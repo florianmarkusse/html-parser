@@ -1,0 +1,33 @@
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Compiled binaries
+/bin/
+/build/
+/lib/
+.cache
+
+# IDE-specific files and directories
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates
+
+# Build artifacts
+*.o
+*.obj
+*.dll
+*.exe
+
+# Dependency directories
+/libs/
+/vendor/
+
+# Miscellaneous
+*.log
+*.DS_Store
+
