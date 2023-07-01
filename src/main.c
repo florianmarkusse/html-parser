@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "nodes.h"
 #include "utils/file/read.h"
 
 int main() {
-    size_t dataLen = 0;
-    const char *data = readFile("test/test.html", &dataLen);
+    const char *htmlString = readFile("test/test.html");
+    printf("%s\n", htmlString);
+    parseNodes(htmlString);
 
-    printf("%s\n", data);
-
-    free((void *)data);
+    printNodes();
+    cleanup();
 }

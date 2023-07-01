@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-const char *readFile(const char *srcPath, size_t *dataLen);
+const char *readFile(const char *srcPath);
 
 #endif

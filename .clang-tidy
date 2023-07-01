@@ -1,4 +1,4 @@
-Checks: '-llvmlibc-restrict-system-libc-headers'
+Checks: '*,-llvmlibc-restrict-system-libc-headers'
 WarningsAsErrors: ''
 CheckOptions:
   - key: indentation.TabWidth

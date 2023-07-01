@@ -31,6 +31,8 @@ endif()
 LIST(APPEND SOURCE_FILES 
     "src/main.c" 
     "src/utils/file/read.c"
+    "src/type/node.c"
+    "src/nodes.c" 
     )
 
 add_executable(${EXECUTABLE_NAME} ${SOURCE_FILES})
