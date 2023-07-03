@@ -14,6 +14,7 @@ static const NodeTypeMapping nodeTypeMappings[] = {
     {"body", BODY},
     {"h1", H1},
     {"head", HEAD},
+    {"div", DIV},
     // self-closing
     {"!DOCTYPE", DOCTYPE},
     {"meta", META},

@@ -15,6 +15,7 @@ typedef uint16_t NodeType;
 #define BODY 0x02
 #define H1 0x03
 #define HEAD 0x04
+#define DIV 0x05
 
 // Self-closing tags
 #define DOCTYPE NODE_TYPE_MSB

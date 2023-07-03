@@ -15,9 +15,11 @@ void parseNodes(const char *htmlString, Document *doc) {
     // To keep track of first child.
     unsigned int stack[MAX_NODE_DEPTH];
     unsigned char currentDepth = 0;
+    unsigned char previousDepth = 0;
+    unsigned char popped = 0;
 
-    // To keep track of previous node.
     unsigned int previousNodeID = 0;
+    unsigned int previousPoppedNodeID = 0;
 
     // To keep track of type of node.
     unsigned int currentPosition = 0;
@@ -37,7 +39,10 @@ void parseNodes(const char *htmlString, Document *doc) {
                 // Transition to text state
                 state = TEXT;
 
+                previousDepth = currentDepth;
+                previousPoppedNodeID = stack[currentDepth - 1];
                 currentDepth--;
+                popped = 1;
             } else {
                 // Transition to tag name state
                 state = TAG_NAME;
@@ -53,22 +58,67 @@ void parseNodes(const char *htmlString, Document *doc) {
                     mapStringToType(&htmlString[tokenStart], tokenLength);
 
                 unsigned int nodeID = addNode(nodeType, doc);
+                previousDepth = currentDepth;
+                stack[currentDepth++] = nodeID;
 
-                if (currentDepth > 0 &&
-                    stack[currentDepth - 1] == previousNodeID) {
-                    addParentFirstChild(stack[currentDepth - 1], nodeID, doc);
+                printf("Current depth: %u\n", currentDepth);
+                printf("previous depth: %u\n", previousDepth);
+                printf("Current node ID: %u\n", nodeID);
+                for (int i = 0; i < currentDepth; i++) {
+                    printf("stack[%i] ID: %u\n", i, stack[i]);
+                }
+
+                // [2] <- currentDepth
+                // [1] <- new node ID
+                // [0] <- parent of new node ID
+                // stack
+                if (currentDepth > 1 &&
+                    stack[currentDepth - 2] == previousNodeID) {
+                    addParentFirstChild(stack[currentDepth - 2], nodeID, doc);
+                } else if (nodeID != 0 &&
+                           (currentDepth == 1 ||
+                            stack[currentDepth - 2] != previousNodeID)) {
+                    if (popped) {
+                        addNextNode(previousPoppedNodeID, nodeID, doc);
+                    } else {
+                        addNextNode(previousNodeID, nodeID, doc);
+                    }
+                }
+
+                printf("\n\n");
+                /*
+                if (currentDepth > previousDepth) {
+                    // [] <- currentDepth
+                    // [2] <- new node ID
+                    // [1] <- parent of new node ID
+                    // [0]
+                    // stack
+                    addParentFirstChild(stack[currentDepth - 2], nodeID, doc);
+                } else if (currentDepth == previousDepth) {
+                    addNextNode(previousNodeID, nodeID, doc);
+                } else if (currentDepth < previousDepth) {
+                    addNextNode(previousPoppedNodeID, nodeID, doc);
+                }
+                */
+
+                /*
+                if (currentDepth > 1 &&
+                    stack[currentDepth - 2] == previousNodeID) {
+                    addParentFirstChild(stack[currentDepth - 2], nodeID, doc);
                 } else if (nodeID != 0 &&
                            (currentDepth == 0 ||
                             stack[currentDepth - 1] != previousNodeID)) {
                     addNextNode(previousNodeID, nodeID, doc);
                 }
+                */
 
-                if (!isSelfClosing(nodeType)) {
-                    stack[currentDepth++] = nodeID;
+                if (isSelfClosing(nodeType)) {
+                    previousDepth = currentDepth;
+                    currentDepth--;
                 }
-
                 state = TEXT;
                 previousNodeID = nodeID;
+                popped = 0;
             }
             break;
 
