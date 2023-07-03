@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "nodes.h"
+#include "dom/document.h"
 #include "utils/file/read.h"
 
 int main() {
     const char *htmlString = readFile("test/test.html");
     printf("%s\n", htmlString);
-    parseNodes(htmlString);
+    const Document doc = createDocument(htmlString);
 
-    printNodes();
-    cleanup();
+    printDocument(&doc);
+
+    destroyDocument(&doc);
 }
