@@ -3,5 +3,6 @@
 
 #include "dom/document.h"
 void parseNodes(const char *htmlString, Document *doc);
+void parseNodesNew(const char *htmlString, Document *doc);
 
 #endif

@@ -24,7 +24,7 @@ Document createDocument(const char *hmtlString) {
     document.nextNodes = malloc(NEXT_NODE_PAGE_SIZE);
     document.nextNodeLen = 0;
 
-    parseNodes(hmtlString, &document);
+    parseNodesNew(hmtlString, &document);
 
     return document;
 }
