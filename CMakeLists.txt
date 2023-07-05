@@ -32,6 +32,7 @@ LIST(APPEND SOURCE_FILES
     "src/main.c" 
     "src/utils/file/read.c"
     "src/type/node-type.c"
+    "src/type/node-tag.c"
     "src/dom/document.c"
     "src/tokenizer/parse.c" 
     )

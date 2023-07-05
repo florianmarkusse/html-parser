@@ -99,7 +99,7 @@ void parse(const char *xmlString, Document *doc) {
     unsigned int previousNodeID = 0;
     char ch = xmlString[currentPosition];
     while (ch != '\0') {
-        printf("Current state: %s\twith char %c\n", stateNames[state], ch);
+        // printf("Current state: %s\twith char %c\n", stateNames[state], ch);
 
         switch (state) {
         case NEW_FREE:
