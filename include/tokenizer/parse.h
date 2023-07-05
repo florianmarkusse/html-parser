@@ -2,7 +2,6 @@
 #define TOKENIZER_PARSE_H
 
 #include "dom/document.h"
-void parseNodes(const char *htmlString, Document *doc);
-void parseNodesNew(const char *htmlString, Document *doc);
+void parse(const char *xmlString, Document *doc);
 
 #endif

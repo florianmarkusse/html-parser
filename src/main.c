@@ -5,7 +5,7 @@
 #include "utils/file/read.h"
 
 int main() {
-    const char *htmlString = readFile("test/new-test.html");
+    const char *htmlString = readFile("test/test.html");
     printf("%s\n", htmlString);
     const Document doc = createDocument(htmlString);
 

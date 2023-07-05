@@ -16,10 +16,12 @@ typedef uint16_t NodeType;
 #define H1 0x03
 #define HEAD 0x04
 #define DIV 0x05
+#define P 0x06
 
 // Self-closing tags
 #define DOCTYPE NODE_TYPE_MSB
 #define META (NODE_TYPE_MSB + 0x01)
+#define INPUT (NODE_TYPE_MSB + 0x02)
 
 // Utility tags
 #define UNKNOWN ((NodeType)-1)

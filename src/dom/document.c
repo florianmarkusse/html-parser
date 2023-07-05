@@ -13,7 +13,7 @@
 #define NEXT_NODE_PAGE_SIZE (1U << 8U)
 #define NEXT_NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(NextNode))
 
-Document createDocument(const char *hmtlString) {
+Document createDocument(const char *xmlString) {
     Document document;
     document.nodes = malloc(NODES_PAGE_SIZE);
     document.nodeLen = 0;
@@ -24,14 +24,15 @@ Document createDocument(const char *hmtlString) {
     document.nextNodes = malloc(NEXT_NODE_PAGE_SIZE);
     document.nextNodeLen = 0;
 
-    parseNodesNew(hmtlString, &document);
+    parse(xmlString, &document);
 
     return document;
 }
 
 unsigned int addNode(const NodeType type, Document *doc) {
     Node *newNode = &(doc->nodes[doc->nodeLen]);
-    newNode->ID = doc->nodeLen;
+    newNode->ID = doc->nodeLen + 1; // We start at 1 because we need to
+                                    // initialize variables when parsing at 0.
     newNode->type = type;
     doc->nodeLen++;
     return newNode->ID;

@@ -15,9 +15,11 @@ static const NodeTypeMapping nodeTypeMappings[] = {
     {"h1", H1},
     {"head", HEAD},
     {"div", DIV},
+    {"p", P},
     // self-closing
     {"!DOCTYPE", DOCTYPE},
     {"meta", META},
+    {"input", INPUT},
 };
 
 static const size_t NUM_MAPPINGS =

@@ -17,7 +17,7 @@ typedef struct {
 
 } __attribute__((aligned(64))) Document;
 
-Document createDocument(const char *hmtlString);
+Document createDocument(const char *xmlString);
 
 unsigned int addNode(NodeType nodeType, Document *doc);
 void addParentFirstChild(unsigned int parentID, unsigned int childID,
