@@ -6,64 +6,35 @@
 #include "type/node-tag.h"
 #include "utils/file/read.h"
 
+static const char *const testFile = "test/test.html";
+
 int main() {
-    // const char *htmlString = readFile("test/test.html");
-    // printf("%s\n", htmlString);
-    // const Document doc = createDocument(htmlString);
+    createTags();
 
-    // printDocument(&doc);
-
-    // destroyDocument(&doc);
-
-    Tags tags = createTags();
-
-    size_t index = tagToIndex(&tags, "head", 1);
-    index = tagToIndex(&tags, "body", 1);
-    index = tagToIndex(&tags, "head", 1);
-    index = tagToIndex(&tags, "heading", 1);
-    index = tagToIndex(&tags, "article", 1);
-    index = tagToIndex(&tags, "p", 1);
-    index = tagToIndex(&tags, "input", 0);
-    index = tagToIndex(&tags, "section", 1);
-    index = tagToIndex(&tags, "div", 1);
-    index = tagToIndex(&tags, "input", 0);
-    index = tagToIndex(&tags, "quote", 0);
-    index = tagToIndex(&tags, "reusable-content", 0);
-
-    printf("Paired Tags...\n");
-    printf("Paired Tags length:\t%zu\n", tags.pairedTagsLen);
-    for (size_t i = 0; i < tags.pairedTagsLen; i++) {
-        printf("i:\t%zu\tTag:\t%s\n", i, tags.tags[i]);
+    char *htmlString = NULL;
+    FileStatus fileStatus = readFile(testFile, &htmlString);
+    if (fileStatus != FILE_SUCCESS) {
+        destroyTags();
+        printf("Failed to read file:\t%s", testFile);
+        printf("Recevied status code:\t%s", fileStatusToString(fileStatus));
+        return 1;
     }
-    printf("\n\n");
+    printf("%s\n", htmlString);
 
-    printf("Single Tags...\n");
-    printf("single Tags length:\t%zu\n", tags.singleTagsLen);
-    for (size_t i = TOTAL_TAGS_MSB; i < TOTAL_TAGS_MSB + tags.singleTagsLen;
-         i++) {
-        printf("i:\t%zu\tTag:\t%s\n", i, tags.tags[i]);
+    Document doc;
+    DocumentStatus documentStatus = createDocument(htmlString, &doc);
+    if (documentStatus != DOCUMENT_SUCCESS) {
+        free(htmlString);
+        destroyTags();
+        printf("Failed to create document from file:\t%s", testFile);
+        printf("Recevied status code:\t%s",
+               documentStatusToString(documentStatus));
+        return 1;
     }
-    printf("\n\n");
 
-    printf("Pages...\n");
-    printf("Pages length:\t%zu\n", tags.pageLen);
-    for (size_t i = 0; i < tags.pageLen; i++) {
-        printf("%zu\n", tags.pages[i].spaceLeft);
-        printf("%.*s\n", PAGE_SIZE, tags.pages[i].start);
+    printDocument(&doc);
 
-        int printedChars = 0;
-        char *copy = tags.pages[i].start;
-        while (printedChars < PAGE_SIZE) {
-            if (*copy == '\0') {
-                printf("~");
-            }
-            printf("%c", *copy);
-            copy++;
-            printedChars++;
-        }
-        printf("\n\n");
-    }
-    printf("\n\n");
-
-    destroyTags(&tags);
+    destroyDocument(&doc);
+    printTagStatus();
+    destroyTags();
 }

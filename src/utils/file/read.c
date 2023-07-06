@@ -3,34 +3,34 @@
 
 #include "utils/file/read.h"
 
-const char *readFile(const char *srcPath) {
+FileStatus readFile(const char *srcPath, char **buffer) {
     FILE *srcFile = fopen(srcPath, "rbe");
     if (srcFile == NULL) {
         printf("Failed to open source file: %s\n", srcPath);
-        return NULL;
+        return FILE_CANT_OPEN;
     }
 
     fseek(srcFile, 0, SEEK_END);
     size_t dataLen = ftell(srcFile);
     rewind(srcFile);
 
-    char *buffer = (char *)malloc(dataLen + 1);
-    if (buffer == NULL) {
+    *buffer = (char *)malloc(dataLen + 1);
+    if (*buffer == NULL) {
         printf("Failed to allocate memory.\n");
         fclose(srcFile);
-        return NULL;
+        return FILE_CANT_ALLOCATE;
     }
 
-    size_t result = fread(buffer, 1, dataLen, srcFile);
+    size_t result = fread(*buffer, 1, dataLen, srcFile);
     if (result != dataLen) {
         printf("Failed to read the file.\n");
         fclose(srcFile);
-        free(buffer);
-        return NULL;
+        free(*buffer);
+        return FILE_CANT_READ;
     }
 
-    buffer[dataLen] = '\0';
+    (*buffer)[dataLen] = '\0';
 
     fclose(srcFile);
-    return buffer;
+    return FILE_SUCCESS;
 }

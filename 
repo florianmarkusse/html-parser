@@ -1,0 +1,773 @@
+[1mdiff --git a/CMakeLists.txt b/CMakeLists.txt[m
+[1mindex 40677d9..89a45fa 100644[m
+[1m--- a/CMakeLists.txt[m
+[1m+++ b/CMakeLists.txt[m
+[36m@@ -31,7 +31,6 @@[m [mendif()[m
+ LIST(APPEND SOURCE_FILES [m
+     "src/main.c" [m
+     "src/utils/file/read.c"[m
+[31m-    "src/type/node-type.c"[m
+     "src/type/node-tag.c"[m
+     "src/dom/document.c"[m
+     "src/tokenizer/parse.c" [m
+[1mdiff --git a/include/dom/document.h b/include/dom/document.h[m
+[1mindex 22e02d8..723a789 100644[m
+[1m--- a/include/dom/document.h[m
+[1m+++ b/include/dom/document.h[m
+[36m@@ -2,28 +2,27 @@[m
+ #define DOM_DOCUMENT_H[m
+ [m
+ #include "type/next-node.h"[m
+[32m+[m[32m#include "type/node-tag.h"[m
+ #include "type/node.h"[m
+ #include "type/parent-first-child.h"[m
+ [m
+ typedef struct {[m
+     Node *nodes;[m
+[31m-    unsigned int nodeLen;[m
+[32m+[m[32m    size_t nodeLen;[m
+ [m
+     ParentFirstChild *parentFirstChilds;[m
+[31m-    unsigned int parentFirstChildLen;[m
+[32m+[m[32m    size_t parentFirstChildLen;[m
+ [m
+     NextNode *nextNodes;[m
+[31m-    unsigned int nextNodeLen;[m
+[32m+[m[32m    size_t nextNodeLen;[m
+ [m
+ } __attribute__((aligned(64))) Document;[m
+ [m
+[31m-Document createDocument(const char *xmlString);[m
+[32m+[m[32mDocument createDocument(const char *xmlStrings);[m
+ [m
+[31m-unsigned int addNode(NodeType nodeType, Document *doc);[m
+[31m-void addParentFirstChild(unsigned int parentID, unsigned int childID,[m
+[31m-                         Document *doc);[m
+[31m-void addNextNode(unsigned int currentNodeID, unsigned int nextNodeID,[m
+[31m-                 Document *doc);[m
+[32m+[m[32msize_t addNode(size_t nodeType, Document *doc);[m
+[32m+[m[32mvoid addParentFirstChild(size_t parentID, size_t childID, Document *doc);[m
+[32m+[m[32mvoid addNextNode(size_t currentNodeID, size_t nextNodeID, Document *doc);[m
+ [m
+ void destroyDocument(const Document *doc);[m
+ [m
+[1mdiff --git a/include/tokenizer/parse.h b/include/tokenizer/parse.h[m
+[1mindex 1c6c3c5..08d42a7 100644[m
+[1m--- a/include/tokenizer/parse.h[m
+[1m+++ b/include/tokenizer/parse.h[m
+[36m@@ -2,6 +2,8 @@[m
+ #define TOKENIZER_PARSE_H[m
+ [m
+ #include "dom/document.h"[m
+[32m+[m[32m#include "type/node-tag.h"[m
+[32m+[m
+ void parse(const char *xmlString, Document *doc);[m
+ [m
+ #endif[m
+[1mdiff --git a/include/type/next-node.h b/include/type/next-node.h[m
+[1mindex d61715f..73ad243 100644[m
+[1m--- a/include/type/next-node.h[m
+[1m+++ b/include/type/next-node.h[m
+[36m@@ -1,9 +1,11 @@[m
+ #ifndef TYPE_NEXT_NODE_H[m
+ #define TYPE_NEXT_NODE_H[m
+ [m
+[32m+[m[32m#include <stddef.h>[m
+[32m+[m
+ typedef struct {[m
+[31m-    unsigned int currentNodeID;[m
+[31m-    unsigned int nextNodeID;[m
+[31m-} __attribute__((aligned(8))) NextNode;[m
+[32m+[m[32m    size_t currentNodeID;[m
+[32m+[m[32m    size_t nextNodeID;[m
+[32m+[m[32m} __attribute__((aligned(16))) NextNode;[m
+ [m
+ #endif[m
+[1mdiff --git a/include/type/node-tag.h b/include/type/node-tag.h[m
+[1mindex 13874f6..aa0fe90 100644[m
+[1m--- a/include/type/node-tag.h[m
+[1m+++ b/include/type/node-tag.h[m
+[36m@@ -3,7 +3,7 @@[m
+ [m
+ #include <stddef.h>[m
+ [m
+[31m-#define PAGE_SIZE (1U << 3U)[m
+[32m+[m[32m#define PAGE_SIZE (1U << 10U)[m
+ #define TOTAL_PAGES (1U << 4U)[m
+ #define TOTAL_TAGS (1U << 10U)[m
+ #define TOTAL_TAGS_MSB (TOTAL_TAGS >> 1U)[m
+[36m@@ -23,9 +23,14 @@[m [mtypedef struct {[m
+     size_t pageLen;[m
+ } __attribute__((aligned(128))) Tags;[m
+ [m
+[31m-Tags createTags();[m
+[31m-void destroyTags(Tags *tags);[m
+[32m+[m[32mextern Tags globalTags;[m
+ [m
+[31m-size_t tagToIndex(Tags *tags, const char *tagName, char isPaired);[m
+[32m+[m[32mvoid createTags();[m
+[32m+[m[32mvoid destroyTags();[m
+[32m+[m
+[32m+[m[32msize_t tagToIndex(const char *tagName, unsigned char isPaired);[m
+[32m+[m[32munsigned char isSelfClosing(size_t index);[m
+[32m+[m
+[32m+[m[32mvoid printTagStatus();[m
+ [m
+ #endif[m
+[1mdiff --git a/include/type/node-type.h b/include/type/node-type.h[m
+[1mdeleted file mode 100644[m
+[1mindex 405c4b0..0000000[m
+[1m--- a/include/type/node-type.h[m
+[1m+++ /dev/null[m
+[36m@@ -1,33 +0,0 @@[m
+[31m-#ifndef TYPE_NODE_TYPE_H[m
+[31m-#define TYPE_NODE_TYPE_H[m
+[31m-[m
+[31m-#include <stddef.h>[m
+[31m-#include <stdint.h>[m
+[31m-[m
+[31m-typedef uint16_t NodeType;[m
+[31m-[m
+[31m-#define NODE_TYPE_MSB (1U << ((sizeof(NodeType) * 8) - 1))[m
+[31m-#define NODE_TYPE_NUM_BITS (sizeof(NodeType) * 8)[m
+[31m-[m
+[31m-// Paired tags[m
+[31m-#define HTML 0x00[m
+[31m-#define TITLE 0x01[m
+[31m-#define BODY 0x02[m
+[31m-#define H1 0x03[m
+[31m-#define HEAD 0x04[m
+[31m-#define DIV 0x05[m
+[31m-#define P 0x06[m
+[31m-[m
+[31m-// Self-closing tags[m
+[31m-#define DOCTYPE NODE_TYPE_MSB[m
+[31m-#define META (NODE_TYPE_MSB + 0x01)[m
+[31m-#define INPUT (NODE_TYPE_MSB + 0x02)[m
+[31m-[m
+[31m-// Utility tags[m
+[31m-#define UNKNOWN ((NodeType)-1)[m
+[31m-[m
+[31m-NodeType mapStringToType(const char *str, size_t strLen);[m
+[31m-const char *mapTypeToString(NodeType type);[m
+[31m-unsigned char isSelfClosing(NodeType type);[m
+[31m-[m
+[31m-#endif[m
+[1mdiff --git a/include/type/node.h b/include/type/node.h[m
+[1mindex 7d30a31..3a59543 100644[m
+[1m--- a/include/type/node.h[m
+[1m+++ b/include/type/node.h[m
+[36m@@ -1,11 +1,11 @@[m
+ #ifndef TYPE_NODE_H[m
+ #define TYPE_NODE_H[m
+ [m
+[31m-#include "node-type.h"[m
+[32m+[m[32m#include <stddef.h>[m
+ [m
+ typedef struct {[m
+[31m-    unsigned int ID;[m
+[31m-    NodeType type;[m
+[31m-} __attribute__((aligned(8))) Node;[m
+[32m+[m[32m    size_t ID;[m
+[32m+[m[32m    size_t type;[m
+[32m+[m[32m} __attribute__((aligned(16))) Node;[m
+ [m
+ #endif[m
+[1mdiff --git a/include/type/parent-first-child.h b/include/type/parent-first-child.h[m
+[1mindex bf32b29..73f99a5 100644[m
+[1m--- a/include/type/parent-first-child.h[m
+[1m+++ b/include/type/parent-first-child.h[m
+[36m@@ -1,9 +1,11 @@[m
+ #ifndef TYPE_PARENT_FIRST_CHILD_H[m
+ #define TYPE_PARENT_FIRST_CHILD_H[m
+ [m
+[32m+[m[32m#include <stddef.h>[m
+[32m+[m
+ typedef struct {[m
+[31m-    unsigned int parentID;[m
+[31m-    unsigned int childID;[m
+[31m-} __attribute__((aligned(8))) ParentFirstChild;[m
+[32m+[m[32m    size_t parentID;[m
+[32m+[m[32m    size_t childID;[m
+[32m+[m[32m} __attribute__((aligned(16))) ParentFirstChild;[m
+ [m
+ #endif[m
+[1mdiff --git a/src/dom/document.c b/src/dom/document.c[m
+[1mindex c894b45..f208a22 100644[m
+[1m--- a/src/dom/document.c[m
+[1m+++ b/src/dom/document.c[m
+[36m@@ -1,3 +1,4 @@[m
+[32m+[m[32m#include <stddef.h>[m
+ #include <stdio.h>[m
+ #include <stdlib.h>[m
+ [m
+[36m@@ -29,7 +30,7 @@[m [mDocument createDocument(const char *xmlString) {[m
+     return document;[m
+ }[m
+ [m
+[31m-unsigned int addNode(const NodeType type, Document *doc) {[m
+[32m+[m[32msize_t addNode(const size_t type, Document *doc) {[m
+     Node *newNode = &(doc->nodes[doc->nodeLen]);[m
+     newNode->ID = doc->nodeLen + 1; // We start at 1 because we need to[m
+                                     // initialize variables when parsing at 0.[m
+[36m@@ -38,8 +39,7 @@[m [munsigned int addNode(const NodeType type, Document *doc) {[m
+     return newNode->ID;[m
+ }[m
+ [m
+[31m-void addParentFirstChild(unsigned int parentID, unsigned int childID,[m
+[31m-                         Document *doc) {[m
+[32m+[m[32mvoid addParentFirstChild(size_t parentID, size_t childID, Document *doc) {[m
+     ParentFirstChild *newParentFirstChild =[m
+         &(doc->parentFirstChilds[doc->parentFirstChildLen]);[m
+     newParentFirstChild->parentID = parentID;[m
+[36m@@ -47,8 +47,7 @@[m [mvoid addParentFirstChild(unsigned int parentID, unsigned int childID,[m
+     doc->parentFirstChildLen++;[m
+ }[m
+ [m
+[31m-void addNextNode(unsigned int currentNodeID, unsigned int nextNodeID,[m
+[31m-                 Document *doc) {[m
+[32m+[m[32mvoid addNextNode(size_t currentNodeID, size_t nextNodeID, Document *doc) {[m
+     NextNode *newNextNode = &(doc->nextNodes[doc->nextNodeLen]);[m
+     newNextNode->currentNodeID = currentNodeID;[m
+     newNextNode->nextNodeID = nextNodeID;[m
+[36m@@ -60,49 +59,49 @@[m [mvoid destroyDocument(const Document *doc) {[m
+     free((void *)doc->parentFirstChilds);[m
+ }[m
+ [m
+[31m-void printBits(const NodeType type) {[m
+[31m-    size_t numBits = sizeof(NodeType) * 8;[m
+[32m+[m[32mvoid printBits(const size_t type) {[m
+[32m+[m[32m    size_t numBits = sizeof(size_t) * 8;[m
+     for (size_t i = 0; i < numBits; i++) {[m
+[31m-        unsigned int bit = (type >> (numBits - 1 - i)) & 1;[m
+[31m-        printf("%u", bit);[m
+[32m+[m[32m        size_t bit = (type >> (numBits - 1 - i)) & 1;[m
+[32m+[m[32m        printf("%zu", bit);[m
+     }[m
+     printf("\n");[m
+ }[m
+ [m
+[31m-void printNode(const Document *doc, const unsigned int nodeID) {[m
+[32m+[m[32mvoid printNode(const Document *doc, const size_t nodeID) {[m
+     Node node = doc->nodes[nodeID];[m
+[31m-    const char *type = mapTypeToString(node.type);[m
+[32m+[m[32m    const char *type = globalTags.tags[nodeID];[m
+     if (isSelfClosing(node.type)) {[m
+[31m-        printf("<%s my ID: %u />\n", type, node.ID);[m
+[32m+[m[32m        printf("<%s my ID: %zu />\n", type, node.ID);[m
+         return;[m
+     }[m
+ }[m
+ [m
+ void printDocument(const Document *doc) {[m
+     printf("Printing document...\n\n");[m
+[31m-    for (unsigned int i = 0; i < doc->nodeLen; i++) {[m
+[32m+[m[32m    for (size_t i = 0; i < doc->nodeLen; i++) {[m
+         Node node = doc->nodes[i];[m
+[31m-        const char *type = mapTypeToString(node.type);[m
+[32m+[m[32m        const char *type = globalTags.tags[i];[m
+ [m
+         printBits(node.type);[m
+ [m
+         if (isSelfClosing(node.type)) {[m
+[31m-            printf("<%s my ID: %u />\n", type, node.ID);[m
+[32m+[m[32m            printf("<%s my ID: %zu />\n", type, node.ID);[m
+         } else {[m
+[31m-            printf("<%s> my ID: %u </%s>\n", type, node.ID, type);[m
+[32m+[m[32m            printf("<%s> my ID: %zu </%s>\n", type, node.ID, type);[m
+         }[m
+ [m
+         printf("\n");[m
+     }[m
+ [m
+[31m-    for (unsigned int i = 0; i < doc->parentFirstChildLen; i++) {[m
+[31m-        printf("Parent: %u with first child: %u\n",[m
+[32m+[m[32m    for (size_t i = 0; i < doc->parentFirstChildLen; i++) {[m
+[32m+[m[32m        printf("Parent: %zu with first child: %zu\n",[m
+                doc->parentFirstChilds[i].parentID,[m
+                doc->parentFirstChilds[i].childID);[m
+     }[m
+ [m
+[31m-    for (unsigned int i = 0; i < doc->nextNodeLen; i++) {[m
+[31m-        printf("current node: %u with next node: %u\n",[m
+[32m+[m[32m    for (size_t i = 0; i < doc->nextNodeLen; i++) {[m
+[32m+[m[32m        printf("current node: %zu with next node: %zu\n",[m
+                doc->nextNodes[i].currentNodeID, doc->nextNodes[i].nextNodeID);[m
+     }[m
+ }[m
+[1mdiff --git a/src/main.c b/src/main.c[m
+[1mindex c53ac34..cce3295 100644[m
+[1m--- a/src/main.c[m
+[1m+++ b/src/main.c[m
+[36m@@ -7,63 +7,14 @@[m
+ #include "utils/file/read.h"[m
+ [m
+ int main() {[m
+[31m-    // const char *htmlString = readFile("test/test.html");[m
+[31m-    // printf("%s\n", htmlString);[m
+[31m-    // const Document doc = createDocument(htmlString);[m
+[32m+[m[32m    createTags();[m
+[32m+[m[32m    const char *htmlString = readFile("test/test.html");[m
+[32m+[m[32m    printf("%s\n", htmlString);[m
+[32m+[m[32m    const Document doc = createDocument(htmlString);[m
+ [m
+[31m-    // printDocument(&doc);[m
+[32m+[m[32m    printDocument(&doc);[m
+ [m
+[31m-    // destroyDocument(&doc);[m
+[31m-[m
+[31m-    Tags tags = createTags();[m
+[31m-[m
+[31m-    size_t index = tagToIndex(&tags, "head", 1);[m
+[31m-    index = tagToIndex(&tags, "body", 1);[m
+[31m-    index = tagToIndex(&tags, "head", 1);[m
+[31m-    index = tagToIndex(&tags, "heading", 1);[m
+[31m-    index = tagToIndex(&tags, "article", 1);[m
+[31m-    index = tagToIndex(&tags, "p", 1);[m
+[31m-    index = tagToIndex(&tags, "input", 0);[m
+[31m-    index = tagToIndex(&tags, "section", 1);[m
+[31m-    index = tagToIndex(&tags, "div", 1);[m
+[31m-    index = tagToIndex(&tags, "input", 0);[m
+[31m-    index = tagToIndex(&tags, "quote", 0);[m
+[31m-    index = tagToIndex(&tags, "reusable-content", 0);[m
+[31m-[m
+[31m-    printf("Paired Tags...\n");[m
+[31m-    printf("Paired Tags length:\t%zu\n", tags.pairedTagsLen);[m
+[31m-    for (size_t i = 0; i < tags.pairedTagsLen; i++) {[m
+[31m-        printf("i:\t%zu\tTag:\t%s\n", i, tags.tags[i]);[m
+[31m-    }[m
+[31m-    printf("\n\n");[m
+[31m-[m
+[31m-    printf("Single Tags...\n");[m
+[31m-    printf("single Tags length:\t%zu\n", tags.singleTagsLen);[m
+[31m-    for (size_t i = TOTAL_TAGS_MSB; i < TOTAL_TAGS_MSB + tags.singleTagsLen;[m
+[31m-         i++) {[m
+[31m-        printf("i:\t%zu\tTag:\t%s\n", i, tags.tags[i]);[m
+[31m-    }[m
+[31m-    printf("\n\n");[m
+[31m-[m
+[31m-    printf("Pages...\n");[m
+[31m-    printf("Pages length:\t%zu\n", tags.pageLen);[m
+[31m-    for (size_t i = 0; i < tags.pageLen; i++) {[m
+[31m-        printf("%zu\n", tags.pages[i].spaceLeft);[m
+[31m-        printf("%.*s\n", PAGE_SIZE, tags.pages[i].start);[m
+[31m-[m
+[31m-        int printedChars = 0;[m
+[31m-        char *copy = tags.pages[i].start;[m
+[31m-        while (printedChars < PAGE_SIZE) {[m
+[31m-            if (*copy == '\0') {[m
+[31m-                printf("~");[m
+[31m-            }[m
+[31m-            printf("%c", *copy);[m
+[31m-            copy++;[m
+[31m-            printedChars++;[m
+[31m-        }[m
+[31m-        printf("\n\n");[m
+[31m-    }[m
+[31m-    printf("\n\n");[m
+[31m-[m
+[31m-    destroyTags(&tags);[m
+[32m+[m[32m    destroyDocument(&doc);[m
+[32m+[m[32m    printTagStatus();[m
+[32m+[m[32m    destroyTags();[m
+ }[m
+[1mdiff --git a/src/tokenizer/parse.c b/src/tokenizer/parse.c[m
+[1mindex ef9097d..76d99c6 100644[m
+[1m--- a/src/tokenizer/parse.c[m
+[1m+++ b/src/tokenizer/parse.c[m
+[36m@@ -1,21 +1,20 @@[m
+[32m+[m[32m#include <stddef.h>[m
+ #include <stdio.h>[m
+ #include <stdlib.h>[m
+ #include <string.h>[m
+ [m
+ #include "tokenizer/parse.h"[m
+[31m-#include "type/node.h"[m
+[32m+[m[32m#include "type/node-tag.h"[m
+ [m
+ #define MAX_NODE_DEPTH 1U << 7U[m
+ [m
+[31m-typedef enum { OPEN_TAG, CLOSING_TAG, TAG_NAME, TEXT } TokenizerState;[m
+[31m-[m
+ typedef enum {[m
+[31m-    NEW_FREE,[m
+[31m-    NEW_OPEN_TAG,[m
+[31m-    NEW_TAG_NAME,[m
+[31m-    NEW_ATTRS,[m
+[31m-    NEW_OPEN_PAIRED,[m
+[31m-    NEW_TEXT_NODE,[m
+[32m+[m[32m    FREE,[m
+[32m+[m[32m    OPEN_TAG,[m
+[32m+[m[32m    TAG_NAME,[m
+[32m+[m[32m    ATTRS,[m
+[32m+[m[32m    OPEN_PAIRED,[m
+[32m+[m[32m    TEXT_NODE,[m
+     NUM_STATES[m
+ } State;[m
+ [m
+[36m@@ -24,18 +23,14 @@[m [mtypedef struct {[m
+     unsigned int nodeDepthLen;[m
+ } __attribute__((aligned(128))) NodeDepth;[m
+ [m
+[31m-static const char *stateNames[NUM_STATES] = {[m
+[31m-    "NEW_FREE",  "NEW_OPEN_TAG",    "NEW_TAG_NAME",[m
+[31m-    "NEW_ATTRS", "NEW_OPEN_PAIRED", "NEW_TEXT_NODE"};[m
+[31m-[m
+[31m-void addPairedNode(const char *tagStart, unsigned int tagLength, Document *doc,[m
+[31m-                   unsigned int *previousNodeID, NodeDepth *stack) {[m
+[31m-    char buffer[tagLength + 1]; // Allocate a buffer with maxLength[m
+[31m-                                // + 1 for null-termination[m
+[32m+[m[32msize_t addToDocument(const char *tagStart, unsigned int tagLength,[m
+[32m+[m[32m                     Document *doc, unsigned int *previousNodeID,[m
+[32m+[m[32m                     NodeDepth *stack, const unsigned char isPaired) {[m
+[32m+[m[32m    char buffer[PAGE_SIZE]; // Allocate a buffer with maxLength[m
+[32m+[m[32m                            // + 1 for null-termination[m
+     snprintf(buffer, tagLength + 1, "%s", tagStart);[m
+[31m-    NodeType nodeType = mapStringToType(tagStart, tagLength);[m
+[32m+[m[32m    size_t nodeType = tagToIndex(buffer, isPaired);[m
+     unsigned int nodeID = addNode(nodeType, doc);[m
+[31m-    printf("Opening of paired tag:\t%s\t\tID:\t%u\n", buffer, nodeID);[m
+ [m
+     if (nodeID > 0 && *previousNodeID > 0) {[m
+         if (stack->nodeDepthLen == 0) {[m
+[36m@@ -50,41 +45,19 @@[m [mvoid addPairedNode(const char *tagStart, unsigned int tagLength, Document *doc,[m
+             }[m
+         }[m
+     }[m
+[31m-[m
+[31m-    stack->stack[stack->nodeDepthLen] = nodeID;[m
+[31m-    stack->nodeDepthLen++;[m
+[31m-[m
+     *previousNodeID = nodeID;[m
+[32m+[m[32m    return nodeID;[m
+ }[m
+ [m
+[31m-void addSingleNode(const char *tagStart, unsigned int tagLength, Document *doc,[m
+[32m+[m[32mvoid addPairedNode(const char *tagStart, unsigned int tagLength, Document *doc,[m
+                    unsigned int *previousNodeID, NodeDepth *stack) {[m
+[31m-    char buffer[tagLength + 1]; // Allocate a buffer with maxLength[m
+[31m-                                // + 1 for null-termination[m
+[31m-    snprintf(buffer, tagLength + 1, "%s", tagStart);[m
+[31m-    NodeType nodeType = mapStringToType(tagStart, tagLength);[m
+[31m-    unsigned int nodeID = addNode(nodeType, doc);[m
+[31m-    printf("Opening of single tag:\t%s\t\tID:\t%u\n", buffer, nodeID);[m
+[31m-[m
+[31m-    if (nodeID > 0 && *previousNodeID > 0) {[m
+[31m-        if (stack->nodeDepthLen == 0) {[m
+[31m-            addNextNode(*previousNodeID, nodeID, doc);[m
+[31m-        } else {[m
+[31m-            const unsigned int parentNodeID =[m
+[31m-                stack->stack[stack->nodeDepthLen - 1];[m
+[31m-            if (parentNodeID == *previousNodeID) {[m
+[31m-                addParentFirstChild(parentNodeID, nodeID, doc);[m
+[31m-            } else {[m
+[31m-                addNextNode(*previousNodeID, nodeID, doc);[m
+[31m-            }[m
+[31m-        }[m
+[31m-    }[m
+[31m-[m
+[31m-    *previousNodeID = nodeID;[m
+[32m+[m[32m    stack->stack[stack->nodeDepthLen] =[m
+[32m+[m[32m        addToDocument(tagStart, tagLength, doc, previousNodeID, stack, 1);[m
+[32m+[m[32m    stack->nodeDepthLen++;[m
+ }[m
+ [m
+ void parse(const char *xmlString, Document *doc) {[m
+[31m-    State state = NEW_FREE;[m
+[32m+[m[32m    State state = FREE;[m
+ [m
+     unsigned int currentPosition = 0;[m
+ [m
+[36m@@ -99,65 +72,63 @@[m [mvoid parse(const char *xmlString, Document *doc) {[m
+     unsigned int previousNodeID = 0;[m
+     char ch = xmlString[currentPosition];[m
+     while (ch != '\0') {[m
+[31m-        // printf("Current state: %s\twith char %c\n", stateNames[state], ch);[m
+[31m-[m
+         switch (state) {[m
+[31m-        case NEW_FREE:[m
+[32m+[m[32m        case FREE:[m
+             if (ch == '<') {[m
+[31m-                state = NEW_OPEN_TAG;[m
+[32m+[m[32m                state = OPEN_TAG;[m
+             }[m
+             break;[m
+[31m-        case NEW_OPEN_TAG:[m
+[32m+[m[32m        case OPEN_TAG:[m
+             if (ch == '/') {[m
+                 previousNodeID = stack.stack[stack.nodeDepthLen - 1];[m
+                 stack.nodeDepthLen--;[m
+[31m-                state = NEW_FREE;[m
+[32m+[m[32m                state = FREE;[m
+             }[m
+             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {[m
+                 tagNameStart = currentPosition;[m
+[31m-                state = NEW_TAG_NAME;[m
+[32m+[m[32m                state = TAG_NAME;[m
+             }[m
+             if (ch == '!') {[m
+                 isExclam = 1;[m
+                 tagNameStart = currentPosition;[m
+[31m-                state = NEW_TAG_NAME;[m
+[32m+[m[32m                state = TAG_NAME;[m
+             }[m
+             break;[m
+[31m-        case NEW_TAG_NAME:[m
+[32m+[m[32m        case TAG_NAME:[m
+             if (ch == ' ') {[m
+                 tagLength = currentPosition - tagNameStart;[m
+[31m-                state = NEW_ATTRS;[m
+[32m+[m[32m                state = ATTRS;[m
+             }[m
+             if (ch == '>') {[m
+                 tagLength = currentPosition - tagNameStart;[m
+                 addPairedNode(&xmlString[tagNameStart], tagLength, doc,[m
+                               &previousNodeID, &stack);[m
+[31m-                state = NEW_OPEN_PAIRED;[m
+[32m+[m[32m                state = OPEN_PAIRED;[m
+             }[m
+             break;[m
+[31m-        case NEW_ATTRS:[m
+[32m+[m[32m        case ATTRS:[m
+             if (ch == '/' || (isExclam && ch == '>')) {[m
+[31m-                addSingleNode(&xmlString[tagNameStart], tagLength, doc,[m
+[31m-                              &previousNodeID, &stack);[m
+[32m+[m[32m                addToDocument(&xmlString[tagNameStart], tagLength, doc,[m
+[32m+[m[32m                              &previousNodeID, &stack, 0);[m
+                 isExclam = 0;[m
+[31m-                state = NEW_FREE;[m
+[32m+[m[32m                state = FREE;[m
+             } else if (ch == '>') {[m
+                 addPairedNode(&xmlString[tagNameStart], tagLength, doc,[m
+                               &previousNodeID, &stack);[m
+[31m-                state = NEW_OPEN_PAIRED;[m
+[32m+[m[32m                state = OPEN_PAIRED;[m
+             }[m
+             break;[m
+[31m-        case NEW_OPEN_PAIRED:[m
+[32m+[m[32m        case OPEN_PAIRED:[m
+             if (ch == '<') {[m
+[31m-                state = NEW_OPEN_TAG;[m
+[32m+[m[32m                state = OPEN_TAG;[m
+             }[m
+             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {[m
+[31m-                state = NEW_TEXT_NODE;[m
+[32m+[m[32m                state = TEXT_NODE;[m
+             }[m
+             break;[m
+[31m-        case NEW_TEXT_NODE:[m
+[32m+[m[32m        case TEXT_NODE:[m
+             if (ch == '<') {[m
+[31m-                state = NEW_OPEN_TAG;[m
+[32m+[m[32m                state = OPEN_TAG;[m
+             }[m
+             break;[m
+         default:;[m
+[1mdiff --git a/src/type/node-tag.c b/src/type/node-tag.c[m
+[1mindex 1d130db..5877865 100644[m
+[1m--- a/src/type/node-tag.c[m
+[1m+++ b/src/type/node-tag.c[m
+[36m@@ -4,6 +4,8 @@[m
+ [m
+ #include "type/node-tag.h"[m
+ [m
+[32m+[m[32mTags globalTags;[m
+[32m+[m
+ TagPage createTagPage() {[m
+     TagPage tagPage;[m
+     tagPage.start = malloc(PAGE_SIZE);[m
+[36m@@ -17,33 +19,30 @@[m [mTagPage createTagPage() {[m
+     return tagPage;[m
+ }[m
+ [m
+[31m-Tags createTags() {[m
+[31m-    Tags tags;[m
+[31m-    tags.pairedTagsLen = 0;[m
+[31m-    tags.singleTagsLen = 0;[m
+[31m-[m
+[31m-    tags.pages[0] = createTagPage();[m
+[31m-    tags.pageLen = 1;[m
+[32m+[m[32mvoid createTags() {[m
+[32m+[m[32m    globalTags.pairedTagsLen = 0;[m
+[32m+[m[32m    globalTags.singleTagsLen = 0;[m
+ [m
+[31m-    return tags;[m
+[32m+[m[32m    globalTags.pages[0] = createTagPage();[m
+[32m+[m[32m    globalTags.pageLen = 1;[m
+ }[m
+ [m
+[31m-void destroyTags(Tags *tags) {[m
+[31m-    for (int i = 0; i < tags->pageLen; i++) {[m
+[31m-        free(tags->pages[i].start);[m
+[32m+[m[32mvoid destroyTags() {[m
+[32m+[m[32m    for (int i = 0; i < globalTags.pageLen; i++) {[m
+[32m+[m[32m        free(globalTags.pages[i].start);[m
+     }[m
+ [m
+[31m-    tags->pairedTagsLen = 0;[m
+[31m-    tags->singleTagsLen = 0;[m
+[32m+[m[32m    globalTags.pairedTagsLen = 0;[m
+[32m+[m[32m    globalTags.singleTagsLen = 0;[m
+ [m
+[31m-    tags->pageLen = 0;[m
+[32m+[m[32m    globalTags.pageLen = 0;[m
+ }[m
+ [m
+[31m-size_t findOrCreateTag(Tags *tags, const char *tagName, size_t *currentTagLen,[m
+[32m+[m[32msize_t findOrCreateTag(const char *tagName, size_t *currentTagLen,[m
+                        size_t offset) {[m
+     for (size_t i = offset; i < offset + *currentTagLen; ++i) {[m
+         // Check if tag already exists[m
+[31m-        if (strcmp(tags->tags[i], tagName) == 0) {[m
+[32m+[m[32m        if (strcmp(globalTags.tags[i], tagName) == 0) {[m
+             return i; // Return index of existing tag[m
+         }[m
+     }[m
+[36m@@ -60,8 +59,8 @@[m [msize_t findOrCreateTag(Tags *tags, const char *tagName, size_t *currentTagLen,[m
+ [m
+     // Find a suitable page for the new tag[m
+     TagPage *suitablePage = NULL;[m
+[31m-    for (size_t i = 0; i < tags->pageLen; ++i) {[m
+[31m-        TagPage *page = &(tags->pages[i]);[m
+[32m+[m[32m    for (size_t i = 0; i < globalTags.pageLen; ++i) {[m
+[32m+[m[32m        TagPage *page = &(globalTags.pages[i]);[m
+         if (page->spaceLeft >= tagNameLength) {[m
+             suitablePage = page;[m
+             break;[m
+[36m@@ -70,8 +69,8 @@[m [msize_t findOrCreateTag(Tags *tags, const char *tagName, size_t *currentTagLen,[m
+ [m
+     // If no suitable page found, create a new page[m
+     if (suitablePage == NULL) {[m
+[31m-        if (tags->pageLen < TOTAL_PAGES) {[m
+[31m-            suitablePage = &(tags->pages[tags->pageLen]);[m
+[32m+[m[32m        if (globalTags.pageLen < TOTAL_PAGES) {[m
+[32m+[m[32m            suitablePage = &(globalTags.pages[globalTags.pageLen]);[m
+             suitablePage->start = malloc(PAGE_SIZE);[m
+             suitablePage->freeSpace = suitablePage->start;[m
+             suitablePage->spaceLeft = PAGE_SIZE;[m
+[36m@@ -83,7 +82,7 @@[m [msize_t findOrCreateTag(Tags *tags, const char *tagName, size_t *currentTagLen,[m
+                                     // way[m
+             }[m
+ [m
+[31m-            tags->pageLen++;[m
+[32m+[m[32m            globalTags.pageLen++;[m
+         } else {[m
+             fprintf(stderr, "No more capacity to create new tag pages.\n");[m
+             return UNKNOWN_TAG; // Or handle the error in an appropriate way[m
+[36m@@ -96,17 +95,56 @@[m [msize_t findOrCreateTag(Tags *tags, const char *tagName, size_t *currentTagLen,[m
+     suitablePage->freeSpace += tagNameLength;[m
+     suitablePage->spaceLeft -= tagNameLength;[m
+ [m
+[31m-    tags->tags[offset + *currentTagLen] =[m
+[32m+[m[32m    globalTags.tags[offset + *currentTagLen] =[m
+         duplicatedTag; // Point tags[i] to the duplicated memory[m
+     (*currentTagLen)++;[m
+ [m
+     return (*currentTagLen) - 1; // Return index of newly created tag[m
+ }[m
+ [m
+[31m-size_t tagToIndex(Tags *tags, const char *tagName, const char isPaired) {[m
+[32m+[m[32msize_t tagToIndex(const char *tagName, const unsigned char isPaired) {[m
+     if (isPaired) {[m
+[31m-        return findOrCreateTag(tags, tagName, &(tags->pairedTagsLen), 0);[m
+[32m+[m[32m        return findOrCreateTag(tagName, &(globalTags.pairedTagsLen), 0);[m
+     }[m
+[31m-    return findOrCreateTag(tags, tagName, &(tags->singleTagsLen),[m
+[32m+[m[32m    return findOrCreateTag(tagName, &(globalTags.singleTagsLen),[m
+                            TOTAL_TAGS_MSB);[m
+ }[m
+[32m+[m
+[32m+[m[32mvoid printTagStatus() {[m
+[32m+[m[32m    printf("Printing global tag status...\n\n");[m
+[32m+[m
+[32m+[m[32m    printf("Paired tags...\n");[m
+[32m+[m[32m    printf("Paired tags length:\t%zu\n", globalTags.pairedTagsLen);[m
+[32m+[m[32m    for (size_t i = 0; i < globalTags.pairedTagsLen; i++) {[m
+[32m+[m[32m        printf("i:\t%zu\tTag:\t%s\n", i, globalTags.tags[i]);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    printf("\n\n");[m
+[32m+[m
+[32m+[m[32m    printf("Single tags...\n");[m
+[32m+[m[32m    printf("single tags length:\t%zu\n", globalTags.singleTagsLen);[m
+[32m+[m[32m    for (size_t i = TOTAL_TAGS_MSB;[m
+[32m+[m[32m         i < TOTAL_TAGS_MSB + globalTags.singleTagsLen; i++) {[m
+[32m+[m[32m        printf("i:\t%zu\tTag:\t%s\n", i, globalTags.tags[i]);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    printf("\n\n");[m
+[32m+[m
+[32m+[m[32m    printf("Pages...\n");[m
+[32m+[m[32m    printf("Pages length:\t%zu\n", globalTags.pageLen);[m
+[32m+[m[32m    for (size_t i = 0; i < globalTags.pageLen; i++) {[m
+[32m+[m[32m        printf("Space left:\t%zu\n", globalTags.pages[i].spaceLeft);[m
+[32m+[m[32m        printf("%.*s\n", PAGE_SIZE, globalTags.pages[i].start);[m
+[32m+[m
+[32m+[m[32m        int printedChars = 0;[m
+[32m+[m[32m        char *copy = globalTags.pages[i].start;[m
+[32m+[m[32m        while (printedChars < PAGE_SIZE) {[m
+[32m+[m[32m            if (*copy == '\0') {[m
+[32m+[m[32m                printf("~");[m
+[32m+[m[32m            }[m
+[32m+[m[32m            printf("%c", *copy);[m
+[32m+[m[32m            copy++;[m
+[32m+[m[32m            printedChars++;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        printf("\n\n");[m
+[32m+[m[32m    }[m
+[32m+[m[32m    printf("\n\n");[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/type/node-type.c b/src/type/node-type.c[m
+[1mdeleted file mode 100644[m
+[1mindex ffb7363..0000000[m
+[1m--- a/src/type/node-type.c[m
+[1m+++ /dev/null[m
+[36m@@ -1,50 +0,0 @@[m
+[31m-#include <string.h>[m
+[31m-[m
+[31m-#include "type/node-type.h"[m
+[31m-[m
+[31m-typedef struct {[m
+[31m-    const char *name;[m
+[31m-    NodeType type;[m
+[31m-} __attribute__((aligned(16))) NodeTypeMapping;[m
+[31m-[m
+[31m-static const NodeTypeMapping nodeTypeMappings[] = {[m
+[31m-    // paired tags[m
+[31m-    {"html", HTML},[m
+[31m-    {"title", TITLE},[m
+[31m-    {"body", BODY},[m
+[31m-    {"h1", H1},[m
+[31m-    {"head", HEAD},[m
+[31m-    {"div", DIV},[m
+[31m-    {"p", P},[m
+[31m-    // self-closing[m
+[31m-    {"!DOCTYPE", DOCTYPE},[m
+[31m-    {"meta", META},[m
+[31m-    {"input", INPUT},[m
+[31m-};[m
+[31m-[m
+[31m-static const size_t NUM_MAPPINGS =[m
+[31m-    sizeof(nodeTypeMappings) / sizeof(nodeTypeMappings[0]);[m
+[31m-[m
+[31m-NodeType mapStringToType(const char *str, const size_t strLen) {[m
+[31m-    for (size_t i = 0; i < NUM_MAPPINGS; i++) {[m
+[31m-        if (strncmp(str, nodeTypeMappings[i].name, strLen) == 0) {[m
+[31m-            return nodeTypeMappings[i].type;[m
+[31m-        }[m
+[31m-    }[m
+[31m-[m
+[31m-    return UNKNOWN;[m
+[31m-}[m
+[31m-[m
+[31m-const char *mapTypeToString(const NodeType type) {[m
+[31m-    for (size_t i = 0; i < NUM_MAPPINGS; i++) {[m
+[31m-        if (type == nodeTypeMappings[i].type) {[m
+[31m-            return nodeTypeMappings[i].name;[m
+[31m-        }[m
+[31m-    }[m
+[31m-[m
+[31m-    return "UNKNOWN";[m
+[31m-}[m
+[31m-[m
+[31m-unsigned char isSelfClosing(const NodeType type) {[m
+[31m-    return type >> (NODE_TYPE_NUM_BITS - 1) != 0;[m
+[31m-}[m

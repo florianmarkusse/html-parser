@@ -1,90 +1,67 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "tokenizer/parse.h"
-#include "type/node.h"
+#include "type/node-tag.h"
 
 #define MAX_NODE_DEPTH 1U << 7U
 
-typedef enum { OPEN_TAG, CLOSING_TAG, TAG_NAME, TEXT } TokenizerState;
-
 typedef enum {
-    NEW_FREE,
-    NEW_OPEN_TAG,
-    NEW_TAG_NAME,
-    NEW_ATTRS,
-    NEW_OPEN_PAIRED,
-    NEW_TEXT_NODE,
+    FREE,
+    OPEN_TAG,
+    TAG_NAME,
+    ATTRS,
+    OPEN_PAIRED,
+    TEXT_NODE,
     NUM_STATES
 } State;
 
 typedef struct {
-    unsigned int stack[MAX_NODE_DEPTH];
-    unsigned int nodeDepthLen;
+    node_id stack[MAX_NODE_DEPTH];
+    node_id nodeDepthLen;
 } __attribute__((aligned(128))) NodeDepth;
 
-static const char *stateNames[NUM_STATES] = {
-    "NEW_FREE",  "NEW_OPEN_TAG",    "NEW_TAG_NAME",
-    "NEW_ATTRS", "NEW_OPEN_PAIRED", "NEW_TEXT_NODE"};
+node_id addToDocument(const char *tagStart, unsigned int tagLength,
+                      Document *doc, unsigned int *previousNodeID,
+                      NodeDepth *stack, const unsigned char isPaired) {
+    char buffer[PAGE_SIZE]; // Allocate a buffer with maxLength
+                            // + 1 for null-termination
+    snprintf(buffer, tagLength + 1, "%s", tagStart);
+    tag_id tagID = tagToIndex(buffer, isPaired);
+    node_id nodeID = addNode(tagID, doc);
+
+    if (nodeID > 0 && *previousNodeID > 0) {
+        if (stack->nodeDepthLen == 0) {
+            addNextNode(*previousNodeID, nodeID, doc);
+        } else {
+            const unsigned int parentNodeID =
+                stack->stack[stack->nodeDepthLen - 1];
+            if (parentNodeID == *previousNodeID) {
+                addParentFirstChild(parentNodeID, nodeID, doc);
+            } else {
+                addNextNode(*previousNodeID, nodeID, doc);
+            }
+        }
+    }
+    *previousNodeID = nodeID;
+
+    printf("tag:\t%s\twith ID:\t%u\twith tag type ID:\t%hu\n", buffer, nodeID,
+           tagID);
+
+    return nodeID;
+}
 
 void addPairedNode(const char *tagStart, unsigned int tagLength, Document *doc,
                    unsigned int *previousNodeID, NodeDepth *stack) {
-    char buffer[tagLength + 1]; // Allocate a buffer with maxLength
-                                // + 1 for null-termination
-    snprintf(buffer, tagLength + 1, "%s", tagStart);
-    NodeType nodeType = mapStringToType(tagStart, tagLength);
-    unsigned int nodeID = addNode(nodeType, doc);
-    printf("Opening of paired tag:\t%s\t\tID:\t%u\n", buffer, nodeID);
-
-    if (nodeID > 0 && *previousNodeID > 0) {
-        if (stack->nodeDepthLen == 0) {
-            addNextNode(*previousNodeID, nodeID, doc);
-        } else {
-            const unsigned int parentNodeID =
-                stack->stack[stack->nodeDepthLen - 1];
-            if (parentNodeID == *previousNodeID) {
-                addParentFirstChild(parentNodeID, nodeID, doc);
-            } else {
-                addNextNode(*previousNodeID, nodeID, doc);
-            }
-        }
-    }
-
-    stack->stack[stack->nodeDepthLen] = nodeID;
+    stack->stack[stack->nodeDepthLen] =
+        addToDocument(tagStart, tagLength, doc, previousNodeID, stack, 1);
     stack->nodeDepthLen++;
-
-    *previousNodeID = nodeID;
-}
-
-void addSingleNode(const char *tagStart, unsigned int tagLength, Document *doc,
-                   unsigned int *previousNodeID, NodeDepth *stack) {
-    char buffer[tagLength + 1]; // Allocate a buffer with maxLength
-                                // + 1 for null-termination
-    snprintf(buffer, tagLength + 1, "%s", tagStart);
-    NodeType nodeType = mapStringToType(tagStart, tagLength);
-    unsigned int nodeID = addNode(nodeType, doc);
-    printf("Opening of single tag:\t%s\t\tID:\t%u\n", buffer, nodeID);
-
-    if (nodeID > 0 && *previousNodeID > 0) {
-        if (stack->nodeDepthLen == 0) {
-            addNextNode(*previousNodeID, nodeID, doc);
-        } else {
-            const unsigned int parentNodeID =
-                stack->stack[stack->nodeDepthLen - 1];
-            if (parentNodeID == *previousNodeID) {
-                addParentFirstChild(parentNodeID, nodeID, doc);
-            } else {
-                addNextNode(*previousNodeID, nodeID, doc);
-            }
-        }
-    }
-
-    *previousNodeID = nodeID;
 }
 
 void parse(const char *xmlString, Document *doc) {
-    State state = NEW_FREE;
+    State state = FREE;
 
     unsigned int currentPosition = 0;
 
@@ -99,65 +76,63 @@ void parse(const char *xmlString, Document *doc) {
     unsigned int previousNodeID = 0;
     char ch = xmlString[currentPosition];
     while (ch != '\0') {
-        // printf("Current state: %s\twith char %c\n", stateNames[state], ch);
-
         switch (state) {
-        case NEW_FREE:
+        case FREE:
             if (ch == '<') {
-                state = NEW_OPEN_TAG;
+                state = OPEN_TAG;
             }
             break;
-        case NEW_OPEN_TAG:
+        case OPEN_TAG:
             if (ch == '/') {
                 previousNodeID = stack.stack[stack.nodeDepthLen - 1];
                 stack.nodeDepthLen--;
-                state = NEW_FREE;
+                state = FREE;
             }
             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
                 tagNameStart = currentPosition;
-                state = NEW_TAG_NAME;
+                state = TAG_NAME;
             }
             if (ch == '!') {
                 isExclam = 1;
                 tagNameStart = currentPosition;
-                state = NEW_TAG_NAME;
+                state = TAG_NAME;
             }
             break;
-        case NEW_TAG_NAME:
+        case TAG_NAME:
             if (ch == ' ') {
                 tagLength = currentPosition - tagNameStart;
-                state = NEW_ATTRS;
+                state = ATTRS;
             }
             if (ch == '>') {
                 tagLength = currentPosition - tagNameStart;
                 addPairedNode(&xmlString[tagNameStart], tagLength, doc,
                               &previousNodeID, &stack);
-                state = NEW_OPEN_PAIRED;
+                state = OPEN_PAIRED;
             }
             break;
-        case NEW_ATTRS:
+        case ATTRS:
             if (ch == '/' || (isExclam && ch == '>')) {
-                addSingleNode(&xmlString[tagNameStart], tagLength, doc,
-                              &previousNodeID, &stack);
+                addToDocument(&xmlString[tagNameStart], tagLength, doc,
+                              &previousNodeID, &stack, 0);
                 isExclam = 0;
-                state = NEW_FREE;
+                state = FREE;
             } else if (ch == '>') {
                 addPairedNode(&xmlString[tagNameStart], tagLength, doc,
                               &previousNodeID, &stack);
-                state = NEW_OPEN_PAIRED;
+                state = OPEN_PAIRED;
             }
             break;
-        case NEW_OPEN_PAIRED:
+        case OPEN_PAIRED:
             if (ch == '<') {
-                state = NEW_OPEN_TAG;
+                state = OPEN_TAG;
             }
             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-                state = NEW_TEXT_NODE;
+                state = TEXT_NODE;
             }
             break;
-        case NEW_TEXT_NODE:
+        case TEXT_NODE:
             if (ch == '<') {
-                state = NEW_OPEN_TAG;
+                state = OPEN_TAG;
             }
             break;
         default:;

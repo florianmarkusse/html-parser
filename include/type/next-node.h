@@ -1,9 +1,11 @@
 #ifndef TYPE_NEXT_NODE_H
 #define TYPE_NEXT_NODE_H
 
+#include "node.h"
+
 typedef struct {
-    unsigned int currentNodeID;
-    unsigned int nextNodeID;
-} __attribute__((aligned(8))) NextNode;
+    node_id currentNodeID;
+    node_id nextNodeID;
+} __attribute__((packed)) __attribute__((aligned(4))) NextNode;
 
 #endif

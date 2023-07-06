@@ -1,11 +1,16 @@
 #ifndef TYPE_NODE_H
 #define TYPE_NODE_H
 
-#include "node-type.h"
+#include <stddef.h>
+#include <stdint.h>
+
+#include "node-tag.h"
+
+typedef uint16_t node_id;
 
 typedef struct {
-    unsigned int ID;
-    NodeType type;
-} __attribute__((aligned(8))) Node;
+    node_id nodeID;
+    tag_id tagID;
+} __attribute__((aligned(4))) Node;
 
 #endif

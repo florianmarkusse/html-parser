@@ -2,48 +2,39 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "type/data-page.h"
 #include "type/node-tag.h"
 
-TagPage createTagPage() {
-    TagPage tagPage;
-    tagPage.start = malloc(PAGE_SIZE);
-    tagPage.freeSpace = tagPage.start;
-    tagPage.spaceLeft = PAGE_SIZE;
+Tags globalTags;
 
-    if (tagPage.start == NULL) {
-        fprintf(stderr, "Failed to allocate memory for tag page.\n");
+tag_id createTags() {
+    globalTags.pairedTagsLen = 0;
+    globalTags.singleTagsLen = 0;
+
+    globalTags.pages[0] = createDataPage();
+    if (globalTags.pages[0].start == NULL) {
+        return FAILED_TO_ALLOCATE_FOR_PAGE_OF_TAGS;
+    }
+    globalTags.pageLen = 1;
+    return 0;
+}
+
+void destroyTags() {
+    for (int i = 0; i < globalTags.pageLen; i++) {
+        free(globalTags.pages[i].start);
     }
 
-    return tagPage;
+    globalTags.pairedTagsLen = 0;
+    globalTags.singleTagsLen = 0;
+
+    globalTags.pageLen = 0;
 }
 
-Tags createTags() {
-    Tags tags;
-    tags.pairedTagsLen = 0;
-    tags.singleTagsLen = 0;
-
-    tags.pages[0] = createTagPage();
-    tags.pageLen = 1;
-
-    return tags;
-}
-
-void destroyTags(Tags *tags) {
-    for (int i = 0; i < tags->pageLen; i++) {
-        free(tags->pages[i].start);
-    }
-
-    tags->pairedTagsLen = 0;
-    tags->singleTagsLen = 0;
-
-    tags->pageLen = 0;
-}
-
-size_t findOrCreateTag(Tags *tags, const char *tagName, size_t *currentTagLen,
-                       size_t offset) {
-    for (size_t i = offset; i < offset + *currentTagLen; ++i) {
+tag_id findOrCreateTag(const char *tagName, tag_id *currentTagLen,
+                       tag_id offset) {
+    for (tag_id i = offset; i < offset + *currentTagLen; ++i) {
         // Check if tag already exists
-        if (strcmp(tags->tags[i], tagName) == 0) {
+        if (strcmp(globalTags.tags[i], tagName) == 0) {
             return i; // Return index of existing tag
         }
     }
@@ -54,59 +45,99 @@ size_t findOrCreateTag(Tags *tags, const char *tagName, size_t *currentTagLen,
         fprintf(stderr, "Tag \"%s\" is too long for page.\n", tagName);
         fprintf(stderr, "Tag size:\t%zu\tPage size:\t%u\n", tagNameLength,
                 PAGE_SIZE);
-        return UNKNOWN_TAG; // Or handle the error in an appropriate
-                            // way
+        return TAG_TOO_LONG; // Or handle the error in an appropriate
+                             // way
     }
 
     // Find a suitable page for the new tag
-    TagPage *suitablePage = NULL;
-    for (size_t i = 0; i < tags->pageLen; ++i) {
-        TagPage *page = &(tags->pages[i]);
+    DataPage *suitablePage = NULL;
+    page_id suitableIndex = globalTags.pageLen;
+    for (page_id i = 0; i < globalTags.pageLen; ++i) {
+        DataPage *page = &(globalTags.pages[i]);
         if (page->spaceLeft >= tagNameLength) {
             suitablePage = page;
+            suitableIndex = i;
             break;
         }
     }
 
     // If no suitable page found, create a new page
-    if (suitablePage == NULL) {
-        if (tags->pageLen < TOTAL_PAGES) {
-            suitablePage = &(tags->pages[tags->pageLen]);
-            suitablePage->start = malloc(PAGE_SIZE);
-            suitablePage->freeSpace = suitablePage->start;
-            suitablePage->spaceLeft = PAGE_SIZE;
-
-            if (suitablePage->start == NULL) {
+    if (suitableIndex == globalTags.pageLen) {
+        if (globalTags.pageLen < TOTAL_PAGES) {
+            globalTags.pages[suitableIndex] = createDataPage();
+            if (globalTags.pages[suitableIndex].start == NULL) {
                 fprintf(stderr,
                         "Failed to allocate memory for new tag page.\n");
-                return UNKNOWN_TAG; // Or handle the error in an appropriate
-                                    // way
+                return FAILED_TO_ALLOCATE_FOR_PAGE_OF_TAGS;
             }
-
-            tags->pageLen++;
+            globalTags.pageLen++;
         } else {
             fprintf(stderr, "No more capacity to create new tag pages.\n");
-            return UNKNOWN_TAG; // Or handle the error in an appropriate way
+            return NO_CAPACITY;
         }
     }
 
     // Duplicate the tag memory within the suitable page
-    char *duplicatedTag = suitablePage->freeSpace;
+    char *duplicatedTag = globalTags.pages[suitableIndex].freeSpace;
     memcpy(duplicatedTag, tagName, tagNameLength);
-    suitablePage->freeSpace += tagNameLength;
-    suitablePage->spaceLeft -= tagNameLength;
+    globalTags.pages[suitableIndex].freeSpace += tagNameLength;
+    globalTags.pages[suitableIndex].spaceLeft -= tagNameLength;
 
-    tags->tags[offset + *currentTagLen] =
+    globalTags.tags[offset + *currentTagLen] =
         duplicatedTag; // Point tags[i] to the duplicated memory
     (*currentTagLen)++;
 
-    return (*currentTagLen) - 1; // Return index of newly created tag
+    return offset + (*currentTagLen) - 1; // Return index of newly created tag
 }
 
-size_t tagToIndex(Tags *tags, const char *tagName, const char isPaired) {
+tag_id tagToIndex(const char *tagName, const unsigned char isPaired) {
     if (isPaired) {
-        return findOrCreateTag(tags, tagName, &(tags->pairedTagsLen), 0);
+        return findOrCreateTag(tagName, &(globalTags.pairedTagsLen), 0);
     }
-    return findOrCreateTag(tags, tagName, &(tags->singleTagsLen),
+    return findOrCreateTag(tagName, &(globalTags.singleTagsLen),
                            TOTAL_TAGS_MSB);
+}
+
+unsigned char isSelfClosing(tag_id index) {
+    return index >> (TOTAL_TAGS_NUM_BITS - 1) != 0;
+}
+
+void printTagStatus() {
+    printf("Printing global tag status...\n\n");
+
+    printf("Paired tags...\n");
+    printf("Paired tags length:\t%hu\n", globalTags.pairedTagsLen);
+    for (size_t i = 0; i < globalTags.pairedTagsLen; i++) {
+        printf("i:\t%zu\tTag:\t%s\n", i, globalTags.tags[i]);
+    }
+    printf("\n\n");
+
+    printf("Single tags...\n");
+    printf("single tags length:\t%hu\n", globalTags.singleTagsLen);
+    for (size_t i = TOTAL_TAGS_MSB;
+         i < TOTAL_TAGS_MSB + globalTags.singleTagsLen; i++) {
+        printf("i:\t%zu\tTag:\t%s\n", i, globalTags.tags[i]);
+    }
+    printf("\n\n");
+
+    printf("Pages...\n");
+    printf("Pages length:\t%hhu\n", globalTags.pageLen);
+    for (size_t i = 0; i < globalTags.pageLen; i++) {
+        printf("Space left:\t%hu\n", globalTags.pages[i].spaceLeft);
+        printf("%.*s\n", PAGE_SIZE, globalTags.pages[i].start);
+
+        int printedChars = 0;
+        char *copy = globalTags.pages[i].start;
+        while (printedChars < PAGE_SIZE) {
+            if (*copy == '\0') {
+                printf("~");
+            } else {
+                printf("%c", *copy);
+            }
+            copy++;
+            printedChars++;
+        }
+        printf("\n\n");
+    }
+    printf("\n\n");
 }

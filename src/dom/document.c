@@ -1,45 +1,43 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "dom/document.h"
 #include "tokenizer/parse.h"
 
-#define NODES_PAGE_SIZE (1U << 10U)
-#define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
+DocumentStatus createDocument(const char *xmlString, Document *doc) {
+    doc->nodes = malloc(NODES_PAGE_SIZE);
+    doc->nodeLen = 0;
 
-#define PARENT_CHILDS_PAGE_SIZE (1U << 8U)
-#define PARENT_CHILDS_PER_PAGE (NODES_PAGE_SIZE / sizeof(ParentChilds))
+    doc->parentFirstChilds = malloc(PARENT_CHILDS_PAGE_SIZE);
+    doc->parentFirstChildLen = 0;
 
-#define NEXT_NODE_PAGE_SIZE (1U << 8U)
-#define NEXT_NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(NextNode))
+    doc->nextNodes = malloc(NEXT_NODE_PAGE_SIZE);
+    doc->nextNodeLen = 0;
 
-Document createDocument(const char *xmlString) {
-    Document document;
-    document.nodes = malloc(NODES_PAGE_SIZE);
-    document.nodeLen = 0;
+    if (doc->nodes == NULL || doc->parentFirstChilds == NULL ||
+        doc->nextNodes == NULL) {
+        fprintf(stderr, "Failed to allocate memory for nodes.\n");
+        destroyDocument(doc);
+        return DOCUMENT_ERROR_MEMORY;
+    }
 
-    document.parentFirstChilds = malloc(PARENT_CHILDS_PAGE_SIZE);
-    document.parentFirstChildLen = 0;
+    parse(xmlString, doc);
 
-    document.nextNodes = malloc(NEXT_NODE_PAGE_SIZE);
-    document.nextNodeLen = 0;
-
-    parse(xmlString, &document);
-
-    return document;
+    return DOCUMENT_SUCCESS;
 }
 
-unsigned int addNode(const NodeType type, Document *doc) {
+node_id addNode(const tag_id tagID, Document *doc) {
     Node *newNode = &(doc->nodes[doc->nodeLen]);
-    newNode->ID = doc->nodeLen + 1; // We start at 1 because we need to
-                                    // initialize variables when parsing at 0.
-    newNode->type = type;
+    newNode->nodeID =
+        doc->nodeLen + 1; // We start at 1 because we need to
+                          // initialize variables when parsing at 0.
+    newNode->tagID = tagID;
     doc->nodeLen++;
-    return newNode->ID;
+    return newNode->nodeID;
 }
 
-void addParentFirstChild(unsigned int parentID, unsigned int childID,
-                         Document *doc) {
+void addParentFirstChild(node_id parentID, node_id childID, Document *doc) {
     ParentFirstChild *newParentFirstChild =
         &(doc->parentFirstChilds[doc->parentFirstChildLen]);
     newParentFirstChild->parentID = parentID;
@@ -47,8 +45,7 @@ void addParentFirstChild(unsigned int parentID, unsigned int childID,
     doc->parentFirstChildLen++;
 }
 
-void addNextNode(unsigned int currentNodeID, unsigned int nextNodeID,
-                 Document *doc) {
+void addNextNode(node_id currentNodeID, node_id nextNodeID, Document *doc) {
     NextNode *newNextNode = &(doc->nextNodes[doc->nextNodeLen]);
     newNextNode->currentNodeID = currentNodeID;
     newNextNode->nextNodeID = nextNodeID;
@@ -58,51 +55,52 @@ void addNextNode(unsigned int currentNodeID, unsigned int nextNodeID,
 void destroyDocument(const Document *doc) {
     free((void *)doc->nodes);
     free((void *)doc->parentFirstChilds);
+    free((void *)doc->nextNodes);
 }
 
-void printBits(const NodeType type) {
-    size_t numBits = sizeof(NodeType) * 8;
-    for (size_t i = 0; i < numBits; i++) {
-        unsigned int bit = (type >> (numBits - 1 - i)) & 1;
-        printf("%u", bit);
+void printBits(const tag_id tagID) {
+    unsigned char numBits = sizeof(tag_id) * 8;
+    for (unsigned char i = 0; i < numBits; i++) {
+        unsigned char bit = (tagID >> (numBits - 1 - i)) & 1;
+        printf("%hhu", bit);
     }
     printf("\n");
 }
 
-void printNode(const Document *doc, const unsigned int nodeID) {
+void printNode(const Document *doc, const node_id nodeID) {
     Node node = doc->nodes[nodeID];
-    const char *type = mapTypeToString(node.type);
-    if (isSelfClosing(node.type)) {
-        printf("<%s my ID: %u />\n", type, node.ID);
+    const char *tag = globalTags.tags[nodeID];
+    if (isSelfClosing(node.tagID)) {
+        printf("<%s my ID: %hu />\n", tag, node.nodeID);
         return;
     }
 }
 
 void printDocument(const Document *doc) {
     printf("Printing document...\n\n");
-    for (unsigned int i = 0; i < doc->nodeLen; i++) {
+    for (size_t i = 0; i < doc->nodeLen; i++) {
         Node node = doc->nodes[i];
-        const char *type = mapTypeToString(node.type);
+        const char *type = globalTags.tags[node.tagID];
 
-        printBits(node.type);
+        printBits(node.tagID);
 
-        if (isSelfClosing(node.type)) {
-            printf("<%s my ID: %u />\n", type, node.ID);
+        if (isSelfClosing(node.tagID)) {
+            printf("<%s my ID: %hu />\n", type, node.nodeID);
         } else {
-            printf("<%s> my ID: %u </%s>\n", type, node.ID, type);
+            printf("<%s> my ID: %hu </%s>\n", type, node.nodeID, type);
         }
 
         printf("\n");
     }
 
-    for (unsigned int i = 0; i < doc->parentFirstChildLen; i++) {
-        printf("Parent: %u with first child: %u\n",
+    for (size_t i = 0; i < doc->parentFirstChildLen; i++) {
+        printf("Parent: %hu with first child: %hu\n",
                doc->parentFirstChilds[i].parentID,
                doc->parentFirstChilds[i].childID);
     }
 
-    for (unsigned int i = 0; i < doc->nextNodeLen; i++) {
-        printf("current node: %u with next node: %u\n",
+    for (size_t i = 0; i < doc->nextNodeLen; i++) {
+        printf("current node: %hu with next node: %hu\n",
                doc->nextNodes[i].currentNodeID, doc->nextNodes[i].nextNodeID);
     }
 }

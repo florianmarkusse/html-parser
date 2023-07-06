@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 
-const char *readFile(const char *srcPath);
+#include "file-status.h"
+
+FileStatus readFile(const char *srcPath, char **buffer);
 
 #endif
