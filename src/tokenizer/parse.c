@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "tokenizer/parse.h"
-#include "type/node-tag.h"
 
 #define MAX_NODE_DEPTH 1U << 7U
 

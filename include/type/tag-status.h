@@ -1,0 +1,10 @@
+#ifndef TYPE_NODE_TAG_STATUS_H
+#define TYPE_NODE_TAG_STATUS_H
+
+typedef enum {
+    DOCUMENT_SUCCESS,
+    DOCUMENT_ERROR_MEMORY,
+    DOCUMENT_NUM_STATUS
+} TagStatus;
+
+#endif

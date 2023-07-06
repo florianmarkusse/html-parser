@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "type/data-page.h"
-#include "type/node-tag.h"
+#include "type/tag.h"
 
 Tags globalTags;
 

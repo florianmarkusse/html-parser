@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "node-tag.h"
+#include "tag.h"
 
 typedef uint16_t node_id;
 

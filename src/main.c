@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 #include "dom/document.h"
-#include "type/node-tag.h"
 #include "utils/file/read.h"
 
 static const char *const testFile = "test/test.html";

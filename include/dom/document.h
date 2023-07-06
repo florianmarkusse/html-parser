@@ -3,7 +3,6 @@
 
 #include "document-status.h"
 #include "type/next-node.h"
-#include "type/node-tag.h"
 #include "type/node.h"
 #include "type/parent-first-child.h"
 
