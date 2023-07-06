@@ -1,7 +1,10 @@
 #ifndef TYPE_DATA_PAGE_H
 #define TYPE_DATA_PAGE_H
 
+#include <stddef.h>
 #include <stdint.h>
+
+#include "data-page-status.h"
 
 #define PAGE_SIZE (1U << 10U)
 typedef uint16_t page_space;
@@ -17,5 +20,7 @@ typedef struct {
 // Left up to the client to check if allocation was succesful.
 // start == NULL
 DataPage createDataPage();
-
+DataPageStatus insertIntoPage(const void *data, size_t byteLen,
+                              DataPage pages[TOTAL_PAGES], page_id *pageLen,
+                              void *address);
 #endif

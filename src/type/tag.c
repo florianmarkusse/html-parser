@@ -4,19 +4,21 @@
 
 #include "type/data-page.h"
 #include "type/tag.h"
+#include "utils/print/error.h"
 
 Tags globalTags;
 
-tag_id createTags() {
+TagStatus createTags() {
     globalTags.pairedTagsLen = 0;
     globalTags.singleTagsLen = 0;
 
     globalTags.pages[0] = createDataPage();
     if (globalTags.pages[0].start == NULL) {
-        return FAILED_TO_ALLOCATE_FOR_PAGE_OF_TAGS;
+        PRINT_ERROR("Failed to allocate memory for data page.\n");
+        return TAG_ERROR_MEMORY;
     }
     globalTags.pageLen = 1;
-    return 0;
+    return TAG_SUCCESS;
 }
 
 void destroyTags() {
@@ -30,8 +32,8 @@ void destroyTags() {
     globalTags.pageLen = 0;
 }
 
-tag_id findOrCreateTag(const char *tagName, tag_id *currentTagLen,
-                       tag_id offset) {
+TagStatus findOrCreateTag(const char *tagName, tag_id *currentTagLen,
+                          tag_id offset, tag_id *tagID) {
     for (tag_id i = offset; i < offset + *currentTagLen; ++i) {
         // Check if tag already exists
         if (strcmp(globalTags.tags[i], tagName) == 0) {
@@ -39,41 +41,42 @@ tag_id findOrCreateTag(const char *tagName, tag_id *currentTagLen,
         }
     }
 
+    char *address = NULL;
+    insertIntoPage(tagName, strlen(tagName) + 1, globalTags.pages,
+                   &globalTags.pageLen, address);
+
+    /*
     // Ensure tag fits into a page.
     size_t tagNameLength = strlen(tagName) + 1;
     if (tagNameLength > PAGE_SIZE) {
-        fprintf(stderr, "Tag \"%s\" is too long for page.\n", tagName);
-        fprintf(stderr, "Tag size:\t%zu\tPage size:\t%u\n", tagNameLength,
-                PAGE_SIZE);
-        return TAG_TOO_LONG; // Or handle the error in an appropriate
-                             // way
+        PRINT_ERROR("Tag \"%s\" is too long for page.\n", tagName);
+        PRINT_ERROR("Tag size:\t%zu\tPage size:\t%u\n", tagNameLength,
+                    PAGE_SIZE);
+        return TAG_TOO_LONG;
     }
 
-    // Find a suitable page for the new tag
-    DataPage *suitablePage = NULL;
     page_id suitableIndex = globalTags.pageLen;
     for (page_id i = 0; i < globalTags.pageLen; ++i) {
         DataPage *page = &(globalTags.pages[i]);
         if (page->spaceLeft >= tagNameLength) {
-            suitablePage = page;
             suitableIndex = i;
             break;
         }
     }
 
-    // If no suitable page found, create a new page
     if (suitableIndex == globalTags.pageLen) {
         if (globalTags.pageLen < TOTAL_PAGES) {
             globalTags.pages[suitableIndex] = createDataPage();
             if (globalTags.pages[suitableIndex].start == NULL) {
-                fprintf(stderr,
-                        "Failed to allocate memory for new tag page.\n");
-                return FAILED_TO_ALLOCATE_FOR_PAGE_OF_TAGS;
+                PRINT_ERROR("Failed to allocate memory for new tag page.\n");
+                return TAG_ERROR_MEMORY;
             }
             globalTags.pageLen++;
         } else {
-            fprintf(stderr, "No more capacity to create new tag pages.\n");
-            return NO_CAPACITY;
+            PRINT_ERROR("No more capacity to create new tag pages.\n");
+            PRINT_ERROR("All %u pages of %u bytes are full.\n", TOTAL_PAGES,
+                        PAGE_SIZE);
+            return TAG_NO_CAPACITY;
         }
     }
 
@@ -82,20 +85,22 @@ tag_id findOrCreateTag(const char *tagName, tag_id *currentTagLen,
     memcpy(duplicatedTag, tagName, tagNameLength);
     globalTags.pages[suitableIndex].freeSpace += tagNameLength;
     globalTags.pages[suitableIndex].spaceLeft -= tagNameLength;
+    */
 
-    globalTags.tags[offset + *currentTagLen] =
-        duplicatedTag; // Point tags[i] to the duplicated memory
+    globalTags.tags[offset + *currentTagLen] = address;
     (*currentTagLen)++;
 
-    return offset + (*currentTagLen) - 1; // Return index of newly created tag
+    *tagID = offset + (*currentTagLen) - 1;
+    return TAG_SUCCESS;
 }
 
-tag_id tagToIndex(const char *tagName, const unsigned char isPaired) {
+TagStatus tagToIndex(const char *tagName, const unsigned char isPaired,
+                     tag_id *tagID) {
     if (isPaired) {
-        return findOrCreateTag(tagName, &(globalTags.pairedTagsLen), 0);
+        return findOrCreateTag(tagName, &(globalTags.pairedTagsLen), 0, tagID);
     }
-    return findOrCreateTag(tagName, &(globalTags.singleTagsLen),
-                           TOTAL_TAGS_MSB);
+    return findOrCreateTag(tagName, &(globalTags.singleTagsLen), TOTAL_TAGS_MSB,
+                           tagID);
 }
 
 unsigned char isSelfClosing(tag_id index) {

@@ -4,6 +4,7 @@
 
 #include "dom/document.h"
 #include "tokenizer/parse.h"
+#include "utils/print/error.h"
 
 DocumentStatus createDocument(const char *xmlString, Document *doc) {
     doc->nodes = malloc(NODES_PAGE_SIZE);
@@ -17,7 +18,7 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
 
     if (doc->nodes == NULL || doc->parentFirstChilds == NULL ||
         doc->nextNodes == NULL) {
-        fprintf(stderr, "Failed to allocate memory for nodes.\n");
+        PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDocument(doc);
         return DOCUMENT_ERROR_MEMORY;
     }
@@ -27,29 +28,38 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
     return DOCUMENT_SUCCESS;
 }
 
-node_id addNode(const tag_id tagID, Document *doc) {
+// TODO(florian): when reach end of node page?
+DocumentStatus addNode(const tag_id tagID, Document *doc, node_id *nodeID) {
     Node *newNode = &(doc->nodes[doc->nodeLen]);
     newNode->nodeID =
         doc->nodeLen + 1; // We start at 1 because we need to
                           // initialize variables when parsing at 0.
     newNode->tagID = tagID;
     doc->nodeLen++;
-    return newNode->nodeID;
+
+    *nodeID = newNode->nodeID;
+    return DOCUMENT_SUCCESS;
 }
 
-void addParentFirstChild(node_id parentID, node_id childID, Document *doc) {
+// TODO(florian): when reach end of parent first child page?
+DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
+                                   Document *doc) {
     ParentFirstChild *newParentFirstChild =
         &(doc->parentFirstChilds[doc->parentFirstChildLen]);
     newParentFirstChild->parentID = parentID;
     newParentFirstChild->childID = childID;
     doc->parentFirstChildLen++;
+    return DOCUMENT_SUCCESS;
 }
 
-void addNextNode(node_id currentNodeID, node_id nextNodeID, Document *doc) {
+// TODO(florian): when reach end of next node page?
+DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
+                           Document *doc) {
     NextNode *newNextNode = &(doc->nextNodes[doc->nextNodeLen]);
     newNextNode->currentNodeID = currentNodeID;
     newNextNode->nextNodeID = nextNodeID;
     doc->nextNodeLen++;
+    return DOCUMENT_SUCCESS;
 }
 
 void destroyDocument(const Document *doc) {

@@ -29,9 +29,11 @@ typedef struct {
 
 DocumentStatus createDocument(const char *xmlString, Document *doc);
 
-node_id addNode(tag_id tagID, Document *doc);
-void addParentFirstChild(node_id parentID, node_id childID, Document *doc);
-void addNextNode(node_id currentNodeID, node_id nextNodeID, Document *doc);
+DocumentStatus addNode(tag_id tagID, Document *doc, node_id *nodeID);
+DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
+                                   Document *doc);
+DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
+                           Document *doc);
 
 void destroyDocument(const Document *doc);
 

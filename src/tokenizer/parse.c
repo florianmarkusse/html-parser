@@ -17,6 +17,7 @@ typedef enum {
     NUM_STATES
 } State;
 
+// TODO(florian): Error handling for bigger node depth
 typedef struct {
     node_id stack[MAX_NODE_DEPTH];
     node_id nodeDepthLen;
@@ -28,18 +29,25 @@ node_id addToDocument(const char *tagStart, unsigned int tagLength,
     char buffer[PAGE_SIZE]; // Allocate a buffer with maxLength
                             // + 1 for null-termination
     snprintf(buffer, tagLength + 1, "%s", tagStart);
-    tag_id tagID = tagToIndex(buffer, isPaired);
-    node_id nodeID = addNode(tagID, doc);
+    tag_id tagID = 0;
+    // TODO(florian): handle this return value.
+    tagToIndex(buffer, isPaired, &tagID);
+    node_id nodeID = 0;
+    // TODO(florian): handle this return value.
+    addNode(tagID, doc, &nodeID);
 
     if (nodeID > 0 && *previousNodeID > 0) {
         if (stack->nodeDepthLen == 0) {
+            // TODO(florian): handle this return value.
             addNextNode(*previousNodeID, nodeID, doc);
         } else {
             const unsigned int parentNodeID =
                 stack->stack[stack->nodeDepthLen - 1];
             if (parentNodeID == *previousNodeID) {
+                // TODO(florian): handle this return value.
                 addParentFirstChild(parentNodeID, nodeID, doc);
             } else {
+                // TODO(florian): handle this return value.
                 addNextNode(*previousNodeID, nodeID, doc);
             }
         }
@@ -54,6 +62,7 @@ node_id addToDocument(const char *tagStart, unsigned int tagLength,
 
 void addPairedNode(const char *tagStart, unsigned int tagLength, Document *doc,
                    unsigned int *previousNodeID, NodeDepth *stack) {
+    // TODO(florian): handle this return value.
     stack->stack[stack->nodeDepthLen] =
         addToDocument(tagStart, tagLength, doc, previousNodeID, stack, 1);
     stack->nodeDepthLen++;

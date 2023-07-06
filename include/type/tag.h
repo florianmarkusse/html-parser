@@ -1,23 +1,18 @@
-#ifndef TYPE_NODE_TAG_H
-#define TYPE_NODE_TAG_H
+#ifndef TYPE_TAG_H
+#define TYPE_TAG_H
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "data-page.h"
+#include "tag-status.h"
 
 #define TOTAL_TAGS (1U << 10U)
 typedef uint16_t tag_id;
-// Top x values are used as error codes.
-#define ERROR_CODES_START (TOTAL_TAGS - (1U << 4U))
 
 #define TOTAL_TAGS_NUM_BITS (sizeof(tag_id) * 8)
 // The MSB is used as a mask to indicate single tags.
 #define TOTAL_TAGS_MSB (TOTAL_TAGS >> 1U)
-
-#define TAG_TOO_LONG (ERROR_CODES_START)
-#define FAILED_TO_ALLOCATE_FOR_PAGE_OF_TAGS (ERROR_CODES_START + 1)
-#define NO_CAPACITY (ERROR_CODES_START + 2)
 
 typedef struct {
     char *tags[TOTAL_TAGS];
@@ -29,10 +24,11 @@ typedef struct {
 
 extern Tags globalTags;
 
-tag_id createTags();
+TagStatus createTags();
 void destroyTags();
 
-tag_id tagToIndex(const char *tagName, unsigned char isPaired);
+TagStatus tagToIndex(const char *tagName, unsigned char isPaired,
+                     tag_id *tagID);
 unsigned char isSelfClosing(tag_id index);
 
 void printTagStatus();

@@ -4,6 +4,7 @@
 
 #include "dom/document.h"
 #include "utils/file/read.h"
+#include "utils/print/error.h"
 
 static const char *const testFile = "test/test.html";
 
@@ -14,8 +15,9 @@ int main() {
     FileStatus fileStatus = readFile(testFile, &htmlString);
     if (fileStatus != FILE_SUCCESS) {
         destroyTags();
-        printf("Failed to read file:\t%s", testFile);
-        printf("Recevied status code:\t%s", fileStatusToString(fileStatus));
+        PRINT_ERROR("Failed to read file:\t%s", testFile);
+        PRINT_ERROR("Recevied status code:\t%s",
+                    fileStatusToString(fileStatus));
         return 1;
     }
     printf("%s\n", htmlString);
@@ -25,9 +27,9 @@ int main() {
     if (documentStatus != DOCUMENT_SUCCESS) {
         free(htmlString);
         destroyTags();
-        printf("Failed to create document from file:\t%s", testFile);
-        printf("Recevied status code:\t%s",
-               documentStatusToString(documentStatus));
+        PRINT_ERROR("Failed to create document from file:\t%s", testFile);
+        PRINT_ERROR("Recevied status code:\t%s",
+                    documentStatusToString(documentStatus));
         return 1;
     }
 
