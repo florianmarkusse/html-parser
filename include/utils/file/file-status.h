@@ -11,9 +11,9 @@ typedef enum {
 
 static const char *const FileStatusStrings[FILE_NUM_STATUS] = {
     "Success",
-    "Error: Cannot open file",
-    "Error: Cannot allocate memory",
-    "Error: Cannot read file",
+    "Cannot open file",
+    "Cannot allocate memory",
+    "Cannot read file",
 };
 
 static const char *fileStatusToString(FileStatus status) {

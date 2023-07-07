@@ -15,9 +15,9 @@ DataPage createDataPage() {
     return dataPage;
 }
 
-DataPageStatus insertIntoPage(const void *data, size_t byteLen,
-                              DataPage pages[TOTAL_PAGES], page_id *pageLen,
-                              void *address) {
+DataPageStatus insertIntoPage(const void *data, size_t byteLen, DataPage *pages,
+                              size_t totalPages, page_id *pageLen,
+                              void **address) {
     // Ensure tag fits into a page.
     if (byteLen > PAGE_SIZE) {
         PRINT_ERROR("data is too long for page.\n");
@@ -38,7 +38,7 @@ DataPageStatus insertIntoPage(const void *data, size_t byteLen,
     }
 
     if (suitableIndex == *pageLen) {
-        if (*pageLen < TOTAL_PAGES) {
+        if (*pageLen < totalPages) {
             pages[suitableIndex] = createDataPage();
             if (pages[suitableIndex].start == NULL) {
                 PRINT_ERROR("Failed to allocate memory for new tag page.\n");
@@ -47,7 +47,7 @@ DataPageStatus insertIntoPage(const void *data, size_t byteLen,
             (*pageLen)++;
         } else {
             PRINT_ERROR("No more capacity to create new tag pages.\n");
-            PRINT_ERROR("All %u pages of %u bytes are full.\n", TOTAL_PAGES,
+            PRINT_ERROR("All %zu page(s) of %u bytes are full.\n", totalPages,
                         PAGE_SIZE);
             return DATA_PAGE_NO_CAPACITY;
         }
@@ -59,6 +59,6 @@ DataPageStatus insertIntoPage(const void *data, size_t byteLen,
     pages[suitableIndex].freeSpace += byteLen;
     pages[suitableIndex].spaceLeft -= byteLen;
 
-    address = duplicatedTag;
+    *address = duplicatedTag;
     return DATA_PAGE_SUCCESS;
 }

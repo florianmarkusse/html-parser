@@ -23,13 +23,16 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
         return DOCUMENT_ERROR_MEMORY;
     }
 
-    parse(xmlString, doc);
-
-    return DOCUMENT_SUCCESS;
+    DocumentStatus documentStatus = parse(xmlString, doc);
+    if (documentStatus != DOCUMENT_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(documentStatusToString(documentStatus),
+                             "Failed to parse document");
+    }
+    return documentStatus;
 }
 
 // TODO(florian): when reach end of node page?
-DocumentStatus addNode(const tag_id tagID, Document *doc, node_id *nodeID) {
+DocumentStatus addNode(node_id *nodeID, tag_id tagID, Document *doc) {
     Node *newNode = &(doc->nodes[doc->nodeLen]);
     newNode->nodeID =
         doc->nodeLen + 1; // We start at 1 because we need to

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,13 +10,7 @@ Tags globalTags;
 TagStatus createTags() {
     globalTags.pairedTagsLen = 0;
     globalTags.singleTagsLen = 0;
-
-    globalTags.pages[0] = createDataPage();
-    if (globalTags.pages[0].start == NULL) {
-        PRINT_ERROR("Failed to allocate memory for data page.\n");
-        return TAG_ERROR_MEMORY;
-    }
-    globalTags.pageLen = 1;
+    globalTags.pageLen = 0;
     return TAG_SUCCESS;
 }
 
@@ -37,55 +30,20 @@ TagStatus findOrCreateTag(const char *tagName, tag_id *currentTagLen,
     for (tag_id i = offset; i < offset + *currentTagLen; ++i) {
         // Check if tag already exists
         if (strcmp(globalTags.tags[i], tagName) == 0) {
-            return i; // Return index of existing tag
+            *tagID = i;
+            return TAG_SUCCESS;
         }
     }
 
     char *address = NULL;
-    insertIntoPage(tagName, strlen(tagName) + 1, globalTags.pages,
-                   &globalTags.pageLen, address);
-
-    /*
-    // Ensure tag fits into a page.
-    size_t tagNameLength = strlen(tagName) + 1;
-    if (tagNameLength > PAGE_SIZE) {
-        PRINT_ERROR("Tag \"%s\" is too long for page.\n", tagName);
-        PRINT_ERROR("Tag size:\t%zu\tPage size:\t%u\n", tagNameLength,
-                    PAGE_SIZE);
-        return TAG_TOO_LONG;
+    DataPageStatus dataPageStatus =
+        insertIntoPage(tagName, strlen(tagName) + 1, globalTags.pages,
+                       TAGS_TOTAL_PAGES, &globalTags.pageLen, (void *)&address);
+    if (dataPageStatus != DATA_PAGE_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
+                               "Could not find or create tag \"%s\"", tagName);
+        return TAG_NOT_FOUND_OR_CREATED;
     }
-
-    page_id suitableIndex = globalTags.pageLen;
-    for (page_id i = 0; i < globalTags.pageLen; ++i) {
-        DataPage *page = &(globalTags.pages[i]);
-        if (page->spaceLeft >= tagNameLength) {
-            suitableIndex = i;
-            break;
-        }
-    }
-
-    if (suitableIndex == globalTags.pageLen) {
-        if (globalTags.pageLen < TOTAL_PAGES) {
-            globalTags.pages[suitableIndex] = createDataPage();
-            if (globalTags.pages[suitableIndex].start == NULL) {
-                PRINT_ERROR("Failed to allocate memory for new tag page.\n");
-                return TAG_ERROR_MEMORY;
-            }
-            globalTags.pageLen++;
-        } else {
-            PRINT_ERROR("No more capacity to create new tag pages.\n");
-            PRINT_ERROR("All %u pages of %u bytes are full.\n", TOTAL_PAGES,
-                        PAGE_SIZE);
-            return TAG_NO_CAPACITY;
-        }
-    }
-
-    // Duplicate the tag memory within the suitable page
-    char *duplicatedTag = globalTags.pages[suitableIndex].freeSpace;
-    memcpy(duplicatedTag, tagName, tagNameLength);
-    globalTags.pages[suitableIndex].freeSpace += tagNameLength;
-    globalTags.pages[suitableIndex].spaceLeft -= tagNameLength;
-    */
 
     globalTags.tags[offset + *currentTagLen] = address;
     (*currentTagLen)++;
@@ -94,12 +52,30 @@ TagStatus findOrCreateTag(const char *tagName, tag_id *currentTagLen,
     return TAG_SUCCESS;
 }
 
-TagStatus tagToIndex(const char *tagName, const unsigned char isPaired,
-                     tag_id *tagID) {
-    if (isPaired) {
-        return findOrCreateTag(tagName, &(globalTags.pairedTagsLen), 0, tagID);
+TagStatus tagToIndex(const char *tagStart, const size_t tagLength,
+                     const unsigned char isPaired, tag_id *tagID) {
+    char buffer[PAGE_SIZE];
+
+    if (tagLength >= PAGE_SIZE) {
+        PRINT_ERROR("Tag is too long to fit into page.\n");
+        PRINT_ERROR("Printing first part of tag:\n");
+
+        memcpy(buffer, tagStart, PAGE_SIZE - 1);
+        buffer[PAGE_SIZE - 1] = '\0';
+
+        PRINT_ERROR("%s\n", buffer);
+        PRINT_ERROR("max size is %u\n", PAGE_SIZE);
+
+        return TAG_TOO_LONG;
     }
-    return findOrCreateTag(tagName, &(globalTags.singleTagsLen), TOTAL_TAGS_MSB,
+
+    memcpy(buffer, tagStart, tagLength);
+    buffer[tagLength] = '\0';
+
+    if (isPaired) {
+        return findOrCreateTag(buffer, &(globalTags.pairedTagsLen), 0, tagID);
+    }
+    return findOrCreateTag(buffer, &(globalTags.singleTagsLen), TOTAL_TAGS_MSB,
                            tagID);
 }
 

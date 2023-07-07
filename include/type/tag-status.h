@@ -3,17 +3,15 @@
 
 typedef enum {
     TAG_SUCCESS,
+    TAG_NOT_FOUND_OR_CREATED,
     TAG_TOO_LONG,
-    TAG_ERROR_MEMORY,
-    TAG_NO_CAPACITY,
     TAG_NUM_STATUS
 } TagStatus;
 
 static const char *const TagStatusStrings[TAG_NUM_STATUS] = {
     "Success",
-    "Error: Tag too long",
-    "Error: Memory",
-    "Error: No capacity",
+    "Tag not found or created",
+    "Tag too long",
 };
 
 static const char *tagStatusToString(TagStatus status) {

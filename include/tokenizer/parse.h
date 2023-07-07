@@ -3,6 +3,6 @@
 
 #include "dom/document.h"
 
-void parse(const char *xmlString, Document *doc);
+DocumentStatus parse(const char *xmlString, Document *doc);
 
 #endif

@@ -11,12 +11,12 @@ typedef enum {
 
 static const char *const DataPageStatusStrings[DATA_PAGE_NUM_STATUS] = {
     "Success",
-    "Error: Data too long",
-    "Error: No capacity",
-    "Error: Memory",
+    "Data too long",
+    "No capacity",
+    "Memory",
 };
 
-static const char *getDataPageStatusString(DataPageStatus status) {
+static const char *dataPageStatusToString(DataPageStatus status) {
     if (status >= 0 && status < DATA_PAGE_NUM_STATUS) {
         return DataPageStatusStrings[status];
     }

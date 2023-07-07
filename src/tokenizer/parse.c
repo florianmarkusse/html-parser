@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "tokenizer/parse.h"
+#include "utils/print/error.h"
 
 #define MAX_NODE_DEPTH 1U << 7U
 
@@ -17,71 +18,88 @@ typedef enum {
     NUM_STATES
 } State;
 
-// TODO(florian): Error handling for bigger node depth
 typedef struct {
     node_id stack[MAX_NODE_DEPTH];
     node_id nodeDepthLen;
-} __attribute__((aligned(128))) NodeDepth;
+} __attribute__((packed)) __attribute__((aligned(128))) NodeDepth;
 
-node_id addToDocument(const char *tagStart, unsigned int tagLength,
-                      Document *doc, unsigned int *previousNodeID,
-                      NodeDepth *stack, const unsigned char isPaired) {
-    char buffer[PAGE_SIZE]; // Allocate a buffer with maxLength
-                            // + 1 for null-termination
-    snprintf(buffer, tagLength + 1, "%s", tagStart);
+DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
+                             Document *doc, node_id *previousNodeID,
+                             NodeDepth *stack, const unsigned char isPaired,
+                             node_id *newNodeID) {
     tag_id tagID = 0;
-    // TODO(florian): handle this return value.
-    tagToIndex(buffer, isPaired, &tagID);
-    node_id nodeID = 0;
-    // TODO(florian): handle this return value.
-    addNode(tagID, doc, &nodeID);
+    if (tagToIndex(tagStart, tagLength, isPaired, &tagID) != TAG_SUCCESS) {
+        return DOCUMENT_NO_TAG;
+    }
+    if (addNode(newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {
+        return DOCUMENT_NO_ADD;
+    }
 
-    if (nodeID > 0 && *previousNodeID > 0) {
+    if (newNodeID > 0 && *previousNodeID > 0) {
         if (stack->nodeDepthLen == 0) {
-            // TODO(florian): handle this return value.
-            addNextNode(*previousNodeID, nodeID, doc);
+            if (addNextNode(*previousNodeID, *newNodeID, doc) !=
+                DOCUMENT_SUCCESS) {
+                return DOCUMENT_NO_ADD;
+            }
         } else {
             const unsigned int parentNodeID =
                 stack->stack[stack->nodeDepthLen - 1];
             if (parentNodeID == *previousNodeID) {
-                // TODO(florian): handle this return value.
-                addParentFirstChild(parentNodeID, nodeID, doc);
+                if (addParentFirstChild(parentNodeID, *newNodeID, doc) !=
+                    DOCUMENT_SUCCESS) {
+                    return DOCUMENT_NO_ADD;
+                }
             } else {
-                // TODO(florian): handle this return value.
-                addNextNode(*previousNodeID, nodeID, doc);
+                if (addNextNode(*previousNodeID, *newNodeID, doc) !=
+                    DOCUMENT_SUCCESS) {
+                    return DOCUMENT_NO_ADD;
+                }
             }
         }
     }
-    *previousNodeID = nodeID;
+    *previousNodeID = *newNodeID;
 
-    printf("tag:\t%s\twith ID:\t%u\twith tag type ID:\t%hu\n", buffer, nodeID,
-           tagID);
-
-    return nodeID;
+    return DOCUMENT_SUCCESS;
 }
 
-void addPairedNode(const char *tagStart, unsigned int tagLength, Document *doc,
-                   unsigned int *previousNodeID, NodeDepth *stack) {
-    // TODO(florian): handle this return value.
-    stack->stack[stack->nodeDepthLen] =
-        addToDocument(tagStart, tagLength, doc, previousNodeID, stack, 1);
+DocumentStatus addPairedNode(const char *tagStart, size_t tagLength,
+                             Document *doc, node_id *previousNodeID,
+                             NodeDepth *stack, node_id *newNodeID) {
+    if (stack->nodeDepthLen >= MAX_NODE_DEPTH) {
+        PRINT_ERROR("Max document node depth %u reached.\n", MAX_NODE_DEPTH);
+        PRINT_ERROR("At tag %s.\n", tagStart);
+        return DOCUMENT_TOO_DEEP;
+    }
+
+    DocumentStatus documentStatus = addToDocument(
+        tagStart, tagLength, doc, previousNodeID, stack, 1, newNodeID);
+    if (documentStatus != DOCUMENT_SUCCESS) {
+        return documentStatus;
+    }
+
+    stack->stack[stack->nodeDepthLen] = *newNodeID;
     stack->nodeDepthLen++;
+
+    return DOCUMENT_SUCCESS;
 }
 
-void parse(const char *xmlString, Document *doc) {
+DocumentStatus parse(const char *xmlString, Document *doc) {
     State state = FREE;
 
-    unsigned int currentPosition = 0;
+    size_t currentPosition = 0;
 
-    unsigned int tagNameStart = 0;
-    unsigned int tagLength = 0;
+    size_t tagNameStart = 0;
+    size_t tagLength = 0;
 
     unsigned char isExclam = 0;
 
     NodeDepth stack;
     stack.nodeDepthLen = 0;
 
-    unsigned int previousNodeID = 0;
+    DocumentStatus documentStatus = DOCUMENT_SUCCESS;
+
+    node_id newNodeID = 0;
+    node_id previousNodeID = 0;
     char ch = xmlString[currentPosition];
     while (ch != '\0') {
         switch (state) {
@@ -113,20 +131,23 @@ void parse(const char *xmlString, Document *doc) {
             }
             if (ch == '>') {
                 tagLength = currentPosition - tagNameStart;
-                addPairedNode(&xmlString[tagNameStart], tagLength, doc,
-                              &previousNodeID, &stack);
+                documentStatus =
+                    addPairedNode(&xmlString[tagNameStart], tagLength, doc,
+                                  &previousNodeID, &stack, &newNodeID);
                 state = OPEN_PAIRED;
             }
             break;
         case ATTRS:
             if (ch == '/' || (isExclam && ch == '>')) {
-                addToDocument(&xmlString[tagNameStart], tagLength, doc,
-                              &previousNodeID, &stack, 0);
+                documentStatus =
+                    addToDocument(&xmlString[tagNameStart], tagLength, doc,
+                                  &previousNodeID, &stack, 0, &newNodeID);
                 isExclam = 0;
                 state = FREE;
             } else if (ch == '>') {
-                addPairedNode(&xmlString[tagNameStart], tagLength, doc,
-                              &previousNodeID, &stack);
+                documentStatus =
+                    addPairedNode(&xmlString[tagNameStart], tagLength, doc,
+                                  &previousNodeID, &stack, &newNodeID);
                 state = OPEN_PAIRED;
             }
             break;
@@ -146,7 +167,12 @@ void parse(const char *xmlString, Document *doc) {
         default:;
         }
 
+        if (documentStatus != DOCUMENT_SUCCESS) {
+            break;
+        }
+
         ch = xmlString[++currentPosition];
     }
-    free((void *)xmlString);
+
+    return documentStatus;
 }

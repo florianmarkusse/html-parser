@@ -15,9 +15,8 @@ int main() {
     FileStatus fileStatus = readFile(testFile, &htmlString);
     if (fileStatus != FILE_SUCCESS) {
         destroyTags();
-        PRINT_ERROR("Failed to read file:\t%s", testFile);
-        PRINT_ERROR("Recevied status code:\t%s",
-                    fileStatusToString(fileStatus));
+        ERROR_WITH_CODE_FORMAT(fileStatusToString(fileStatus),
+                               "Failed to read file: \"%s\"", testFile);
         return 1;
     }
     printf("%s\n", htmlString);
@@ -27,11 +26,12 @@ int main() {
     if (documentStatus != DOCUMENT_SUCCESS) {
         free(htmlString);
         destroyTags();
-        PRINT_ERROR("Failed to create document from file:\t%s", testFile);
-        PRINT_ERROR("Recevied status code:\t%s",
-                    documentStatusToString(documentStatus));
+        ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),
+                               "Failed to create document from file \"%s\"",
+                               testFile);
         return 1;
     }
+    free(htmlString);
 
     printDocument(&doc);
 
