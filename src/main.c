@@ -33,7 +33,8 @@ int main() {
     }
     free(htmlString);
 
-    printDocument(&doc);
+    printDocumentStatus(&doc);
+    printXML(&doc);
 
     destroyDocument(&doc);
     printTagStatus();

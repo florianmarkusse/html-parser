@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -46,9 +47,9 @@ TagStatus findOrCreateTag(const char *tagName, tag_id *currentTagLen,
     }
 
     globalTags.tags[offset + *currentTagLen] = address;
+    *tagID = offset + (*currentTagLen);
     (*currentTagLen)++;
 
-    *tagID = offset + (*currentTagLen) - 1;
     return TAG_SUCCESS;
 }
 
@@ -75,37 +76,36 @@ TagStatus tagToIndex(const char *tagStart, const size_t tagLength,
     if (isPaired) {
         return findOrCreateTag(buffer, &(globalTags.pairedTagsLen), 0, tagID);
     }
-    return findOrCreateTag(buffer, &(globalTags.singleTagsLen), TOTAL_TAGS_MSB,
-                           tagID);
+    return findOrCreateTag(buffer, &(globalTags.singleTagsLen),
+                           SINGLE_TAGS_OFFSET, tagID);
 }
 
 unsigned char isSelfClosing(tag_id index) {
-    return index >> (TOTAL_TAGS_NUM_BITS - 1) != 0;
+    return (index >> TOTAL_TAGS_MSB) != 0;
 }
 
 void printTagStatus() {
-    printf("Printing global tag status...\n\n");
+    printf("printing global tag status...\n\n");
 
-    printf("Paired tags...\n");
-    printf("Paired tags length:\t%hu\n", globalTags.pairedTagsLen);
+    printf("paired tags...\n");
+    printf("capacity: %hu/%u\n", globalTags.pairedTagsLen, TOTAL_TAGS / 2);
     for (size_t i = 0; i < globalTags.pairedTagsLen; i++) {
-        printf("i:\t%zu\tTag:\t%s\n", i, globalTags.tags[i]);
+        printf("tag ID: %-5zutag: %-20s\n", i, globalTags.tags[i]);
     }
-    printf("\n\n");
+    printf("\n");
 
-    printf("Single tags...\n");
-    printf("single tags length:\t%hu\n", globalTags.singleTagsLen);
-    for (size_t i = TOTAL_TAGS_MSB;
-         i < TOTAL_TAGS_MSB + globalTags.singleTagsLen; i++) {
-        printf("i:\t%zu\tTag:\t%s\n", i, globalTags.tags[i]);
+    printf("single tags...\n");
+    printf("capacity: %hu/%u\n", globalTags.singleTagsLen, TOTAL_TAGS / 2);
+    for (size_t i = SINGLE_TAGS_OFFSET;
+         i < SINGLE_TAGS_OFFSET + globalTags.singleTagsLen; i++) {
+        printf("tag ID: %-5zutag: %-20s\n", i, globalTags.tags[i]);
     }
-    printf("\n\n");
+    printf("\n");
 
-    printf("Pages...\n");
-    printf("Pages length:\t%hhu\n", globalTags.pageLen);
+    printf("tag pages...\n");
+    printf("%-15s: %hhu\n", "pages length", globalTags.pageLen);
     for (size_t i = 0; i < globalTags.pageLen; i++) {
-        printf("Space left:\t%hu\n", globalTags.pages[i].spaceLeft);
-        printf("%.*s\n", PAGE_SIZE, globalTags.pages[i].start);
+        printf("%-15s: %hu\n", "space left", globalTags.pages[i].spaceLeft);
 
         int printedChars = 0;
         char *copy = globalTags.pages[i].start;
@@ -118,7 +118,8 @@ void printTagStatus() {
             copy++;
             printedChars++;
         }
-        printf("\n\n");
+        printf("\n");
     }
+
     printf("\n\n");
 }

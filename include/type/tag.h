@@ -7,13 +7,16 @@
 #include "data-page.h"
 #include "tag-status.h"
 
-#define TOTAL_TAGS (1U << 10U)
-#define TAGS_TOTAL_PAGES (1U << 4U)
-typedef uint16_t tag_id;
-
-#define TOTAL_TAGS_NUM_BITS (sizeof(tag_id) * 8)
+#define EXPONENT 10U
+#define TOTAL_TAGS (1U << EXPONENT)
 // The MSB is used as a mask to indicate single tags.
-#define TOTAL_TAGS_MSB (TOTAL_TAGS >> 1U)
+#define TOTAL_TAGS_MSB (EXPONENT - 1)
+#define SINGLE_TAGS_OFFSET (1U << (EXPONENT - 1))
+
+#define TAGS_TOTAL_PAGES (1U << 4U)
+
+typedef uint16_t tag_id;
+#define TOTAL_TAGS_NUM_BITS (sizeof(tag_id) * 8)
 
 typedef struct {
     char *tags[TOTAL_TAGS];

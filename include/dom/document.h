@@ -10,22 +10,25 @@
 #define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
 
 #define PARENT_CHILDS_PAGE_SIZE (1U << 8U)
-#define PARENT_CHILDS_PER_PAGE (NODES_PAGE_SIZE / sizeof(ParentChilds))
+#define PARENT_CHILDS_PER_PAGE                                                 \
+    (PARENT_CHILDS_PAGE_SIZE / sizeof(ParentFirstChild))
 
-#define NEXT_NODE_PAGE_SIZE (1U << 8U)
-#define NEXT_NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(NextNode))
+#define NEXT_NODES_PAGE_SIZE (1U << 8U)
+#define NEXT_NODES_PER_PAGE (NEXT_NODES_PAGE_SIZE / sizeof(NextNode))
 
 typedef struct {
     Node *nodes;
     size_t nodeLen;
+    size_t nodeCapacity;
 
     ParentFirstChild *parentFirstChilds;
     size_t parentFirstChildLen;
+    size_t parentFirstChildCapacity;
 
     NextNode *nextNodes;
     size_t nextNodeLen;
-
-} __attribute__((aligned(64))) Document;
+    size_t nextNodeCapacity;
+} __attribute__((packed)) __attribute__((aligned(128))) Document;
 
 DocumentStatus createDocument(const char *xmlString, Document *doc);
 
@@ -37,6 +40,7 @@ DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
 
 void destroyDocument(const Document *doc);
 
-void printDocument(const Document *doc);
+void printDocumentStatus(const Document *doc);
+void printXML(const Document *doc);
 
 #endif
