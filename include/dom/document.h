@@ -5,6 +5,7 @@
 #include "type/next-node.h"
 #include "type/node.h"
 #include "type/parent-first-child.h"
+#include "utils/file/file-status.h"
 
 #define NODES_PAGE_SIZE (1U << 10U)
 #define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
@@ -38,9 +39,9 @@ DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
 DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
                            Document *doc);
 
-void destroyDocument(const Document *doc);
+node_id getFirstChild(node_id parentID, const Document *doc);
+node_id getNextNode(node_id currentNodeID, const Document *doc);
 
-void printDocumentStatus(const Document *doc);
-void printXML(const Document *doc);
+void destroyDocument(const Document *doc);
 
 #endif

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "dom/document-writing.h"
 #include "dom/document.h"
 #include "utils/file/read.h"
 #include "utils/print/error.h"
@@ -35,6 +36,7 @@ int main() {
 
     printDocumentStatus(&doc);
     printXML(&doc);
+    writeXMLToFile(&doc, "test/test-write.html");
 
     destroyDocument(&doc);
     printTagStatus();
