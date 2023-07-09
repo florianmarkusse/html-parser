@@ -30,8 +30,7 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
 
     DocumentStatus documentStatus = parse(xmlString, doc);
     if (documentStatus != DOCUMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(documentStatusToString(documentStatus),
-                             "Failed to parse document");
+        PRINT_ERROR("Failed to parse document.\n");
     }
     return documentStatus;
 }

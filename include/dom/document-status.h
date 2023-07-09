@@ -7,12 +7,17 @@ typedef enum {
     DOCUMENT_NO_ADD,
     DOCUMENT_NO_ELEMENT,
     DOCUMENT_TOO_DEEP,
+    DOCUMENT_TOO_MANY_ATTRIBUTES,
     DOCUMENT_NUM_STATUS
 } DocumentStatus;
 
 static const char *const DocumentStatusStrings[DOCUMENT_NUM_STATUS] = {
-    "Success", "Memory", "Could not add to document", "Could not find element",
-    "Too many nested tags"};
+    "Success",
+    "Memory",
+    "Could not add to document",
+    "Could not find element",
+    "Too many nested tags",
+    "Too many attributes on single tag"};
 
 static const char *documentStatusToString(DocumentStatus status) {
     if (status >= 0 && status < DOCUMENT_NUM_STATUS) {

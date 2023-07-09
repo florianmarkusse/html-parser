@@ -33,11 +33,27 @@ void printNode(const node_id nodeID, const size_t indentation,
     }
 
     const char *tag = globalTags.elements[node.tagID];
+    fprintf(output, "<%s", tag);
+
+    for (size_t i = 0; i < doc->nodeAttributeLen; i++) {
+        NodeAttribute nodeAttribute = doc->nodeAttributes[i];
+
+        if (nodeAttribute.nodeID == node.nodeID) {
+            char *attribute =
+                globalAttributes.elements[nodeAttribute.attributeID];
+            if (isSingle(nodeAttribute.attributeID)) {
+                fprintf(output, " %s", attribute);
+            } else {
+                fprintf(output, " %s=%s", attribute, "NOT IMPLEMENTED");
+            }
+        }
+    }
+
     if (isSingle(node.tagID)) {
-        fprintf(output, "<%s />\n", tag);
+        fprintf(output, "/>\n");
         return;
     }
-    fprintf(output, "<%s>\n", tag);
+    fprintf(output, ">\n");
     node_id childNode = getFirstChild(nodeID, doc);
     while (childNode) {
         printNode(childNode, indentation + 1, doc, output);
@@ -102,29 +118,27 @@ void printDocumentStatus(const Document *doc) {
     }
     printf("\n");
 
-    /*
-     * TODO: Continue here!!! then add when parsing
     printf("attribute nodes inside document...\n");
-    printf("total number of attribute nodes: %zu\n", doc->nodeLen);
-    for (size_t i = 0; i < doc->nodeLen; i++) {
-        Node node = doc->nodes[i];
-        const char *type = globalTags.elements[node.tagID];
+    printf("total number of attribute nodes: %zu\n", doc->nodeAttributeLen);
+    for (size_t i = 0; i < doc->nodeAttributeLen; i++) {
+        NodeAttribute nodeAttribute = doc->nodeAttributes[i];
+        const char *type = globalAttributes.elements[nodeAttribute.attributeID];
 
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
-        getBits(node.tagID, bitBuffer, bufferSize);
-        printf("tag: %-4u bits: %-18s", node.tagID, bitBuffer);
+        getBits(nodeAttribute.attributeID, bitBuffer, bufferSize);
+        printf("attribute: %-4u bits: %-18s", nodeAttribute.attributeID,
+               bitBuffer);
 
-        if (isSingle(node.tagID)) {
+        if (isSingle(nodeAttribute.attributeID)) {
             printf("%-8s %-20s with node ID: %-4hu\n", "single", type,
-                   node.nodeID);
+                   nodeAttribute.nodeID);
         } else {
             printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
-                   node.nodeID);
+                   nodeAttribute.nodeID);
         }
     }
     printf("\n");
-    */
 
     printf("parent-first-child inside document...\n");
     printf("total number of parent-first-child: %zu\n",
