@@ -33,7 +33,7 @@ typedef struct {
 
 DocumentStatus createDocument(const char *xmlString, Document *doc);
 
-DocumentStatus addNode(node_id *nodeID, tag_id tagID, Document *doc);
+DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc);
 DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
                                    Document *doc);
 DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,

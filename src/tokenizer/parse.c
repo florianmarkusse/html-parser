@@ -27,8 +27,9 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
                              Document *doc, node_id *previousNodeID,
                              NodeDepth *stack, const unsigned char isPaired,
                              node_id *newNodeID) {
-    tag_id tagID = 0;
-    if (tagToIndex(tagStart, tagLength, isPaired, &tagID) != TAG_SUCCESS) {
+    element_id tagID = 0;
+    if (elementToIndex(&globalTags, tagStart, tagLength, isPaired, &tagID) !=
+        ELEMENT_SUCCESS) {
         return DOCUMENT_NO_TAG;
     }
     if (addNode(newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {

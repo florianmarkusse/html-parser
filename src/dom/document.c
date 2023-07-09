@@ -44,7 +44,7 @@ void *resizeArray(void *array, size_t currentLen, size_t *totalCapacity,
     return newArray;
 }
 
-DocumentStatus addNode(node_id *nodeID, tag_id tagID, Document *doc) {
+DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
     if (doc->nodeLen >= doc->nodeCapacity) {
         doc->nodes = resizeArray(doc->nodes, doc->nodeLen, &doc->nodeCapacity,
                                  sizeof(Node), NODES_PER_PAGE);

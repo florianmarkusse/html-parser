@@ -32,7 +32,7 @@ LIST(APPEND SOURCE_FILES
     "src/main.c" 
     "src/utils/file/read.c"
     "src/utils/file/path.c"
-    "src/type/tag.c"
+    "src/type/element.c"
     "src/type/data-page.c"
     "src/dom/document.c"
     "src/dom/document-writing.c"

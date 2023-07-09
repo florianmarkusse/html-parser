@@ -10,12 +10,12 @@
 static const char *const testFile = "test/test.html";
 
 int main() {
-    createTags();
+    createGlobals();
 
     char *htmlString = NULL;
     FileStatus fileStatus = readFile(testFile, &htmlString);
     if (fileStatus != FILE_SUCCESS) {
-        destroyTags();
+        destroyGlobals();
         ERROR_WITH_CODE_FORMAT(fileStatusToString(fileStatus),
                                "Failed to read file: \"%s\"", testFile);
         return 1;
@@ -26,7 +26,7 @@ int main() {
     DocumentStatus documentStatus = createDocument(htmlString, &doc);
     if (documentStatus != DOCUMENT_SUCCESS) {
         free(htmlString);
-        destroyTags();
+        destroyGlobals();
         ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),
                                "Failed to create document from file \"%s\"",
                                testFile);
@@ -39,6 +39,6 @@ int main() {
     writeXMLToFile(&doc, "test/test-write.html");
 
     destroyDocument(&doc);
-    printTagStatus();
-    destroyTags();
+    printElementStatus();
+    destroyGlobals();
 }

@@ -1,17 +1,18 @@
 #include <stdio.h>
 
 #include "dom/document.h"
+#include "utils/file/path.h"
 
-void printBits(const tag_id tagID) {
-    unsigned char numBits = sizeof(tag_id) * 8;
+void printBits(const element_id tagID) {
+    unsigned char numBits = sizeof(element_id) * 8;
     for (unsigned char i = 0; i < numBits; i++) {
         unsigned char bit = (tagID >> (numBits - 1 - i)) & 1;
         printf("%hhu", bit);
     }
 }
 
-void getBits(const tag_id tagID, char *bits, const size_t size) {
-    unsigned char numBits = sizeof(tag_id) * 8;
+void getBits(const element_id tagID, char *bits, const size_t size) {
+    unsigned char numBits = sizeof(element_id) * 8;
     if (size < numBits + 1) {
         fprintf(stderr, "Insufficient buffer size in getBits\n");
         return;
@@ -31,8 +32,8 @@ void printNode(const node_id nodeID, const size_t indentation,
         fprintf(output, "  ");
     }
 
-    const char *tag = globalTags.tags[node.tagID];
-    if (isSelfClosing(node.tagID)) {
+    const char *tag = globalTags.elements[node.tagID];
+    if (isSingle(node.tagID)) {
         fprintf(output, "<%s />\n", tag);
         return;
     }
@@ -84,14 +85,14 @@ void printDocumentStatus(const Document *doc) {
     printf("total number of nodes: %zu\n", doc->nodeLen);
     for (size_t i = 0; i < doc->nodeLen; i++) {
         Node node = doc->nodes[i];
-        const char *type = globalTags.tags[node.tagID];
+        const char *type = globalTags.elements[node.tagID];
 
-        size_t bufferSize = sizeof(tag_id) * 8 + 1;
+        size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
         getBits(node.tagID, bitBuffer, bufferSize);
         printf("tag: %-4u bits: %-18s", node.tagID, bitBuffer);
 
-        if (isSelfClosing(node.tagID)) {
+        if (isSingle(node.tagID)) {
             printf("%-8s %-20s with node ID: %-4hu\n", "single", type,
                    node.nodeID);
         } else {

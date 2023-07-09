@@ -4,13 +4,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "tag.h"
+#include "element.h"
 
 typedef uint16_t node_id;
 
 typedef struct {
     node_id nodeID;
-    tag_id tagID;
+    page_id tagID;
 } __attribute__((aligned(4))) Node;
 
 #endif
