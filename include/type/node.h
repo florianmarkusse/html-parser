@@ -10,7 +10,7 @@ typedef uint16_t node_id;
 
 typedef struct {
     node_id nodeID;
-    page_id tagID;
+    element_id tagID;
 } __attribute__((aligned(4))) Node;
 
 #endif

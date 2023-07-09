@@ -17,8 +17,12 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
     doc->nextNodeLen = 0;
     doc->nextNodeCapacity = NEXT_NODES_PER_PAGE;
 
+    doc->nodeAttributes = malloc(ATTRIBUTE_NODES_PAGE_SIZE);
+    doc->nodeAttributeLen = 0;
+    doc->nodeAttributeCapacity = ATTRIBUTE_NODES_PER_PAGE;
+
     if (doc->nodes == NULL || doc->parentFirstChilds == NULL ||
-        doc->nextNodes == NULL) {
+        doc->nextNodes == NULL || doc->nodeAttributes == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDocument(doc);
         return DOCUMENT_ERROR_MEMORY;
@@ -56,9 +60,9 @@ DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
 
     Node *newNode = &(doc->nodes[doc->nodeLen]);
     newNode->nodeID =
-        doc->nodeLen +
-        1; // We start at 1 because the parse variables are initialized to 0.
+        doc->nodeLen + 1; // We start at 1 because 0 is used as error id
     newNode->tagID = tagID;
+
     doc->nodeLen++;
     *nodeID = newNode->nodeID;
     return DOCUMENT_SUCCESS;
@@ -121,6 +125,26 @@ node_id getNextNode(const node_id currentNodeID, const Document *doc) {
         }
     }
     return 0;
+}
+
+DocumentStatus addAttributeNode(const node_id nodeID,
+                                const element_id attributeID, Document *doc) {
+    if (doc->nodeAttributeLen >= doc->nodeAttributeCapacity) {
+        doc->nodeAttributes = resizeArray(
+            doc->nodeAttributes, doc->nodeAttributeLen,
+            &doc->nodeAttributeCapacity, sizeof(NextNode), NEXT_NODES_PER_PAGE);
+        if (doc->nodeAttributes == NULL) {
+            PRINT_ERROR("Failed to reallocate memory for next node array.\n");
+            return DOCUMENT_ERROR_MEMORY;
+        }
+    }
+
+    NodeAttribute *newNodeAttribute =
+        &(doc->nodeAttributes[doc->nodeAttributeLen]);
+    newNodeAttribute->nodeID = nodeID;
+    newNodeAttribute->attributeID = attributeID;
+    doc->nodeAttributeLen++;
+    return DOCUMENT_SUCCESS;
 }
 
 void destroyDocument(const Document *doc) {

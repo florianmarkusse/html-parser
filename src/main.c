@@ -39,6 +39,7 @@ int main() {
     writeXMLToFile(&doc, "test/test-write.html");
 
     destroyDocument(&doc);
-    printElementStatus();
+    printGlobalTagStatus();
+    printGlobalAttributeStatus();
     destroyGlobals();
 }

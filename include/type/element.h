@@ -11,7 +11,7 @@
 #define TOTAL_ELEMENTS (1U << EXPONENT)
 // The MSB is used as a mask to indicate singles.
 #define TOTAL_ELEMENTS_MSB (EXPONENT - 1)
-#define SINGLE_TAGS_OFFSET (1U << (EXPONENT - 1))
+#define SINGLE_OFFSET (1U << (EXPONENT - 1))
 
 #define TOTAL_PAGES (1U << 4U)
 
@@ -37,6 +37,7 @@ ElementStatus elementToIndex(Elements *global, const char *elementStart,
                              element_id *elementID);
 unsigned char isSingle(element_id index);
 
-void printElementStatus();
+void printGlobalTagStatus();
+void printGlobalAttributeStatus();
 
 #endif

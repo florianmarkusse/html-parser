@@ -35,12 +35,12 @@ void destroyGlobals() {
     globalAttributes.singleLen = 0;
 }
 
-ElementStatus findOrCreateElement(Elements *global, const char *tagName,
-                                  element_id *currentTagLen, element_id offset,
-                                  element_id *elementID) {
-    for (element_id i = offset; i < offset + *currentTagLen; ++i) {
-        // Check if tag already exists
-        if (strcmp(global->elements[i], tagName) == 0) {
+ElementStatus findOrCreateElement(Elements *global, const char *elementName,
+                                  element_id *currentElementLen,
+                                  element_id offset, element_id *elementID) {
+    for (element_id i = offset; i < offset + *currentElementLen; ++i) {
+        // Check if element already exists
+        if (strcmp(global->elements[i], elementName) == 0) {
             *elementID = i;
             return ELEMENT_SUCCESS;
         }
@@ -48,17 +48,18 @@ ElementStatus findOrCreateElement(Elements *global, const char *tagName,
 
     char *address = NULL;
     DataPageStatus dataPageStatus =
-        insertIntoPage(tagName, strlen(tagName) + 1, global->pages, TOTAL_PAGES,
-                       &global->pageLen, (void *)&address);
+        insertIntoPage(elementName, strlen(elementName) + 1, global->pages,
+                       TOTAL_PAGES, &global->pageLen, (void *)&address);
     if (dataPageStatus != DATA_PAGE_SUCCESS) {
         ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
-                               "Could not find or create tag \"%s\"", tagName);
+                               "Could not find or create element \"%s\"",
+                               elementName);
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
 
-    global->elements[offset + *currentTagLen] = address;
-    *elementID = offset + (*currentTagLen);
-    (*currentTagLen)++;
+    global->elements[offset + *currentElementLen] = address;
+    *elementID = offset + (*currentElementLen);
+    (*currentElementLen)++;
 
     return ELEMENT_SUCCESS;
 }
@@ -89,38 +90,35 @@ ElementStatus elementToIndex(Elements *global, const char *elementStart,
                                    elementID);
     }
     return findOrCreateElement(global, buffer, &(global->singleLen),
-                               SINGLE_TAGS_OFFSET, elementID);
+                               SINGLE_OFFSET, elementID);
 }
 
 unsigned char isSingle(element_id index) {
     return (index >> TOTAL_ELEMENTS_MSB) != 0;
 }
 
-void printElementStatus() {
-    printf("printing global tag status...\n\n");
-
-    printf("paired tags...\n");
-    printf("capacity: %hu/%u\n", globalTags.pairedLen, TOTAL_ELEMENTS / 2);
-    for (size_t i = 0; i < globalTags.pairedLen; i++) {
-        printf("tag ID: %-5zutag: %-20s\n", i, globalTags.elements[i]);
+void printElementStatus(Elements *global) {
+    printf("paired elements...\n");
+    printf("capacity: %hu/%u\n", global->pairedLen, TOTAL_ELEMENTS / 2);
+    for (size_t i = 0; i < global->pairedLen; i++) {
+        printf("element ID: %-5zuelement: %-20s\n", i, global->elements[i]);
     }
     printf("\n");
 
-    printf("single tags...\n");
-    printf("capacity: %hu/%u\n", globalTags.singleLen, TOTAL_ELEMENTS / 2);
-    for (size_t i = SINGLE_TAGS_OFFSET;
-         i < SINGLE_TAGS_OFFSET + globalTags.singleLen; i++) {
-        printf("tag ID: %-5zutag: %-20s\n", i, globalTags.elements[i]);
+    printf("single elements...\n");
+    printf("capacity: %hu/%u\n", global->singleLen, TOTAL_ELEMENTS / 2);
+    for (size_t i = SINGLE_OFFSET; i < SINGLE_OFFSET + global->singleLen; i++) {
+        printf("element ID: %-5zuelement: %-20s\n", i, global->elements[i]);
     }
     printf("\n");
 
-    printf("tag pages...\n");
-    printf("%-15s: %hhu\n", "pages length", globalTags.pageLen);
-    for (size_t i = 0; i < globalTags.pageLen; i++) {
-        printf("%-15s: %hu\n", "space left", globalTags.pages[i].spaceLeft);
+    printf("element pages...\n");
+    printf("%-15s: %hhu\n", "pages length", global->pageLen);
+    for (size_t i = 0; i < global->pageLen; i++) {
+        printf("%-15s: %hu\n", "space left", global->pages[i].spaceLeft);
 
         int printedChars = 0;
-        char *copy = globalTags.pages[i].start;
+        char *copy = global->pages[i].start;
         while (printedChars < PAGE_SIZE) {
             if (*copy == '\0') {
                 printf("~");
@@ -134,4 +132,13 @@ void printElementStatus() {
     }
 
     printf("\n\n");
+}
+void printGlobalTagStatus() {
+    printf("printing global tag status...\n\n");
+    printElementStatus(&globalTags);
+}
+
+void printGlobalAttributeStatus() {
+    printf("printing global attribute status...\n\n");
+    printElementStatus(&globalAttributes);
 }

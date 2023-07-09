@@ -102,6 +102,30 @@ void printDocumentStatus(const Document *doc) {
     }
     printf("\n");
 
+    /*
+     * TODO: Continue here!!! then add when parsing
+    printf("attribute nodes inside document...\n");
+    printf("total number of attribute nodes: %zu\n", doc->nodeLen);
+    for (size_t i = 0; i < doc->nodeLen; i++) {
+        Node node = doc->nodes[i];
+        const char *type = globalTags.elements[node.tagID];
+
+        size_t bufferSize = sizeof(element_id) * 8 + 1;
+        char bitBuffer[bufferSize];
+        getBits(node.tagID, bitBuffer, bufferSize);
+        printf("tag: %-4u bits: %-18s", node.tagID, bitBuffer);
+
+        if (isSingle(node.tagID)) {
+            printf("%-8s %-20s with node ID: %-4hu\n", "single", type,
+                   node.nodeID);
+        } else {
+            printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
+                   node.nodeID);
+        }
+    }
+    printf("\n");
+    */
+
     printf("parent-first-child inside document...\n");
     printf("total number of parent-first-child: %zu\n",
            doc->parentFirstChildLen);
@@ -118,6 +142,5 @@ void printDocumentStatus(const Document *doc) {
         printf("current node: %-4hu next node: %-4hu\n",
                doc->nextNodes[i].currentNodeID, doc->nextNodes[i].nextNodeID);
     }
-
     printf("\n\n");
 }

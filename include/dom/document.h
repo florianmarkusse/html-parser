@@ -3,6 +3,7 @@
 
 #include "document-status.h"
 #include "type/next-node.h"
+#include "type/node-attribute.h"
 #include "type/node.h"
 #include "type/parent-first-child.h"
 #include "utils/file/file-status.h"
@@ -17,6 +18,10 @@
 #define NEXT_NODES_PAGE_SIZE (1U << 8U)
 #define NEXT_NODES_PER_PAGE (NEXT_NODES_PAGE_SIZE / sizeof(NextNode))
 
+#define ATTRIBUTE_NODES_PAGE_SIZE (1U << 8U)
+#define ATTRIBUTE_NODES_PER_PAGE                                               \
+    (ATTRIBUTE_NODES_PAGE_SIZE / sizeof(NodeAttribute))
+
 typedef struct {
     Node *nodes;
     size_t nodeLen;
@@ -29,7 +34,11 @@ typedef struct {
     NextNode *nextNodes;
     size_t nextNodeLen;
     size_t nextNodeCapacity;
-} __attribute__((packed)) __attribute__((aligned(128))) Document;
+
+    NodeAttribute *nodeAttributes;
+    size_t nodeAttributeLen;
+    size_t nodeAttributeCapacity;
+} __attribute__((aligned(128))) Document;
 
 DocumentStatus createDocument(const char *xmlString, Document *doc);
 
@@ -38,6 +47,8 @@ DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
                                    Document *doc);
 DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
                            Document *doc);
+DocumentStatus addAttributeNode(node_id nodeID, element_id attributeID,
+                                Document *doc);
 
 node_id getFirstChild(node_id parentID, const Document *doc);
 node_id getNextNode(node_id currentNodeID, const Document *doc);
