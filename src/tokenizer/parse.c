@@ -22,6 +22,18 @@ typedef enum {
     NUM_STATES
 } State;
 
+const char *stateToString(State state) {
+    static const char *stateStrings[NUM_STATES] = {
+        "FREE",     "OPEN_TAG",   "TAG_NAME",    "ATTRS",
+        "ATTR_KEY", "ATTR_VALUE", "OPEN_PAIRED", "TEXT_NODE"};
+
+    if (state >= 0 && state < NUM_STATES) {
+        return stateStrings[state];
+    }
+
+    return "UNKNOWN";
+}
+
 typedef struct {
     const char *start;
     size_t len;
@@ -41,12 +53,12 @@ unsigned char isAlphaBetical(const char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
 }
 
-DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
-                             Document *doc, node_id *previousNodeID,
-                             NodeDepth *depthStack,
-                             const unsigned char isPaired,
-                             PropertyStack *binaryPropertiesStack,
-                             node_id *newNodeID) {
+DocumentStatus
+addToDocument(const char *tagStart, size_t tagLength, Document *doc,
+              node_id *previousNodeID, NodeDepth *depthStack,
+              const unsigned char isPaired, PropertyStack *binaryProperties,
+              PropertyStack *attributeKeys, PropertyStack *attributeValues,
+              node_id *newNodeID) {
     element_id tagID = 0;
     if (elementToIndex(&globalTags, tagStart, tagLength, isPaired, &tagID) !=
         ELEMENT_SUCCESS) {
@@ -56,8 +68,8 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
         return DOCUMENT_NO_ADD;
     }
 
-    for (size_t i = 0; i < binaryPropertiesStack->len; i++) {
-        Property attr = binaryPropertiesStack->stack[i];
+    for (size_t i = 0; i < binaryProperties->len; i++) {
+        Property attr = binaryProperties->stack[i];
 
         element_id attributeID = 0;
 
@@ -69,7 +81,22 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
             return DOCUMENT_NO_ELEMENT;
         }
     }
-    binaryPropertiesStack->len = 0;
+    binaryProperties->len = 0;
+
+    for (size_t i = 0; i < attributeKeys->len; i++) {
+        Property key = attributeKeys->stack[i];
+
+        element_id attributeID = 0;
+
+        if (elementToIndex(&globalProperties, key.start, key.len, 1,
+                           &attributeID) != ELEMENT_SUCCESS) {
+            return DOCUMENT_NO_ELEMENT;
+        }
+        if (addAttributeNode(*newNodeID, attributeID, doc) != ELEMENT_SUCCESS) {
+            return DOCUMENT_NO_ELEMENT;
+        }
+    }
+    attributeKeys->len = 0;
 
     if (newNodeID > 0 && *previousNodeID > 0) {
         if (depthStack->len == 0) {
@@ -98,20 +125,20 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
     return DOCUMENT_SUCCESS;
 }
 
-DocumentStatus addPairedNode(const char *tagStart, size_t tagLength,
-                             Document *doc, node_id *previousNodeID,
-                             NodeDepth *depthStack,
-                             PropertyStack *singlePropertyStack,
-                             node_id *newNodeID) {
+DocumentStatus
+addPairedNode(const char *tagStart, size_t tagLength, Document *doc,
+              node_id *previousNodeID, NodeDepth *depthStack,
+              PropertyStack *singlePropertyStack, PropertyStack *attributeKeys,
+              PropertyStack *attributeValues, node_id *newNodeID) {
     if (depthStack->len >= MAX_NODE_DEPTH) {
         PRINT_ERROR("Max document node depth %u reached.\n", MAX_NODE_DEPTH);
         PRINT_ERROR("At tag %s.\n", tagStart);
         return DOCUMENT_TOO_DEEP;
     }
 
-    DocumentStatus documentStatus =
-        addToDocument(tagStart, tagLength, doc, previousNodeID, depthStack, 1,
-                      singlePropertyStack, newNodeID);
+    DocumentStatus documentStatus = addToDocument(
+        tagStart, tagLength, doc, previousNodeID, depthStack, 1,
+        singlePropertyStack, attributeKeys, attributeValues, newNodeID);
     if (documentStatus != DOCUMENT_SUCCESS) {
         return documentStatus;
     }
@@ -124,7 +151,8 @@ DocumentStatus addPairedNode(const char *tagStart, size_t tagLength,
 
 DocumentStatus putPropertyOnStack(size_t *currentStackLen,
                                   Property currentAttrs[MAX_ATTRIBUTES],
-                                  const size_t start, const size_t attributeEnd,
+                                  const size_t attributeStart,
+                                  const size_t attributeEnd,
                                   const char *xmlString) {
     if (*currentStackLen >= MAX_ATTRIBUTES) {
         PRINT_ERROR("Max number of %u attributes per tag reached.\n",
@@ -139,8 +167,8 @@ DocumentStatus putPropertyOnStack(size_t *currentStackLen,
     }
 
     Property *attr = &currentAttrs[*currentStackLen];
-    attr->start = &xmlString[start];
-    attr->len = attributeEnd - start + 1;
+    attr->start = &xmlString[attributeStart];
+    attr->len = attributeEnd - attributeStart;
     (*currentStackLen)++;
 
     return DOCUMENT_SUCCESS;
@@ -210,13 +238,9 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
     node_id newNodeID = 0;
     node_id previousNodeID = 0;
     char ch = xmlString[currentPosition];
-    char nextChar = 0;
     while (ch != '\0') {
-        if (xmlString[currentPosition + 1] != '\0') {
-            nextChar = xmlString[currentPosition + 1];
-        } else {
-            nextChar = ch;
-        }
+        // printf("Current state: %s\n", stateToString(state));
+        // printf("Current char: %c\n", ch);
 
         switch (state) {
         case FREE:
@@ -249,56 +273,64 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                 tagLength = currentPosition - tagNameStart;
                 documentStatus = addPairedNode(
                     &xmlString[tagNameStart], tagLength, doc, &previousNodeID,
-                    &depthStack, &binaryProperties, &newNodeID);
+                    &depthStack, &binaryProperties, &attributeKeys,
+                    &attributeValues, &newNodeID);
                 state = OPEN_PAIRED;
             }
             break;
         case ATTRS:
             if (isAlphaBetical(ch)) {
                 propertyStart = currentPosition;
-                if (nextChar == ' ' || nextChar == '>') {
-                    documentStatus = putPropertyOnStack(
-                        &binaryProperties.len, binaryProperties.stack,
-                        propertyStart, currentPosition, xmlString);
-                } else if (nextChar == '=') {
-                    // TODO(florian): set attribute key end here.
-                    documentStatus = putPropertyOnStack(
-                        &attributeKeys.len, attributeKeys.stack, propertyStart,
-                        currentPosition, xmlString);
-                    currentPosition += 2; // skip '="'
-                    state = ATTR_VALUE;
-                } else {
-                    state = ATTR_KEY;
-                }
+                state = ATTR_KEY;
             }
             if (ch == '/' || (isExclam && ch == '>')) {
                 documentStatus = addToDocument(
                     &xmlString[tagNameStart], tagLength, doc, &previousNodeID,
-                    &depthStack, 0, &binaryProperties, &newNodeID);
+                    &depthStack, 0, &binaryProperties, &attributeKeys,
+                    &attributeValues, &newNodeID);
                 isExclam = 0;
                 state = FREE;
             } else if (ch == '>') {
                 documentStatus = addPairedNode(
                     &xmlString[tagNameStart], tagLength, doc, &previousNodeID,
-                    &depthStack, &binaryProperties, &newNodeID);
+                    &depthStack, &binaryProperties, &attributeKeys,
+                    &attributeValues, &newNodeID);
                 state = OPEN_PAIRED;
             }
             break;
         case ATTR_KEY: {
-            char nextChar = xmlString[currentPosition + 1];
-            if (nextChar == '=') {
+            if (ch == ' ' || ch == '>') {
+                documentStatus = putPropertyOnStack(
+                    &binaryProperties.len, binaryProperties.stack,
+                    propertyStart, currentPosition, xmlString);
+                if (ch == ' ') {
+                    state = ATTRS;
+                } else {
+                    if (documentStatus == DOCUMENT_SUCCESS) {
+                        if (isExclam) {
+                            documentStatus = addToDocument(
+                                &xmlString[tagNameStart], tagLength, doc,
+                                &previousNodeID, &depthStack, 0,
+                                &binaryProperties, &attributeKeys,
+                                &attributeValues, &newNodeID);
+                            isExclam = 0;
+                            state = FREE;
+                        } else {
+                            documentStatus = addPairedNode(
+                                &xmlString[tagNameStart], tagLength, doc,
+                                &previousNodeID, &depthStack, &binaryProperties,
+                                &attributeKeys, &attributeValues, &newNodeID);
+                            state = OPEN_PAIRED;
+                        }
+                    }
+                }
+            } else if (ch == '=') {
                 // TODO(florian): set attribute key end here.
                 documentStatus = putPropertyOnStack(
                     &attributeKeys.len, attributeKeys.stack, propertyStart,
                     currentPosition, xmlString);
                 currentPosition += 2; // skip '="'
                 state = ATTR_VALUE;
-            }
-            if (nextChar == ' ' || nextChar == '>') {
-                documentStatus = putPropertyOnStack(
-                    &binaryProperties.len, binaryProperties.stack,
-                    propertyStart, currentPosition, xmlString);
-                state = ATTRS;
             }
             break;
         }

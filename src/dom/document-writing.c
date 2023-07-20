@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "dom/document.h"
 #include "utils/file/path.h"
@@ -50,7 +51,11 @@ void printNode(const node_id nodeID, const size_t indentation,
     }
 
     if (isSingle(node.tagID)) {
-        fprintf(output, "/>\n");
+        if (strcmp(tag, "!DOCTYPE") == 0) {
+            fprintf(output, ">\n");
+        } else {
+            fprintf(output, " />\n");
+        }
         return;
     }
     fprintf(output, ">\n");
