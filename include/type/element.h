@@ -27,7 +27,7 @@ typedef struct {
 } __attribute__((aligned(128))) Elements;
 
 extern Elements globalTags;
-extern Elements globalAttributes;
+extern Elements globalProperties;
 
 ElementStatus createGlobals();
 void destroyGlobals();

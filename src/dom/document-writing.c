@@ -40,7 +40,7 @@ void printNode(const node_id nodeID, const size_t indentation,
 
         if (nodeAttribute.nodeID == node.nodeID) {
             char *attribute =
-                globalAttributes.elements[nodeAttribute.attributeID];
+                globalProperties.elements[nodeAttribute.attributeID];
             if (isSingle(nodeAttribute.attributeID)) {
                 fprintf(output, " %s", attribute);
             } else {
@@ -122,7 +122,7 @@ void printDocumentStatus(const Document *doc) {
     printf("total number of attribute nodes: %zu\n", doc->nodeAttributeLen);
     for (size_t i = 0; i < doc->nodeAttributeLen; i++) {
         NodeAttribute nodeAttribute = doc->nodeAttributes[i];
-        const char *type = globalAttributes.elements[nodeAttribute.attributeID];
+        const char *type = globalProperties.elements[nodeAttribute.attributeID];
 
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];

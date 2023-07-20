@@ -23,18 +23,18 @@ typedef enum {
 } State;
 
 typedef struct {
-    const char *attributeStart;
-    size_t attributeLen;
-} __attribute__((aligned(16))) SingleAttribute;
+    const char *start;
+    size_t len;
+} __attribute__((aligned(16))) Property;
 
 typedef struct {
-    SingleAttribute stack[MAX_ATTRIBUTES];
-    size_t stackLen;
-} __attribute__((packed)) __attribute__((aligned(128))) SingleAttributeStack;
+    Property stack[MAX_ATTRIBUTES];
+    size_t len;
+} __attribute__((packed)) __attribute__((aligned(128))) PropertyStack;
 
 typedef struct {
     node_id stack[MAX_NODE_DEPTH];
-    node_id stackLen;
+    node_id len;
 } __attribute__((packed)) __attribute__((aligned(128))) NodeDepth;
 
 unsigned char isAlphaBetical(const char ch) {
@@ -45,7 +45,7 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
                              Document *doc, node_id *previousNodeID,
                              NodeDepth *depthStack,
                              const unsigned char isPaired,
-                             SingleAttributeStack *singleAttributesStack,
+                             PropertyStack *binaryPropertiesStack,
                              node_id *newNodeID) {
     element_id tagID = 0;
     if (elementToIndex(&globalTags, tagStart, tagLength, isPaired, &tagID) !=
@@ -56,12 +56,12 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
         return DOCUMENT_NO_ADD;
     }
 
-    for (size_t i = 0; i < singleAttributesStack->stackLen; i++) {
-        SingleAttribute attr = singleAttributesStack->stack[i];
+    for (size_t i = 0; i < binaryPropertiesStack->len; i++) {
+        Property attr = binaryPropertiesStack->stack[i];
 
         element_id attributeID = 0;
-        if (elementToIndex(&globalAttributes, attr.attributeStart,
-                           attr.attributeLen, 0,
+
+        if (elementToIndex(&globalProperties, attr.start, attr.len, 0,
                            &attributeID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
@@ -69,17 +69,17 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
             return DOCUMENT_NO_ELEMENT;
         }
     }
-    singleAttributesStack->stackLen = 0;
+    binaryPropertiesStack->len = 0;
 
     if (newNodeID > 0 && *previousNodeID > 0) {
-        if (depthStack->stackLen == 0) {
+        if (depthStack->len == 0) {
             if (addNextNode(*previousNodeID, *newNodeID, doc) !=
                 DOCUMENT_SUCCESS) {
                 return DOCUMENT_NO_ADD;
             }
         } else {
             const unsigned int parentNodeID =
-                depthStack->stack[depthStack->stackLen - 1];
+                depthStack->stack[depthStack->len - 1];
             if (parentNodeID == *previousNodeID) {
                 if (addParentFirstChild(parentNodeID, *newNodeID, doc) !=
                     DOCUMENT_SUCCESS) {
@@ -101,9 +101,9 @@ DocumentStatus addToDocument(const char *tagStart, size_t tagLength,
 DocumentStatus addPairedNode(const char *tagStart, size_t tagLength,
                              Document *doc, node_id *previousNodeID,
                              NodeDepth *depthStack,
-                             SingleAttributeStack *singleAttributeStack,
+                             PropertyStack *singlePropertyStack,
                              node_id *newNodeID) {
-    if (depthStack->stackLen >= MAX_NODE_DEPTH) {
+    if (depthStack->len >= MAX_NODE_DEPTH) {
         PRINT_ERROR("Max document node depth %u reached.\n", MAX_NODE_DEPTH);
         PRINT_ERROR("At tag %s.\n", tagStart);
         return DOCUMENT_TOO_DEEP;
@@ -111,42 +111,76 @@ DocumentStatus addPairedNode(const char *tagStart, size_t tagLength,
 
     DocumentStatus documentStatus =
         addToDocument(tagStart, tagLength, doc, previousNodeID, depthStack, 1,
-                      singleAttributeStack, newNodeID);
+                      singlePropertyStack, newNodeID);
     if (documentStatus != DOCUMENT_SUCCESS) {
         return documentStatus;
     }
 
-    depthStack->stack[depthStack->stackLen] = *newNodeID;
-    depthStack->stackLen++;
+    depthStack->stack[depthStack->len] = *newNodeID;
+    depthStack->len++;
 
     return DOCUMENT_SUCCESS;
 }
 
-DocumentStatus putSingleAttributeOnStack(SingleAttributeStack *singleAttributes,
-                                         const size_t currentPosition,
-                                         const size_t attributeStart) {
-    if (singleAttributes->stackLen >= MAX_ATTRIBUTES) {
+DocumentStatus putPropertyOnStack(size_t *currentStackLen,
+                                  Property currentAttrs[MAX_ATTRIBUTES],
+                                  const size_t start, const size_t attributeEnd,
+                                  const char *xmlString) {
+    if (*currentStackLen >= MAX_ATTRIBUTES) {
         PRINT_ERROR("Max number of %u attributes per tag reached.\n",
                     MAX_ATTRIBUTES);
-        SingleAttribute attr =
-            singleAttributes->stack[singleAttributes->stackLen - 1];
+        Property attr = currentAttrs[*currentStackLen - 1];
 
-        char buffer[attr.attributeLen];
-        strncpy(buffer, attr.attributeStart, attr.attributeLen);
-        buffer[attr.attributeLen] = '\0';
-        PRINT_ERROR("Attribute before size was %s.\n", buffer);
+        char buffer[attr.len];
+        strncpy(buffer, attr.start, attr.len);
+        buffer[attr.len] = '\0';
+        PRINT_ERROR("Property before size was %s.\n", buffer);
         return DOCUMENT_TOO_MANY_ATTRIBUTES;
     }
-    singleAttributes->stack[singleAttributes->stackLen].attributeLen =
-        currentPosition - attributeStart + 1;
-    const char *startPos =
-        singleAttributes->stack[singleAttributes->stackLen].attributeStart;
-    size_t singleLen =
-        singleAttributes->stack[singleAttributes->stackLen].attributeLen;
-    singleAttributes->stackLen++;
+
+    Property *attr = &currentAttrs[*currentStackLen];
+    attr->start = &xmlString[start];
+    attr->len = attributeEnd - start + 1;
+    (*currentStackLen)++;
 
     return DOCUMENT_SUCCESS;
 }
+
+// DocumentStatus putPropertyValueOnStack(PropertyValueStack *attributeValues,
+//                                         const size_t start,
+//                                         const size_t attributeEnd,
+//                                         const size_t valueStart,
+//                                         const size_t valueEnd) {
+//     if (attributeValues->len >= MAX_ATTRIBUTES) {
+//         PRINT_ERROR("Max number of %u attribute-values per tag reached.\n",
+//                     MAX_ATTRIBUTES);
+//         PropertyValue attr =
+//             attributeValues->stack[attributeValues->len - 1];
+//
+//         char attributeBuffer[attr.attribute.len];
+//         strncpy(attributeBuffer, attr.attribute.start,
+//                 attr.attribute.len);
+//         attributeBuffer[attr.attribute.len] = '\0';
+//         PRINT_ERROR("Last read attribute was %s.\n", attributeBuffer);
+//
+//         char valueBuffer[attr.value.len];
+//         strncpy(valueBuffer, attr.value.start,
+//                 attr.value.len);
+//         valueBuffer[attr.value.len] = '\0';
+//         PRINT_ERROR("Last read value was %s.\n", valueBuffer);
+//         return DOCUMENT_TOO_MANY_ATTRIBUTES;
+//     }
+//
+//    attributeValues->stack[attributeValues->len].len =
+//        currentPosition - start + 1;
+//    const char *startPos =
+//        attributeValues->stack[attributeValues->len].start;
+//    size_t singleLen =
+//        attributeValues->stack[attributeValues->len].attribute;
+//    attributeValues->len++;
+//
+//  return DOCUMENT_SUCCESS;
+// }
 
 DocumentStatus parse(const char *xmlString, Document *doc) {
     State state = FREE;
@@ -159,18 +193,31 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
     unsigned char isExclam = 0;
 
     NodeDepth depthStack;
-    depthStack.stackLen = 0;
+    depthStack.len = 0;
 
-    SingleAttributeStack singleAttributes;
-    singleAttributes.stackLen = 0;
-    size_t attributeStart = 0;
+    PropertyStack binaryProperties;
+    binaryProperties.len = 0;
+
+    PropertyStack attributeKeys;
+    attributeKeys.len = 0;
+    PropertyStack attributeValues;
+    attributeValues.len = 0;
+
+    size_t propertyStart = 0;
 
     DocumentStatus documentStatus = DOCUMENT_SUCCESS;
 
     node_id newNodeID = 0;
     node_id previousNodeID = 0;
     char ch = xmlString[currentPosition];
+    char nextChar = 0;
     while (ch != '\0') {
+        if (xmlString[currentPosition + 1] != '\0') {
+            nextChar = xmlString[currentPosition + 1];
+        } else {
+            nextChar = ch;
+        }
+
         switch (state) {
         case FREE:
             if (ch == '<') {
@@ -179,8 +226,8 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             break;
         case OPEN_TAG:
             if (ch == '/') {
-                previousNodeID = depthStack.stack[depthStack.stackLen - 1];
-                depthStack.stackLen--;
+                previousNodeID = depthStack.stack[depthStack.len - 1];
+                depthStack.len--;
                 state = FREE;
             }
             if (isAlphaBetical(ch)) {
@@ -202,22 +249,22 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                 tagLength = currentPosition - tagNameStart;
                 documentStatus = addPairedNode(
                     &xmlString[tagNameStart], tagLength, doc, &previousNodeID,
-                    &depthStack, &singleAttributes, &newNodeID);
+                    &depthStack, &binaryProperties, &newNodeID);
                 state = OPEN_PAIRED;
             }
             break;
         case ATTRS:
             if (isAlphaBetical(ch)) {
-                attributeStart = currentPosition;
-                singleAttributes.stack[singleAttributes.stackLen]
-                    .attributeStart = &xmlString[currentPosition];
-
-                char nextChar = xmlString[currentPosition + 1];
+                propertyStart = currentPosition;
                 if (nextChar == ' ' || nextChar == '>') {
-                    documentStatus = putSingleAttributeOnStack(
-                        &singleAttributes, currentPosition, attributeStart);
+                    documentStatus = putPropertyOnStack(
+                        &binaryProperties.len, binaryProperties.stack,
+                        propertyStart, currentPosition, xmlString);
                 } else if (nextChar == '=') {
                     // TODO(florian): set attribute key end here.
+                    documentStatus = putPropertyOnStack(
+                        &attributeKeys.len, attributeKeys.stack, propertyStart,
+                        currentPosition, xmlString);
                     currentPosition += 2; // skip '="'
                     state = ATTR_VALUE;
                 } else {
@@ -227,13 +274,13 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             if (ch == '/' || (isExclam && ch == '>')) {
                 documentStatus = addToDocument(
                     &xmlString[tagNameStart], tagLength, doc, &previousNodeID,
-                    &depthStack, 0, &singleAttributes, &newNodeID);
+                    &depthStack, 0, &binaryProperties, &newNodeID);
                 isExclam = 0;
                 state = FREE;
             } else if (ch == '>') {
                 documentStatus = addPairedNode(
                     &xmlString[tagNameStart], tagLength, doc, &previousNodeID,
-                    &depthStack, &singleAttributes, &newNodeID);
+                    &depthStack, &binaryProperties, &newNodeID);
                 state = OPEN_PAIRED;
             }
             break;
@@ -241,12 +288,16 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             char nextChar = xmlString[currentPosition + 1];
             if (nextChar == '=') {
                 // TODO(florian): set attribute key end here.
+                documentStatus = putPropertyOnStack(
+                    &attributeKeys.len, attributeKeys.stack, propertyStart,
+                    currentPosition, xmlString);
                 currentPosition += 2; // skip '="'
                 state = ATTR_VALUE;
             }
             if (nextChar == ' ' || nextChar == '>') {
-                documentStatus = putSingleAttributeOnStack(
-                    &singleAttributes, currentPosition, attributeStart);
+                documentStatus = putPropertyOnStack(
+                    &binaryProperties.len, binaryProperties.stack,
+                    propertyStart, currentPosition, xmlString);
                 state = ATTRS;
             }
             break;

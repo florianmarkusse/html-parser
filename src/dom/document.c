@@ -21,8 +21,13 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
     doc->nodeAttributeLen = 0;
     doc->nodeAttributeCapacity = ATTRIBUTE_NODES_PER_PAGE;
 
+    doc->nodeAttributeValues = malloc(ATTRIBUTE_VALUE_NODES_PAGE_SIZE);
+    doc->nodeAttributeValueLen = 0;
+    doc->nodeAttributeValueCapacity = ATTRIBUTE_VALUE_NODES_PER_PAGE;
+
     if (doc->nodes == NULL || doc->parentFirstChilds == NULL ||
-        doc->nextNodes == NULL || doc->nodeAttributes == NULL) {
+        doc->nextNodes == NULL || doc->nodeAttributes == NULL ||
+        doc->nodeAttributeValues == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDocument(doc);
         return DOCUMENT_ERROR_MEMORY;
@@ -150,4 +155,6 @@ void destroyDocument(const Document *doc) {
     free((void *)doc->nodes);
     free((void *)doc->parentFirstChilds);
     free((void *)doc->nextNodes);
+    free((void *)doc->nodeAttributes);
+    free((void *)doc->nodeAttributeValues);
 }

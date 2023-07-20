@@ -3,6 +3,7 @@
 
 #include "document-status.h"
 #include "type/next-node.h"
+#include "type/node-attribute-value.h"
 #include "type/node-attribute.h"
 #include "type/node.h"
 #include "type/parent-first-child.h"
@@ -22,6 +23,10 @@
 #define ATTRIBUTE_NODES_PER_PAGE                                               \
     (ATTRIBUTE_NODES_PAGE_SIZE / sizeof(NodeAttribute))
 
+#define ATTRIBUTE_VALUE_NODES_PAGE_SIZE (1U << 8U)
+#define ATTRIBUTE_VALUE_NODES_PER_PAGE                                         \
+    (ATTRIBUTE_VALUE_NODES_PAGE_SIZE / sizeof(NodeAttribute))
+
 typedef struct {
     Node *nodes;
     size_t nodeLen;
@@ -38,6 +43,10 @@ typedef struct {
     NodeAttribute *nodeAttributes;
     size_t nodeAttributeLen;
     size_t nodeAttributeCapacity;
+
+    NodeAttributeValue *nodeAttributeValues;
+    size_t nodeAttributeValueLen;
+    size_t nodeAttributeValueCapacity;
 } __attribute__((aligned(128))) Document;
 
 DocumentStatus createDocument(const char *xmlString, Document *doc);

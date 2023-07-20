@@ -7,15 +7,15 @@
 #include "utils/print/error.h"
 
 Elements globalTags;
-Elements globalAttributes;
+Elements globalProperties;
 
 ElementStatus createGlobals() {
     globalTags.pairedLen = 0;
     globalTags.singleLen = 0;
     globalTags.pageLen = 0;
-    globalAttributes.pairedLen = 0;
-    globalAttributes.singleLen = 0;
-    globalAttributes.pageLen = 0;
+    globalProperties.pairedLen = 0;
+    globalProperties.singleLen = 0;
+    globalProperties.pageLen = 0;
     return ELEMENT_SUCCESS;
 }
 
@@ -27,12 +27,12 @@ void destroyGlobals() {
     globalTags.pairedLen = 0;
     globalTags.singleLen = 0;
 
-    for (int i = 0; i < globalAttributes.pageLen; i++) {
-        free(globalAttributes.pages[i].start);
+    for (int i = 0; i < globalProperties.pageLen; i++) {
+        free(globalProperties.pages[i].start);
     }
-    globalAttributes.pageLen = 0;
-    globalAttributes.pairedLen = 0;
-    globalAttributes.singleLen = 0;
+    globalProperties.pageLen = 0;
+    globalProperties.pairedLen = 0;
+    globalProperties.singleLen = 0;
 }
 
 ElementStatus findOrCreateElement(Elements *global, const char *elementName,
@@ -70,7 +70,8 @@ ElementStatus elementToIndex(Elements *global, const char *elementStart,
     char buffer[PAGE_SIZE];
 
     if (elementLength >= PAGE_SIZE) {
-        PRINT_ERROR("Tag is too long to fit into page.\n");
+        PRINT_ERROR("Tag is too long, size=%zu, to fit into page.\n",
+                    elementLength);
         PRINT_ERROR("Printing first part of tag:\n");
 
         memcpy(buffer, elementStart, PAGE_SIZE - 1);
@@ -140,5 +141,5 @@ void printGlobalTagStatus() {
 
 void printGlobalAttributeStatus() {
     printf("printing global attribute status...\n\n");
-    printElementStatus(&globalAttributes);
+    printElementStatus(&globalProperties);
 }
