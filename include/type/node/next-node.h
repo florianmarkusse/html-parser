@@ -1,5 +1,5 @@
-#ifndef TYPE_NEXT_NODE_H
-#define TYPE_NEXT_NODE_H
+#ifndef TYPE_NODE_NEXT_NODE_H
+#define TYPE_NODE_NEXT_NODE_H
 
 #include "node.h"
 

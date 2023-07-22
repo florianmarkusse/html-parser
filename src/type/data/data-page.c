@@ -3,28 +3,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type/data-page.h"
+#include "type/data/data-page.h"
 #include "utils/print/error.h"
 
-DataPage createDataPage() {
+DataPage createDataPage(const size_t pageSize) {
     DataPage dataPage;
-    dataPage.start = malloc(PAGE_SIZE);
+    dataPage.start = malloc(pageSize);
     dataPage.freeSpace = dataPage.start;
-    dataPage.spaceLeft = PAGE_SIZE;
+    dataPage.spaceLeft = pageSize;
 
     return dataPage;
 }
 
 DataPageStatus insertIntoPage(const void *data, size_t byteLen, DataPage *pages,
                               size_t totalPages, page_id *pageLen,
-                              void **address) {
+                              const size_t pageSize, void **address) {
     // Ensure tag fits into a page.
-    if (byteLen > PAGE_SIZE) {
+    if (byteLen > pageSize) {
         PRINT_ERROR("data is too long for page.\n");
         PRINT_ERROR("\n------------------------\n");
         PRINT_ERROR("%s", (char *)data);
         PRINT_ERROR("\n------------------------\n");
-        PRINT_ERROR("Data size:\t%zu\tPage size:\t%u\n", byteLen, PAGE_SIZE);
+        PRINT_ERROR("Data size:\t%zu\tPage size:\t%zu\n", byteLen, pageSize);
         return DATA_PAGE_DATA_TOO_LONG;
     }
 
@@ -39,7 +39,7 @@ DataPageStatus insertIntoPage(const void *data, size_t byteLen, DataPage *pages,
 
     if (suitableIndex == *pageLen) {
         if (*pageLen < totalPages) {
-            pages[suitableIndex] = createDataPage();
+            pages[suitableIndex] = createDataPage(pageSize);
             if (pages[suitableIndex].start == NULL) {
                 PRINT_ERROR("Failed to allocate memory for new tag page.\n");
                 return DATA_PAGE_ERROR_MEMORY;
@@ -47,8 +47,8 @@ DataPageStatus insertIntoPage(const void *data, size_t byteLen, DataPage *pages,
             (*pageLen)++;
         } else {
             PRINT_ERROR("No more capacity to create new tag pages.\n");
-            PRINT_ERROR("All %zu page(s) of %u bytes are full.\n", totalPages,
-                        PAGE_SIZE);
+            PRINT_ERROR("All %zu page(s) of %zu bytes are full.\n", totalPages,
+                        pageSize);
             return DATA_PAGE_NO_CAPACITY;
         }
     }

@@ -33,20 +33,25 @@ void printNode(const node_id nodeID, const size_t indentation,
         fprintf(output, "  ");
     }
 
-    const char *tag = globalTags.elements[node.tagID];
+    const char *tag = gTags.container.elements[node.tagID];
     fprintf(output, "<%s", tag);
 
-    for (size_t i = 0; i < doc->nodeAttributeLen; i++) {
-        NodeAttribute nodeAttribute = doc->nodeAttributes[i];
+    for (size_t i = 0; i < doc->boolPropsLen; i++) {
+        BooleanProperty boolProp = doc->boolProps[i];
 
-        if (nodeAttribute.nodeID == node.nodeID) {
-            char *attribute =
-                globalProperties.elements[nodeAttribute.attributeID];
-            if (isSingle(nodeAttribute.attributeID)) {
-                fprintf(output, " %s", attribute);
-            } else {
-                fprintf(output, " %s=%s", attribute, "NOT IMPLEMENTED");
-            }
+        if (boolProp.nodeID == node.nodeID) {
+            char *prop = gPropKeys.container.elements[boolProp.propID];
+            fprintf(output, " %s", prop);
+        }
+    }
+
+    for (size_t i = 0; i < doc->propsLen; i++) {
+        Property prop = doc->props[i];
+
+        if (prop.nodeID == node.nodeID) {
+            char *key = gPropKeys.container.elements[prop.keyID];
+            char *value = gPropValues.container.elements[prop.valueID];
+            fprintf(output, " %s=\"%s\"", key, value);
         }
     }
 
@@ -106,7 +111,7 @@ void printDocumentStatus(const Document *doc) {
     printf("total number of nodes: %zu\n", doc->nodeLen);
     for (size_t i = 0; i < doc->nodeLen; i++) {
         Node node = doc->nodes[i];
-        const char *type = globalTags.elements[node.tagID];
+        const char *type = gTags.container.elements[node.tagID];
 
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
@@ -123,25 +128,44 @@ void printDocumentStatus(const Document *doc) {
     }
     printf("\n");
 
-    printf("attribute nodes inside document...\n");
-    printf("total number of attribute nodes: %zu\n", doc->nodeAttributeLen);
-    for (size_t i = 0; i < doc->nodeAttributeLen; i++) {
-        NodeAttribute nodeAttribute = doc->nodeAttributes[i];
-        const char *type = globalProperties.elements[nodeAttribute.attributeID];
+    printf("boolean property nodes inside document...\n");
+    printf("total number of boolean properties: %zu\n", doc->boolPropsLen);
+    for (size_t i = 0; i < doc->boolPropsLen; i++) {
+        BooleanProperty boolProps = doc->boolProps[i];
+        const char *type = gPropKeys.container.elements[boolProps.propID];
 
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
-        getBits(nodeAttribute.attributeID, bitBuffer, bufferSize);
-        printf("attribute: %-4u bits: %-18s", nodeAttribute.attributeID,
+        getBits(boolProps.propID, bitBuffer, bufferSize);
+        printf("boolean property: %-4u bits: %-18s", boolProps.propID,
                bitBuffer);
 
-        if (isSingle(nodeAttribute.attributeID)) {
+        if (isSingle(boolProps.propID)) {
             printf("%-8s %-20s with node ID: %-4hu\n", "single", type,
-                   nodeAttribute.nodeID);
+                   boolProps.nodeID);
         } else {
             printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
-                   nodeAttribute.nodeID);
+                   boolProps.nodeID);
         }
+    }
+    printf("\n");
+
+    printf("key-value property nodes inside document...\n");
+    printf("total number of key-value properties: %zu\n", doc->propsLen);
+    for (size_t i = 0; i < doc->propsLen; i++) {
+        Property property = doc->props[i];
+        const char *key = gPropKeys.container.elements[property.keyID];
+        const char *value = gPropValues.container.elements[property.valueID];
+
+        size_t bufferSize = sizeof(element_id) * 8 + 1;
+        char bitBuffer[bufferSize];
+        getBits(property.keyID, bitBuffer, bufferSize);
+        printf("key: %-4u bits: %-18s", property.keyID, bitBuffer);
+        getBits(property.valueID, bitBuffer, bufferSize);
+        printf("value: %-4u bits: %-18s", property.valueID, bitBuffer);
+
+        printf("%-20s %-20s with node ID: %-4hu\n", key, value,
+               property.nodeID);
     }
     printf("\n");
 

@@ -1,10 +1,10 @@
-#ifndef TYPE_NODE_H
-#define TYPE_NODE_H
+#ifndef TYPE_NODE_NODE_H
+#define TYPE_NODE_NODE_H
 
 #include <stddef.h>
 #include <stdint.h>
 
-#include "element.h"
+#include "../element/elements.h"
 
 typedef uint16_t node_id;
 
