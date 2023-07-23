@@ -41,5 +41,6 @@ int main() {
     destroyDocument(&doc);
     printGlobalTagStatus();
     printGlobalAttributeStatus();
+    printGlobalTextStatus();
     destroyGlobals();
 }

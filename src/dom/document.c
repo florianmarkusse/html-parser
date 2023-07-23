@@ -25,9 +25,13 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
     doc->propsLen = 0;
     doc->propsCap = PROPERTIES_PER_PAGE;
 
+    doc->text = malloc(TEXT_NODES_PAGE_SIZE);
+    doc->textLen = 0;
+    doc->textCap = TEXT_NODES_PER_PAGE;
+
     if (doc->nodes == NULL || doc->parentFirstChilds == NULL ||
         doc->nextNodes == NULL || doc->boolProps == NULL ||
-        doc->props == NULL) {
+        doc->props == NULL || doc->text == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDocument(doc);
         return DOCUMENT_ERROR_MEMORY;
@@ -40,18 +44,18 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
     return documentStatus;
 }
 
-void *resizeArray(void *array, size_t currentLen, size_t *totalCap,
+void *resizeArray(void *array, size_t currentLen, size_t *currentCap,
                   size_t elementSize, size_t extraElements) {
-    if (currentLen < *totalCap) {
+    if (currentLen < *currentCap) {
         return array;
     }
     size_t newCap = (currentLen + extraElements) * elementSize;
     void *newArray = realloc(array, newCap);
     if (newArray == NULL) {
-        PRINT_ERROR("Failed to reallocate memory for the array.\n");
+        PRINT_ERROR("Failed to reallocate more memory for the array.\n");
         return NULL;
     }
-    *totalCap = newCap / elementSize;
+    *currentCap = newCap / elementSize;
     return newArray;
 }
 
@@ -152,10 +156,26 @@ DocumentStatus addProperty(const node_id nodeID, const element_id keyID,
     return DOCUMENT_SUCCESS;
 }
 
+DocumentStatus addTextNode(const node_id nodeID, const element_id textID,
+                           Document *doc) {
+    if ((doc->text = resizeArray(doc->text, doc->textLen, &doc->textCap,
+                                 sizeof(TextNode), TEXT_NODES_PER_PAGE)) ==
+        NULL) {
+        return DOCUMENT_ERROR_MEMORY;
+    }
+
+    TextNode *newTextNode = &(doc->text[doc->textLen]);
+    newTextNode->nodeID = nodeID;
+    newTextNode->textID = textID;
+    doc->textLen++;
+    return DOCUMENT_SUCCESS;
+}
+
 void destroyDocument(const Document *doc) {
     free((void *)doc->nodes);
     free((void *)doc->parentFirstChilds);
     free((void *)doc->nextNodes);
     free((void *)doc->boolProps);
     free((void *)doc->props);
+    free((void *)doc->text);
 }

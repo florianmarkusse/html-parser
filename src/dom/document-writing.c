@@ -116,7 +116,7 @@ void printDocumentStatus(const Document *doc) {
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
         getBits(node.tagID, bitBuffer, bufferSize);
-        printf("tag: %-4u bits: %-18s", node.tagID, bitBuffer);
+        printf("tag: %-6u bits: %-18s", node.tagID, bitBuffer);
 
         if (isSingle(node.tagID)) {
             printf("%-8s %-20s with node ID: %-4hu\n", "single", type,
@@ -125,6 +125,21 @@ void printDocumentStatus(const Document *doc) {
             printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
                    node.nodeID);
         }
+    }
+    printf("\n");
+
+    printf("text nodes inside document...\n");
+    printf("total number of text nodes: %zu\n", doc->nodeLen);
+    for (size_t i = 0; i < doc->textLen; i++) {
+        TextNode textNode = doc->text[i];
+        const char *type = gText.container.elements[textNode.textID];
+
+        size_t bufferSize = sizeof(element_id) * 8 + 1;
+        char bitBuffer[bufferSize];
+        getBits(textNode.textID, bitBuffer, bufferSize);
+        printf("text: %-6u bits: %-18s", textNode.textID, bitBuffer);
+
+        printf("%-20s with node ID: %-4hu\n", type, textNode.nodeID);
     }
     printf("\n");
 
@@ -137,16 +152,10 @@ void printDocumentStatus(const Document *doc) {
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
         getBits(boolProps.propID, bitBuffer, bufferSize);
-        printf("boolean property: %-4u bits: %-18s", boolProps.propID,
+        printf("boolean property: %-6u bits: %-18s", boolProps.propID,
                bitBuffer);
 
-        if (isSingle(boolProps.propID)) {
-            printf("%-8s %-20s with node ID: %-4hu\n", "single", type,
-                   boolProps.nodeID);
-        } else {
-            printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
-                   boolProps.nodeID);
-        }
+        printf("%-20s with node ID: %-4hu\n", type, boolProps.nodeID);
     }
     printf("\n");
 
@@ -160,9 +169,9 @@ void printDocumentStatus(const Document *doc) {
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
         getBits(property.keyID, bitBuffer, bufferSize);
-        printf("key: %-4u bits: %-18s", property.keyID, bitBuffer);
+        printf("key: %-6u bits: %-18s", property.keyID, bitBuffer);
         getBits(property.valueID, bitBuffer, bufferSize);
-        printf("value: %-4u bits: %-18s", property.valueID, bitBuffer);
+        printf("value: %-6u bits: %-18s", property.valueID, bitBuffer);
 
         printf("%-20s %-20s with node ID: %-4hu\n", key, value,
                property.nodeID);

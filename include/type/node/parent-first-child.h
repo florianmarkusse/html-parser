@@ -6,6 +6,6 @@
 typedef struct {
     node_id parentID;
     node_id childID;
-} __attribute__((packed)) __attribute__((aligned(4))) ParentFirstChild;
+} __attribute__((aligned(4))) ParentFirstChild;
 
 #endif

@@ -35,12 +35,12 @@ const char *stateToString(State state) {
 typedef struct {
     ParseProperty stack[MAX_PROPERTIES];
     size_t len;
-} __attribute__((packed)) __attribute__((aligned(128))) ParsePropertyStack;
+} __attribute__((aligned(128))) ParsePropertyStack;
 
 typedef struct {
     node_id stack[MAX_NODE_DEPTH];
     node_id len;
-} __attribute__((packed)) __attribute__((aligned(128))) NodeDepth;
+} __attribute__((aligned(128))) NodeDepth;
 
 unsigned char isAlphaBetical(const char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
@@ -91,20 +91,20 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
             return DOCUMENT_NO_ELEMENT;
         }
 
-        char buffer[128];
-        strncpy(buffer, key.start, key.len);
-        printf("KEY: %s\n", buffer);
-        strncpy(buffer, value.start, value.len);
-        printf("VALUE: %s\n", buffer);
-        printf("I AM KEY ID: %hu\n", keyID);
-        printf("I AM VALUE ID: %hu\n", valueID);
-        printf("I AM NODE ID: %hu\n", *newNodeID);
         if (addProperty(*newNodeID, keyID, valueID, doc) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
     }
     propKeys->len = 0;
     propValues->len = 0;
+
+    if (!isSingle(tagID)) {
+        element_id textID = 0;
+        createElement(&gText.container, "test-test", &gText.len, 0, &textID);
+        if (addTextNode(*newNodeID, textID, doc) != ELEMENT_SUCCESS) {
+            return DOCUMENT_NO_ELEMENT;
+        }
+    }
 
     if (newNodeID > 0 && *previousNodeID > 0) {
         if (depthStack->len == 0) {
@@ -130,6 +130,13 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     }
     *previousNodeID = *newNodeID;
 
+    char buffer[tagLength];
+    strncpy(buffer, tagStart, tagLength);
+    buffer[tagLength] = '\0';
+    printf("Current tag: %s\n", buffer);
+    printf("Given tag ID: %u\n", tagID);
+    printf("Given node ID: %u\n", *newNodeID);
+    printf("--------------------------------\n\n");
     return DOCUMENT_SUCCESS;
 }
 

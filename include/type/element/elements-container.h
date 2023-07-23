@@ -3,15 +3,24 @@
 
 #include "../data/data-page.h"
 
-#define EXPONENT 10U
-#define TOTAL_ELEMENTS (1U << EXPONENT)
+typedef uint16_t element_id;
+#define TOTAL_ELEMENTS_NUM_BITS (sizeof(element_id) * 8)
+
+#define EXPONENT 16U
+
+#define SINGLE_MASK (EXPONENT - 2)
+#define SINGLE_OFFSET (1U << SINGLE_MASK)
+
+// The remaining bits are used as masks.
+#define TOTAL_ELEMENTS (1U << SINGLE_MASK)
 
 #define TOTAL_PAGES (1U << 4U)
 
+// The size of each page of each global.
 #define TAGS_PAGE_SIZE (1U << 10U)
 #define PROP_KEYS_PAGE_SIZE (1U << 10U)
 #define PROP_VALUES_PAGE_SIZE (1U << 10U)
-#define TEXT_PAGE_SIZE (1U << 10U)
+#define TEXT_PAGE_SIZE (1U << 12U)
 
 typedef struct {
     char *elements[TOTAL_ELEMENTS];

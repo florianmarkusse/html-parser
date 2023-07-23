@@ -56,24 +56,24 @@ void destroyGlobals() {
     gText.len = 0;
 }
 
-ElementStatus createElement(ElementsContainer *container,
-                            const char *elementName,
-                            element_id *currentElementLen,
-                            const element_id offset, element_id *elementID) {
+ElementStatus createElement(ElementsContainer *container, const char *element,
+                            element_id *currentElementsLen,
+                            const element_id offsetMask,
+                            element_id *elementID) {
     char *address = NULL;
     DataPageStatus dataPageStatus = insertIntoPage(
-        elementName, strlen(elementName) + 1, container->pages, TOTAL_PAGES,
+        element, strlen(element) + 1, container->pages, TOTAL_PAGES,
         &container->pageLen, container->pageSize, (void *)&address);
     if (dataPageStatus != DATA_PAGE_SUCCESS) {
         ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
                                "Could not find or create element \"%s\"",
-                               elementName);
+                               element);
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
 
-    container->elements[offset + *currentElementLen] = address;
-    *elementID = offset + (*currentElementLen);
-    (*currentElementLen)++;
+    container->elements[offsetMask | *currentElementsLen] = address;
+    *elementID = offsetMask | (*currentElementsLen);
+    (*currentElementsLen)++;
 
     return ELEMENT_SUCCESS;
 }
@@ -81,16 +81,22 @@ ElementStatus createElement(ElementsContainer *container,
 ElementStatus findOrCreateElement(ElementsContainer *container,
                                   const char *elementName,
                                   element_id *currentElementLen,
-                                  const element_id offset,
+                                  const element_id offsetMask,
                                   element_id *elementID) {
-    for (element_id i = offset; i < offset + *currentElementLen; ++i) {
+    printf("offsetMask: %u\n", offsetMask);
+    printf("up until: %u\n", offsetMask | *currentElementLen);
+    printf("\n\n");
+    for (element_id i = offsetMask; i < (offsetMask | *currentElementLen);
+         ++i) {
+        printf("%s\n", container->elements[i]);
+        printf("%s\n", elementName);
         if (strcmp(container->elements[i], elementName) == 0) {
             *elementID = i;
             return ELEMENT_SUCCESS;
         }
     }
 
-    return createElement(container, elementName, currentElementLen, offset,
+    return createElement(container, elementName, currentElementLen, offsetMask,
                          elementID);
 }
 
@@ -115,7 +121,8 @@ ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
 }
 
 ElementStatus elementToIndex(Elements *global, const char *elementStart,
-                             size_t elementLength, element_id *elementID) {
+                             const size_t elementLength,
+                             element_id *elementID) {
     char buffer[global->container.pageSize];
     const ElementStatus sizeCheck = elementSizeCheck(
         buffer, global->container.pageSize, elementStart, elementLength);
@@ -132,8 +139,8 @@ ElementStatus elementToIndex(Elements *global, const char *elementStart,
 
 ElementStatus combinedElementToIndex(CombinedElements *global,
                                      const char *elementStart,
-                                     size_t elementLength,
-                                     unsigned char isPaired,
+                                     const size_t elementLength,
+                                     const unsigned char isPaired,
                                      element_id *elementID) {
     char buffer[global->container.pageSize];
     const ElementStatus sizeCheck = elementSizeCheck(
@@ -153,36 +160,29 @@ ElementStatus combinedElementToIndex(CombinedElements *global,
                                SINGLE_OFFSET, elementID);
 }
 
-unsigned char isSingle(element_id index) {
-    return (index >> TOTAL_ELEMENTS_MSB) != 0;
+unsigned char isSingle(const element_id index) {
+    return (index >> SINGLE_MASK) != 0;
 }
 
-void printCombinedElementStatus(CombinedElements *global) {
-    printf("paired elements...\n");
-    printf("capacity: %hu/%u\n", global->pairedLen, TOTAL_ELEMENTS / 2);
-    for (size_t i = 0; i < global->pairedLen; i++) {
-        printf("element ID: %-5zuelement: %-20s\n", i,
-               global->container.elements[i]);
+void printElements(const size_t currentLen,
+                   char *const elements[TOTAL_ELEMENTS],
+                   const size_t offsetMask) {
+    printf("capacity: %zu/%u\n", currentLen, TOTAL_ELEMENTS);
+    for (size_t i = offsetMask; i < (offsetMask | currentLen); i++) {
+        printf("element ID: %-7zuelement: %-20s\n", i, elements[i]);
     }
-    printf("\n");
+    printf("\n\n");
+}
 
-    printf("single elements...\n");
-    printf("capacity: %hu/%u\n", global->singleLen, TOTAL_ELEMENTS / 2);
-    for (size_t i = SINGLE_OFFSET; i < SINGLE_OFFSET + global->singleLen; i++) {
-        printf("element ID: %-5zuelement: %-20s\n", i,
-               global->container.elements[i]);
-    }
-    printf("\n");
-
+void printElementPages(const ElementsContainer *container) {
     printf("element pages...\n");
-    printf("%-15s: %hhu\n", "pages length", global->container.pageLen);
-    for (size_t i = 0; i < global->container.pageLen; i++) {
-        printf("%-15s: %lu\n", "space left",
-               global->container.pages[i].spaceLeft);
+    printf("%-15s: %hhu\n", "pages length", container->pageLen);
+    for (size_t i = 0; i < container->pageLen; i++) {
+        printf("%-15s: %lu\n", "space left", container->pages[i].spaceLeft);
 
         int printedChars = 0;
-        char *copy = global->container.pages[i].start;
-        while (printedChars < global->container.pageSize) {
+        char *copy = container->pages[i].start;
+        while (printedChars < container->pageSize) {
             if (*copy == '\0') {
                 printf("~");
             } else {
@@ -196,6 +196,23 @@ void printCombinedElementStatus(CombinedElements *global) {
 
     printf("\n\n");
 }
+
+void printElementStatus(const Elements *global) {
+    printf("elements...\n");
+    printElements(global->len, global->container.elements, 0);
+
+    printElementPages(&global->container);
+}
+
+void printCombinedElementStatus(const CombinedElements *global) {
+    printf("single elements...\n");
+    printElements(global->singleLen, global->container.elements, SINGLE_OFFSET);
+
+    printf("paired elements...\n");
+    printElements(global->pairedLen, global->container.elements, 0);
+
+    printElementPages(&global->container);
+}
 void printGlobalTagStatus() {
     printf("printing global tag status...\n\n");
     printCombinedElementStatus(&gTags);
@@ -204,9 +221,10 @@ void printGlobalTagStatus() {
 void printGlobalAttributeStatus() {
     printf("printing global property status...\n\n");
     printCombinedElementStatus(&gPropKeys);
+    printElementStatus(&gPropValues);
 }
 
 void printGlobalTextStatus() {
-    // TODO(florian): print global text but also PROP VALUES I FORGOT
     printf("printing global text status...\n\n");
+    printElementStatus(&gText);
 }

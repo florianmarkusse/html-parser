@@ -27,8 +27,8 @@
 #define PROPERTIES_PAGE_SIZE (1U << 8U)
 #define PROPERTIES_PER_PAGE (PROPERTIES_PAGE_SIZE / sizeof(Property))
 
-#define TEXT_NODES_PAGE_SIZE (1U << 8U)
-#define TEXT_NODES_PER_PAGE (TEXT_NODES_PAGE_SIZE / sizeof(TextNode))
+#define TEXT_NODE_PAGE_SIZE (1U << 8U)
+#define TEXT_NODE_PER_PAGE (TEXT_NODE_PAGE_SIZE / sizeof(TextNode))
 
 typedef struct {
     Node *nodes;
@@ -51,7 +51,7 @@ typedef struct {
     size_t propsLen;
     size_t propsCap;
 
-    TextNode *text;
+    Text text;
     size_t textLen;
     size_t textCap;
 } __attribute__((aligned(128))) Document;
@@ -67,7 +67,6 @@ DocumentStatus addBooleanProperty(node_id nodeID, element_id propID,
                                   Document *doc);
 DocumentStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
                            Document *doc);
-DocumentStatus addTextNode(node_id nodeID, element_id textID, Document *doc);
 node_id getFirstChild(node_id parentID, const Document *doc);
 node_id getNextNode(node_id currentNodeID, const Document *doc);
 

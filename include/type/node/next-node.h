@@ -6,6 +6,6 @@
 typedef struct {
     node_id currentNodeID;
     node_id nextNodeID;
-} __attribute__((packed)) __attribute__((aligned(4))) NextNode;
+} __attribute__((aligned(4))) NextNode;
 
 #endif
