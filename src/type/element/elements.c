@@ -122,9 +122,15 @@ ElementStatus findOrCreateElement(ElementsContainer *container,
 }
 
 ElementStatus
-elementToIndexxxx(ElementsContainer *container, element_id *currentElementLen,
-                  const char *elementStart, const size_t elementLength,
-                  const unsigned char isPaired, element_id *elementID) {
+elementToIndex(ElementsContainer *container, element_id *currentElementLen,
+               const char *elementStart, const size_t elementLength,
+               const unsigned char isText, const unsigned char isPaired,
+               element_id *elementID) {
+    if (isText) {
+        *elementID = TEXT_OFFSET;
+        return ELEMENT_SUCCESS;
+    }
+
     char buffer[container->pageSize];
     const ElementStatus sizeCheck = elementSizeCheck(
         buffer, container->pageSize, elementStart, elementLength);
@@ -136,11 +142,15 @@ elementToIndexxxx(ElementsContainer *container, element_id *currentElementLen,
     buffer[elementLength] = '\0';
 
     return findOrCreateElement(container, buffer, currentElementLen,
-                               isPaired ? 0 : SINGLES_OFFSET, elementID);
+                               (isPaired ? 0 : SINGLES_OFFSET), elementID);
 }
 
 unsigned char isSingle(const element_id index) {
     return (index >> SINGLES_MASK) != 0;
+}
+
+unsigned char isText(const element_id index) {
+    return (index >> TEXT_MASK) != 0;
 }
 
 void printElements(const size_t currentLen,

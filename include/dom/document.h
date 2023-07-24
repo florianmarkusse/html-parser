@@ -31,6 +31,8 @@
 #define TEXT_NODES_PER_PAGE (TEXT_NODES_PAGE_SIZE / sizeof(TextNode))
 
 typedef struct {
+    Node *first;
+
     Node *nodes;
     size_t nodeLen;
     size_t nodeCap;

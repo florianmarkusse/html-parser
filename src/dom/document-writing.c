@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "dom/document.h"
+#include "type/node/text-node.h"
 #include "utils/file/path.h"
 
 void printBits(const element_id tagID) {
@@ -31,6 +32,18 @@ void printNode(const node_id nodeID, const size_t indentation,
     Node node = doc->nodes[nodeID - 1];
     for (size_t i = 0; i < indentation; i++) {
         fprintf(output, "  ");
+    }
+
+    if (isText(node.tagID)) {
+        for (size_t i = 0; i < doc->textLen; i++) {
+            TextNode textNode = doc->text[i];
+
+            if (textNode.nodeID == node.nodeID) {
+                char *text = gText.container.elements[textNode.textID];
+                fprintf(output, "%s\n", text);
+            }
+        }
+        return;
     }
 
     const char *tag = gTags.container.elements[node.tagID];
@@ -77,7 +90,7 @@ void printNode(const node_id nodeID, const size_t indentation,
 
 void printXML(const Document *doc) {
     printf("printing XML...\n\n");
-    node_id currentNodeID = 1;
+    node_id currentNodeID = doc->first->nodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, doc, stdout);
         currentNodeID = getNextNode(currentNodeID, doc);

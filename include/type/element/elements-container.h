@@ -11,10 +11,14 @@ typedef uint16_t element_id;
 
 #define EXPONENT 8U
 
+// masks
+#define TEXT_MASK (EXPONENT - 1)
+#define TEXT_OFFSET (1U << TEXT_MASK)
+
 #define SINGLES_MASK (EXPONENT - 2)
 #define SINGLES_OFFSET (1U << SINGLES_MASK)
 
-// The remaining bits are used as masks.
+// The remaining bits are for the IDs.
 #define TOTAL_ELEMENTS (1U << EXPONENT)
 #define POSSIBLE_ELEMENTS (1U << SINGLES_MASK)
 

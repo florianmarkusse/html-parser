@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,9 +54,10 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
               ParsePropertyStack *propKeys, ParsePropertyStack *propValues,
               node_id *newNodeID) {
     element_id tagID = 0;
-    if (elementToIndexxxx(
-            &gTags.container, isPaired ? &gTags.pairedLen : &gTags.singleLen,
-            tagStart, tagLength, isPaired, &tagID) != ELEMENT_SUCCESS) {
+    // TODO(florian): find a way to parse the text stuff.
+    if (elementToIndex(&gTags.container,
+                       isPaired ? &gTags.pairedLen : &gTags.singleLen, tagStart,
+                       tagLength, 0, isPaired, &tagID) != ELEMENT_SUCCESS) {
         return DOCUMENT_NO_ELEMENT;
     }
     if (addNode(newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {
@@ -67,9 +69,9 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
 
         element_id propID = 0;
 
-        if (elementToIndexxxx(&gPropKeys.container, &gPropKeys.singleLen,
-                              parseProp.start, parseProp.len, 0,
-                              &propID) != ELEMENT_SUCCESS) {
+        if (elementToIndex(&gPropKeys.container, &gPropKeys.singleLen,
+                           parseProp.start, parseProp.len, 0, 0,
+                           &propID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
         if (addBooleanProperty(*newNodeID, propID, doc) != ELEMENT_SUCCESS) {
@@ -81,17 +83,17 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     for (size_t i = 0; i < propKeys->len; i++) {
         ParseProperty key = propKeys->stack[i];
         element_id keyID = 0;
-        if (elementToIndexxxx(&gPropKeys.container, &gPropKeys.pairedLen,
-                              key.start, key.len, 1,
-                              &keyID) != ELEMENT_SUCCESS) {
+        if (elementToIndex(&gPropKeys.container, &gPropKeys.pairedLen,
+                           key.start, key.len, 0, 1,
+                           &keyID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
 
         ParseProperty value = propValues->stack[i];
         element_id valueID = 0;
-        if (elementToIndexxxx(&gPropValues.container, &gPropValues.len,
-                              value.start, value.len, 1,
-                              &valueID) != ELEMENT_SUCCESS) {
+        if (elementToIndex(&gPropValues.container, &gPropValues.len,
+                           value.start, value.len, 0, 1,
+                           &valueID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
 
@@ -101,15 +103,6 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     }
     propKeys->len = 0;
     propValues->len = 0;
-
-    printf("hererererere\n");
-    if (!isSingle(tagID)) {
-        element_id textID = 0;
-        createElement(&gText.container, "test-test", &gText.len, 0, &textID);
-        if (addTextNode(*newNodeID, textID, doc) != ELEMENT_SUCCESS) {
-            return DOCUMENT_NO_ELEMENT;
-        }
-    }
 
     if (newNodeID > 0 && *previousNodeID > 0) {
         if (depthStack->len == 0) {
@@ -138,22 +131,20 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     return DOCUMENT_SUCCESS;
 }
 
-DocumentStatus addPairedNode(const char *tagStart, size_t tagLength,
-                             Document *doc, node_id *previousNodeID,
-                             NodeDepth *depthStack,
-                             ParsePropertyStack *singleParsePropertyStack,
-                             ParsePropertyStack *propKeys,
-                             ParsePropertyStack *propValues,
-                             node_id *newNodeID) {
+DocumentStatus
+addPairedNode(const char *tagStart, size_t tagLength, Document *doc,
+              node_id *previousNodeID, NodeDepth *depthStack,
+              ParsePropertyStack *boolProps, ParsePropertyStack *propKeys,
+              ParsePropertyStack *propValues, node_id *newNodeID) {
     if (depthStack->len >= MAX_NODE_DEPTH) {
         PRINT_ERROR("Max document node depth %u reached.\n", MAX_NODE_DEPTH);
         PRINT_ERROR("At tag %s.\n", tagStart);
         return DOCUMENT_TOO_DEEP;
     }
 
-    DocumentStatus documentStatus = addToDocument(
-        tagStart, tagLength, doc, previousNodeID, depthStack, 1,
-        singleParsePropertyStack, propKeys, propValues, newNodeID);
+    DocumentStatus documentStatus =
+        addToDocument(tagStart, tagLength, doc, previousNodeID, depthStack, 1,
+                      boolProps, propKeys, propValues, newNodeID);
     if (documentStatus != DOCUMENT_SUCCESS) {
         return documentStatus;
     }
@@ -190,47 +181,13 @@ DocumentStatus putPropertyOnStack(size_t *currentStackLen,
     return DOCUMENT_SUCCESS;
 }
 
-// DocumentStatus putParsePropertyValueOnStack(ParsePropertyValueStack
-// *propValues,
-//                                         const size_t start,
-//                                         const size_t attributeEnd,
-//                                         const size_t valueStart,
-//                                         const size_t valueEnd) {
-//     if (propValues->len >= MAX_PROPERTIES) {
-//         PRINT_ERROR("Max number of %u attribute-values per tag reached.\n",
-//                     MAX_PROPERTIES);
-//         ParsePropertyValue attr =
-//             propValues->stack[propValues->len - 1];
-//
-//         char attributeBuffer[attr.attribute.len];
-//         strncpy(attributeBuffer, attr.attribute.start,
-//                 attr.attribute.len);
-//         attributeBuffer[attr.attribute.len] = '\0';
-//         PRINT_ERROR("Last read attribute was %s.\n", attributeBuffer);
-//
-//         char valueBuffer[attr.value.len];
-//         strncpy(valueBuffer, attr.value.start,
-//                 attr.value.len);
-//         valueBuffer[attr.value.len] = '\0';
-//         PRINT_ERROR("Last read value was %s.\n", valueBuffer);
-//         return DOCUMENT_TOO_MANY_ATTRIBUTES;
-//     }
-//
-//    propValues->stack[propValues->len].len =
-//        currentPosition - start + 1;
-//    const char *startPos =
-//        propValues->stack[propValues->len].start;
-//    size_t singleLen =
-//        propValues->stack[propValues->len].attribute;
-//    propValues->len++;
-//
-//  return DOCUMENT_SUCCESS;
-// }
-
 DocumentStatus parse(const char *xmlString, Document *doc) {
     State state = FREE;
 
     size_t currentPosition = 0;
+
+    size_t textNodeStart = 0;
+    unsigned char isNewline = 0;
 
     size_t tagNameStart = 0;
     size_t tagLength = 0;
@@ -258,7 +215,48 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
     char ch = xmlString[currentPosition];
     while (ch != '\0') {
         // printf("Current state: %s\n", stateToString(state));
-        // printf("Current char: %c\n", ch);
+        // if (isprint(ch)) {
+        //     printf("'%c' = %d\n", ch, ch);
+        // } else {
+        //     switch (ch) {
+        //     case '\0':
+        //         printf("'\\0' (null terminator) = %d\n", ch);
+        //         break;
+        //     case '\a':
+        //         printf("'\\a' (alert) = %d\n", ch);
+        //         break;
+        //     case '\b':
+        //         printf("'\\b' (backspace) = %d\n", ch);
+        //         break;
+        //     case '\f':
+        //         printf("'\\f' (form feed) = %d\n", ch);
+        //         break;
+        //     case '\r':
+        //         printf("'\\r' (carriage return) = %d\n", ch);
+        //         break;
+        //     case '\t':
+        //         printf("'\\t' (tab) = %d\n", ch);
+        //         break;
+        //     case '\v':
+        //         printf("'\\v' (vertical tab) = %d\n", ch);
+        //         break;
+        //     case '\n':
+        //         printf("'\\n' (newline) = %d\n", ch);
+        //         break;
+        //     case '\\':
+        //         printf("'\\\\' (backslash) = %d\n", ch);
+        //         break;
+        //     case '\'':
+        //         printf("'\\'' (single quote) = %d\n", ch);
+        //         break;
+        //     case '\"':
+        //         printf("'\\\"' (double quote) = %d\n", ch);
+        //         break;
+        //     default:
+        //         printf("'%c' (non-printable) = %d\n", ch, ch);
+        //         break;
+        //     }
+        // }
 
         switch (state) {
         case FREE:
@@ -361,16 +359,39 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             break;
         }
         case OPEN_PAIRED:
-            if (ch == '<') {
-                state = OPEN_TAG;
-            }
-            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-                state = TEXT_NODE;
+            if (!isNewline) {
+                if (ch == '<') {
+                    state = OPEN_TAG;
+                } else if (ch == '\n') {
+                    isNewline = 1;
+                } else {
+                    textNodeStart = currentPosition;
+                    state = TEXT_NODE;
+                }
+            } else {
+                if (ch == '<') {
+                    isNewline = 0;
+                    state = OPEN_TAG;
+                } else if (ch != ' ' && ch != '\n' && ch != '\t') {
+                    isNewline = 0;
+                    textNodeStart = currentPosition;
+                    state = TEXT_NODE;
+                }
             }
             break;
         case TEXT_NODE:
-            if (ch == '<') {
-                state = OPEN_TAG;
+            if (ch == '\n' || ch == '<') {
+                size_t textNodeSize = currentPosition - textNodeStart;
+                char buffer[textNodeSize];
+                buffer[textNodeSize] = '\0';
+                strncpy(buffer, &xmlString[textNodeStart], textNodeSize);
+                printf("printing text node\n");
+                printf("%s\n", buffer);
+                if (ch == '\n') {
+                    state = FREE;
+                } else {
+                    state = OPEN_TAG;
+                }
             }
             break;
         default:;

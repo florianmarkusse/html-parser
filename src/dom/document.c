@@ -5,6 +5,8 @@
 #include "utils/print/error.h"
 
 DocumentStatus createDocument(const char *xmlString, Document *doc) {
+    doc->first = NULL;
+
     doc->nodes = malloc(NODES_PAGE_SIZE);
     doc->nodeLen = 0;
     doc->nodeCap = NODES_PER_PAGE;
@@ -69,6 +71,10 @@ DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
     newNode->nodeID =
         doc->nodeLen + 1; // We start at 1 because 0 is used as error id
     newNode->tagID = tagID;
+
+    if (doc->first == NULL) {
+        doc->first = newNode;
+    }
 
     doc->nodeLen++;
     *nodeID = newNode->nodeID;

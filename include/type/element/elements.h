@@ -26,16 +26,18 @@ extern Elements gText;
 ElementStatus createGlobals();
 void destroyGlobals();
 
-ElementStatus elementToIndexxxx(ElementsContainer *container,
-                                element_id *currentElementLen,
-                                const char *elementStart, size_t elementLength,
-                                unsigned char isPaired, element_id *elementID);
+ElementStatus elementToIndex(ElementsContainer *container,
+                             element_id *currentElementLen,
+                             const char *elementStart, size_t elementLength,
+                             unsigned char isText, unsigned char isPaired,
+                             element_id *elementID);
 
 ElementStatus createElement(ElementsContainer *container, const char *element,
                             element_id *currentElementsLen, element_id offset,
                             element_id *elementID);
 
 unsigned char isSingle(element_id index);
+unsigned char isText(element_id index);
 
 void printGlobalTagStatus();
 void printGlobalAttributeStatus();
