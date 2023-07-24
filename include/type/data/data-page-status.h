@@ -3,7 +3,6 @@
 
 typedef enum {
     DATA_PAGE_SUCCESS,
-    DATA_PAGE_DATA_TOO_LONG,
     DATA_PAGE_NO_CAPACITY,
     DATA_PAGE_ERROR_MEMORY,
     DATA_PAGE_NUM_STATUS
@@ -11,7 +10,6 @@ typedef enum {
 
 static const char *const DataPageStatusStrings[DATA_PAGE_NUM_STATUS] = {
     "Success",
-    "Data too long",
     "No capacity",
     "Memory",
 };

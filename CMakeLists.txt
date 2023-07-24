@@ -33,7 +33,7 @@ LIST(APPEND SOURCE_FILES
     "src/utils/file/read.c"
     "src/utils/file/path.c"
     "src/type/element/elements.c"
-    "src/type/data/data-page.c"
+    "src/type/data/data-functions.c"
     "src/dom/document.c"
     "src/dom/document-writing.c"
     "src/tokenizer/parse.c" 

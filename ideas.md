@@ -1,3 +1,4 @@
+- Elements array takes up a huge amount... in the order of 500KB...
 Allow creation of unlimited tags:
     - Single tags have even IDs
     - paired tags have uneven IDs

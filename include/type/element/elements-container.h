@@ -1,18 +1,22 @@
 #ifndef TYPE_ELEMENT_ELEMENTS_CONTAINER_H
 #define TYPE_ELEMENT_ELEMENTS_CONTAINER_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "../data/data-page.h"
 
 typedef uint16_t element_id;
 #define TOTAL_ELEMENTS_NUM_BITS (sizeof(element_id) * 8)
 
-#define EXPONENT 16U
+#define EXPONENT 8U
 
-#define SINGLE_MASK (EXPONENT - 2)
-#define SINGLE_OFFSET (1U << SINGLE_MASK)
+#define SINGLES_MASK (EXPONENT - 2)
+#define SINGLES_OFFSET (1U << SINGLES_MASK)
 
 // The remaining bits are used as masks.
-#define TOTAL_ELEMENTS (1U << SINGLE_MASK)
+#define TOTAL_ELEMENTS (1U << EXPONENT)
+#define POSSIBLE_ELEMENTS (1U << SINGLES_MASK)
 
 #define TOTAL_PAGES (1U << 4U)
 

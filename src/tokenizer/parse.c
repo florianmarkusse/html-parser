@@ -53,8 +53,9 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
               ParsePropertyStack *propKeys, ParsePropertyStack *propValues,
               node_id *newNodeID) {
     element_id tagID = 0;
-    if (combinedElementToIndex(&gTags, tagStart, tagLength, isPaired, &tagID) !=
-        ELEMENT_SUCCESS) {
+    if (elementToIndexxxx(
+            &gTags.container, isPaired ? &gTags.pairedLen : &gTags.singleLen,
+            tagStart, tagLength, isPaired, &tagID) != ELEMENT_SUCCESS) {
         return DOCUMENT_NO_ELEMENT;
     }
     if (addNode(newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {
@@ -66,8 +67,9 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
 
         element_id propID = 0;
 
-        if (combinedElementToIndex(&gPropKeys, parseProp.start, parseProp.len,
-                                   0, &propID) != ELEMENT_SUCCESS) {
+        if (elementToIndexxxx(&gPropKeys.container, &gPropKeys.singleLen,
+                              parseProp.start, parseProp.len, 0,
+                              &propID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
         if (addBooleanProperty(*newNodeID, propID, doc) != ELEMENT_SUCCESS) {
@@ -79,15 +81,17 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     for (size_t i = 0; i < propKeys->len; i++) {
         ParseProperty key = propKeys->stack[i];
         element_id keyID = 0;
-        if (combinedElementToIndex(&gPropKeys, key.start, key.len, 1, &keyID) !=
-            ELEMENT_SUCCESS) {
+        if (elementToIndexxxx(&gPropKeys.container, &gPropKeys.pairedLen,
+                              key.start, key.len, 1,
+                              &keyID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
 
         ParseProperty value = propValues->stack[i];
         element_id valueID = 0;
-        if (elementToIndex(&gPropValues, value.start, value.len, &valueID) !=
-            ELEMENT_SUCCESS) {
+        if (elementToIndexxxx(&gPropValues.container, &gPropValues.len,
+                              value.start, value.len, 1,
+                              &valueID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
 
@@ -98,6 +102,7 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     propKeys->len = 0;
     propValues->len = 0;
 
+    printf("hererererere\n");
     if (!isSingle(tagID)) {
         element_id textID = 0;
         createElement(&gText.container, "test-test", &gText.len, 0, &textID);
@@ -130,13 +135,6 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     }
     *previousNodeID = *newNodeID;
 
-    char buffer[tagLength];
-    strncpy(buffer, tagStart, tagLength);
-    buffer[tagLength] = '\0';
-    printf("Current tag: %s\n", buffer);
-    printf("Given tag ID: %u\n", tagID);
-    printf("Given node ID: %u\n", *newNodeID);
-    printf("--------------------------------\n\n");
     return DOCUMENT_SUCCESS;
 }
 

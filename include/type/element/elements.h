@@ -26,13 +26,11 @@ extern Elements gText;
 ElementStatus createGlobals();
 void destroyGlobals();
 
-ElementStatus combinedElementToIndex(CombinedElements *global,
-                                     const char *elementStart,
-                                     size_t elementLength,
-                                     unsigned char isPaired,
-                                     element_id *elementID);
-ElementStatus elementToIndex(Elements *global, const char *elementStart,
-                             size_t elementLength, element_id *elementID);
+ElementStatus elementToIndexxxx(ElementsContainer *container,
+                                element_id *currentElementLen,
+                                const char *elementStart, size_t elementLength,
+                                unsigned char isPaired, element_id *elementID);
+
 ElementStatus createElement(ElementsContainer *container, const char *element,
                             element_id *currentElementsLen, element_id offset,
                             element_id *elementID);
