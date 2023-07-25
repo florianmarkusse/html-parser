@@ -12,6 +12,7 @@
 typedef enum {
     FREE,
     OPEN_TAG,
+    CLOSE_TAG,
     TAG_NAME,
     ATTRS,
     ATTR_KEY,
@@ -23,7 +24,7 @@ typedef enum {
 
 const char *stateToString(State state) {
     static const char *stateStrings[NUM_STATES] = {
-        "FREE",     "OPEN_TAG",   "TAG_NAME",    "ATTRS",
+        "FREE",     "OPEN_TAG",   "CLOSE_TAG",   "TAG_NAME", "ATTRS",
         "ATTR_KEY", "ATTR_VALUE", "OPEN_PAIRED", "TEXT_NODE"};
 
     if (state >= 0 && state < NUM_STATES) {
@@ -293,15 +294,35 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
 
         switch (state) {
         case FREE:
-            if (ch == '<') {
-                state = OPEN_TAG;
+            if (!isNewline) {
+                if (ch == '<') {
+                    state = OPEN_TAG;
+                } else if (ch == '\n') {
+                    isNewline = 1;
+                } else {
+                    textNodeStart = currentPosition;
+                    state = TEXT_NODE;
+                }
+            } else {
+                if (ch == '<') {
+                    isNewline = 0;
+                    state = OPEN_TAG;
+                } else if (ch != ' ' && ch != '\n' && ch != '\t') {
+                    isNewline = 0;
+                    textNodeStart = currentPosition;
+                    state = TEXT_NODE;
+                }
             }
+
+            //             if (ch == '<') {
+            //                 state = OPEN_TAG;
+            //             }
             break;
         case OPEN_TAG:
             if (ch == '/') {
                 previousNodeID = depthStack.stack[depthStack.len - 1];
                 depthStack.len--;
-                state = FREE;
+                state = CLOSE_TAG;
             }
             if (isAlphaBetical(ch)) {
                 tagNameStart = currentPosition;
@@ -338,7 +359,11 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                                   &previousNodeID, &depthStack, 0, &binaryProps,
                                   &propKeys, &propValues, &newNodeID);
                 isExclam = 0;
-                state = FREE;
+                if (ch == '/') {
+                    state = CLOSE_TAG;
+                } else {
+                    state = FREE;
+                }
             } else if (ch == '>') {
                 documentStatus =
                     addPairedNode(&xmlString[tagNameStart], tagLength, doc,
@@ -430,6 +455,11 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                 } else {
                     state = OPEN_TAG;
                 }
+            }
+            break;
+        case CLOSE_TAG:
+            if (ch == '>') {
+                state = FREE;
             }
             break;
         default:;
