@@ -5,6 +5,8 @@
 #include "type/node/text-node.h"
 #include "utils/file/path.h"
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 void printBits(const element_id tagID) {
     unsigned char numBits = sizeof(element_id) * 8;
     for (unsigned char i = 0; i < numBits; i++) {
@@ -30,9 +32,6 @@ void getBits(const element_id tagID, char *bits, const size_t size) {
 void printNode(const node_id nodeID, const size_t indentation,
                const Document *doc, FILE *output) {
     Node node = doc->nodes[nodeID - 1];
-    for (size_t i = 0; i < indentation; i++) {
-        fprintf(output, "  ");
-    }
 
     if (isText(node.tagID)) {
         for (size_t i = 0; i < doc->textLen; i++) {
@@ -40,7 +39,7 @@ void printNode(const node_id nodeID, const size_t indentation,
 
             if (textNode.nodeID == node.nodeID) {
                 char *text = gText.container.elements[textNode.textID];
-                fprintf(output, "%s\n", text);
+                fprintf(output, "%s", text);
             }
         }
         return;
@@ -70,22 +69,19 @@ void printNode(const node_id nodeID, const size_t indentation,
 
     if (isSingle(node.tagID)) {
         if (strcmp(tag, "!DOCTYPE") == 0) {
-            fprintf(output, ">\n");
+            fprintf(output, ">");
         } else {
-            fprintf(output, " />\n");
+            fprintf(output, " />");
         }
         return;
     }
-    fprintf(output, ">\n");
+    fprintf(output, ">");
     node_id childNode = getFirstChild(nodeID, doc);
     while (childNode) {
         printNode(childNode, indentation + 1, doc, output);
         childNode = getNextNode(childNode, doc);
     }
-    for (size_t i = 0; i < indentation; i++) {
-        fprintf(output, "  ");
-    }
-    fprintf(output, "</%s>\n", tag);
+    fprintf(output, "</%s>", tag);
 }
 
 void printXML(const Document *doc) {
@@ -106,7 +102,7 @@ FileStatus writeXMLToFile(const Document *doc, const char *filePath) {
         return FILE_CANT_OPEN;
     }
 
-    node_id currentNodeID = 1;
+    node_id currentNodeID = doc->first->nodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, doc, file);
         currentNodeID = getNextNode(currentNodeID, doc);
@@ -132,8 +128,8 @@ void printDocumentStatus(const Document *doc) {
         printf("tag: %-6u bits: %-18s", node.tagID, bitBuffer);
 
         if (isSingle(node.tagID)) {
-            printf("%-8s %-20s with node ID: %-4hu\n", "single", type,
-                   node.nodeID);
+            printf("%-8s %-20s with node ID: %-4hu\n", "single",
+                   isText(node.tagID) ? "--text--" : type, node.nodeID);
         } else {
             printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
                    node.nodeID);
@@ -142,7 +138,7 @@ void printDocumentStatus(const Document *doc) {
     printf("\n");
 
     printf("text nodes inside document...\n");
-    printf("total number of text nodes: %zu\n", doc->nodeLen);
+    printf("total number of text nodes: %zu\n", doc->textLen);
     for (size_t i = 0; i < doc->textLen; i++) {
         TextNode textNode = doc->text[i];
         const char *type = gText.container.elements[textNode.textID];
@@ -151,7 +147,6 @@ void printDocumentStatus(const Document *doc) {
         char bitBuffer[bufferSize];
         getBits(textNode.textID, bitBuffer, bufferSize);
         printf("text: %-6u bits: %-18s", textNode.textID, bitBuffer);
-
         printf("%-20s with node ID: %-4hu\n", type, textNode.nodeID);
     }
     printf("\n");

@@ -10,7 +10,6 @@
 #include "utils/print/error.h"
 
 typedef enum {
-    FREE,
     OPEN_TAG,
     CLOSE_TAG,
     TAG_NAME,
@@ -24,7 +23,7 @@ typedef enum {
 
 const char *stateToString(State state) {
     static const char *stateStrings[NUM_STATES] = {
-        "FREE",     "OPEN_TAG",   "CLOSE_TAG",   "TAG_NAME", "ATTRS",
+        "OPEN_TAG", "CLOSE_TAG",  "TAG_NAME",    "ATTRS",
         "ATTR_KEY", "ATTR_VALUE", "OPEN_PAIRED", "TEXT_NODE"};
 
     if (state >= 0 && state < NUM_STATES) {
@@ -216,7 +215,7 @@ DocumentStatus putPropertyOnStack(size_t *currentStackLen,
 }
 
 DocumentStatus parse(const char *xmlString, Document *doc) {
-    State state = FREE;
+    State state = OPEN_PAIRED;
 
     size_t currentPosition = 0;
 
@@ -248,76 +247,51 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
     node_id previousNodeID = 0;
     char ch = xmlString[currentPosition];
     while (ch != '\0') {
-        printf("Current state: %s\n", stateToString(state));
-        if (isprint(ch)) {
-            printf("'%c' = %d\n", ch, ch);
-        } else {
-            switch (ch) {
-            case '\0':
-                printf("'\\0' (null terminator) = %d\n", ch);
-                break;
-            case '\a':
-                printf("'\\a' (alert) = %d\n", ch);
-                break;
-            case '\b':
-                printf("'\\b' (backspace) = %d\n", ch);
-                break;
-            case '\f':
-                printf("'\\f' (form feed) = %d\n", ch);
-                break;
-            case '\r':
-                printf("'\\r' (carriage return) = %d\n", ch);
-                break;
-            case '\t':
-                printf("'\\t' (tab) = %d\n", ch);
-                break;
-            case '\v':
-                printf("'\\v' (vertical tab) = %d\n", ch);
-                break;
-            case '\n':
-                printf("'\\n' (newline) = %d\n", ch);
-                break;
-            case '\\':
-                printf("'\\\\' (backslash) = %d\n", ch);
-                break;
-            case '\'':
-                printf("'\\'' (single quote) = %d\n", ch);
-                break;
-            case '\"':
-                printf("'\\\"' (double quote) = %d\n", ch);
-                break;
-            default:
-                printf("'%c' (non-printable) = %d\n", ch, ch);
-                break;
-            }
-        }
+        //         printf("Current state: %s\n", stateToString(state));
+        //         if (isprint(ch)) {
+        //             printf("'%c' = %d\n", ch, ch);
+        //         } else {
+        //             switch (ch) {
+        //             case '\0':
+        //                 printf("'\\0' (null terminator) = %d\n", ch);
+        //                 break;
+        //             case '\a':
+        //                 printf("'\\a' (alert) = %d\n", ch);
+        //                 break;
+        //             case '\b':
+        //                 printf("'\\b' (backspace) = %d\n", ch);
+        //                 break;
+        //             case '\f':
+        //                 printf("'\\f' (form feed) = %d\n", ch);
+        //                 break;
+        //             case '\r':
+        //                 printf("'\\r' (carriage return) = %d\n", ch);
+        //                 break;
+        //             case '\t':
+        //                 printf("'\\t' (tab) = %d\n", ch);
+        //                 break;
+        //             case '\v':
+        //                 printf("'\\v' (vertical tab) = %d\n", ch);
+        //                 break;
+        //             case '\n':
+        //                 printf("'\\n' (newline) = %d\n", ch);
+        //                 break;
+        //             case '\\':
+        //                 printf("'\\\\' (backslash) = %d\n", ch);
+        //                 break;
+        //             case '\'':
+        //                 printf("'\\'' (single quote) = %d\n", ch);
+        //                 break;
+        //             case '\"':
+        //                 printf("'\\\"' (double quote) = %d\n", ch);
+        //                 break;
+        //             default:
+        //                 printf("'%c' (non-printable) = %d\n", ch, ch);
+        //                 break;
+        //             }
+        //         }
 
         switch (state) {
-        case FREE:
-            if (!isNewline) {
-                if (ch == '<') {
-                    state = OPEN_TAG;
-                } else if (ch == '\n') {
-                    isNewline = 1;
-                } else {
-                    textNodeStart = currentPosition;
-                    state = TEXT_NODE;
-                }
-            } else {
-                if (ch == '<') {
-                    isNewline = 0;
-                    state = OPEN_TAG;
-                } else if (ch != ' ' && ch != '\n' && ch != '\t') {
-                    isNewline = 0;
-                    textNodeStart = currentPosition;
-                    state = TEXT_NODE;
-                }
-            }
-
-            //             if (ch == '<') {
-            //                 state = OPEN_TAG;
-            //             }
-            break;
         case OPEN_TAG:
             if (ch == '/') {
                 previousNodeID = depthStack.stack[depthStack.len - 1];
@@ -362,7 +336,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                 if (ch == '/') {
                     state = CLOSE_TAG;
                 } else {
-                    state = FREE;
+                    state = OPEN_PAIRED;
                 }
             } else if (ch == '>') {
                 documentStatus =
@@ -387,7 +361,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                                 &previousNodeID, &depthStack, 0, &binaryProps,
                                 &propKeys, &propValues, &newNodeID);
                             isExclam = 0;
-                            state = FREE;
+                            state = OPEN_PAIRED;
                         } else {
                             documentStatus = addPairedNode(
                                 &xmlString[tagNameStart], tagLength, doc,
@@ -451,7 +425,8 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                                       doc, &previousNodeID, &depthStack);
 
                 if (ch == '\n') {
-                    state = FREE;
+                    isNewline = 1;
+                    state = OPEN_PAIRED;
                 } else {
                     state = OPEN_TAG;
                 }
@@ -459,7 +434,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             break;
         case CLOSE_TAG:
             if (ch == '>') {
-                state = FREE;
+                state = OPEN_PAIRED;
             }
             break;
         default:;
