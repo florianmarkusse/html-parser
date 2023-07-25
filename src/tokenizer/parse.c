@@ -47,6 +47,64 @@ unsigned char isAlphaBetical(const char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
 }
 
+DocumentStatus updateReferences(const node_id newNodeID,
+                                node_id *previousNodeID, NodeDepth *depthStack,
+                                Document *doc) {
+    if (newNodeID > 0 && *previousNodeID > 0) {
+        if (depthStack->len == 0) {
+            if (addNextNode(*previousNodeID, newNodeID, doc) !=
+                DOCUMENT_SUCCESS) {
+                return DOCUMENT_NO_ADD;
+            }
+        } else {
+            const unsigned int parentNodeID =
+                depthStack->stack[depthStack->len - 1];
+            if (parentNodeID == *previousNodeID) {
+                if (addParentFirstChild(parentNodeID, newNodeID, doc) !=
+                    DOCUMENT_SUCCESS) {
+                    return DOCUMENT_NO_ADD;
+                }
+            } else {
+                if (addNextNode(*previousNodeID, newNodeID, doc) !=
+                    DOCUMENT_SUCCESS) {
+                    return DOCUMENT_NO_ADD;
+                }
+            }
+        }
+    }
+    *previousNodeID = newNodeID;
+
+    return DOCUMENT_SUCCESS;
+}
+
+DocumentStatus addTextToDocument(const char *tagStart, const size_t tagLength,
+                                 Document *doc, node_id *previousNodeID,
+                                 NodeDepth *depthStack
+
+) {
+    element_id tagID = 0;
+    if (textElementToIndex(&tagID) != ELEMENT_SUCCESS) {
+        return DOCUMENT_NO_ELEMENT;
+    }
+    node_id newNodeID = 0;
+    if (addNode(&newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {
+        return DOCUMENT_NO_ADD;
+    }
+
+    element_id textID = 0;
+
+    if (elementToIndex(&gText.container, &gText.len, tagStart, tagLength, 1, 1,
+                       &textID) != ELEMENT_SUCCESS) {
+        return DOCUMENT_NO_ELEMENT;
+    }
+
+    if (addTextNode(newNodeID, textID, doc) != DOCUMENT_SUCCESS) {
+        return DOCUMENT_NO_ADD;
+    }
+
+    return updateReferences(newNodeID, previousNodeID, depthStack, doc);
+}
+
 DocumentStatus
 addToDocument(const char *tagStart, size_t tagLength, Document *doc,
               node_id *previousNodeID, NodeDepth *depthStack,
@@ -54,10 +112,9 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
               ParsePropertyStack *propKeys, ParsePropertyStack *propValues,
               node_id *newNodeID) {
     element_id tagID = 0;
-    // TODO(florian): find a way to parse the text stuff.
     if (elementToIndex(&gTags.container,
                        isPaired ? &gTags.pairedLen : &gTags.singleLen, tagStart,
-                       tagLength, 0, isPaired, &tagID) != ELEMENT_SUCCESS) {
+                       tagLength, isPaired, 1, &tagID) != ELEMENT_SUCCESS) {
         return DOCUMENT_NO_ELEMENT;
     }
     if (addNode(newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {
@@ -70,7 +127,7 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
         element_id propID = 0;
 
         if (elementToIndex(&gPropKeys.container, &gPropKeys.singleLen,
-                           parseProp.start, parseProp.len, 0, 0,
+                           parseProp.start, parseProp.len, 0, 1,
                            &propID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
@@ -84,7 +141,7 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
         ParseProperty key = propKeys->stack[i];
         element_id keyID = 0;
         if (elementToIndex(&gPropKeys.container, &gPropKeys.pairedLen,
-                           key.start, key.len, 0, 1,
+                           key.start, key.len, 1, 1,
                            &keyID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
@@ -92,7 +149,7 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
         ParseProperty value = propValues->stack[i];
         element_id valueID = 0;
         if (elementToIndex(&gPropValues.container, &gPropValues.len,
-                           value.start, value.len, 0, 1,
+                           value.start, value.len, 1, 1,
                            &valueID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
@@ -104,31 +161,7 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
     propKeys->len = 0;
     propValues->len = 0;
 
-    if (newNodeID > 0 && *previousNodeID > 0) {
-        if (depthStack->len == 0) {
-            if (addNextNode(*previousNodeID, *newNodeID, doc) !=
-                DOCUMENT_SUCCESS) {
-                return DOCUMENT_NO_ADD;
-            }
-        } else {
-            const unsigned int parentNodeID =
-                depthStack->stack[depthStack->len - 1];
-            if (parentNodeID == *previousNodeID) {
-                if (addParentFirstChild(parentNodeID, *newNodeID, doc) !=
-                    DOCUMENT_SUCCESS) {
-                    return DOCUMENT_NO_ADD;
-                }
-            } else {
-                if (addNextNode(*previousNodeID, *newNodeID, doc) !=
-                    DOCUMENT_SUCCESS) {
-                    return DOCUMENT_NO_ADD;
-                }
-            }
-        }
-    }
-    *previousNodeID = *newNodeID;
-
-    return DOCUMENT_SUCCESS;
+    return updateReferences(*newNodeID, previousNodeID, depthStack, doc);
 }
 
 DocumentStatus
@@ -214,49 +247,49 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
     node_id previousNodeID = 0;
     char ch = xmlString[currentPosition];
     while (ch != '\0') {
-        // printf("Current state: %s\n", stateToString(state));
-        // if (isprint(ch)) {
-        //     printf("'%c' = %d\n", ch, ch);
-        // } else {
-        //     switch (ch) {
-        //     case '\0':
-        //         printf("'\\0' (null terminator) = %d\n", ch);
-        //         break;
-        //     case '\a':
-        //         printf("'\\a' (alert) = %d\n", ch);
-        //         break;
-        //     case '\b':
-        //         printf("'\\b' (backspace) = %d\n", ch);
-        //         break;
-        //     case '\f':
-        //         printf("'\\f' (form feed) = %d\n", ch);
-        //         break;
-        //     case '\r':
-        //         printf("'\\r' (carriage return) = %d\n", ch);
-        //         break;
-        //     case '\t':
-        //         printf("'\\t' (tab) = %d\n", ch);
-        //         break;
-        //     case '\v':
-        //         printf("'\\v' (vertical tab) = %d\n", ch);
-        //         break;
-        //     case '\n':
-        //         printf("'\\n' (newline) = %d\n", ch);
-        //         break;
-        //     case '\\':
-        //         printf("'\\\\' (backslash) = %d\n", ch);
-        //         break;
-        //     case '\'':
-        //         printf("'\\'' (single quote) = %d\n", ch);
-        //         break;
-        //     case '\"':
-        //         printf("'\\\"' (double quote) = %d\n", ch);
-        //         break;
-        //     default:
-        //         printf("'%c' (non-printable) = %d\n", ch, ch);
-        //         break;
-        //     }
-        // }
+        printf("Current state: %s\n", stateToString(state));
+        if (isprint(ch)) {
+            printf("'%c' = %d\n", ch, ch);
+        } else {
+            switch (ch) {
+            case '\0':
+                printf("'\\0' (null terminator) = %d\n", ch);
+                break;
+            case '\a':
+                printf("'\\a' (alert) = %d\n", ch);
+                break;
+            case '\b':
+                printf("'\\b' (backspace) = %d\n", ch);
+                break;
+            case '\f':
+                printf("'\\f' (form feed) = %d\n", ch);
+                break;
+            case '\r':
+                printf("'\\r' (carriage return) = %d\n", ch);
+                break;
+            case '\t':
+                printf("'\\t' (tab) = %d\n", ch);
+                break;
+            case '\v':
+                printf("'\\v' (vertical tab) = %d\n", ch);
+                break;
+            case '\n':
+                printf("'\\n' (newline) = %d\n", ch);
+                break;
+            case '\\':
+                printf("'\\\\' (backslash) = %d\n", ch);
+                break;
+            case '\'':
+                printf("'\\'' (single quote) = %d\n", ch);
+                break;
+            case '\"':
+                printf("'\\\"' (double quote) = %d\n", ch);
+                break;
+            default:
+                printf("'%c' (non-printable) = %d\n", ch, ch);
+                break;
+            }
+        }
 
         switch (state) {
         case FREE:
@@ -387,6 +420,11 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                 strncpy(buffer, &xmlString[textNodeStart], textNodeSize);
                 printf("printing text node\n");
                 printf("%s\n", buffer);
+
+                documentStatus =
+                    addTextToDocument(&xmlString[textNodeStart], textNodeSize,
+                                      doc, &previousNodeID, &depthStack);
+
                 if (ch == '\n') {
                     state = FREE;
                 } else {

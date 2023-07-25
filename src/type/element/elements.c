@@ -121,16 +121,16 @@ ElementStatus findOrCreateElement(ElementsContainer *container,
                          elementID);
 }
 
+ElementStatus textElementToIndex(element_id *elementID) {
+    *elementID = TEXT_OFFSET;
+    return ELEMENT_SUCCESS;
+}
+
 ElementStatus
 elementToIndex(ElementsContainer *container, element_id *currentElementLen,
                const char *elementStart, const size_t elementLength,
-               const unsigned char isText, const unsigned char isPaired,
+               const unsigned char isPaired, const unsigned char searchElements,
                element_id *elementID) {
-    if (isText) {
-        *elementID = TEXT_OFFSET;
-        return ELEMENT_SUCCESS;
-    }
-
     char buffer[container->pageSize];
     const ElementStatus sizeCheck = elementSizeCheck(
         buffer, container->pageSize, elementStart, elementLength);
@@ -141,8 +141,12 @@ elementToIndex(ElementsContainer *container, element_id *currentElementLen,
     memcpy(buffer, elementStart, elementLength);
     buffer[elementLength] = '\0';
 
-    return findOrCreateElement(container, buffer, currentElementLen,
-                               (isPaired ? 0 : SINGLES_OFFSET), elementID);
+    if (searchElements) {
+        return findOrCreateElement(container, buffer, currentElementLen,
+                                   (isPaired ? 0 : SINGLES_OFFSET), elementID);
+    }
+    return createElement(container, buffer, currentElementLen,
+                         (isPaired ? 0 : SINGLES_OFFSET), elementID);
 }
 
 unsigned char isSingle(const element_id index) {

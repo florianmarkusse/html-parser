@@ -29,9 +29,11 @@ void destroyGlobals();
 ElementStatus elementToIndex(ElementsContainer *container,
                              element_id *currentElementLen,
                              const char *elementStart, size_t elementLength,
-                             unsigned char isText, unsigned char isPaired,
+                             unsigned char isPaired,
+                             unsigned char searchElements,
                              element_id *elementID);
 
+ElementStatus textElementToIndex(element_id *elementID);
 ElementStatus createElement(ElementsContainer *container, const char *element,
                             element_id *currentElementsLen, element_id offset,
                             element_id *elementID);
