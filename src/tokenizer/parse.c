@@ -414,12 +414,6 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
         case TEXT_NODE:
             if (ch == '\n' || ch == '<') {
                 size_t textNodeSize = currentPosition - textNodeStart;
-                char buffer[textNodeSize];
-                buffer[textNodeSize] = '\0';
-                strncpy(buffer, &xmlString[textNodeStart], textNodeSize);
-                printf("printing text node\n");
-                printf("%s\n", buffer);
-
                 documentStatus =
                     addTextToDocument(&xmlString[textNodeStart], textNodeSize,
                                       doc, &previousNodeID, &depthStack);

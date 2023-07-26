@@ -2,45 +2,49 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "dom/document-comparison.h"
+#include "dom/document-user.h"
 #include "dom/document-writing.h"
 #include "dom/document.h"
 #include "utils/file/read.h"
 #include "utils/print/error.h"
 
-static const char *const testFile = "test/test.html";
+static const char *const test1File = "test/test-1.html";
+static const char *const test2File = "test/test-2.html";
 
 int main() {
     createGlobals();
 
-    char *htmlString = NULL;
-    FileStatus fileStatus = readFile(testFile, &htmlString);
-    if (fileStatus != FILE_SUCCESS) {
+    Document doc1;
+    if (createFromFile(test1File, &doc1) != DOCUMENT_SUCCESS) {
         destroyGlobals();
-        ERROR_WITH_CODE_FORMAT(fileStatusToString(fileStatus),
-                               "Failed to read file: \"%s\"", testFile);
         return 1;
     }
-    printf("%s\n", htmlString);
 
-    Document doc;
-    DocumentStatus documentStatus = createDocument(htmlString, &doc);
-    if (documentStatus != DOCUMENT_SUCCESS) {
-        free(htmlString);
+    //    printDocumentStatus(&doc1);
+    printXML(&doc1);
+    writeXMLToFile(&doc1, "test/test-1-write.html");
+
+    Document doc2;
+    if (createFromFile(test2File, &doc2) != DOCUMENT_SUCCESS) {
         destroyGlobals();
-        ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),
-                               "Failed to create document from file \"%s\"",
-                               testFile);
         return 1;
     }
-    free(htmlString);
 
-    printDocumentStatus(&doc);
-    printXML(&doc);
-    writeXMLToFile(&doc, "test/test-write.html");
+    //    printDocumentStatus(&doc2);
+    printXML(&doc2);
+    writeXMLToFile(&doc2, "test/test-2-write.html");
 
-    destroyDocument(&doc);
-    printGlobalTagStatus();
-    printGlobalAttributeStatus();
-    printGlobalTextStatus();
-    destroyGlobals();
+    ComparisonStatus comp = equals(&doc1, &doc2);
+
+    ERROR_WITH_CODE_ONLY(comparisonStatusToString(comp),
+                         "The comparison result");
+
+    destroyDocument(&doc1);
+    destroyDocument(&doc2);
+
+    //     printGlobalTagStatus();
+    //     printGlobalAttributeStatus();
+    //     printGlobalTextStatus();
+    //     destroyGlobals();
 }

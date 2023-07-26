@@ -37,6 +37,9 @@ LIST(APPEND SOURCE_FILES
     "src/dom/document.c"
     "src/dom/document-writing.c"
     "src/tokenizer/parse.c" 
+    "src/dom/document-user.c"
+    "src/dom/document-comparison.c"
+    "src/dom/document-utils.c"
     )
 
 add_executable(${EXECUTABLE_NAME} ${SOURCE_FILES})

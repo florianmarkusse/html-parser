@@ -3,12 +3,23 @@
 
 typedef enum {
     COMPARISON_SUCCESS,
+    COMPARISON_DIFFERENT_NODE_TYPE,
     COMPARISON_DIFFERENT_TAGS,
+    COMPARISON_MISSING_PROPERTIES,
+    COMPARISON_DIFFERENT_PROPERTIES,
+    COMPARISON_DIFFERENT_SIZES,
+    COMPARISON_DIFFERENT_TEXT,
     COMPARISON_NUM_STATUS
 } ComparisonStatus;
 
 static const char *const ComparisonStatusStrings[COMPARISON_NUM_STATUS] = {
-    "Success", "Different type of tags"};
+    "Success",
+    "Different type of node",
+    "Different tags",
+    "Nodes have different number of properties",
+    "Nodes have different properties",
+    "Different number of nodes",
+    "Text nodes have different content"};
 
 static const char *comparisonStatusToString(ComparisonStatus status) {
     if (status >= 0 && status < COMPARISON_NUM_STATUS) {

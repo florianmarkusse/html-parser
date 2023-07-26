@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "dom/document-utils.h"
 #include "dom/document.h"
 #include "type/node/text-node.h"
 #include "utils/file/path.h"
@@ -34,13 +35,9 @@ void printNode(const node_id nodeID, const size_t indentation,
     Node node = doc->nodes[nodeID - 1];
 
     if (isText(node.tagID)) {
-        for (size_t i = 0; i < doc->textLen; i++) {
-            TextNode textNode = doc->text[i];
-
-            if (textNode.nodeID == node.nodeID) {
-                char *text = gText.container.elements[textNode.textID];
-                fprintf(output, "%s", text);
-            }
+        const char *text = getText(node.nodeID, doc);
+        if (text != NULL) {
+            fprintf(output, "%s", text);
         }
         return;
     }

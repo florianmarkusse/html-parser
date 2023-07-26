@@ -4,6 +4,6 @@
 #include "document-comparison-status.h"
 #include "document.h"
 
-ComparisonStatus equals(Document *doc1, Document *doc2);
+ComparisonStatus equals(const Document *doc1, const Document *doc2);
 
 #endif
