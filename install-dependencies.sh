@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-RED='\033[31m'
 YELLOW='\033[33m'
 BOLD='\033[1m'
 NO_COLOR='\033[0m'

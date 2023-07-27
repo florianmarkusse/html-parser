@@ -9,8 +9,8 @@
 #include "utils/file/read.h"
 #include "utils/print/error.h"
 
-static const char *const test1File = "test/test-1.html";
-static const char *const test2File = "test/test-2.html";
+static const char *const test1File = "tests/data/html/test-1.html";
+static const char *const test2File = "tests/data/html/test-2.html";
 
 int main() {
     createGlobals();
@@ -23,7 +23,7 @@ int main() {
 
     //    printDocumentStatus(&doc1);
     printXML(&doc1);
-    writeXMLToFile(&doc1, "test/test-1-write.html");
+    writeXMLToFile(&doc1, "tests/data/html/test-1-write.html");
 
     Document doc2;
     if (createFromFile(test2File, &doc2) != DOCUMENT_SUCCESS) {
@@ -33,7 +33,7 @@ int main() {
 
     //    printDocumentStatus(&doc2);
     printXML(&doc2);
-    writeXMLToFile(&doc2, "test/test-2-write.html");
+    writeXMLToFile(&doc2, "tests/data/html/test-2-write.html");
 
     ComparisonStatus comp = equals(&doc1, &doc2);
 

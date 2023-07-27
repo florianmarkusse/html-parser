@@ -9,6 +9,7 @@ Makefile
 /build/
 /lib/
 .cache
+/tests/build/
 
 # IDE-specific files and directories
 .vscode/
