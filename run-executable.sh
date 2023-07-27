@@ -31,4 +31,5 @@ if [ "$num_executables" -gt 1 ]; then
 fi
 
 echo -e "Executing ${YELLOW}${executable_paths}${NO_COLOR}..."
+echo ""
 "$executable_paths"

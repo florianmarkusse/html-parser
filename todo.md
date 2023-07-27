@@ -1,0 +1,2 @@
+- fix printing of node comparisons on failure.
+- investigate what happens when reading from empty file :O

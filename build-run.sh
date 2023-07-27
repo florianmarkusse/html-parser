@@ -68,6 +68,7 @@ if [ "$PROJECT_ONLY" = true ]; then
 else
 	echo -e "Build the main project and ${YELLOW}run tests${NO_COLOR}."
 fi
+echo ""
 
 # Perform the build based on the options
 cmake -S . -B build/ -D CMAKE_BUILD_TYPE="$BUILD_TYPE"

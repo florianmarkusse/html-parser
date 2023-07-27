@@ -293,8 +293,11 @@ ComparisonStatus equals(const Document *doc1, node_id *currNodeID1,
     return COMPARISON_SUCCESS;
 }
 
-void printFirstDifference(const Node *node1, const Document *doc1,
-                          const Node *node2, const Document *doc2) {
+void printFirstDifference(const node_id nodeID1, const Document *doc1,
+                          const node_id nodeID2, const Document *doc2) {
+    Node *node1 = &doc1->nodes[nodeID1 - 1];
+    Node *node2 = &doc2->nodes[nodeID2 - 1];
+
     if (compareTags(node1, doc1, node2, doc2, 1) != COMPARISON_SUCCESS) {
         return;
     }
@@ -309,6 +312,7 @@ void printFirstDifference(const Node *node1, const Document *doc1,
         }
     }
 
-    PRINT_ERROR("Could not find any differences for the supplied nodes/docs "
-                "combination.\n");
+    PRINT_ERROR(
+        "Could not find any differences for the supplied nodes & documents "
+        "combination.\n");
 }
