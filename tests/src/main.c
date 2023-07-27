@@ -1,8 +1,10 @@
+#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "comparisons/comparisons.h"
 
 int main() {
-    // Printing is fun
-    printf("I AM THE TEST\n");
-
-    return 0;
+    // run the test :D
+    testComparisons();
 }

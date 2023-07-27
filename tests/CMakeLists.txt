@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 project(html-parser-tests)
 
 list(APPEND TEST_SOURCE_FILES
-    "src/main-test.c"
+    "src/main.c"
+    "src/comparisons/comparisons.c"
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "debug")
@@ -18,4 +19,5 @@ add_executable(${EXECUTABLE_NAME} ${TEST_SOURCE_FILES})
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${LIBRARY_NAME})
 
 # Include the "include" directory from the main project, if necessary
+target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)

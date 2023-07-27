@@ -5,5 +5,7 @@
 #include "document.h"
 
 ComparisonStatus equals(const Document *doc1, const Document *doc2);
+void printFirstDifference(const Node *node1, const Document *doc1,
+                          const Node *node2, const Document *doc2);
 
 #endif
