@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include "dom/document-comparison.h"
@@ -223,10 +224,10 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus compareNode(const node_id doc1Node, const Document *doc1,
-                             const node_id doc2Node, const Document *doc2) {
-    Node node1 = doc1->nodes[doc1Node - 1];
-    Node node2 = doc2->nodes[doc2Node - 1];
+ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
+                             node_id *currNodeID2, const Document *doc2) {
+    Node node1 = doc1->nodes[*currNodeID1 - 1];
+    Node node2 = doc2->nodes[*currNodeID2 - 1];
 
     ComparisonStatus result = compareTags(&node1, doc1, &node2, doc2, 0);
     if (result != COMPARISON_SUCCESS) {
@@ -244,41 +245,48 @@ ComparisonStatus compareNode(const node_id doc1Node, const Document *doc1,
         }
     }
 
-    node_id childNode1 = getFirstChild(doc1Node, doc1);
-    node_id childNode2 = getFirstChild(doc2Node, doc2);
+    const node_id parentNodeID1 = *currNodeID1;
+    const node_id parentNodeID2 = *currNodeID2;
+    *currNodeID1 = getFirstChild(*currNodeID1, doc1);
+    *currNodeID2 = getFirstChild(*currNodeID2, doc2);
 
-    while (childNode1 && childNode2) {
-        ComparisonStatus comp = compareNode(childNode1, doc1, childNode2, doc2);
+    while (*currNodeID1 && *currNodeID2) {
+        ComparisonStatus comp =
+            compareNode(currNodeID1, doc1, currNodeID2, doc2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
 
-        childNode1 = getNextNode(childNode1, doc1);
-        childNode2 = getNextNode(childNode2, doc2);
+        *currNodeID1 = getNextNode(*currNodeID1, doc1);
+        *currNodeID2 = getNextNode(*currNodeID2, doc2);
     }
 
-    if (childNode1 ^ childNode2) {
+    if (*currNodeID1 ^ *currNodeID2) {
         return COMPARISON_DIFFERENT_SIZES;
     }
+
+    *currNodeID1 = parentNodeID1;
+    *currNodeID2 = parentNodeID2;
 
     return COMPARISON_SUCCESS;
 }
 
 ComparisonStatus equals(const Document *doc1, node_id *currNodeID1,
                         const Document *doc2, node_id *currNodeID2) {
-    node_id doc1Node = doc1->first->nodeID;
-    node_id doc2Node = doc2->first->nodeID;
-    while (doc1Node && doc2Node) {
-        ComparisonStatus comp = compareNode(doc1Node, doc1, doc2Node, doc2);
+    *currNodeID1 = doc1->first->nodeID;
+    *currNodeID2 = doc2->first->nodeID;
+    while (*currNodeID1 && *currNodeID2) {
+        ComparisonStatus comp =
+            compareNode(currNodeID1, doc1, currNodeID2, doc2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
 
-        doc1Node = getNextNode(doc1Node, doc1);
-        doc2Node = getNextNode(doc2Node, doc2);
+        *currNodeID1 = getNextNode(*currNodeID1, doc1);
+        *currNodeID2 = getNextNode(*currNodeID2, doc2);
     }
 
-    if (doc1Node ^ doc2Node) {
+    if (*currNodeID1 ^ *currNodeID2) {
         return COMPARISON_DIFFERENT_SIZES;
     }
 
