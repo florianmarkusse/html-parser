@@ -4,8 +4,8 @@
 #include "tokenizer/parse.h"
 #include "utils/print/error.h"
 
-DocumentStatus createDocument(const char *xmlString, Document *doc) {
-    doc->first = NULL;
+DocumentStatus createDocument(const char *htmlString, Document *doc) {
+    doc->firstNodeID = 0;
 
     doc->nodes = malloc(NODES_PAGE_SIZE);
     doc->nodeLen = 0;
@@ -39,7 +39,7 @@ DocumentStatus createDocument(const char *xmlString, Document *doc) {
         return DOCUMENT_ERROR_MEMORY;
     }
 
-    DocumentStatus documentStatus = parse(xmlString, doc);
+    DocumentStatus documentStatus = parse(htmlString, doc);
     if (documentStatus != DOCUMENT_SUCCESS) {
         PRINT_ERROR("Failed to parse document.\n");
     }
@@ -72,8 +72,8 @@ DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
         doc->nodeLen + 1; // We start at 1 because 0 is used as error id
     newNode->tagID = tagID;
 
-    if (doc->first == NULL) {
-        doc->first = newNode;
+    if (doc->firstNodeID == 0) {
+        doc->firstNodeID = newNode->nodeID;
     }
 
     doc->nodeLen++;
@@ -174,6 +174,18 @@ DocumentStatus addTextNode(const node_id nodeID, const element_id textID,
     newTextNode->nodeID = nodeID;
     newTextNode->textID = textID;
     doc->textLen++;
+    return DOCUMENT_SUCCESS;
+}
+
+DocumentStatus replaceTextNode(node_id nodeID, element_id newTextID,
+                               Document *doc) {
+    for (size_t i = 0; i < doc->textLen; i++) {
+        if (doc->text[i].nodeID == nodeID) {
+            doc->text[i].textID = newTextID;
+            break;
+        }
+    }
+
     return DOCUMENT_SUCCESS;
 }
 

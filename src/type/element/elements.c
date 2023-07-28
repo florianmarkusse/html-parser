@@ -33,11 +33,11 @@ ElementStatus createGlobals() {
     return ELEMENT_SUCCESS;
 }
 
-void destroyElementsContainer(ElementsContainer *elements) {
-    for (int i = 0; i < elements->pageLen; i++) {
-        free(elements->pages[i].start);
+void destroyElementsContainer(ElementsContainer *container) {
+    for (int i = 0; i < container->pageLen; i++) {
+        free(container->pages[i].start);
     }
-    elements->pageLen = 0;
+    container->pageLen = 0;
 }
 
 void destroyGlobals() {
@@ -87,7 +87,6 @@ ElementStatus createElement(ElementsContainer *container, const char *element,
         return ELEMENT_ARRAY_FULL;
     }
 
-    element_id index = offsetMask | (*currentElementsLen);
     DataPageStatus dataPageStatus =
         insertIntoPage(element, strlen(element) + 1, TOTAL_PAGES,
                        offsetMask | (*currentElementsLen), container);

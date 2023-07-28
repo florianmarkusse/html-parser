@@ -15,7 +15,10 @@ static const char *const FileStatusStrings[FILE_NUM_STATUS] = {
     "Success",          "Cannot open file",   "Cannot allocate memory",
     "Cannot read file", "Cannot create file", "Cannot write to file"};
 
-static const char *fileStatusToString(FileStatus status) {
+// Not always used, but very handy for those that actually do want readable
+// error codes.
+__attribute__((unused)) static const char *
+fileStatusToString(FileStatus status) {
     if (status >= 0 && status < FILE_NUM_STATUS) {
         return FileStatusStrings[status];
     }

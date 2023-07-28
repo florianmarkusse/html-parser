@@ -16,7 +16,10 @@ static const char *const ElementStatusStrings[ELEMENT_NUM_STATUS] = {
     "Element array max size reached",
 };
 
-static const char *tagStatusToString(ElementStatus status) {
+// Not always used, but very handy for those that actually do want readable
+// error codes.
+__attribute__((unused)) static const char *
+tagStatusToString(ElementStatus status) {
     if (status >= 0 && status < ELEMENT_NUM_STATUS) {
         return ElementStatusStrings[status];
     }

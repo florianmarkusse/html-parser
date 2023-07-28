@@ -31,7 +31,7 @@
 #define TEXT_NODES_PER_PAGE (TEXT_NODES_PAGE_SIZE / sizeof(TextNode))
 
 typedef struct {
-    Node *first;
+    node_id firstNodeID;
 
     Node *nodes;
     size_t nodeLen;
@@ -58,7 +58,7 @@ typedef struct {
     size_t textCap;
 } __attribute__((aligned(128))) Document;
 
-DocumentStatus createDocument(const char *xmlString, Document *doc);
+DocumentStatus createDocument(const char *htmlString, Document *doc);
 
 DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc);
 DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
@@ -70,6 +70,8 @@ DocumentStatus addBooleanProperty(node_id nodeID, element_id propID,
 DocumentStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
                            Document *doc);
 DocumentStatus addTextNode(node_id nodeID, element_id textID, Document *doc);
+DocumentStatus replaceTextNode(node_id nodeID, element_id newTextID,
+                               Document *doc);
 node_id getFirstChild(node_id parentID, const Document *doc);
 node_id getNextNode(node_id currentNodeID, const Document *doc);
 

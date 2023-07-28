@@ -19,7 +19,10 @@ static const char *const DocumentStatusStrings[DOCUMENT_NUM_STATUS] = {
     "Too many nested tags",
     "Too many attributes on single tag"};
 
-static const char *documentStatusToString(DocumentStatus status) {
+// Not always used, but very handy for those that actually do want readable
+// error codes.
+__attribute__((unused)) static const char *
+documentStatusToString(DocumentStatus status) {
     if (status >= 0 && status < DOCUMENT_NUM_STATUS) {
         return DocumentStatusStrings[status];
     }

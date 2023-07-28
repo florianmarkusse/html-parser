@@ -21,7 +21,10 @@ static const char *const ComparisonStatusStrings[COMPARISON_NUM_STATUS] = {
     "Different number of nodes",
     "Text nodes have different content"};
 
-static const char *comparisonStatusToString(ComparisonStatus status) {
+// Not always used, but very handy for those that actually do want readable
+// error codes.
+__attribute__((unused)) static const char *
+comparisonStatusToString(ComparisonStatus status) {
     if (status >= 0 && status < COMPARISON_NUM_STATUS) {
         return ComparisonStatusStrings[status];
     }

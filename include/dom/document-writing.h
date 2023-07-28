@@ -4,7 +4,7 @@
 #include "document.h"
 
 void printDocumentStatus(const Document *doc);
-void printXML(const Document *doc);
-FileStatus writeXMLToFile(const Document *doc, const char *filePath);
+void printHTML(const Document *doc);
+FileStatus writeHTMLToFile(const Document *doc, const char *filePath);
 
 #endif

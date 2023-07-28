@@ -11,7 +11,10 @@ typedef enum {
 static const char *const TestStatusStrings[TEST_NUM_STATUS] = {
     "Success", "Initialization Error", "Failure"};
 
-static const char *testStatusToString(TestStatus status) {
+// Not always used, but very handy for those that actually do want readable
+// error codes.
+__attribute__((unused)) static const char *
+testStatusToString(TestStatus status) {
     if (status >= 0 && status < TEST_NUM_STATUS) {
         return TestStatusStrings[status];
     }

@@ -193,18 +193,18 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
 
     if (isSingle(node1->tagID) ^ isSingle(node2->tagID)) {
         if (printDifferences) {
-            char singleDoc = '1';
+            char singleNode = '1';
             if (isSingle(node2->tagID)) {
-                singleDoc++;
+                singleNode++;
             }
 
             const char *tag1 = gTags.container.elements[node1->tagID];
             const char *tag2 = gTags.container.elements[node2->tagID];
             PRINT_ERROR(
                 "Uncomparable nodes: single node and paired node.\nFound "
-                "single node in document %c.\n"
-                "document 1 tag: %s\ndocument 2 tag: %s\n",
-                singleDoc, tag1, tag2);
+                "single node in node %c.\n"
+                "node 1 tag: %s\nnode 2 tag: %s\n",
+                singleNode, tag1, tag2);
             return COMPARISON_DIFFERENT_NODE_TYPE;
         }
     }
@@ -213,10 +213,9 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
         if (printDifferences) {
             const char *tag1 = gTags.container.elements[node1->tagID];
             const char *tag2 = gTags.container.elements[node2->tagID];
-            PRINT_ERROR(
-                "Nodes have different tags.\ndocument 1 tag: %s\ndocument "
-                "2 tag: %s\n",
-                tag1, tag2);
+            PRINT_ERROR("Nodes have different tags.\nnode 1 tag: %s\nnode "
+                        "2 tag: %s\n",
+                        tag1, tag2);
         }
         return COMPARISON_DIFFERENT_TAGS;
     }
@@ -273,8 +272,8 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
 
 ComparisonStatus equals(const Document *doc1, node_id *currNodeID1,
                         const Document *doc2, node_id *currNodeID2) {
-    *currNodeID1 = doc1->first->nodeID;
-    *currNodeID2 = doc2->first->nodeID;
+    *currNodeID1 = doc1->firstNodeID;
+    *currNodeID2 = doc2->firstNodeID;
     while (*currNodeID1 && *currNodeID2) {
         ComparisonStatus comp =
             compareNode(currNodeID1, doc1, currNodeID2, doc2);

@@ -81,9 +81,9 @@ void printNode(const node_id nodeID, const size_t indentation,
     fprintf(output, "</%s>", tag);
 }
 
-void printXML(const Document *doc) {
-    printf("printing XML...\n\n");
-    node_id currentNodeID = doc->first->nodeID;
+void printHTML(const Document *doc) {
+    printf("printing HTML...\n\n");
+    node_id currentNodeID = doc->firstNodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, doc, stdout);
         currentNodeID = getNextNode(currentNodeID, doc);
@@ -91,7 +91,7 @@ void printXML(const Document *doc) {
     printf("\n\n");
 }
 
-FileStatus writeXMLToFile(const Document *doc, const char *filePath) {
+FileStatus writeHTMLToFile(const Document *doc, const char *filePath) {
     createPath(filePath);
     FILE *file = fopen(filePath, "wbe");
     if (file == NULL) {
@@ -99,7 +99,7 @@ FileStatus writeXMLToFile(const Document *doc, const char *filePath) {
         return FILE_CANT_OPEN;
     }
 
-    node_id currentNodeID = doc->first->nodeID;
+    node_id currentNodeID = doc->firstNodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, doc, file);
         currentNodeID = getNextNode(currentNodeID, doc);

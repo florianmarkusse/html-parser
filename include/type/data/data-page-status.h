@@ -14,7 +14,10 @@ static const char *const DataPageStatusStrings[DATA_PAGE_NUM_STATUS] = {
     "Memory",
 };
 
-static const char *dataPageStatusToString(DataPageStatus status) {
+// Not always used, but very handy for those that actually do want readable
+// error codes.
+__attribute__((unused)) static const char *
+dataPageStatusToString(DataPageStatus status) {
     if (status >= 0 && status < DATA_PAGE_NUM_STATUS) {
         return DataPageStatusStrings[status];
     }

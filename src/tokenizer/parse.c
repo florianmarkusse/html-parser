@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "dom/document-utils.h"
 #include "dom/document.h"
 #include "tokenizer/parse-property.h"
 #include "tokenizer/parse.h"
@@ -82,6 +83,29 @@ DocumentStatus addTextToDocument(const char *tagStart, const size_t tagLength,
                                  NodeDepth *depthStack
 
 ) {
+    // Comments require us to merge this and the previous text node :(
+    Node prevNode = doc->nodes[*previousNodeID - 1];
+    if (isText(prevNode.tagID)) {
+        const char *prevText = getText(prevNode.nodeID, doc);
+        const size_t mergedLen =
+            strlen(prevText) + tagLength + 2; // Adding a whitespace in between.
+
+        char buffer[mergedLen];
+        strcpy(buffer, prevText);
+        strcat(buffer, " ");
+        strncat(buffer, tagStart, tagLength);
+        buffer[mergedLen - 1] = '\0';
+
+        element_id updatedTextID = 0;
+
+        if (elementToIndex(&gText.container, &gText.len, buffer, mergedLen, 1,
+                           0, &updatedTextID) != ELEMENT_SUCCESS) {
+            return DOCUMENT_NO_ELEMENT;
+        }
+
+        return replaceTextNode(prevNode.nodeID, updatedTextID, doc);
+    }
+
     element_id tagID = 0;
     if (textElementToIndex(&tagID) != ELEMENT_SUCCESS) {
         return DOCUMENT_NO_ELEMENT;
@@ -93,7 +117,7 @@ DocumentStatus addTextToDocument(const char *tagStart, const size_t tagLength,
 
     element_id textID = 0;
 
-    if (elementToIndex(&gText.container, &gText.len, tagStart, tagLength, 1, 1,
+    if (elementToIndex(&gText.container, &gText.len, tagStart, tagLength, 1, 0,
                        &textID) != ELEMENT_SUCCESS) {
         return DOCUMENT_NO_ELEMENT;
     }
@@ -131,7 +155,7 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
                            &propID) != ELEMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
-        if (addBooleanProperty(*newNodeID, propID, doc) != ELEMENT_SUCCESS) {
+        if (addBooleanProperty(*newNodeID, propID, doc) != DOCUMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
     }
@@ -154,7 +178,7 @@ addToDocument(const char *tagStart, size_t tagLength, Document *doc,
             return DOCUMENT_NO_ELEMENT;
         }
 
-        if (addProperty(*newNodeID, keyID, valueID, doc) != ELEMENT_SUCCESS) {
+        if (addProperty(*newNodeID, keyID, valueID, doc) != DOCUMENT_SUCCESS) {
             return DOCUMENT_NO_ELEMENT;
         }
     }
@@ -191,14 +215,12 @@ addPairedNode(const char *tagStart, size_t tagLength, Document *doc,
 DocumentStatus putPropertyOnStack(size_t *currentStackLen,
                                   ParseProperty stack[MAX_PROPERTIES],
                                   const size_t propStart, const size_t propEnd,
-                                  const char *xmlString) {
+                                  const char *htmlString) {
     const size_t propLen = propEnd - propStart;
-    const char *start = &xmlString[propStart];
+    const char *start = &htmlString[propStart];
     if (*currentStackLen >= MAX_PROPERTIES) {
         PRINT_ERROR("Max number of %u properties per tag reached.\n",
                     MAX_PROPERTIES);
-        ParseProperty attr = stack[*currentStackLen - 1];
-
         char buffer[propLen];
         strncpy(buffer, start, propLen);
         buffer[propLen] = '\0';
@@ -214,7 +236,7 @@ DocumentStatus putPropertyOnStack(size_t *currentStackLen,
     return DOCUMENT_SUCCESS;
 }
 
-DocumentStatus parse(const char *xmlString, Document *doc) {
+DocumentStatus parse(const char *htmlString, Document *doc) {
     State state = OPEN_PAIRED;
 
     size_t currentPosition = 0;
@@ -245,7 +267,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
 
     node_id newNodeID = 0;
     node_id previousNodeID = 0;
-    char ch = xmlString[currentPosition];
+    char ch = htmlString[currentPosition];
     while (ch != '\0') {
         //         printf("Current state: %s\n", stateToString(state));
         //         if (isprint(ch)) {
@@ -290,6 +312,16 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
         //                 break;
         //             }
         //         }
+        //
+
+        // Ignore pesky comments '<!- ..... >
+        if (ch == '<' && htmlString[currentPosition + 1] == '!' &&
+            htmlString[currentPosition + 2] == '-') {
+            while (ch != '>') {
+                ch = htmlString[++currentPosition];
+            }
+            ch = htmlString[++currentPosition];
+        }
 
         switch (state) {
         case OPEN_TAG:
@@ -316,7 +348,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             if (ch == '>') {
                 tagLength = currentPosition - tagNameStart;
                 documentStatus =
-                    addPairedNode(&xmlString[tagNameStart], tagLength, doc,
+                    addPairedNode(&htmlString[tagNameStart], tagLength, doc,
                                   &previousNodeID, &depthStack, &binaryProps,
                                   &propKeys, &propValues, &newNodeID);
                 state = OPEN_PAIRED;
@@ -329,7 +361,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             }
             if (ch == '/' || (isExclam && ch == '>')) {
                 documentStatus =
-                    addToDocument(&xmlString[tagNameStart], tagLength, doc,
+                    addToDocument(&htmlString[tagNameStart], tagLength, doc,
                                   &previousNodeID, &depthStack, 0, &binaryProps,
                                   &propKeys, &propValues, &newNodeID);
                 isExclam = 0;
@@ -340,7 +372,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
                 }
             } else if (ch == '>') {
                 documentStatus =
-                    addPairedNode(&xmlString[tagNameStart], tagLength, doc,
+                    addPairedNode(&htmlString[tagNameStart], tagLength, doc,
                                   &previousNodeID, &depthStack, &binaryProps,
                                   &propKeys, &propValues, &newNodeID);
                 state = OPEN_PAIRED;
@@ -350,21 +382,21 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             if (ch == ' ' || ch == '>') {
                 documentStatus = putPropertyOnStack(
                     &binaryProps.len, binaryProps.stack, propKeyStart,
-                    currentPosition, xmlString);
+                    currentPosition, htmlString);
                 if (ch == ' ') {
                     state = ATTRS;
                 } else {
                     if (documentStatus == DOCUMENT_SUCCESS) {
                         if (isExclam) {
                             documentStatus = addToDocument(
-                                &xmlString[tagNameStart], tagLength, doc,
+                                &htmlString[tagNameStart], tagLength, doc,
                                 &previousNodeID, &depthStack, 0, &binaryProps,
                                 &propKeys, &propValues, &newNodeID);
                             isExclam = 0;
                             state = OPEN_PAIRED;
                         } else {
                             documentStatus = addPairedNode(
-                                &xmlString[tagNameStart], tagLength, doc,
+                                &htmlString[tagNameStart], tagLength, doc,
                                 &previousNodeID, &depthStack, &binaryProps,
                                 &propKeys, &propValues, &newNodeID);
                             state = OPEN_PAIRED;
@@ -374,7 +406,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             } else if (ch == '=') {
                 documentStatus = putPropertyOnStack(
                     &propKeys.len, propKeys.stack, propKeyStart,
-                    currentPosition, xmlString);
+                    currentPosition, htmlString);
                 currentPosition += 2; // skip '="'
                 propValueStart = currentPosition;
                 state = ATTR_VALUE;
@@ -385,7 +417,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             if (ch == '"') {
                 documentStatus = putPropertyOnStack(
                     &propValues.len, propValues.stack, propValueStart,
-                    currentPosition, xmlString);
+                    currentPosition, htmlString);
                 state = ATTRS;
             }
             break;
@@ -415,7 +447,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             if (ch == '\n' || ch == '<') {
                 size_t textNodeSize = currentPosition - textNodeStart;
                 documentStatus =
-                    addTextToDocument(&xmlString[textNodeStart], textNodeSize,
+                    addTextToDocument(&htmlString[textNodeStart], textNodeSize,
                                       doc, &previousNodeID, &depthStack);
 
                 if (ch == '\n') {
@@ -438,7 +470,7 @@ DocumentStatus parse(const char *xmlString, Document *doc) {
             break;
         }
 
-        ch = xmlString[++currentPosition];
+        ch = htmlString[++currentPosition];
     }
 
     return documentStatus;
