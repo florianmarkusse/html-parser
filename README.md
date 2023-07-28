@@ -2,7 +2,7 @@
 
 This project. contains my (in-progress) implementation of a lenient HTML-parser. 
 
-**Currently, this project is only good for minfying HTML. Please come back later or [contribute](#Contributing) to speed up the process of this project.**
+**Currently, this project is only good for minfying HTML. Please come back later or [contribute](#contributing) to speed up the process of this project.**
 
 ## Functionalities
 - Reading an HTML file or string into a `Document`.
