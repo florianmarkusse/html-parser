@@ -1,5 +1,3 @@
-- fix printing of node comparisons on failure.
-
 - Deleting/Modifying global elements
     - E.g., when we merge text nodes during parsing.
 
