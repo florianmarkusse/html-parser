@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "dom/document.h"
-#include "tokenizer/parse.h"
+#include "parse/parse.h"
 #include "utils/print/error.h"
 
 DocumentStatus createDocument(const char *htmlString, Document *doc) {

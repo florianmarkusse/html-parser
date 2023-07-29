@@ -1,11 +1,12 @@
 #include <stdio.h>
 
 #include "comparisons/comparisons.h"
-#include "dom/document-comparison.h"
+#include "dom/comparison/document-comparison.h"
 #include "dom/document-user.h"
 #include "dom/document.h"
 #include "pretty-print.h"
 #include "test-status.h"
+#include "test.h"
 #include "utils/print/error.h"
 
 #define CURRENT_DIR "tests/src/comparisons/"
@@ -21,10 +22,7 @@
 #define TEST_FILE_10 CURRENT_DIR "test-10.html"
 
 TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
-                        const ComparisonStatus expectedResult,
-                        const char *testName) {
-    printf("    Testing %-50s", testName);
-
+                        const ComparisonStatus expectedResult) {
     createGlobals();
 
     Document doc1;
@@ -46,19 +44,16 @@ TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
     TestStatus result = TEST_FAILURE;
 
     if (comp == expectedResult) {
-        printf("%s%-20s%s\n", ANSI_COLOR_GREEN, "Success", ANSI_COLOR_RESET);
+        printTestSuccess();
         result = TEST_SUCCESS;
     } else {
-        printf("%s%-20s%s\n", ANSI_COLOR_RED, "Failure", ANSI_COLOR_RESET);
-        printf("---------------------------------------------------------------"
-               "---\n");
-        printf("%-10s: %-4u - %s\n", "Expected", expectedResult,
-               comparisonStatusToString(expectedResult));
-        printf("%-10s: %-4u - %s\n", "Actual", comp,
-               comparisonStatusToString(comp));
+        printTestFailure();
+        printTestDemarcation();
+        printTestResultDifference(expectedResult,
+                                  comparisonStatusToString(expectedResult),
+                                  comp, comparisonStatusToString(comp));
         printFirstDifference(nodeID1, &doc1, nodeID2, &doc2);
-        printf("---------------------------------------------------------------"
-               "---\n");
+        printTestDemarcation();
     }
 
     destroyDocument(&doc1);
@@ -69,10 +64,14 @@ TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
     return result;
 }
 
-void testAndCount(const char *fileLocation1, const char *fileLocation2,
-                  const ComparisonStatus expectedResult, const char *testName,
-                  size_t *localSuccesses, size_t *localFailures) {
-    if (compareFiles(fileLocation1, fileLocation2, expectedResult, testName) ==
+static inline void testAndCount(const char *fileLocation1,
+                                const char *fileLocation2,
+                                const ComparisonStatus expectedResult,
+                                const char *testName, size_t *localSuccesses,
+                                size_t *localFailures) {
+    printTestStart(testName);
+
+    if (compareFiles(fileLocation1, fileLocation2, expectedResult) ==
         TEST_SUCCESS) {
         (*localSuccesses)++;
     } else {
@@ -81,7 +80,7 @@ void testAndCount(const char *fileLocation1, const char *fileLocation2,
 }
 
 unsigned char testComparisons(size_t *successes, size_t *failures) {
-    printf("Testing document comparisons...\n");
+    printTestTopicStart("document comparisons");
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
@@ -109,7 +108,7 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
                  "comments; comments inside text nodes still BUGGED",
                  &localSuccesses, &localFailures);
 
-    printf("[ %zu / %lu ]\n", localSuccesses, localFailures + localSuccesses);
+    printTestScore(localSuccesses, localFailures);
 
     *successes += localSuccesses;
     *failures += localFailures;

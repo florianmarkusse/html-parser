@@ -4,6 +4,8 @@
 
 #include "comparisons/comparisons.h"
 #include "pretty-print.h"
+#include "querying/querying.h"
+#include "test.h"
 
 int main() {
     printf("Starting test suite...\n\n");
@@ -14,7 +16,10 @@ int main() {
     testComparisons(&successes, &failures);
     printf("\n");
 
-    printf("[ %zu / %lu ]\n", successes, failures + successes);
+    testQueries(&successes, &failures);
+    printf("\n");
+
+    printTestScore(successes, failures);
     if (failures > 0) {
         printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
     } else {

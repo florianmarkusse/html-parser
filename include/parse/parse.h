@@ -1,5 +1,5 @@
-#ifndef TOKENIZER_PARSE_H
-#define TOKENIZER_PARSE_H
+#ifndef PARSE_PARSE_H
+#define PARSE_PARSE_H
 
 #include "dom/document.h"
 

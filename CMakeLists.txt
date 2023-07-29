@@ -30,9 +30,10 @@ add_library(${LIBRARY_NAME} SHARED
     "src/type/data/data-functions.c"
     "src/dom/document.c"
     "src/dom/document-writing.c"
-    "src/tokenizer/parse.c" 
+    "src/parse/parse.c" 
     "src/dom/document-user.c"
-    "src/dom/document-comparison.c"
+    "src/dom/comparison/document-comparison.c"
+    "src/dom/querying/document-querying.c"
     "src/dom/document-utils.c"
 )
 

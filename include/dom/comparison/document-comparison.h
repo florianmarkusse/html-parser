@@ -1,8 +1,8 @@
-#ifndef DOM_DOCUMENT_COMPARISON_H
-#define DOM_DOCUMENT_COMPARISON_H
+#ifndef DOM_COMPARISON_DOCUMENT_COMPARISON_H
+#define DOM_COMPARISON_DOCUMENT_COMPARISON_H
 
 #include "document-comparison-status.h"
-#include "document.h"
+#include "dom/document.h"
 
 ComparisonStatus equals(const Document *doc1, node_id *currNodeID1,
                         const Document *doc2, node_id *currNodeID2);

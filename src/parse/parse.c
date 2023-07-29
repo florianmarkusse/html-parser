@@ -6,9 +6,10 @@
 
 #include "dom/document-utils.h"
 #include "dom/document.h"
-#include "tokenizer/parse-property.h"
-#include "tokenizer/parse.h"
+#include "parse/parse-property.h"
+#include "parse/parse.h"
 #include "utils/print/error.h"
+#include "utils/text/text.h"
 
 typedef enum {
     OPEN_TAG,
@@ -22,7 +23,7 @@ typedef enum {
     NUM_STATES
 } State;
 
-const char *stateToString(State state) {
+static inline const char *stateToString(State state) {
     static const char *stateStrings[NUM_STATES] = {
         "OPEN_TAG", "CLOSE_TAG",  "TAG_NAME",    "ATTRS",
         "ATTR_KEY", "ATTR_VALUE", "OPEN_PAIRED", "TEXT_NODE"};
@@ -43,10 +44,6 @@ typedef struct {
     node_id stack[MAX_NODE_DEPTH];
     node_id len;
 } __attribute__((aligned(128))) NodeDepth;
-
-unsigned char isAlphaBetical(const char ch) {
-    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
-}
 
 DocumentStatus updateReferences(const node_id newNodeID,
                                 node_id *previousNodeID, NodeDepth *depthStack,

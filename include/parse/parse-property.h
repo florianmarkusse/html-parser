@@ -1,5 +1,5 @@
-#ifndef TOKENIZER_PARSE_PROPERTY_H
-#define TOKENIZER_PARSE_PROPERTY_H
+#ifndef PARSE_PARSE_PROPERTY_H
+#define PARSE_PARSE_PROPERTY_H
 
 #include <stddef.h>
 

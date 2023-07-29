@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "dom/document-comparison.h"
+#include "dom/comparison/document-comparison.h"
 #include "dom/document-utils.h"
-#include "tokenizer/parse.h"
+#include "parse/parse.h"
 #include "utils/print/error.h"
 
 void printProps(const element_id node1Tag, const element_id node1PropsLen,

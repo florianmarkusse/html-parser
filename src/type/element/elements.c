@@ -103,17 +103,29 @@ ElementStatus createElement(ElementsContainer *container, const char *element,
     return ELEMENT_SUCCESS;
 }
 
-ElementStatus findOrCreateElement(ElementsContainer *container,
-                                  const char *elementName,
-                                  element_id *currentElementLen,
-                                  const element_id offsetMask,
-                                  element_id *elementID) {
+ElementStatus findElement(ElementsContainer *container,
+                          const element_id *currentElementLen,
+                          const char *elementName, element_id offsetMask,
+                          element_id *elementID) {
     for (element_id i = offsetMask; i < (offsetMask | *currentElementLen);
          ++i) {
         if (strcmp(container->elements[i], elementName) == 0) {
             *elementID = i;
             return ELEMENT_SUCCESS;
         }
+    }
+
+    return ELEMENT_NOT_FOUND_OR_CREATED;
+}
+
+ElementStatus findOrCreateElement(ElementsContainer *container,
+                                  const char *elementName,
+                                  element_id *currentElementLen,
+                                  const element_id offsetMask,
+                                  element_id *elementID) {
+    if (findElement(container, currentElementLen, elementName, offsetMask,
+                    elementID) == ELEMENT_SUCCESS) {
+        return ELEMENT_SUCCESS;
     }
 
     return createElement(container, elementName, currentElementLen, offsetMask,

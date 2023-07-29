@@ -26,6 +26,10 @@ extern Elements gText;
 ElementStatus createGlobals();
 void destroyGlobals();
 
+ElementStatus findElement(ElementsContainer *container,
+                          const element_id *currentElementLen,
+                          const char *elementName, element_id offsetMask,
+                          element_id *elementID);
 ElementStatus elementToIndex(ElementsContainer *container,
                              element_id *currentElementLen,
                              const char *elementStart, size_t elementLength,

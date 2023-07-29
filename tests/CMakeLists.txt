@@ -4,6 +4,7 @@ project(html-parser-tests)
 list(APPEND TEST_SOURCE_FILES
     "src/main.c"
     "src/comparisons/comparisons.c"
+    "src/querying/querying.c"
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "debug")
