@@ -11,6 +11,8 @@
 #include "utils/print/error.h"
 #include "utils/text/text.h"
 
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 typedef enum {
     OPEN_TAG,
     CLOSE_TAG,
@@ -20,13 +22,14 @@ typedef enum {
     ATTR_VALUE,
     OPEN_PAIRED,
     TEXT_NODE,
+    COMMENT,
     NUM_STATES
 } State;
 
 static inline const char *stateToString(State state) {
     static const char *stateStrings[NUM_STATES] = {
-        "OPEN_TAG", "CLOSE_TAG",  "TAG_NAME",    "ATTRS",
-        "ATTR_KEY", "ATTR_VALUE", "OPEN_PAIRED", "TEXT_NODE"};
+        "OPEN_TAG",   "CLOSE_TAG",   "TAG_NAME",  "ATTRS",  "ATTR_KEY",
+        "ATTR_VALUE", "OPEN_PAIRED", "TEXT_NODE", "COMMENT"};
 
     if (state >= 0 && state < NUM_STATES) {
         return stateStrings[state];
@@ -266,59 +269,49 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
     node_id previousNodeID = 0;
     char ch = htmlString[currentPosition];
     while (ch != '\0') {
-        //         printf("Current state: %s\n", stateToString(state));
-        //         if (isprint(ch)) {
-        //             printf("'%c' = %d\n", ch, ch);
-        //         } else {
-        //             switch (ch) {
-        //             case '\0':
-        //                 printf("'\\0' (null terminator) = %d\n", ch);
-        //                 break;
-        //             case '\a':
-        //                 printf("'\\a' (alert) = %d\n", ch);
-        //                 break;
-        //             case '\b':
-        //                 printf("'\\b' (backspace) = %d\n", ch);
-        //                 break;
-        //             case '\f':
-        //                 printf("'\\f' (form feed) = %d\n", ch);
-        //                 break;
-        //             case '\r':
-        //                 printf("'\\r' (carriage return) = %d\n", ch);
-        //                 break;
-        //             case '\t':
-        //                 printf("'\\t' (tab) = %d\n", ch);
-        //                 break;
-        //             case '\v':
-        //                 printf("'\\v' (vertical tab) = %d\n", ch);
-        //                 break;
-        //             case '\n':
-        //                 printf("'\\n' (newline) = %d\n", ch);
-        //                 break;
-        //             case '\\':
-        //                 printf("'\\\\' (backslash) = %d\n", ch);
-        //                 break;
-        //             case '\'':
-        //                 printf("'\\'' (single quote) = %d\n", ch);
-        //                 break;
-        //             case '\"':
-        //                 printf("'\\\"' (double quote) = %d\n", ch);
-        //                 break;
-        //             default:
-        //                 printf("'%c' (non-printable) = %d\n", ch, ch);
-        //                 break;
-        //             }
-        //         }
-        //
-
-        // Ignore pesky comments '<!- ..... >
-        if (ch == '<' && htmlString[currentPosition + 1] == '!' &&
-            htmlString[currentPosition + 2] == '-') {
-            while (ch != '>') {
-                ch = htmlString[++currentPosition];
-            }
-            ch = htmlString[++currentPosition];
-        }
+        //        printf("Current state: %s\n", stateToString(state));
+        //        if (isprint(ch)) {
+        //            printf("'%c' = %d\n", ch, ch);
+        //        } else {
+        //            switch (ch) {
+        //            case '\0':
+        //                printf("'\\0' (null terminator) = %d\n", ch);
+        //                break;
+        //            case '\a':
+        //                printf("'\\a' (alert) = %d\n", ch);
+        //                break;
+        //            case '\b':
+        //                printf("'\\b' (backspace) = %d\n", ch);
+        //                break;
+        //            case '\f':
+        //                printf("'\\f' (form feed) = %d\n", ch);
+        //                break;
+        //            case '\r':
+        //                printf("'\\r' (carriage return) = %d\n", ch);
+        //                break;
+        //            case '\t':
+        //                printf("'\\t' (tab) = %d\n", ch);
+        //                break;
+        //            case '\v':
+        //                printf("'\\v' (vertical tab) = %d\n", ch);
+        //                break;
+        //            case '\n':
+        //                printf("'\\n' (newline) = %d\n", ch);
+        //                break;
+        //            case '\\':
+        //                printf("'\\\\' (backslash) = %d\n", ch);
+        //                break;
+        //            case '\'':
+        //                printf("'\\'' (single quote) = %d\n", ch);
+        //                break;
+        //            case '\"':
+        //                printf("'\\\"' (double quote) = %d\n", ch);
+        //                break;
+        //            default:
+        //                printf("'%c' (non-printable) = %d\n", ch, ch);
+        //                break;
+        //            }
+        //        }
 
         switch (state) {
         case OPEN_TAG:
@@ -332,11 +325,23 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
                 state = TAG_NAME;
             }
             if (ch == '!') {
-                isExclam = 1;
-                tagNameStart = currentPosition;
-                state = TAG_NAME;
+                if (htmlString[currentPosition + 1] == '-' &&
+                    htmlString[currentPosition + 2] == '-') {
+                    state = COMMENT;
+                } else {
+                    isExclam = 1;
+                    tagNameStart = currentPosition;
+                    state = TAG_NAME;
+                }
             }
             break;
+        case COMMENT: {
+            if (ch == '>' && htmlString[MAX(0, currentPosition - 1)] == '-' &&
+                htmlString[MAX(0, currentPosition - 2)] == '-') {
+                state = OPEN_PAIRED;
+            }
+            break;
+        }
         case TAG_NAME:
             if (ch == ' ') {
                 tagLength = currentPosition - tagNameStart;

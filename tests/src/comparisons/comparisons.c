@@ -104,8 +104,7 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
                  "different tags", &localSuccesses, &localFailures);
     testAndCount(TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_TEXT,
                  "different text nodes", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS,
-                 "comments; comments inside text nodes still BUGGED",
+    testAndCount(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments",
                  &localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
