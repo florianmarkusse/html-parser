@@ -2,6 +2,7 @@
 
 #include "dom/document.h"
 #include "parse/parse.h"
+#include "utils/memory/memory.h"
 #include "utils/print/error.h"
 
 DocumentStatus createDocument(const char *htmlString, Document *doc) {
@@ -11,9 +12,13 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
     doc->nodeLen = 0;
     doc->nodeCap = NODES_PER_PAGE;
 
-    doc->parentFirstChilds = malloc(PARENT_CHILDS_PAGE_SIZE);
+    doc->parentFirstChilds = malloc(PARENT_FIRST_CHILDS_PAGE_SIZE);
     doc->parentFirstChildLen = 0;
-    doc->parentFirstChildCap = PARENT_CHILDS_PER_PAGE;
+    doc->parentFirstChildCap = PARENT_FIRST_CHILDS_PER_PAGE;
+
+    doc->parentChilds = malloc(PARENT_CHILDS_PAGE_SIZE);
+    doc->parentChildLen = 0;
+    doc->parentChildCap = PARENT_CHILDS_PER_PAGE;
 
     doc->nextNodes = malloc(NEXT_NODES_PAGE_SIZE);
     doc->nextNodeLen = 0;
@@ -32,8 +37,8 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
     doc->textCap = TEXT_NODES_PER_PAGE;
 
     if (doc->nodes == NULL || doc->parentFirstChilds == NULL ||
-        doc->nextNodes == NULL || doc->boolProps == NULL ||
-        doc->props == NULL || doc->text == NULL) {
+        doc->parentChilds == NULL || doc->nextNodes == NULL ||
+        doc->boolProps == NULL || doc->props == NULL || doc->text == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDocument(doc);
         return DOCUMENT_ERROR_MEMORY;
@@ -44,21 +49,6 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
         PRINT_ERROR("Failed to parse document.\n");
     }
     return documentStatus;
-}
-
-void *resizeArray(void *array, size_t currentLen, size_t *currentCap,
-                  size_t elementSize, size_t extraElements) {
-    if (currentLen < *currentCap) {
-        return array;
-    }
-    size_t newCap = (currentLen + extraElements) * elementSize;
-    void *newArray = realloc(array, newCap);
-    if (newArray == NULL) {
-        PRINT_ERROR("Failed to reallocate more memory for the array.\n");
-        return NULL;
-    }
-    *currentCap = newCap / elementSize;
-    return newArray;
 }
 
 DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
@@ -81,12 +71,12 @@ DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
     return DOCUMENT_SUCCESS;
 }
 
-DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
-                                   Document *doc) {
+DocumentStatus addParentFirstChild(const node_id parentID,
+                                   const node_id childID, Document *doc) {
     if ((doc->parentFirstChilds =
              resizeArray(doc->parentFirstChilds, doc->parentFirstChildLen,
                          &doc->parentFirstChildCap, sizeof(ParentFirstChild),
-                         PARENT_CHILDS_PER_PAGE)) == NULL) {
+                         PARENT_FIRST_CHILDS_PER_PAGE)) == NULL) {
         return DOCUMENT_ERROR_MEMORY;
     }
 
@@ -95,6 +85,21 @@ DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
     newParentFirstChild->parentID = parentID;
     newParentFirstChild->childID = childID;
     doc->parentFirstChildLen++;
+    return DOCUMENT_SUCCESS;
+}
+
+DocumentStatus addParentChild(const node_id parentID, const node_id childID,
+                              Document *doc) {
+    if ((doc->parentChilds = resizeArray(
+             doc->parentChilds, doc->parentChildLen, &doc->parentChildCap,
+             sizeof(ParentChild), PARENT_CHILDS_PER_PAGE)) == NULL) {
+        return DOCUMENT_ERROR_MEMORY;
+    }
+
+    ParentChild *newParentChild = &(doc->parentChilds[doc->parentChildLen]);
+    newParentChild->parentID = parentID;
+    newParentChild->childID = childID;
+    doc->parentChildLen++;
     return DOCUMENT_SUCCESS;
 }
 
@@ -107,8 +112,8 @@ node_id getFirstChild(const node_id parentID, const Document *doc) {
     return 0;
 }
 
-DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
-                           Document *doc) {
+DocumentStatus addNextNode(const node_id currentNodeID,
+                           const node_id nextNodeID, Document *doc) {
     if ((doc->nextNodes =
              resizeArray(doc->nextNodes, doc->nextNodeLen, &doc->nextNodeCap,
                          sizeof(NextNode), NEXT_NODES_PER_PAGE)) == NULL) {
@@ -177,7 +182,7 @@ DocumentStatus addTextNode(const node_id nodeID, const element_id textID,
     return DOCUMENT_SUCCESS;
 }
 
-DocumentStatus replaceTextNode(node_id nodeID, element_id newTextID,
+DocumentStatus replaceTextNode(const node_id nodeID, element_id newTextID,
                                Document *doc) {
     for (size_t i = 0; i < doc->textLen; i++) {
         if (doc->text[i].nodeID == nodeID) {
@@ -192,6 +197,7 @@ DocumentStatus replaceTextNode(node_id nodeID, element_id newTextID,
 void destroyDocument(const Document *doc) {
     free((void *)doc->nodes);
     free((void *)doc->parentFirstChilds);
+    free((void *)doc->parentChilds);
     free((void *)doc->nextNodes);
     free((void *)doc->boolProps);
     free((void *)doc->props);

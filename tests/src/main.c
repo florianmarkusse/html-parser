@@ -16,8 +16,8 @@ int main() {
     testComparisons(&successes, &failures);
     printf("\n");
 
-    //    testQueries(&successes, &failures);
-    //    printf("\n");
+    testQueries(&successes, &failures);
+    printf("\n");
 
     printTestScore(successes, failures);
     if (failures > 0) {

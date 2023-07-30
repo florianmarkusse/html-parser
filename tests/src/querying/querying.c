@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "dom/document-user.h"
+#include "dom/document-writing.h"
 #include "dom/document.h"
 #include "dom/querying/document-querying.h"
 #include "querying/querying.h"
@@ -21,8 +22,11 @@ TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         return TEST_ERROR_INITIALIZATION;
     }
 
-    printGlobalTagStatus();
+    //    printGlobalTagStatus();
+    printDocumentStatus(&doc);
+    printHTML(&doc);
     QueryingStatus actual = querySelectorAll(&doc, cssQuery);
+    // TODO(florian): need to free the result from querySelectors..
 
     TestStatus result = TEST_FAILURE;
 
@@ -61,8 +65,11 @@ unsigned char testQueries(size_t *successes, size_t *failures) {
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
-    testAndCount(TEST_FILE_1, "body div p h1 lalalal", QUERYING_SUCCESS,
-                 "tag selector", &localSuccesses, &localFailures);
+    // testAndCount(TEST_FILE_1, "body div p h1 lalalal input",
+    // QUERYING_SUCCESS,
+    //              "tag selector", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, "body div p", QUERYING_SUCCESS, "tag selector",
+                 &localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 

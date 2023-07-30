@@ -5,6 +5,7 @@
 #include "type/node/boolean-property.h"
 #include "type/node/next-node.h"
 #include "type/node/node.h"
+#include "type/node/parent-child.h"
 #include "type/node/parent-first-child.h"
 #include "type/node/property.h"
 #include "type/node/text-node.h"
@@ -13,9 +14,12 @@
 #define NODES_PAGE_SIZE (1U << 10U)
 #define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
 
+#define PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
+#define PARENT_FIRST_CHILDS_PER_PAGE                                           \
+    (PARENT_FIRST_CHILDS_PAGE_SIZE / sizeof(ParentFirstChild))
+
 #define PARENT_CHILDS_PAGE_SIZE (1U << 8U)
-#define PARENT_CHILDS_PER_PAGE                                                 \
-    (PARENT_CHILDS_PAGE_SIZE / sizeof(ParentFirstChild))
+#define PARENT_CHILDS_PER_PAGE (PARENT_CHILDS_PAGE_SIZE / sizeof(ParentChild))
 
 #define NEXT_NODES_PAGE_SIZE (1U << 8U)
 #define NEXT_NODES_PER_PAGE (NEXT_NODES_PAGE_SIZE / sizeof(NextNode))
@@ -41,6 +45,10 @@ typedef struct {
     size_t parentFirstChildLen;
     size_t parentFirstChildCap;
 
+    ParentChild *parentChilds;
+    size_t parentChildLen;
+    size_t parentChildCap;
+
     NextNode *nextNodes;
     size_t nextNodeLen;
     size_t nextNodeCap;
@@ -63,6 +71,7 @@ DocumentStatus createDocument(const char *htmlString, Document *doc);
 DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc);
 DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
                                    Document *doc);
+DocumentStatus addParentChild(node_id parentID, node_id childID, Document *doc);
 DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
                            Document *doc);
 DocumentStatus addBooleanProperty(node_id nodeID, element_id propID,

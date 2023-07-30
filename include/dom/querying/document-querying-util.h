@@ -11,4 +11,8 @@ QueryingStatus getNodesWithTagID(element_id tagID, const Document *doc,
                                  node_id **results, size_t *len,
                                  size_t *currentCap);
 
+QueryingStatus filterByTagID(element_id tagID, const Document *doc,
+                             node_id *results, size_t *len);
+QueryingStatus getDescendantsOf(node_id **results, size_t *len,
+                                size_t *currentCap, Document *doc);
 #endif

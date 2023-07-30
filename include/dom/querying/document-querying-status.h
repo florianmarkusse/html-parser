@@ -4,12 +4,16 @@
 typedef enum {
     QUERYING_SUCCESS,
     QUERYING_INVALID_SELECTOR,
+    QUERYING_NOT_FOUND,
+    QUERYING_MEMORY_ERROR,
     QUERYING_NUM_STATUS
 } QueryingStatus;
 
 static const char *const QueryingStatusStrings[QUERYING_NUM_STATUS] = {
     "Success",
     "Invalid selector",
+    "Did not find any match",
+    "Memory error",
 };
 
 __attribute__((unused)) static const char *

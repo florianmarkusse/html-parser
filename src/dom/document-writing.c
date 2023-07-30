@@ -193,6 +193,14 @@ void printDocumentStatus(const Document *doc) {
     }
     printf("\n");
 
+    printf("parent-child inside document...\n");
+    printf("total number of parent-child: %zu\n", doc->parentChildLen);
+    for (size_t i = 0; i < doc->parentChildLen; i++) {
+        printf("parent: %-4hu child: %-4hu\n", doc->parentChilds[i].parentID,
+               doc->parentChilds[i].childID);
+    }
+    printf("\n");
+
     printf("next nodes inside document...\n");
     printf("total number of next nodes: %zu\n", doc->nextNodeLen);
     for (size_t i = 0; i < doc->nextNodeLen; i++) {

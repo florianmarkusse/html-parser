@@ -3,6 +3,7 @@
 #include "comparisons/comparisons.h"
 #include "dom/comparison/document-comparison.h"
 #include "dom/document-user.h"
+#include "dom/document-writing.h"
 #include "dom/document.h"
 #include "pretty-print.h"
 #include "test-status.h"

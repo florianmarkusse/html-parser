@@ -60,6 +60,10 @@ DocumentStatus updateReferences(const node_id newNodeID,
         } else {
             const unsigned int parentNodeID =
                 depthStack->stack[depthStack->len - 1];
+            if (addParentChild(parentNodeID, newNodeID, doc) !=
+                DOCUMENT_SUCCESS) {
+                return DOCUMENT_NO_ADD;
+            }
             if (parentNodeID == *previousNodeID) {
                 if (addParentFirstChild(parentNodeID, newNodeID, doc) !=
                     DOCUMENT_SUCCESS) {
