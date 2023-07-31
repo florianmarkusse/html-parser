@@ -3,12 +3,9 @@
 #include "comparisons/comparisons.h"
 #include "dom/comparison/document-comparison.h"
 #include "dom/document-user.h"
-#include "dom/document-writing.h"
 #include "dom/document.h"
-#include "pretty-print.h"
 #include "test-status.h"
 #include "test.h"
-#include "utils/print/error.h"
 
 #define CURRENT_DIR "tests/src/comparisons/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"

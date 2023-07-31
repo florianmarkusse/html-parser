@@ -9,7 +9,7 @@
 typedef uint16_t element_id;
 #define TOTAL_ELEMENTS_NUM_BITS (sizeof(element_id) * 8)
 
-#define EXPONENT 8U
+#define EXPONENT 16U
 
 // masks
 #define TEXT_MASK (EXPONENT - 1)

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "comparisons/comparisons.h"
+#include "parsing/parsing.h"
 #include "pretty-print.h"
 #include "querying/querying.h"
 #include "test.h"
@@ -12,6 +13,9 @@ int main() {
 
     size_t successes = 0;
     size_t failures = 0;
+
+    testParsings(&successes, &failures);
+    printf("\n");
 
     testComparisons(&successes, &failures);
     printf("\n");

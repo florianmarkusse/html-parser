@@ -7,8 +7,9 @@ BOLD='\033[1m'
 NO_COLOR='\033[0m'
 
 # Default values
-BUILD_TYPE="release"
-PROJECT_ONLY=false
+BUILD_MODE="release"
+RUN_TESTS=false
+RUN_BENCHMARKS=false
 # Initialize the positional arguments
 EXECUTABLE=""
 
@@ -16,8 +17,9 @@ EXECUTABLE=""
 function display_usage() {
 	echo -e "${RED}${BOLD}Usage: $0 <${YELLOW}EXECUTABLE${RED}> [${YELLOW}OPTIONS${RED}]${NO_COLOR}"
 	echo -e "${BOLD}Options:${NO_COLOR}"
-	echo -e "  -t, --build-type <TYPE>    Set the build type (${YELLOW}debug${NO_COLOR} or ${YELLOW}release${NO_COLOR}). Default is ${YELLOW}release${NO_COLOR}."
-	echo -e "  -p, --project-only         Build only the main project without tests."
+	echo -e "  -m, --build-mode <TYPE>    Set the build mode (${YELLOW}debug${NO_COLOR} or ${YELLOW}release${NO_COLOR}). Default is ${YELLOW}release${NO_COLOR}."
+	echo -e "  -t, --run-tests            Run tests after building."
+	echo -e "  -b, --run-benchmarks       Run benchmarks after building."
 	echo -e "  -h, --help                 Display this help message."
 	exit 1
 }
@@ -25,16 +27,20 @@ function display_usage() {
 # Parse command-line options
 while [[ "$#" -gt 0 ]]; do
 	case $1 in
-	-t | --build-type)
+	-m | --build-mode)
 		if [[ "$2" != "debug" && "$2" != "release" ]]; then
-			echo -e "${RED}${BOLD}Invalid ${YELLOW}BUILD_TYPE${RED}. Valid options: ${NO_COLOR}${YELLOW}debug${BOLD}${RED}, ${NO_COLOR}${YELLOW}release${BOLD}${RED}.${NO_COLOR}"
+			echo -e "${RED}${BOLD}Invalid ${YELLOW}BUILD_MODE${RED}. Valid options: ${NO_COLOR}${YELLOW}debug${BOLD}${RED}, ${NO_COLOR}${YELLOW}release${BOLD}${RED}.${NO_COLOR}"
 			exit 1
 		fi
-		BUILD_TYPE="$2"
+		BUILD_MODE="$2"
 		shift 2
 		;;
-	-p | --project-only)
-		PROJECT_ONLY=true
+	-t | --run-tests)
+		RUN_TESTS=true
+		shift
+		;;
+	-b | --run-benchmarks)
+		RUN_BENCHMARKS=true
 		shift
 		;;
 	-h | --help)
@@ -53,27 +59,36 @@ if [[ -z "$EXECUTABLE" ]]; then
 	display_usage
 fi
 
-# Check if the provided BUILD_TYPE is valid (this check is already done in the loop, but we repeat it here for clarity)
-if [[ "$BUILD_TYPE" != "debug" && "$BUILD_TYPE" != "release" ]]; then
-	echo -e "${RED}${BOLD}Invalid ${YELLOW}BUILD_TYPE${RED}. Valid options: ${NO_COLOR}${YELLOW}debug${BOLD}${RED}, ${NO_COLOR}${YELLOW}release${BOLD}${RED}.${NO_COLOR}"
+# Check if the provided BUILD_MODE is valid (this check is already done in the loop, but we repeat it here for clarity)
+if [[ "$BUILD_MODE" != "debug" && "$BUILD_MODE" != "release" ]]; then
+	echo -e "${RED}${BOLD}Invalid ${YELLOW}BUILD_MODE${RED}. Valid options: ${NO_COLOR}${YELLOW}debug${BOLD}${RED}, ${NO_COLOR}${YELLOW}release${BOLD}${RED}.${NO_COLOR}"
 	exit 1
 fi
 
 # Display the configuration
 echo -e "${BOLD}${YELLOW}Configuration...${NO_COLOR}"
 echo -e "${BOLD}${YELLOW}EXECUTABLE${NO_COLOR}: ${YELLOW}$EXECUTABLE${NO_COLOR}"
-echo -e "${BOLD}${YELLOW}BUILD_TYPE${NO_COLOR}: ${YELLOW}$BUILD_TYPE${NO_COLOR}"
-if [ "$PROJECT_ONLY" = true ]; then
-	echo -e "Build only the main project ${YELLOW}without tests${NO_COLOR}."
+echo -e "${BOLD}${YELLOW}BUILD_MODE${NO_COLOR}: ${YELLOW}$BUILD_MODE${NO_COLOR}"
+if [ "$RUN_TESTS" = true ]; then
+	echo -e "${BOLD}${YELLOW}Run tests${NO_COLOR}: ${YELLOW}Yes${NO_COLOR}"
 else
-	echo -e "Build the main project and ${YELLOW}run tests${NO_COLOR}."
+	echo -e "${BOLD}${YELLOW}Run tests${NO_COLOR}: ${YELLOW}No${NO_COLOR}"
+fi
+if [ "$RUN_BENCHMARKS" = true ]; then
+	echo -e "${BOLD}${YELLOW}Run benchmarks${NO_COLOR}: ${YELLOW}Yes${NO_COLOR}"
+else
+	echo -e "${BOLD}${YELLOW}Run benchmarks${NO_COLOR}: ${YELLOW}No${NO_COLOR}"
 fi
 echo ""
 
 # Perform the build based on the options
-cmake -S . -B build/ -D CMAKE_BUILD_TYPE="$BUILD_TYPE"
+cmake -S . -B build/ -D CMAKE_BUILD_TYPE="$BUILD_MODE" -D RUN_TESTS="$RUN_TESTS" -D RUN_BENCHMARKS="$RUN_BENCHMARKS"
 cmake --build build/
 
-if [ "$PROJECT_ONLY" = false ]; then
-	./run-executable.sh build "$EXECUTABLE"-tests-"$BUILD_TYPE"
+if [ "$RUN_TESTS" = true ]; then
+	./run-executable.sh build "$EXECUTABLE"-tests-"$BUILD_MODE"
+fi
+
+if [ "$RUN_BENCHMARKS" = true ]; then
+	./run-executable.sh build "$EXECUTABLE"-benchmarks-"$BUILD_MODE"
 fi
