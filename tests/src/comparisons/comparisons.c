@@ -3,6 +3,7 @@
 #include "comparisons/comparisons.h"
 #include "dom/comparison/document-comparison.h"
 #include "dom/document-user.h"
+#include "dom/document-writing.h"
 #include "dom/document.h"
 #include "test-status.h"
 #include "test.h"
@@ -18,6 +19,7 @@
 #define TEST_FILE_8 CURRENT_DIR "test-8.html"
 #define TEST_FILE_9 CURRENT_DIR "test-9.html"
 #define TEST_FILE_10 CURRENT_DIR "test-10.html"
+#define TEST_FILE_11 CURRENT_DIR "test-11.html"
 
 TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
                         const ComparisonStatus expectedResult) {
@@ -54,6 +56,10 @@ TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
         printTestDemarcation();
     }
 
+    printHTML(&doc2);
+    printDocumentStatus(&doc2);
+    printGlobalTextStatus();
+    printGlobalTagStatus();
     destroyDocument(&doc1);
     destroyDocument(&doc2);
 
@@ -103,6 +109,8 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
     testAndCount(TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_TEXT,
                  "different text nodes", &localSuccesses, &localFailures);
     testAndCount(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments",
+                 &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_11, COMPARISON_SUCCESS, "bad style",
                  &localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);

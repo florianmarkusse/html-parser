@@ -273,49 +273,49 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
     node_id previousNodeID = 0;
     char ch = htmlString[currentPosition];
     while (ch != '\0') {
-        //        printf("Current state: %s\n", stateToString(state));
-        //        if (isprint(ch)) {
-        //            printf("'%c' = %d\n", ch, ch);
-        //        } else {
-        //            switch (ch) {
-        //            case '\0':
-        //                printf("'\\0' (null terminator) = %d\n", ch);
-        //                break;
-        //            case '\a':
-        //                printf("'\\a' (alert) = %d\n", ch);
-        //                break;
-        //            case '\b':
-        //                printf("'\\b' (backspace) = %d\n", ch);
-        //                break;
-        //            case '\f':
-        //                printf("'\\f' (form feed) = %d\n", ch);
-        //                break;
-        //            case '\r':
-        //                printf("'\\r' (carriage return) = %d\n", ch);
-        //                break;
-        //            case '\t':
-        //                printf("'\\t' (tab) = %d\n", ch);
-        //                break;
-        //            case '\v':
-        //                printf("'\\v' (vertical tab) = %d\n", ch);
-        //                break;
-        //            case '\n':
-        //                printf("'\\n' (newline) = %d\n", ch);
-        //                break;
-        //            case '\\':
-        //                printf("'\\\\' (backslash) = %d\n", ch);
-        //                break;
-        //            case '\'':
-        //                printf("'\\'' (single quote) = %d\n", ch);
-        //                break;
-        //            case '\"':
-        //                printf("'\\\"' (double quote) = %d\n", ch);
-        //                break;
-        //            default:
-        //                printf("'%c' (non-printable) = %d\n", ch, ch);
-        //                break;
-        //            }
-        //        }
+        printf("Current state: %s\n", stateToString(state));
+        if (isprint(ch)) {
+            printf("'%c' = %d\n", ch, ch);
+        } else {
+            switch (ch) {
+            case '\0':
+                printf("'\\0' (null terminator) = %d\n", ch);
+                break;
+            case '\a':
+                printf("'\\a' (alert) = %d\n", ch);
+                break;
+            case '\b':
+                printf("'\\b' (backspace) = %d\n", ch);
+                break;
+            case '\f':
+                printf("'\\f' (form feed) = %d\n", ch);
+                break;
+            case '\r':
+                printf("'\\r' (carriage return) = %d\n", ch);
+                break;
+            case '\t':
+                printf("'\\t' (tab) = %d\n", ch);
+                break;
+            case '\v':
+                printf("'\\v' (vertical tab) = %d\n", ch);
+                break;
+            case '\n':
+                printf("'\\n' (newline) = %d\n", ch);
+                break;
+            case '\\':
+                printf("'\\\\' (backslash) = %d\n", ch);
+                break;
+            case '\'':
+                printf("'\\'' (single quote) = %d\n", ch);
+                break;
+            case '\"':
+                printf("'\\\"' (double quote) = %d\n", ch);
+                break;
+            default:
+                printf("'%c' (non-printable) = %d\n", ch, ch);
+                break;
+            }
+        }
 
         switch (state) {
         case OPEN_TAG:
