@@ -88,7 +88,7 @@ DocumentStatus addTextToDocument(const char *tagStart, const size_t tagLength,
 
 ) {
     // Comments require us to merge this and the previous text node :(
-    Node prevNode = doc->nodes[*previousNodeID - 1];
+    Node prevNode = doc->nodes[*previousNodeID];
     if (isText(prevNode.tagID)) {
         const char *prevText = getText(prevNode.nodeID, doc);
         const size_t mergedLen =

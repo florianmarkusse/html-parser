@@ -9,7 +9,8 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
     doc->firstNodeID = 0;
 
     doc->nodes = malloc(NODES_PAGE_SIZE);
-    doc->nodeLen = 0;
+    doc->nodeLen = 1; // We start at 1 because 0 is used as error id, and
+                      // otherwise we have to do [nodeID - 1] every time.
     doc->nodeCap = NODES_PER_PAGE;
 
     doc->parentFirstChilds = malloc(PARENT_FIRST_CHILDS_PAGE_SIZE);
@@ -58,8 +59,7 @@ DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
     }
 
     Node *newNode = &(doc->nodes[doc->nodeLen]);
-    newNode->nodeID =
-        doc->nodeLen + 1; // We start at 1 because 0 is used as error id
+    newNode->nodeID = doc->nodeLen;
     newNode->tagID = tagID;
 
     if (doc->firstNodeID == 0) {

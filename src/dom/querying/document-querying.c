@@ -128,7 +128,7 @@ QueryingStatus querySelectorAll(Document *doc, const char *cssQuery) {
                 printf("Size of results: %zu\n", resultsLen);
                 for (size_t i = 0; i < resultsLen; i++) {
                     printf("Node ID: %u, Tag ID: %u\n", results[i],
-                           doc->nodes[results[i] - 1].tagID);
+                           doc->nodes[results[i]].tagID);
                 }
 
                 currentPosition--;

@@ -51,7 +51,7 @@ QueryingStatus filterByTagID(const element_id tagID, const Document *doc,
                              node_id *results, size_t *len) {
     size_t nextFreeSpot = 0;
     for (size_t i = 0; i < *len; i++) {
-        if (doc->nodes[results[i] - 1].tagID == tagID) {
+        if (doc->nodes[results[i]].tagID == tagID) {
             results[nextFreeSpot++] = results[i];
         }
     }
@@ -105,7 +105,7 @@ QueryingStatus getDescendantsOf(node_id **results, size_t *len,
         startLen = *len;
         for (size_t i = 0; i < doc->parentChildLen; i++) {
             ParentChild parentChildNode = doc->parentChilds[i];
-            if (!(isText(doc->nodes[parentChildNode.childID - 1].tagID)) &&
+            if (!(isText(doc->nodes[parentChildNode.childID].tagID)) &&
                 isParentIn(parentChildNode.parentID, parents, parentLen)) {
                 if ((*(results) = resizeArray(*results, *len, currentCap,
                                               sizeof(node_id), *currentCap)) ==

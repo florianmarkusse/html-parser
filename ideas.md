@@ -1,5 +1,4 @@
 - Elements array takes up a huge amount... in the order of 500KB...
-- get ride of element[nodeID - 1] and just not do that?
 Allow creation of unlimited tags:
     - Single tags have even IDs
     - paired tags have uneven IDs

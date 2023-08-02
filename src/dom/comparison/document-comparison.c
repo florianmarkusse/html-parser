@@ -225,8 +225,8 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
 
 ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
                              node_id *currNodeID2, const Document *doc2) {
-    Node node1 = doc1->nodes[*currNodeID1 - 1];
-    Node node2 = doc2->nodes[*currNodeID2 - 1];
+    Node node1 = doc1->nodes[*currNodeID1];
+    Node node2 = doc2->nodes[*currNodeID2];
 
     ComparisonStatus result = compareTags(&node1, doc1, &node2, doc2, 0);
     if (result != COMPARISON_SUCCESS) {
@@ -294,8 +294,8 @@ ComparisonStatus equals(const Document *doc1, node_id *currNodeID1,
 
 void printFirstDifference(const node_id nodeID1, const Document *doc1,
                           const node_id nodeID2, const Document *doc2) {
-    Node *node1 = &doc1->nodes[nodeID1 - 1];
-    Node *node2 = &doc2->nodes[nodeID2 - 1];
+    Node *node1 = &doc1->nodes[nodeID1];
+    Node *node2 = &doc2->nodes[nodeID2];
 
     if (compareTags(node1, doc1, node2, doc2, 1) != COMPARISON_SUCCESS) {
         return;

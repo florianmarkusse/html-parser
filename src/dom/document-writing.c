@@ -32,7 +32,7 @@ void getBits(const element_id tagID, char *bits, const size_t size) {
 
 void printNode(const node_id nodeID, const size_t indentation,
                const Document *doc, FILE *output) {
-    Node node = doc->nodes[nodeID - 1];
+    Node node = doc->nodes[nodeID];
 
     if (isText(node.tagID)) {
         const char *text = getText(node.nodeID, doc);
