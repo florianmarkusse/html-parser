@@ -14,6 +14,8 @@
 #define NODES_PAGE_SIZE (1U << 10U)
 #define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
 
+#define ERROR_NODE_ID 0
+
 #define PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
 #define PARENT_FIRST_CHILDS_PER_PAGE                                           \
     (PARENT_FIRST_CHILDS_PAGE_SIZE / sizeof(ParentFirstChild))
@@ -68,6 +70,8 @@ typedef struct {
 
 DocumentStatus createDocument(const char *htmlString, Document *doc);
 
+DocumentStatus createNode(node_id *nodeID, Document *doc);
+DocumentStatus setTagID(node_id nodeID, element_id tagID, Document *doc);
 DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc);
 DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
                                    Document *doc);

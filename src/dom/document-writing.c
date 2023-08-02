@@ -32,6 +32,9 @@ void getBits(const element_id tagID, char *bits, const size_t size) {
 
 void printNode(const node_id nodeID, const size_t indentation,
                const Document *doc, FILE *output) {
+    if (nodeID == ERROR_NODE_ID) {
+        return;
+    }
     Node node = doc->nodes[nodeID];
 
     if (isText(node.tagID)) {
@@ -117,19 +120,25 @@ void printDocumentStatus(const Document *doc) {
     printf("total number of nodes: %zu\n", doc->nodeLen);
     for (size_t i = 0; i < doc->nodeLen; i++) {
         Node node = doc->nodes[i];
-        const char *type = gTags.container.elements[node.tagID];
 
-        size_t bufferSize = sizeof(element_id) * 8 + 1;
-        char bitBuffer[bufferSize];
-        getBits(node.tagID, bitBuffer, bufferSize);
-        printf("tag: %-6u bits: %-18s", node.tagID, bitBuffer);
-
-        if (isSingle(node.tagID)) {
-            printf("%-8s %-20s with node ID: %-4hu\n", "single",
-                   isText(node.tagID) ? "--text--" : type, node.nodeID);
-        } else {
-            printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
+        if (node.nodeID == 0) {
+            printf("tag: %-6s bits: %-18s", "xxx", "xxxxxxxxxxxxxxxx");
+            printf("%-8s %-20s with node ID: %-4hu\n", "error", "internal use",
                    node.nodeID);
+        } else {
+            const char *type = gTags.container.elements[node.tagID];
+
+            size_t bufferSize = sizeof(element_id) * 8 + 1;
+            char bitBuffer[bufferSize];
+            getBits(node.tagID, bitBuffer, bufferSize);
+            printf("tag: %-6u bits: %-18s", node.tagID, bitBuffer);
+            if (isSingle(node.tagID)) {
+                printf("%-8s %-20s with node ID: %-4hu\n", "single",
+                       isText(node.tagID) ? "--text--" : type, node.nodeID);
+            } else {
+                printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
+                       node.nodeID);
+            }
         }
     }
     printf("\n");

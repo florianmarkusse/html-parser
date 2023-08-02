@@ -5,6 +5,7 @@
 - Add in contexts of <style> and <script> tags.
     - style tags don't care about anything, everything is text until u specifically encounter </style>
     - <script> tags don't care about anything that is within quotes, is all considered text.
+- Instead of hardcoded 8 for bits in byte we can use define that is defined somewhere.
 - Deleting/Modifying global elements
     - E.g., when we merge text nodes during parsing.
 

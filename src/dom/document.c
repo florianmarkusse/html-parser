@@ -9,6 +9,10 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
     doc->firstNodeID = 0;
 
     doc->nodes = malloc(NODES_PAGE_SIZE);
+    Node errorNode;
+    errorNode.nodeID = ERROR_NODE_ID;
+    errorNode.tagID = ERROR_NODE_ID;
+    doc->nodes[0] = errorNode;
     doc->nodeLen = 1; // We start at 1 because 0 is used as error id, and
                       // otherwise we have to do [nodeID - 1] every time.
     doc->nodeCap = NODES_PER_PAGE;
@@ -45,11 +49,36 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
         return DOCUMENT_ERROR_MEMORY;
     }
 
-    DocumentStatus documentStatus = parse(htmlString, doc);
+    DocumentStatus documentStatus = parseNEW(htmlString, doc);
     if (documentStatus != DOCUMENT_SUCCESS) {
         PRINT_ERROR("Failed to parse document.\n");
     }
     return documentStatus;
+}
+
+DocumentStatus createNode(node_id *nodeID, Document *doc) {
+    if ((doc->nodes = resizeArray(doc->nodes, doc->nodeLen, &doc->nodeCap,
+                                  sizeof(Node), NODES_PER_PAGE)) == NULL) {
+        return DOCUMENT_ERROR_MEMORY;
+    }
+
+    Node *newNode = &(doc->nodes[doc->nodeLen]);
+    newNode->nodeID = doc->nodeLen;
+
+    if (doc->firstNodeID == 0) {
+        doc->firstNodeID = newNode->nodeID;
+    }
+
+    doc->nodeLen++;
+    *nodeID = newNode->nodeID;
+    return DOCUMENT_SUCCESS;
+}
+DocumentStatus setTagID(const node_id nodeID, const element_id tagID,
+                        Document *doc) {
+    Node *createdNode = &(doc->nodes[nodeID]);
+    createdNode->tagID = tagID;
+
+    return DOCUMENT_SUCCESS;
 }
 
 DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc) {
