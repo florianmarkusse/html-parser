@@ -33,8 +33,20 @@ DocumentStatus parseNEW(const char *htmlString, Document *doc) {
         return DOCUMENT_NO_ELEMENT;
     }
 
+    element_id tagID = 0;
+    element_id attrKeyID = 0;
+    element_id attrValueID = 0;
+
     size_t currentPosition = 0;
+
     size_t elementStartIndex = 0;
+    size_t elementLen = 0;
+
+    size_t attrKeyStartIndex = 0;
+    size_t attrKeyLen = 0;
+
+    size_t attrValueStartIndex = 0;
+    size_t attrValueLen = 0;
 
     node_id prevNodeID = 0;
     node_id currentNodeID = 0;
@@ -103,7 +115,7 @@ DocumentStatus parseNEW(const char *htmlString, Document *doc) {
                 ch = htmlString[++currentPosition];
             }
 
-            size_t elementLen = currentPosition - elementStartIndex;
+            elementLen = currentPosition - elementStartIndex;
             if (ch == ' ') {
                 elementLen--;
             }
@@ -187,14 +199,125 @@ DocumentStatus parseNEW(const char *htmlString, Document *doc) {
                     }
 
                 } else {
+                    ch = htmlString[++currentPosition];
+                    if ((documentStatus = createNode(&currentNodeID, doc)) !=
+                        DOCUMENT_SUCCESS) {
+                        PRINT_ERROR("Failed to create node.\n");
+                        return documentStatus;
+                    }
+
+                    elementStartIndex = currentPosition;
+                    while (ch != ' ' && ch != '>') {
+                        ch = htmlString[++currentPosition];
+                    }
+
+                    elementLen = currentPosition - elementStartIndex;
+                    char buffer[100];
+                    strncpy(buffer, &htmlString[elementStartIndex], elementLen);
+                    buffer[elementLen] = '\0';
+                    printf("the doctype: %s\n", buffer);
+
+                    // Collect attributes here.
+                    while (ch != '>') {
+                        printf("char 1: %c\n", ch);
+
+                        while (ch == ' ' || isSpecialSpace(ch)) {
+                            ch = htmlString[++currentPosition];
+                        }
+
+                        printf("char 2: %c\n", ch);
+                        attrKeyStartIndex = currentPosition;
+                        while (ch != ' ' && ch != '>' && ch != '=') {
+                            ch = htmlString[++currentPosition];
+                        }
+                        attrKeyLen = currentPosition - attrKeyStartIndex;
+
+                        printf("char 3: %c\n", ch);
+                        if (ch == '=') {
+                            // Expected syntax: key="value".
+                            // We can do some more interesting stuff but
+                            // currently not required.
+                            if (elementToIndex(
+                                    &gPropKeys.container, &gPropKeys.pairedLen,
+                                    &htmlString[attrKeyStartIndex], attrKeyLen,
+                                    1, 1, &attrKeyID) != ELEMENT_SUCCESS) {
+                                PRINT_ERROR(
+                                    "Failed to create element ID for key.\n");
+                                return DOCUMENT_NO_ELEMENT;
+                            }
+                            currentPosition += 2;
+                            ch = htmlString[currentPosition];
+
+                            attrValueStartIndex = currentPosition;
+                            while (ch != '"') {
+                                ch = htmlString[++currentPosition];
+                            }
+                            attrValueLen =
+                                currentPosition - attrValueStartIndex;
+                            char buffer[100];
+                            strncpy(buffer, &htmlString[attrValueStartIndex],
+                                    attrValueLen);
+                            buffer[elementLen] = '\0';
+                            printf("the value: %s\n", buffer);
+
+                            if (elementToIndex(
+                                    &gPropValues.container, &gPropValues.len,
+                                    &htmlString[attrValueStartIndex],
+                                    attrValueLen, 1, 1,
+                                    &attrValueID) != ELEMENT_SUCCESS) {
+                                PRINT_ERROR(
+                                    "Failed to create element ID for value.\n");
+                                return DOCUMENT_NO_ELEMENT;
+                            }
+
+                            if (addProperty(currentNodeID, attrKeyID,
+                                            attrValueID,
+                                            doc) != DOCUMENT_SUCCESS) {
+                                PRINT_ERROR(
+                                    "Failed to add key-value property.\n");
+                                return DOCUMENT_NO_ELEMENT;
+                            }
+
+                            // Move past '"'
+                            ch = htmlString[++currentPosition];
+                        } else {
+                            if (elementToIndex(
+                                    &gPropKeys.container, &gPropKeys.singleLen,
+                                    &htmlString[attrKeyStartIndex], attrKeyLen,
+                                    0, 1, &attrKeyID) != ELEMENT_SUCCESS) {
+                                PRINT_ERROR(
+                                    "Failed to create element ID for key.\n");
+                                return DOCUMENT_NO_ELEMENT;
+                            }
+                            if (addBooleanProperty(currentNodeID, attrKeyID,
+                                                   doc) != DOCUMENT_SUCCESS) {
+                                PRINT_ERROR(
+                                    "Failed to add boolean property.\n");
+                                return DOCUMENT_NO_ELEMENT;
+                            }
+                        }
+
+                        //                        ch =
+                        //                        htmlString[++currentPosition];
+                    }
+
+                    if (elementToIndex(&gTags.container, &gTags.singleLen,
+                                       &htmlString[elementStartIndex],
+                                       elementLen, 0, 1,
+                                       &tagID) != ELEMENT_SUCCESS) {
+                        PRINT_ERROR("Failed to create tag ID for element "
+                                    "starting with '!'.\n");
+                        return DOCUMENT_NO_ELEMENT;
+                    }
+
+                    if ((documentStatus = setTagID(currentNodeID, tagID,
+                                                   doc)) != DOCUMENT_SUCCESS) {
+                        PRINT_ERROR(
+                            "Failed to set tag ID to text id to document.\n");
+                        return DOCUMENT_NO_ADD;
+                    }
                 }
             }
-
-            // if ((documentStatus = createNode(&currentNodeID, doc)) !=
-            //     DOCUMENT_SUCCESS) {
-            //     PRINT_ERROR("Failed to create node.\n");
-            //     return documentStatus;
-            // }
 
             // size_t elementStartIndex = currentPosition;
             // while (ch != '<' && ch != '\0') {
