@@ -49,7 +49,7 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
         return DOCUMENT_ERROR_MEMORY;
     }
 
-    DocumentStatus documentStatus = parseNEW(htmlString, doc);
+    DocumentStatus documentStatus = parse(htmlString, doc);
     if (documentStatus != DOCUMENT_SUCCESS) {
         PRINT_ERROR("Failed to parse document.\n");
     }

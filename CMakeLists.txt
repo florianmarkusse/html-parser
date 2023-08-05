@@ -31,7 +31,6 @@ add_library(${LIBRARY_NAME} SHARED
     "src/dom/document.c"
     "src/dom/document-writing.c"
     "src/parse/parse.c" 
-    "src/parse/new-parse.c" 
     "src/dom/document-user.c"
     "src/dom/comparison/document-comparison.c"
     "src/dom/querying/document-querying.c"

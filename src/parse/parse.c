@@ -8,475 +8,386 @@
 #include "dom/document.h"
 #include "parse/parse-property.h"
 #include "parse/parse.h"
+#include "type/element/elements.h"
 #include "utils/print/error.h"
 #include "utils/text/text.h"
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-typedef enum {
-    OPEN_TAG,
-    CLOSE_TAG,
-    TAG_NAME,
-    ATTRS,
-    ATTR_KEY,
-    ATTR_VALUE,
-    OPEN_PAIRED,
-    TEXT_NODE,
-    COMMENT,
-    NUM_STATES
-} State;
+unsigned char isSpecialSpace(char ch) {
+    return ch == '\t' || ch == '\n' || ch == '\r';
+}
 
-static inline const char *stateToString(State state) {
-    static const char *stateStrings[NUM_STATES] = {
-        "OPEN_TAG",   "CLOSE_TAG",   "TAG_NAME",  "ATTRS",  "ATTR_KEY",
-        "ATTR_VALUE", "OPEN_PAIRED", "TEXT_NODE", "COMMENT"};
-
-    if (state >= 0 && state < NUM_STATES) {
-        return stateStrings[state];
-    }
-
-    return "UNKNOWN";
+DocumentStatus getNewNodeID(node_id *currentNodeID, node_id *prevNodeID,
+                            Document *doc) {
+    *prevNodeID = *currentNodeID;
+    return createNode(currentNodeID, doc);
 }
 
 typedef struct {
-    ParseProperty stack[MAX_PROPERTIES];
-    size_t len;
-} __attribute__((aligned(128))) ParsePropertyStack;
-
-typedef struct {
     node_id stack[MAX_NODE_DEPTH];
-    node_id len;
+    size_t len;
 } __attribute__((aligned(128))) NodeDepth;
 
 DocumentStatus updateReferences(const node_id newNodeID,
-                                node_id *previousNodeID, NodeDepth *depthStack,
-                                Document *doc) {
-    if (newNodeID > 0 && *previousNodeID > 0) {
+                                const node_id previousNodeID,
+                                const NodeDepth *depthStack, Document *doc) {
+    DocumentStatus documentStatus = DOCUMENT_SUCCESS;
+
+    if (newNodeID > 0 && previousNodeID > 0) {
         if (depthStack->len == 0) {
-            if (addNextNode(*previousNodeID, newNodeID, doc) !=
-                DOCUMENT_SUCCESS) {
-                return DOCUMENT_NO_ADD;
+            if ((documentStatus = addNextNode(previousNodeID, newNodeID,
+                                              doc)) != DOCUMENT_SUCCESS) {
+                return documentStatus;
             }
         } else {
             const unsigned int parentNodeID =
                 depthStack->stack[depthStack->len - 1];
-            if (addParentChild(parentNodeID, newNodeID, doc) !=
-                DOCUMENT_SUCCESS) {
-                return DOCUMENT_NO_ADD;
+            if ((documentStatus = addParentChild(parentNodeID, newNodeID,
+                                                 doc)) != DOCUMENT_SUCCESS) {
+                return documentStatus;
             }
-            if (parentNodeID == *previousNodeID) {
-                if (addParentFirstChild(parentNodeID, newNodeID, doc) !=
-                    DOCUMENT_SUCCESS) {
-                    return DOCUMENT_NO_ADD;
+            if (parentNodeID == previousNodeID) {
+                if ((documentStatus = addParentFirstChild(
+                         parentNodeID, newNodeID, doc)) != DOCUMENT_SUCCESS) {
+                    return documentStatus;
                 }
             } else {
-                if (addNextNode(*previousNodeID, newNodeID, doc) !=
-                    DOCUMENT_SUCCESS) {
-                    return DOCUMENT_NO_ADD;
+                if ((documentStatus = addNextNode(previousNodeID, newNodeID,
+                                                  doc)) != DOCUMENT_SUCCESS) {
+                    return documentStatus;
                 }
             }
         }
     }
-    *previousNodeID = newNodeID;
 
-    return DOCUMENT_SUCCESS;
+    return documentStatus;
 }
 
-DocumentStatus addTextToDocument(const char *tagStart, const size_t tagLength,
-                                 Document *doc, node_id *previousNodeID,
-                                 NodeDepth *depthStack
+DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
+                            node_id *prevNodeID, node_id *newNodeID,
+                            unsigned char *isSingle, unsigned char exclamStart,
+                            Document *doc) {
+    DocumentStatus documentStatus = DOCUMENT_SUCCESS;
+    char ch = htmlString[++(*currentPosition)];
 
-) {
-    // Comments require us to merge this and the previous text node :(
-    Node prevNode = doc->nodes[*previousNodeID];
-    if (isText(prevNode.tagID)) {
-        const char *prevText = getText(prevNode.nodeID, doc);
-        const size_t mergedLen =
-            strlen(prevText) + tagLength + 2; // Adding a whitespace in between.
+    if ((documentStatus = getNewNodeID(newNodeID, prevNodeID, doc)) !=
+        DOCUMENT_SUCCESS) {
+        PRINT_ERROR("Failed to create node.\n");
+        return documentStatus;
+    }
 
-        char buffer[mergedLen];
-        strcpy(buffer, prevText);
-        strcat(buffer, " ");
-        strncat(buffer, tagStart, tagLength);
-        buffer[mergedLen - 1] = '\0';
+    size_t elementStartIndex = *currentPosition;
+    while (ch != ' ' && ch != '>' && ch != '\0') {
+        ch = htmlString[++(*currentPosition)];
+    }
+    size_t elementLen = *currentPosition - elementStartIndex;
+    if (ch == '\0') {
+        elementLen--;
+    }
 
-        element_id updatedTextID = 0;
+    *isSingle = exclamStart;
+    if (ch == '>' && htmlString[MAX(0, *currentPosition - 1)] == '/') {
+        *isSingle = 1;
+        elementLen--;
+    }
 
-        if (elementToIndex(&gText.container, &gText.len, buffer, mergedLen, 1,
-                           0, &updatedTextID) != ELEMENT_SUCCESS) {
-            return DOCUMENT_NO_ELEMENT;
+    // Collect attributes here.
+    while (ch != '>' && ch != '/' && ch != '\0') {
+        while (ch == ' ' || isSpecialSpace(ch)) {
+            ch = htmlString[++(*currentPosition)];
+        }
+        // '/' is not a valid starting attribute.
+        if (ch == '/') {
+            *isSingle = 1;
+            break;
         }
 
-        return replaceTextNode(prevNode.nodeID, updatedTextID, doc);
+        size_t attrKeyStartIndex = *currentPosition;
+        while (ch != ' ' && ch != '>' && ch != '=') {
+            ch = htmlString[++(*currentPosition)];
+        }
+        size_t attrKeyLen = *currentPosition - attrKeyStartIndex;
+        if (ch == '>' && htmlString[MAX(*currentPosition - 1, 0)] == '/') {
+            *isSingle = 1;
+            attrKeyLen--;
+        }
+
+        element_id attrKeyID = 0;
+        if (ch == '=') {
+            element_id attrValueID = 0;
+
+            // Expected syntax: key="value".
+            // We can do some more interesting stuff but
+            // currently not required.
+            if (elementToIndex(&gPropKeys.container, &gPropKeys.pairedLen,
+                               &htmlString[attrKeyStartIndex], attrKeyLen, 1, 1,
+                               &attrKeyID) != ELEMENT_SUCCESS) {
+                PRINT_ERROR("Failed to create element ID for key.\n");
+                return DOCUMENT_NO_ELEMENT;
+            }
+            (*currentPosition) += 2;
+            ch = htmlString[*currentPosition];
+
+            size_t attrValueStartIndex = *currentPosition;
+            while (ch != '"') {
+                ch = htmlString[++(*currentPosition)];
+            }
+            size_t attrValueLen = *currentPosition - attrValueStartIndex;
+
+            if (elementToIndex(&gPropValues.container, &gPropValues.len,
+                               &htmlString[attrValueStartIndex], attrValueLen,
+                               1, 1, &attrValueID) != ELEMENT_SUCCESS) {
+                PRINT_ERROR("Failed to create element ID for value.\n");
+                return DOCUMENT_NO_ELEMENT;
+            }
+
+            if ((documentStatus =
+                     addProperty(*newNodeID, attrKeyID, attrValueID, doc)) !=
+                DOCUMENT_SUCCESS) {
+                PRINT_ERROR("Failed to add key-value property.\n");
+                return DOCUMENT_NO_ELEMENT;
+            }
+
+            // Move past '"'
+            ch = htmlString[++(*currentPosition)];
+        } else {
+            if (elementToIndex(&gPropKeys.container, &gPropKeys.singleLen,
+                               &htmlString[attrKeyStartIndex], attrKeyLen, 0, 1,
+                               &attrKeyID) != ELEMENT_SUCCESS) {
+                PRINT_ERROR("Failed to create element ID for key.\n");
+                return DOCUMENT_NO_ELEMENT;
+            }
+            if ((documentStatus = addBooleanProperty(
+                     *newNodeID, attrKeyID, doc)) != DOCUMENT_SUCCESS) {
+                PRINT_ERROR("Failed to add boolean property.\n");
+                return documentStatus;
+            }
+        }
     }
 
     element_id tagID = 0;
-    if (textElementToIndex(&tagID) != ELEMENT_SUCCESS) {
+    element_id *elementTypeLen = &gTags.pairedLen;
+    if (*isSingle) {
+        elementTypeLen = &gTags.singleLen;
+    }
+
+    if (elementToIndex(&gTags.container, elementTypeLen,
+                       &htmlString[elementStartIndex], elementLen, !(*isSingle),
+                       1, &tagID) != ELEMENT_SUCCESS) {
+        PRINT_ERROR("Failed to create tag ID for element "
+                    "starting with '!'.\n");
         return DOCUMENT_NO_ELEMENT;
     }
-    node_id newNodeID = 0;
-    if (addNode(&newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {
-        return DOCUMENT_NO_ADD;
+
+    if ((documentStatus = setTagID(*newNodeID, tagID, doc)) !=
+        DOCUMENT_SUCCESS) {
+        PRINT_ERROR("Failed to set tag ID to text id to document.\n");
+        return documentStatus;
+    }
+
+    while (ch != '>' && ch != '\0') {
+        ch = htmlString[++(*currentPosition)];
+    }
+    if (ch != '\0') {
+        ch = htmlString[++(*currentPosition)];
+    }
+
+    return documentStatus;
+}
+
+DocumentStatus parseBasicDocNode(const char *htmlString,
+                                 size_t *currentPosition, node_id *prevNodeID,
+                                 node_id *newNodeID, unsigned char *isSingle,
+                                 Document *doc) {
+    return parseDocNode(htmlString, currentPosition, prevNodeID, newNodeID,
+                        isSingle, 0, doc);
+}
+
+DocumentStatus parseExclamDocNode(const char *htmlString,
+                                  size_t *currentPosition, node_id *prevNodeID,
+                                  node_id *newNodeID, Document *doc) {
+    unsigned char ignore = 0;
+    return parseDocNode(htmlString, currentPosition, prevNodeID, newNodeID,
+                        &ignore, 1, doc);
+}
+
+DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
+                             node_id *prevNodeID, node_id *currentNodeID,
+                             const element_id textTagID, Document *doc) {
+    DocumentStatus documentStatus = DOCUMENT_SUCCESS;
+    size_t elementStartIndex = *currentPosition;
+    char ch = htmlString[*currentPosition];
+    // Continue until we encounter extra space or the end of the text
+    // node.
+    while (ch != '<' && ch != '\0' && !isSpecialSpace(ch) &&
+           (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ')) {
+        ch = htmlString[++(*currentPosition)];
+    }
+
+    size_t elementLen = *currentPosition - elementStartIndex;
+    if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
+        elementLen--;
     }
 
     element_id textID = 0;
 
-    if (elementToIndex(&gText.container, &gText.len, tagStart, tagLength, 1, 0,
-                       &textID) != ELEMENT_SUCCESS) {
-        return DOCUMENT_NO_ELEMENT;
-    }
+    Node prevNode = doc->nodes[*currentNodeID];
+    if (isText(prevNode.tagID)) {
+        const char *prevText = getText(prevNode.nodeID, doc);
+        const size_t mergedLen = strlen(prevText) + elementLen +
+                                 2; // Adding a whitespace in between.
 
-    if (addTextNode(newNodeID, textID, doc) != DOCUMENT_SUCCESS) {
-        return DOCUMENT_NO_ADD;
-    }
+        char buffer[mergedLen];
+        strcpy(buffer, prevText);
+        strcat(buffer, " ");
+        strncat(buffer, &htmlString[elementStartIndex], elementLen);
+        buffer[mergedLen - 1] = '\0';
 
-    return updateReferences(newNodeID, previousNodeID, depthStack, doc);
-}
-
-DocumentStatus
-addToDocument(const char *tagStart, size_t tagLength, Document *doc,
-              node_id *previousNodeID, NodeDepth *depthStack,
-              const unsigned char isPaired, ParsePropertyStack *binaryProps,
-              ParsePropertyStack *propKeys, ParsePropertyStack *propValues,
-              node_id *newNodeID) {
-    element_id tagID = 0;
-    if (elementToIndex(&gTags.container,
-                       isPaired ? &gTags.pairedLen : &gTags.singleLen, tagStart,
-                       tagLength, isPaired, 1, &tagID) != ELEMENT_SUCCESS) {
-        return DOCUMENT_NO_ELEMENT;
-    }
-    if (addNode(newNodeID, tagID, doc) != DOCUMENT_SUCCESS) {
-        return DOCUMENT_NO_ADD;
-    }
-
-    for (size_t i = 0; i < binaryProps->len; i++) {
-        ParseProperty parseProp = binaryProps->stack[i];
-
-        element_id propID = 0;
-
-        if (elementToIndex(&gPropKeys.container, &gPropKeys.singleLen,
-                           parseProp.start, parseProp.len, 0, 1,
-                           &propID) != ELEMENT_SUCCESS) {
-            return DOCUMENT_NO_ELEMENT;
-        }
-        if (addBooleanProperty(*newNodeID, propID, doc) != DOCUMENT_SUCCESS) {
-            return DOCUMENT_NO_ELEMENT;
-        }
-    }
-    binaryProps->len = 0;
-
-    for (size_t i = 0; i < propKeys->len; i++) {
-        ParseProperty key = propKeys->stack[i];
-        element_id keyID = 0;
-        if (elementToIndex(&gPropKeys.container, &gPropKeys.pairedLen,
-                           key.start, key.len, 1, 1,
-                           &keyID) != ELEMENT_SUCCESS) {
+        if (elementToIndex(&gText.container, &gText.len, buffer, mergedLen, 1,
+                           0, &textID) != ELEMENT_SUCCESS) {
+            PRINT_ERROR("Failed to create text ID for merging text nodes.\n");
             return DOCUMENT_NO_ELEMENT;
         }
 
-        ParseProperty value = propValues->stack[i];
-        element_id valueID = 0;
-        if (elementToIndex(&gPropValues.container, &gPropValues.len,
-                           value.start, value.len, 1, 1,
-                           &valueID) != ELEMENT_SUCCESS) {
+        if ((documentStatus = replaceTextNode(*currentNodeID, textID, doc)) !=
+            DOCUMENT_SUCCESS) {
+            PRINT_ERROR("Failed to replace the text node for a merge.\n");
+            return documentStatus;
+        }
+    } else {
+        if ((documentStatus = getNewNodeID(currentNodeID, prevNodeID, doc)) !=
+            DOCUMENT_SUCCESS) {
+            PRINT_ERROR("Failed to create node for document.\n");
+            return documentStatus;
+        }
+
+        if (elementToIndex(&gText.container, &gText.len,
+                           &htmlString[elementStartIndex], elementLen, 1, 0,
+                           &textID) != ELEMENT_SUCCESS) {
+            PRINT_ERROR("Failed to create text ID.\n");
             return DOCUMENT_NO_ELEMENT;
         }
 
-        if (addProperty(*newNodeID, keyID, valueID, doc) != DOCUMENT_SUCCESS) {
-            return DOCUMENT_NO_ELEMENT;
+        if ((documentStatus = addTextNode(*currentNodeID, textID, doc)) !=
+            DOCUMENT_SUCCESS) {
+            PRINT_ERROR("Failed to add text node to document.\n");
+            return documentStatus;
+        }
+
+        if ((documentStatus = setTagID(*currentNodeID, textTagID, doc)) !=
+            DOCUMENT_SUCCESS) {
+            PRINT_ERROR("Failed to set tag ID to text id to document.\n");
+            return documentStatus;
         }
     }
-    propKeys->len = 0;
-    propValues->len = 0;
 
-    return updateReferences(*newNodeID, previousNodeID, depthStack, doc);
-}
-
-DocumentStatus
-addPairedNode(const char *tagStart, size_t tagLength, Document *doc,
-              node_id *previousNodeID, NodeDepth *depthStack,
-              ParsePropertyStack *boolProps, ParsePropertyStack *propKeys,
-              ParsePropertyStack *propValues, node_id *newNodeID) {
-    if (depthStack->len >= MAX_NODE_DEPTH) {
-        PRINT_ERROR("Max document node depth %u reached.\n", MAX_NODE_DEPTH);
-        PRINT_ERROR("At tag %s.\n", tagStart);
-        return DOCUMENT_TOO_DEEP;
-    }
-
-    DocumentStatus documentStatus =
-        addToDocument(tagStart, tagLength, doc, previousNodeID, depthStack, 1,
-                      boolProps, propKeys, propValues, newNodeID);
-    if (documentStatus != DOCUMENT_SUCCESS) {
-        return documentStatus;
-    }
-
-    depthStack->stack[depthStack->len] = *newNodeID;
-    depthStack->len++;
-
-    return DOCUMENT_SUCCESS;
-}
-
-DocumentStatus putPropertyOnStack(size_t *currentStackLen,
-                                  ParseProperty stack[MAX_PROPERTIES],
-                                  const size_t propStart, const size_t propEnd,
-                                  const char *htmlString) {
-    const size_t propLen = propEnd - propStart;
-    const char *start = &htmlString[propStart];
-    if (*currentStackLen >= MAX_PROPERTIES) {
-        PRINT_ERROR("Max number of %u properties per tag reached.\n",
-                    MAX_PROPERTIES);
-        char buffer[propLen];
-        strncpy(buffer, start, propLen);
-        buffer[propLen] = '\0';
-        PRINT_ERROR("Failed at parse property: \"%s\".\n", buffer);
-        return DOCUMENT_TOO_MANY_ATTRIBUTES;
-    }
-
-    ParseProperty *attr = &stack[*currentStackLen];
-    attr->start = start;
-    attr->len = propLen;
-    (*currentStackLen)++;
-
-    return DOCUMENT_SUCCESS;
+    return documentStatus;
 }
 
 DocumentStatus parse(const char *htmlString, Document *doc) {
-    State state = OPEN_PAIRED;
+    DocumentStatus documentStatus = DOCUMENT_SUCCESS;
+
+    element_id textTagID = 0;
+    if (textElementToIndex(&textTagID) != ELEMENT_SUCCESS) {
+        PRINT_ERROR("Failed to initialize tag ID for text nodes\n");
+        return DOCUMENT_NO_ELEMENT;
+    }
 
     size_t currentPosition = 0;
 
-    size_t textNodeStart = 0;
-    unsigned char isNewline = 0;
+    NodeDepth nodeStack;
+    nodeStack.len = 0;
 
-    size_t tagNameStart = 0;
-    size_t tagLength = 0;
-
-    unsigned char isExclam = 0;
-
-    NodeDepth depthStack;
-    depthStack.len = 0;
-
-    ParsePropertyStack binaryProps;
-    binaryProps.len = 0;
-
-    ParsePropertyStack propKeys;
-    propKeys.len = 0;
-    ParsePropertyStack propValues;
-    propValues.len = 0;
-
-    size_t propKeyStart = 0;
-    size_t propValueStart = 0;
-
-    DocumentStatus documentStatus = DOCUMENT_SUCCESS;
-
-    node_id newNodeID = 0;
-    node_id previousNodeID = 0;
+    node_id prevNodeID = 0;
+    node_id currentNodeID = 0;
     char ch = htmlString[currentPosition];
+
     while (ch != '\0') {
-        printf("Current state: %s\n", stateToString(state));
-        if (isprint(ch)) {
-            printf("'%c' = %d\n", ch, ch);
-        } else {
-            switch (ch) {
-            case '\0':
-                printf("'\\0' (null terminator) = %d\n", ch);
-                break;
-            case '\a':
-                printf("'\\a' (alert) = %d\n", ch);
-                break;
-            case '\b':
-                printf("'\\b' (backspace) = %d\n", ch);
-                break;
-            case '\f':
-                printf("'\\f' (form feed) = %d\n", ch);
-                break;
-            case '\r':
-                printf("'\\r' (carriage return) = %d\n", ch);
-                break;
-            case '\t':
-                printf("'\\t' (tab) = %d\n", ch);
-                break;
-            case '\v':
-                printf("'\\v' (vertical tab) = %d\n", ch);
-                break;
-            case '\n':
-                printf("'\\n' (newline) = %d\n", ch);
-                break;
-            case '\\':
-                printf("'\\\\' (backslash) = %d\n", ch);
-                break;
-            case '\'':
-                printf("'\\'' (single quote) = %d\n", ch);
-                break;
-            case '\"':
-                printf("'\\\"' (double quote) = %d\n", ch);
-                break;
-            default:
-                printf("'%c' (non-printable) = %d\n", ch, ch);
-                break;
-            }
+        ch = htmlString[currentPosition];
+        while (ch == ' ' || isSpecialSpace(ch)) {
+            ch = htmlString[++currentPosition];
+        }
+        if (ch == '\0') {
+            break;
         }
 
-        switch (state) {
-        case OPEN_TAG:
-            if (ch == '/') {
-                previousNodeID = depthStack.stack[depthStack.len - 1];
-                depthStack.len--;
-                state = CLOSE_TAG;
-            }
-            if (isAlphaBetical(ch)) {
-                tagNameStart = currentPosition;
-                state = TAG_NAME;
-            }
-            if (ch == '!') {
-                if (htmlString[currentPosition + 1] == '-' &&
-                    htmlString[currentPosition + 2] == '-') {
-                    state = COMMENT;
-                } else {
-                    isExclam = 1;
-                    tagNameStart = currentPosition;
-                    state = TAG_NAME;
+        if (ch == '<') {
+            // Closing tags.
+            if (htmlString[currentPosition + 1] == '/') {
+                while (ch != '\0' && ch != '>') {
+                    ch = htmlString[++currentPosition];
                 }
-            }
-            break;
-        case COMMENT: {
-            if (ch == '>' && htmlString[MAX(0, currentPosition - 1)] == '-' &&
-                htmlString[MAX(0, currentPosition - 2)] == '-') {
-                state = OPEN_PAIRED;
-            }
-            break;
-        }
-        case TAG_NAME:
-            if (ch == ' ') {
-                tagLength = currentPosition - tagNameStart;
-                state = ATTRS;
-            }
-            if (ch == '>') {
-                tagLength = currentPosition - tagNameStart;
-                documentStatus =
-                    addPairedNode(&htmlString[tagNameStart], tagLength, doc,
-                                  &previousNodeID, &depthStack, &binaryProps,
-                                  &propKeys, &propValues, &newNodeID);
-                state = OPEN_PAIRED;
-            }
-            break;
-        case ATTRS:
-            if (isAlphaBetical(ch)) {
-                propKeyStart = currentPosition;
-                state = ATTR_KEY;
-            }
-            if (ch == '/' || (isExclam && ch == '>')) {
-                documentStatus =
-                    addToDocument(&htmlString[tagNameStart], tagLength, doc,
-                                  &previousNodeID, &depthStack, 0, &binaryProps,
-                                  &propKeys, &propValues, &newNodeID);
-                isExclam = 0;
-                if (ch == '/') {
-                    state = CLOSE_TAG;
-                } else {
-                    state = OPEN_PAIRED;
+                if (ch != '\0') {
+                    ch = htmlString[++currentPosition];
                 }
-            } else if (ch == '>') {
-                documentStatus =
-                    addPairedNode(&htmlString[tagNameStart], tagLength, doc,
-                                  &previousNodeID, &depthStack, &binaryProps,
-                                  &propKeys, &propValues, &newNodeID);
-                state = OPEN_PAIRED;
+
+                nodeStack.len = MAX(nodeStack.len - 1, 0);
+                currentNodeID = nodeStack.stack[nodeStack.len];
             }
-            break;
-        case ATTR_KEY: {
-            if (ch == ' ' || ch == '>') {
-                documentStatus = putPropertyOnStack(
-                    &binaryProps.len, binaryProps.stack, propKeyStart,
-                    currentPosition, htmlString);
-                if (ch == ' ') {
-                    state = ATTRS;
-                } else {
-                    if (documentStatus == DOCUMENT_SUCCESS) {
-                        if (isExclam) {
-                            documentStatus = addToDocument(
-                                &htmlString[tagNameStart], tagLength, doc,
-                                &previousNodeID, &depthStack, 0, &binaryProps,
-                                &propKeys, &propValues, &newNodeID);
-                            isExclam = 0;
-                            state = OPEN_PAIRED;
-                        } else {
-                            documentStatus = addPairedNode(
-                                &htmlString[tagNameStart], tagLength, doc,
-                                &previousNodeID, &depthStack, &binaryProps,
-                                &propKeys, &propValues, &newNodeID);
-                            state = OPEN_PAIRED;
-                        }
+            // Comments or <!DOCTYPE>.
+            else if (htmlString[currentPosition + 1] == '!') {
+                // Skip comments.
+                if (htmlString[currentPosition + 2] == '-' &&
+                    htmlString[currentPosition + 3] == '-') {
+                    while (ch != '\0' &&
+                           (ch != '>' ||
+                            htmlString[MAX(0, currentPosition - 1)] != '-' ||
+                            htmlString[MAX(0, currentPosition - 2)] != '-')) {
+                        ch = htmlString[++currentPosition];
+                    }
+                    if (ch != '\0') {
+                        ch = htmlString[++currentPosition];
+                    }
+
+                }
+                // Any <! is treated as a standard single tag and during
+                // printing <!DOCTYPE is special case.
+                else {
+                    if ((documentStatus = parseExclamDocNode(
+                             htmlString, &currentPosition, &prevNodeID,
+                             &currentNodeID, doc)) != DOCUMENT_SUCCESS) {
+                        return documentStatus;
+                    }
+                    if ((documentStatus = updateReferences(
+                             currentNodeID, prevNodeID, &nodeStack, doc)) !=
+                        DOCUMENT_SUCCESS) {
+                        return documentStatus;
                     }
                 }
-            } else if (ch == '=') {
-                documentStatus = putPropertyOnStack(
-                    &propKeys.len, propKeys.stack, propKeyStart,
-                    currentPosition, htmlString);
-                currentPosition += 2; // skip '="'
-                propValueStart = currentPosition;
-                state = ATTR_VALUE;
             }
-            break;
-        }
-        case ATTR_VALUE: {
-            if (ch == '"') {
-                documentStatus = putPropertyOnStack(
-                    &propValues.len, propValues.stack, propValueStart,
-                    currentPosition, htmlString);
-                state = ATTRS;
-            }
-            break;
-        }
-        case OPEN_PAIRED:
-            if (!isNewline) {
-                if (ch == '<') {
-                    state = OPEN_TAG;
-                } else if (ch == '\n') {
-                    isNewline = 1;
-                } else {
-                    textNodeStart = currentPosition;
-                    state = TEXT_NODE;
+            // basic doc node.
+            else {
+                unsigned char isSingle = 0;
+                if ((documentStatus = parseBasicDocNode(
+                         htmlString, &currentPosition, &prevNodeID,
+                         &currentNodeID, &isSingle, doc)) != DOCUMENT_SUCCESS) {
+                    return documentStatus;
                 }
-            } else {
-                if (ch == '<') {
-                    isNewline = 0;
-                    state = OPEN_TAG;
-                } else if (ch != ' ' && ch != '\n' && ch != '\t') {
-                    isNewline = 0;
-                    textNodeStart = currentPosition;
-                    state = TEXT_NODE;
+                if ((documentStatus =
+                         updateReferences(currentNodeID, prevNodeID, &nodeStack,
+                                          doc)) != DOCUMENT_SUCCESS) {
+                    return documentStatus;
+                }
+                if (!isSingle) {
+                    nodeStack.stack[nodeStack.len] = currentNodeID;
+                    nodeStack.len++;
                 }
             }
-            break;
-        case TEXT_NODE:
-            if (ch == '\n' || ch == '<') {
-                size_t textNodeSize = currentPosition - textNodeStart;
-                documentStatus =
-                    addTextToDocument(&htmlString[textNodeStart], textNodeSize,
-                                      doc, &previousNodeID, &depthStack);
-
-                if (ch == '\n') {
-                    isNewline = 1;
-                    state = OPEN_PAIRED;
-                } else {
-                    state = OPEN_TAG;
-                }
-            }
-            break;
-        case CLOSE_TAG:
-            if (ch == '>') {
-                state = OPEN_PAIRED;
-            }
-            break;
-        default:;
         }
-
-        if (documentStatus != DOCUMENT_SUCCESS) {
-            break;
+        // Text node.
+        else {
+            if ((documentStatus = parseTextNode(
+                     htmlString, &currentPosition, &prevNodeID, &currentNodeID,
+                     textTagID, doc)) != DOCUMENT_SUCCESS) {
+                return documentStatus;
+            }
+            if ((documentStatus = updateReferences(currentNodeID, prevNodeID,
+                                                   &nodeStack, doc)) !=
+                DOCUMENT_SUCCESS) {
+                return documentStatus;
+            }
         }
-
-        ch = htmlString[++currentPosition];
     }
 
     return documentStatus;

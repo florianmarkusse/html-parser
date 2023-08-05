@@ -7,6 +7,5 @@
 #define MAX_PROPERTIES 1U << 7U
 
 DocumentStatus parse(const char *htmlString, Document *doc);
-DocumentStatus parseNEW(const char *htmlString, Document *doc);
 
 #endif
