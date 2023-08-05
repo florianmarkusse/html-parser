@@ -71,7 +71,7 @@ void printNode(const node_id nodeID, const size_t indentation,
         if (strcmp(tag, "!DOCTYPE") == 0) {
             fprintf(output, ">");
         } else {
-            fprintf(output, " />");
+            fprintf(output, "/>");
         }
         return;
     }

@@ -56,10 +56,6 @@ TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
         printTestDemarcation();
     }
 
-    printHTML(&doc2);
-    printDocumentStatus(&doc2);
-    printGlobalTextStatus();
-    printGlobalTagStatus();
     destroyDocument(&doc1);
     destroyDocument(&doc2);
 
@@ -90,33 +86,28 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
 
     testAndCount(TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file",
                  &localSuccesses, &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_2,
-    //    COMPARISON_DIFFERENT_PROPERTIES,
-    //                 "different key-value property", &localSuccesses,
-    //                 &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES,
-    //                 "empty file", &localSuccesses, &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_4, COMPARISON_MISSING_PROPERTIES,
-    //                 "missing boolean property", &localSuccesses,
-    //                 &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_5, COMPARISON_MISSING_PROPERTIES,
-    //                 "missing key-value property", &localSuccesses,
-    //                 &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
-    //                 "text node and document node", &localSuccesses,
-    //                 &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES,
-    //                 "different sizes", &localSuccesses, &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_TAGS,
-    //                 "different tags", &localSuccesses, &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_TEXT,
-    //                 "different text nodes", &localSuccesses, &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS,
-    //    "comments",
-    //                 &localSuccesses, &localFailures);
-    //    testAndCount(TEST_FILE_1, TEST_FILE_11, COMPARISON_SUCCESS, "bad
-    //    style",
-    //                 &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_PROPERTIES,
+                 "different key-value property", &localSuccesses,
+                 &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES,
+                 "empty file", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_4, COMPARISON_MISSING_PROPERTIES,
+                 "missing boolean property", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_5, COMPARISON_MISSING_PROPERTIES,
+                 "missing key-value property", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
+                 "text node and document node", &localSuccesses,
+                 &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES,
+                 "different sizes", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_TAGS,
+                 "different tags", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_TEXT,
+                 "different text nodes", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments",
+                 &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_11, COMPARISON_SUCCESS, "bad style",
+                 &localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 
