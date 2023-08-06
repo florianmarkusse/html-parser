@@ -14,6 +14,8 @@
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
+typedef enum { BASIC_CONTEXT, SCRIPT_CONTEXT, STYLE_CONTEXT } TextParsing;
+
 unsigned char isSpecialSpace(char ch) {
     return ch == '\t' || ch == '\n' || ch == '\r';
 }
@@ -66,8 +68,8 @@ DocumentStatus updateReferences(const node_id newNodeID,
 
 DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
                             node_id *prevNodeID, node_id *newNodeID,
-                            unsigned char *isSingle, unsigned char exclamStart,
-                            Document *doc) {
+                            unsigned char *isSingle, TextParsing *context,
+                            unsigned char exclamStart, Document *doc) {
     DocumentStatus documentStatus = DOCUMENT_SUCCESS;
     char ch = htmlString[++(*currentPosition)];
 
@@ -172,6 +174,18 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
         elementTypeLen = &gTags.singleLen;
     }
 
+    char tagName[elementLen + 1];
+    strncpy(tagName, &htmlString[elementStartIndex], elementLen);
+    tagName[elementLen] = '\0';
+    *context = BASIC_CONTEXT;
+    if (strcmp(tagName, "script") == 0) {
+        *context = SCRIPT_CONTEXT;
+    }
+
+    if (strcmp(tagName, "style") == 0) {
+        *context = STYLE_CONTEXT;
+    }
+
     if (elementToIndex(&gTags.container, elementTypeLen,
                        &htmlString[elementStartIndex], elementLen, !(*isSingle),
                        1, &tagID) != ELEMENT_SUCCESS) {
@@ -199,35 +213,122 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
 DocumentStatus parseBasicDocNode(const char *htmlString,
                                  size_t *currentPosition, node_id *prevNodeID,
                                  node_id *newNodeID, unsigned char *isSingle,
-                                 Document *doc) {
+                                 TextParsing *context, Document *doc) {
     return parseDocNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        isSingle, 0, doc);
+                        isSingle, context, 0, doc);
 }
 
 DocumentStatus parseExclamDocNode(const char *htmlString,
                                   size_t *currentPosition, node_id *prevNodeID,
                                   node_id *newNodeID, Document *doc) {
     unsigned char ignore = 0;
+    TextParsing ignore2 = BASIC_CONTEXT;
     return parseDocNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        &ignore, 1, doc);
+                        &ignore, &ignore2, 1, doc);
 }
 
 DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                              node_id *prevNodeID, node_id *currentNodeID,
-                             const element_id textTagID, Document *doc) {
+                             const element_id textTagID, TextParsing *context,
+                             Document *doc) {
     DocumentStatus documentStatus = DOCUMENT_SUCCESS;
     size_t elementStartIndex = *currentPosition;
     char ch = htmlString[*currentPosition];
+    size_t elementLen = 0;
+
     // Continue until we encounter extra space or the end of the text
     // node.
-    while (ch != '<' && ch != '\0' && !isSpecialSpace(ch) &&
-           (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ')) {
-        ch = htmlString[++(*currentPosition)];
-    }
+    switch (*context) {
+    case BASIC_CONTEXT: {
+        while (
+            ch != '\0' && !isSpecialSpace(ch) &&
+            (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ') &&
+            ch != '<') {
+            ch = htmlString[++(*currentPosition)];
+        }
 
-    size_t elementLen = *currentPosition - elementStartIndex;
-    if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
-        elementLen--;
+        elementLen = *currentPosition - elementStartIndex;
+        if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
+            elementLen--;
+        }
+        break;
+    }
+    case STYLE_CONTEXT: {
+        while (
+            ch != '\0' && !isSpecialSpace(ch) &&
+            (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ') &&
+            (ch != '<' || htmlString[*currentPosition + 1] != '/' ||
+             htmlString[*currentPosition + 2] != 's' ||
+             htmlString[*currentPosition + 3] != 't' ||
+             htmlString[*currentPosition + 4] != 'y' ||
+             htmlString[*currentPosition + 5] != 'l' ||
+             htmlString[*currentPosition + 6] != 'e' ||
+             htmlString[*currentPosition + 7] != '>')) {
+            ch = htmlString[++(*currentPosition)];
+        }
+
+        if (ch == '<' && htmlString[*currentPosition + 1] == '/' &&
+            htmlString[*currentPosition + 2] == 's' &&
+            htmlString[*currentPosition + 3] == 't' &&
+            htmlString[*currentPosition + 4] == 'y' &&
+            htmlString[*currentPosition + 5] == 'l' &&
+            htmlString[*currentPosition + 6] == 'e' &&
+            htmlString[*currentPosition + 7] == '>') {
+            *context = BASIC_CONTEXT;
+            return documentStatus;
+        }
+
+        elementLen = *currentPosition - elementStartIndex;
+        if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
+            elementLen--;
+        }
+        break;
+    }
+    case SCRIPT_CONTEXT: {
+        char isInString = 0;
+        while (
+            ch != '\0' && !isSpecialSpace(ch) &&
+            (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ') &&
+            (isInString ||
+             (ch != '<' || htmlString[*currentPosition + 1] != '/' ||
+              htmlString[*currentPosition + 2] != 's' ||
+              htmlString[*currentPosition + 3] != 'c' ||
+              htmlString[*currentPosition + 4] != 'r' ||
+              htmlString[*currentPosition + 5] != 'i' ||
+              htmlString[*currentPosition + 6] != 'p' ||
+              htmlString[*currentPosition + 7] != 't' ||
+              htmlString[*currentPosition + 8] != '>'))) {
+            if (ch == '\'' || ch == '"' || ch == '`') {
+                if (isInString == ch) {
+                    isInString = 0;
+                } else if (!isInString) {
+                    isInString = ch;
+                }
+            }
+            ch = htmlString[++(*currentPosition)];
+        }
+
+        if (ch == '<' && htmlString[*currentPosition + 1] == '/' &&
+            htmlString[*currentPosition + 2] == 's' &&
+            htmlString[*currentPosition + 3] == 'c' &&
+            htmlString[*currentPosition + 4] == 'r' &&
+            htmlString[*currentPosition + 5] == 'i' &&
+            htmlString[*currentPosition + 6] == 'p' &&
+            htmlString[*currentPosition + 7] == 't' &&
+            htmlString[*currentPosition + 8] == '>') {
+            *context = BASIC_CONTEXT;
+            return documentStatus;
+        }
+
+        elementLen = *currentPosition - elementStartIndex;
+        if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
+            elementLen--;
+        }
+        break;
+    }
+    default: {
+        break;
+    }
     }
 
     element_id textID = 0;
@@ -299,6 +400,8 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
     NodeDepth nodeStack;
     nodeStack.len = 0;
 
+    TextParsing context = BASIC_CONTEXT;
+
     node_id prevNodeID = 0;
     node_id currentNodeID = 0;
     char ch = htmlString[currentPosition];
@@ -312,7 +415,21 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
             break;
         }
 
-        if (ch == '<') {
+        // Text node.
+        if (context != BASIC_CONTEXT || ch != '<') {
+            if ((documentStatus = parseTextNode(
+                     htmlString, &currentPosition, &prevNodeID, &currentNodeID,
+                     textTagID, &context, doc)) != DOCUMENT_SUCCESS) {
+                return documentStatus;
+            }
+            if ((documentStatus = updateReferences(currentNodeID, prevNodeID,
+                                                   &nodeStack, doc)) !=
+                DOCUMENT_SUCCESS) {
+                return documentStatus;
+            }
+        }
+        // Doc node.
+        else {
             // Closing tags.
             if (htmlString[currentPosition + 1] == '/') {
                 while (ch != '\0' && ch != '>') {
@@ -324,6 +441,7 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
 
                 nodeStack.len = MAX(nodeStack.len - 1, 0);
                 currentNodeID = nodeStack.stack[nodeStack.len];
+                context = BASIC_CONTEXT;
             }
             // Comments or <!DOCTYPE>.
             else if (htmlString[currentPosition + 1] == '!') {
@@ -342,7 +460,7 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
 
                 }
                 // Any <! is treated as a standard single tag and during
-                // printing <!DOCTYPE is special case.
+                // printing !DOCTYPE is special case.
                 else {
                     if ((documentStatus = parseExclamDocNode(
                              htmlString, &currentPosition, &prevNodeID,
@@ -361,7 +479,8 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
                 unsigned char isSingle = 0;
                 if ((documentStatus = parseBasicDocNode(
                          htmlString, &currentPosition, &prevNodeID,
-                         &currentNodeID, &isSingle, doc)) != DOCUMENT_SUCCESS) {
+                         &currentNodeID, &isSingle, &context, doc)) !=
+                    DOCUMENT_SUCCESS) {
                     return documentStatus;
                 }
                 if ((documentStatus =
@@ -373,19 +492,6 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
                     nodeStack.stack[nodeStack.len] = currentNodeID;
                     nodeStack.len++;
                 }
-            }
-        }
-        // Text node.
-        else {
-            if ((documentStatus = parseTextNode(
-                     htmlString, &currentPosition, &prevNodeID, &currentNodeID,
-                     textTagID, doc)) != DOCUMENT_SUCCESS) {
-                return documentStatus;
-            }
-            if ((documentStatus = updateReferences(currentNodeID, prevNodeID,
-                                                   &nodeStack, doc)) !=
-                DOCUMENT_SUCCESS) {
-                return documentStatus;
             }
         }
     }

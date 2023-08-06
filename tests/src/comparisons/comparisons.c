@@ -20,6 +20,7 @@
 #define TEST_FILE_9 CURRENT_DIR "test-9.html"
 #define TEST_FILE_10 CURRENT_DIR "test-10.html"
 #define TEST_FILE_11 CURRENT_DIR "test-11.html"
+#define TEST_FILE_12 CURRENT_DIR "test-12.html"
 
 TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
                         const ComparisonStatus expectedResult) {
@@ -106,8 +107,10 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
                  "different text nodes", &localSuccesses, &localFailures);
     testAndCount(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments",
                  &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_11, COMPARISON_SUCCESS, "bad style",
-                 &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_11, COMPARISON_DIFFERENT_SIZES,
+                 "extra style tag", &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, TEST_FILE_12, COMPARISON_DIFFERENT_SIZES,
+                 "extra script tag", &localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 
