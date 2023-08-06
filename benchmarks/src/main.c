@@ -15,10 +15,10 @@ unsigned char parseFile(const char *fileLocation) {
     Document doc1;
     if (createFromFile(fileLocation, &doc1) != DOCUMENT_SUCCESS) {
         destroyGlobals();
-        return 1;
+        return 0;
     }
     destroyDocument(&doc1);
-    return 0;
+    return 1;
 }
 
 void benchmark() {
@@ -43,6 +43,7 @@ void benchmark() {
         printf("parsing %s\n", fileLocation);
         if (!parseFile(fileLocation)) {
             printf("Parsing document %s failed\n", fileLocation);
+            break;
         }
     }
 

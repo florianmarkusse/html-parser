@@ -23,8 +23,8 @@ TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
     //    printGlobalTagStatus();
-    printDocumentStatus(&doc);
-    printHTML(&doc);
+    //    printDocumentStatus(&doc);
+    //    printHTML(&doc);
     QueryingStatus actual = querySelectorAll(&doc, cssQuery);
     // TODO(florian): need to free the result from querySelectors..
 

@@ -22,13 +22,13 @@ typedef uint16_t element_id;
 #define TOTAL_ELEMENTS (1U << EXPONENT)
 #define POSSIBLE_ELEMENTS (1U << SINGLES_MASK)
 
-#define TOTAL_PAGES (1U << 4U)
+#define TOTAL_PAGES (1U << 8U)
 
 // The size of each page of each global.
-#define TAGS_PAGE_SIZE (1U << 10U)
-#define PROP_KEYS_PAGE_SIZE (1U << 10U)
-#define PROP_VALUES_PAGE_SIZE (1U << 10U)
-#define TEXT_PAGE_SIZE (1U << 12U)
+#define TAGS_PAGE_SIZE (1U << 12U)
+#define PROP_KEYS_PAGE_SIZE (1U << 12U)
+#define PROP_VALUES_PAGE_SIZE (1U << 12U)
+#define TEXT_PAGE_SIZE (1U << 16U)
 
 typedef struct {
     char *elements[TOTAL_ELEMENTS];

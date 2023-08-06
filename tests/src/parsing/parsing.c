@@ -1,42 +1,67 @@
 
 
+#include <dirent.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "dom/document-user.h"
+#include "dom/document-writing.h"
 #include "dom/document.h"
 #include "parsing/parsing.h"
 #include "test-status.h"
 #include "test.h"
 
-#define CURRENT_DIR "tests/src/parsing/"
-#define LARGE_FILE CURRENT_DIR "large-file.html"
+#define INPUTS_DIR "tests/src/parsing/"
+#define TEST_1 CURRENT_DIR "test-1.html"
 
-TestStatus parseFiles(const char *fileLocation1) {
-    createGlobals();
-
+unsigned char parseFile(const char *fileLocation) {
     Document doc1;
-    if (createFromFile(fileLocation1, &doc1) != DOCUMENT_SUCCESS) {
+    if (createFromFile(fileLocation, &doc1) != DOCUMENT_SUCCESS) {
         destroyGlobals();
-        return TEST_FAILURE;
+        return 0;
     }
-
     destroyDocument(&doc1);
-    destroyGlobals();
-
-    return TEST_SUCCESS;
+    return 1;
 }
 
-static inline void testAndCount(const char *fileLocation1,
+TestStatus parseFiles() { return TEST_SUCCESS; }
 
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
-    printTestStart(testName);
+static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
+    createGlobals();
 
-    if (parseFiles(fileLocation1) == TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
+    // Open the inputs directory
+    DIR *dir = NULL;
+    struct dirent *ent = NULL;
+    if ((dir = opendir(INPUTS_DIR)) == NULL) {
         (*localFailures)++;
+        printf("Failed to open test directory: %s\n", INPUTS_DIR);
+        return;
     }
+
+    // Traverse the directory and parse all the HTML files
+    while ((ent = readdir(dir)) != NULL) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+        char fileLocation[1024];
+        snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
+                 ent->d_name);
+        printTestStart(fileLocation);
+        if (!parseFile(fileLocation)) {
+            (*localFailures)++;
+            printTestFailure();
+            printTestDemarcation();
+            printf("Parsing document %s failed\n", fileLocation);
+            printTestDemarcation();
+        } else {
+            (*localSuccesses)++;
+            printTestSuccess();
+        }
+    }
+
+    closedir(dir);
+
+    destroyGlobals();
 }
 
 unsigned char testParsings(size_t *successes, size_t *failures) {
@@ -44,7 +69,7 @@ unsigned char testParsings(size_t *successes, size_t *failures) {
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
-    testAndCount(LARGE_FILE, "large file", &localSuccesses, &localFailures);
+    testAndCount(&localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 
