@@ -1,10 +1,4 @@
-- Rewrite parsing method.
-    1. Parse tag name
-    2. Add any attributes
-    3. Set TagID for that nodeID, be it single or paired.
-- Add in contexts of <style> and <script> tags.
-    - style tags don't care about anything, everything is text until u specifically encounter </style>
-    - <script> tags don't care about anything that is within quotes, is all considered text.
+- Relax max sizes for real word scenarios
 - Instead of hardcoded 8 for bits in byte we can use define that is defined somewhere.
 - Deleting/Modifying global elements
     - E.g., when we merge text nodes during parsing.
