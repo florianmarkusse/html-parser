@@ -20,7 +20,13 @@
 #define TEST_FILE_9 CURRENT_DIR "test-9.html"
 #define TEST_FILE_10 CURRENT_DIR "test-10.html"
 #define TEST_FILE_11 CURRENT_DIR "test-11.html"
+#define TEST_FILE_11_MIN CURRENT_DIR "test-11-min.html"
 #define TEST_FILE_12 CURRENT_DIR "test-12.html"
+#define TEST_FILE_12_MIN CURRENT_DIR "test-12-min.html"
+#define TEST_FILE_13 CURRENT_DIR "test-13.html"
+#define TEST_FILE_13_MIN CURRENT_DIR "test-13-min.html"
+#define TEST_FILE_14 CURRENT_DIR "test-14.html"
+#define TEST_FILE_14_MIN CURRENT_DIR "test-14-min.html"
 
 TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
                         const ComparisonStatus expectedResult) {
@@ -65,11 +71,11 @@ TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation1,
-                                const char *fileLocation2,
-                                const ComparisonStatus expectedResult,
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
+static inline void parseAndCompare(const char *fileLocation1,
+                                   const char *fileLocation2,
+                                   const ComparisonStatus expectedResult,
+                                   const char *testName, size_t *localSuccesses,
+                                   size_t *localFailures) {
     printTestStart(testName);
 
     if (compareFiles(fileLocation1, fileLocation2, expectedResult) ==
@@ -85,32 +91,39 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
-    testAndCount(TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file",
-                 &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_PROPERTIES,
-                 "different key-value property", &localSuccesses,
-                 &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES,
-                 "empty file", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_4, COMPARISON_MISSING_PROPERTIES,
-                 "missing boolean property", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_5, COMPARISON_MISSING_PROPERTIES,
-                 "missing key-value property", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
-                 "text node and document node", &localSuccesses,
-                 &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES,
-                 "different sizes", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_TAGS,
-                 "different tags", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_TEXT,
-                 "different text nodes", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments",
-                 &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_11, COMPARISON_DIFFERENT_SIZES,
-                 "extra style tag", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, TEST_FILE_12, COMPARISON_DIFFERENT_SIZES,
-                 "extra script tag", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file",
+                    &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_PROPERTIES,
+                    "different key-value property", &localSuccesses,
+                    &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES,
+                    "empty file", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_4, COMPARISON_MISSING_PROPERTIES,
+                    "missing boolean property", &localSuccesses,
+                    &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_5, COMPARISON_MISSING_PROPERTIES,
+                    "missing key-value property", &localSuccesses,
+                    &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
+                    "text node and document node", &localSuccesses,
+                    &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES,
+                    "different sizes", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_TAGS,
+                    "different tags", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_TEXT,
+                    "different text nodes", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments",
+                    &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_11, TEST_FILE_11_MIN, COMPARISON_SUCCESS,
+                    "style tag", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_12, TEST_FILE_12_MIN, COMPARISON_SUCCESS,
+                    "script tag", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_13, TEST_FILE_13_MIN, COMPARISON_SUCCESS,
+                    "difficult style tag", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_14, TEST_FILE_14_MIN, COMPARISON_SUCCESS,
+                    "different quotes in attributes", &localSuccesses,
+                    &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 

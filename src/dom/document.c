@@ -183,8 +183,8 @@ DocumentStatus addBooleanProperty(const node_id nodeID, const element_id propID,
 DocumentStatus addProperty(const node_id nodeID, const element_id keyID,
                            const element_id valueID, Document *doc) {
     if ((doc->props = resizeArray(doc->props, doc->propsLen, &doc->propsCap,
-                                  sizeof(BooleanProperty),
-                                  BOOLEAN_PROPERTIES_PER_PAGE)) == NULL) {
+                                  sizeof(Property), PROPERTIES_PER_PAGE)) ==
+        NULL) {
         return DOCUMENT_ERROR_MEMORY;
     }
 

@@ -38,7 +38,7 @@ DataPageStatus insertIntoPage(const void *data, const size_t byteLen,
             }
             container->pageLen++;
         } else {
-            PRINT_ERROR("No more capacity to create new tag pages.\n");
+            PRINT_ERROR("No more capacity to create new pages.\n");
             PRINT_ERROR("All %zu page(s) of %zu bytes are full.\n", totalPages,
                         container->pageSize);
             return DATA_PAGE_NO_CAPACITY;

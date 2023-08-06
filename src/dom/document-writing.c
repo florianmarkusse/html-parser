@@ -122,7 +122,7 @@ void printDocumentStatus(const Document *doc) {
         Node node = doc->nodes[i];
 
         if (node.nodeID == 0) {
-            printf("tag: %-6s bits: %-18s", "xxx", "xxxxxxxxxxxxxxxx");
+            printf("tag: %-6s bits: %-18s", "xxxxx", "xxxxxxxxxxxxxxxx");
             printf("%-8s %-20s with node ID: %-4hu\n", "error", "internal use",
                    node.nodeID);
         } else {

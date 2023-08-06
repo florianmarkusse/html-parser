@@ -14,7 +14,12 @@
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-typedef enum { BASIC_CONTEXT, SCRIPT_CONTEXT, STYLE_CONTEXT } TextParsing;
+typedef enum {
+    BASIC_CONTEXT,
+    SCRIPT_CONTEXT,
+    STYLE_CONTEXT,
+    ROGUE_OPEN_TAG
+} TextParsing;
 
 unsigned char isSpecialSpace(char ch) {
     return ch == '\t' || ch == '\n' || ch == '\r';
@@ -80,7 +85,7 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
     }
 
     size_t elementStartIndex = *currentPosition;
-    while (ch != ' ' && ch != '>' && ch != '\0') {
+    while (ch != ' ' && !isSpecialSpace(ch) && ch != '>' && ch != '\0') {
         ch = htmlString[++(*currentPosition)];
     }
     size_t elementLen = *currentPosition - elementStartIndex;
@@ -99,9 +104,7 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
         while (ch == ' ' || isSpecialSpace(ch)) {
             ch = htmlString[++(*currentPosition)];
         }
-        // '/' is not a valid starting attribute.
-        if (ch == '/') {
-            *isSingle = 1;
+        if (ch == '/' || ch == '>') {
             break;
         }
 
@@ -119,7 +122,8 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
         if (ch == '=') {
             element_id attrValueID = 0;
 
-            // Expected syntax: key="value".
+            // Expected syntax: key="value" OR
+            // Expected syntax: key='value'
             // We can do some more interesting stuff but
             // currently not required.
             if (elementToIndex(&gPropKeys.container, &gPropKeys.pairedLen,
@@ -128,11 +132,12 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
                 PRINT_ERROR("Failed to create element ID for key.\n");
                 return DOCUMENT_NO_ELEMENT;
             }
-            (*currentPosition) += 2;
-            ch = htmlString[*currentPosition];
+            ch = htmlString[++(*currentPosition)];
+            char quote = ch;
+            ch = htmlString[++(*currentPosition)];
 
             size_t attrValueStartIndex = *currentPosition;
-            while (ch != '"') {
+            while (ch != quote) {
                 ch = htmlString[++(*currentPosition)];
             }
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
@@ -166,6 +171,9 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
                 return documentStatus;
             }
         }
+    }
+    if (ch == '/') {
+        *isSingle = 1;
     }
 
     element_id tagID = 0;
@@ -227,77 +235,70 @@ DocumentStatus parseExclamDocNode(const char *htmlString,
                         &ignore, &ignore2, 1, doc);
 }
 
+unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
+                                 const size_t currentPosition) {
+    return (ch != '\0' && !isSpecialSpace(ch) &&
+            (ch != ' ' ||
+             (currentPosition > 0 && htmlString[currentPosition - 1] != ' ')));
+}
+
 DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                              node_id *prevNodeID, node_id *currentNodeID,
                              const element_id textTagID, TextParsing *context,
-                             Document *doc) {
+                             unsigned char *isMerge, Document *doc) {
     DocumentStatus documentStatus = DOCUMENT_SUCCESS;
     size_t elementStartIndex = *currentPosition;
     char ch = htmlString[*currentPosition];
+    // Always consume at least a single character
     size_t elementLen = 0;
 
     // Continue until we encounter extra space or the end of the text
     // node.
+
     switch (*context) {
     case BASIC_CONTEXT: {
-        while (
-            ch != '\0' && !isSpecialSpace(ch) &&
-            (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ') &&
-            ch != '<') {
+        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
+               ch != '<') {
             ch = htmlString[++(*currentPosition)];
         }
 
         elementLen = *currentPosition - elementStartIndex;
-        if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
-            elementLen--;
+        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+            if (elementLen > 0) {
+                elementLen--;
+            }
         }
         break;
     }
     case STYLE_CONTEXT: {
-        while (
-            ch != '\0' && !isSpecialSpace(ch) &&
-            (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ') &&
-            (ch != '<' || htmlString[*currentPosition + 1] != '/' ||
-             htmlString[*currentPosition + 2] != 's' ||
-             htmlString[*currentPosition + 3] != 't' ||
-             htmlString[*currentPosition + 4] != 'y' ||
-             htmlString[*currentPosition + 5] != 'l' ||
-             htmlString[*currentPosition + 6] != 'e' ||
-             htmlString[*currentPosition + 7] != '>')) {
+        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
+               strncmp(&htmlString[*currentPosition], "</style",
+                       strlen("</style")) != 0) {
             ch = htmlString[++(*currentPosition)];
         }
 
-        if (ch == '<' && htmlString[*currentPosition + 1] == '/' &&
-            htmlString[*currentPosition + 2] == 's' &&
-            htmlString[*currentPosition + 3] == 't' &&
-            htmlString[*currentPosition + 4] == 'y' &&
-            htmlString[*currentPosition + 5] == 'l' &&
-            htmlString[*currentPosition + 6] == 'e' &&
-            htmlString[*currentPosition + 7] == '>') {
-            *context = BASIC_CONTEXT;
-            return documentStatus;
+        elementLen = *currentPosition - elementStartIndex;
+        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+            if (elementLen > 0) {
+                elementLen--;
+            }
         }
 
-        elementLen = *currentPosition - elementStartIndex;
-        if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
-            elementLen--;
+        if (strncmp(&htmlString[*currentPosition], "</style",
+                    strlen("</style")) == 0) {
+            *context = BASIC_CONTEXT;
+            if (elementLen < 1) {
+                return documentStatus;
+            }
         }
+
         break;
     }
     case SCRIPT_CONTEXT: {
         char isInString = 0;
-        while (
-            ch != '\0' && !isSpecialSpace(ch) &&
-            (ch != ' ' || htmlString[MAX(0, (*currentPosition) - 1)] != ' ') &&
-            (isInString ||
-             (ch != '<' || htmlString[*currentPosition + 1] != '/' ||
-              htmlString[*currentPosition + 2] != 's' ||
-              htmlString[*currentPosition + 3] != 'c' ||
-              htmlString[*currentPosition + 4] != 'r' ||
-              htmlString[*currentPosition + 5] != 'i' ||
-              htmlString[*currentPosition + 6] != 'p' ||
-              htmlString[*currentPosition + 7] != 't' ||
-              htmlString[*currentPosition + 8] != '>'))) {
+        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
+               (isInString || strncmp(&htmlString[*currentPosition], "</script",
+                                      strlen("</script")) != 0)) {
             if (ch == '\'' || ch == '"' || ch == '`') {
                 if (isInString == ch) {
                     isInString = 0;
@@ -308,21 +309,36 @@ DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             ch = htmlString[++(*currentPosition)];
         }
 
-        if (ch == '<' && htmlString[*currentPosition + 1] == '/' &&
-            htmlString[*currentPosition + 2] == 's' &&
-            htmlString[*currentPosition + 3] == 'c' &&
-            htmlString[*currentPosition + 4] == 'r' &&
-            htmlString[*currentPosition + 5] == 'i' &&
-            htmlString[*currentPosition + 6] == 'p' &&
-            htmlString[*currentPosition + 7] == 't' &&
-            htmlString[*currentPosition + 8] == '>') {
+        elementLen = *currentPosition - elementStartIndex;
+
+        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+            if (elementLen > 0) {
+                elementLen--;
+            }
+        }
+        if (strncmp(&htmlString[*currentPosition], "</script",
+                    strlen("</script")) == 0) {
             *context = BASIC_CONTEXT;
-            return documentStatus;
+            if (elementLen < 1) {
+                return documentStatus;
+            }
+        }
+
+        break;
+    }
+    case ROGUE_OPEN_TAG: {
+        // Always consume the rogue opening tag.
+        ch = htmlString[++(*currentPosition)];
+        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
+               ch != '<') {
+            ch = htmlString[++(*currentPosition)];
         }
 
         elementLen = *currentPosition - elementStartIndex;
-        if (htmlString[MAX(0, (*currentPosition) - 1)] == ' ') {
-            elementLen--;
+        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+            if (elementLen > 0) {
+                elementLen--;
+            }
         }
         break;
     }
@@ -335,6 +351,7 @@ DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
 
     Node prevNode = doc->nodes[*currentNodeID];
     if (isText(prevNode.tagID)) {
+        *isMerge = 1;
         const char *prevText = getText(prevNode.nodeID, doc);
         const size_t mergedLen = strlen(prevText) + elementLen +
                                  2; // Adding a whitespace in between.
@@ -416,16 +433,32 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
         }
 
         // Text node.
-        if (context != BASIC_CONTEXT || ch != '<') {
+        if (context != BASIC_CONTEXT || ch != '<' ||
+            (ch == '<' && (htmlString[currentPosition + 1] == ' ' ||
+                           isSpecialSpace(htmlString[currentPosition + 1])))) {
+            if (context == BASIC_CONTEXT && ch == '<' &&
+                (htmlString[currentPosition + 1] == ' ' ||
+                 isSpecialSpace(htmlString[currentPosition + 1]))) {
+                context = ROGUE_OPEN_TAG;
+            }
+            unsigned char isMerge = 0;
+
             if ((documentStatus = parseTextNode(
                      htmlString, &currentPosition, &prevNodeID, &currentNodeID,
-                     textTagID, &context, doc)) != DOCUMENT_SUCCESS) {
+                     textTagID, &context, &isMerge, doc)) != DOCUMENT_SUCCESS) {
                 return documentStatus;
             }
-            if ((documentStatus = updateReferences(currentNodeID, prevNodeID,
-                                                   &nodeStack, doc)) !=
-                DOCUMENT_SUCCESS) {
-                return documentStatus;
+
+            if (context == ROGUE_OPEN_TAG) {
+                context = BASIC_CONTEXT;
+            }
+
+            if (!isMerge) {
+                if ((documentStatus =
+                         updateReferences(currentNodeID, prevNodeID, &nodeStack,
+                                          doc)) != DOCUMENT_SUCCESS) {
+                    return documentStatus;
+                }
             }
         }
         // Doc node.
