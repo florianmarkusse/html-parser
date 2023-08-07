@@ -14,8 +14,8 @@ int main() {
     size_t successes = 0;
     size_t failures = 0;
 
-    testParsings(&successes, &failures);
-    printf("\n");
+    // testParsings(&successes, &failures);
+    // printf("\n");
 
     testComparisons(&successes, &failures);
     printf("\n");

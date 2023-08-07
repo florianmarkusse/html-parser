@@ -109,8 +109,18 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
         }
 
         size_t attrKeyStartIndex = *currentPosition;
-        while (ch != ' ' && ch != '>' && ch != '=') {
-            ch = htmlString[++(*currentPosition)];
+
+        if (ch == '\'' || ch == '"') {
+            char quote = ch;
+            ch = htmlString[++(*currentPosition)]; // Skip start quote.
+            while (ch != quote && ch != '\0') {
+                ch = htmlString[++(*currentPosition)];
+            }
+            ch = htmlString[++(*currentPosition)]; // Skip end quote.
+        } else {
+            while (ch != ' ' && ch != '>' && ch != '=') {
+                ch = htmlString[++(*currentPosition)];
+            }
         }
         size_t attrKeyLen = *currentPosition - attrKeyStartIndex;
         if (ch == '>' && htmlString[MAX(*currentPosition - 1, 0)] == '/') {

@@ -27,6 +27,8 @@
 #define TEST_FILE_13_MIN CURRENT_DIR "test-13-min.html"
 #define TEST_FILE_14 CURRENT_DIR "test-14.html"
 #define TEST_FILE_14_MIN CURRENT_DIR "test-14-min.html"
+#define TEST_FILE_15 CURRENT_DIR "test-15.html"
+#define TEST_FILE_15_MIN CURRENT_DIR "test-15-min.html"
 
 TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
                         const ComparisonStatus expectedResult) {
@@ -124,6 +126,8 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
     parseAndCompare(TEST_FILE_14, TEST_FILE_14_MIN, COMPARISON_SUCCESS,
                     "different quotes in attributes", &localSuccesses,
                     &localFailures);
+    parseAndCompare(TEST_FILE_15, TEST_FILE_15_MIN, COMPARISON_SUCCESS,
+                    "quotes as attribute key", &localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 
