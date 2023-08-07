@@ -12,8 +12,6 @@
 #include "utils/print/error.h"
 #include "utils/text/text.h"
 
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-
 typedef enum {
     BASIC_CONTEXT,
     SCRIPT_CONTEXT,
@@ -94,7 +92,8 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
     }
 
     *isSingle = exclamStart;
-    if (ch == '>' && htmlString[MAX(0, *currentPosition - 1)] == '/') {
+    if (ch == '>' && *currentPosition > 0 &&
+        htmlString[*currentPosition - 1] == '/') {
         *isSingle = 1;
         elementLen--;
     }
@@ -123,7 +122,8 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
             }
         }
         size_t attrKeyLen = *currentPosition - attrKeyStartIndex;
-        if (ch == '>' && htmlString[MAX(*currentPosition - 1, 0)] == '/') {
+        if (ch == '>' && *currentPosition > 0 &&
+            htmlString[*currentPosition - 1] == '/') {
             *isSingle = 1;
             attrKeyLen--;
         }
@@ -482,7 +482,9 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
                     ch = htmlString[++currentPosition];
                 }
 
-                nodeStack.len = MAX(nodeStack.len - 1, 0);
+                if (nodeStack.len > 0) {
+                    nodeStack.len--;
+                }
                 currentNodeID = nodeStack.stack[nodeStack.len];
                 context = BASIC_CONTEXT;
             }
@@ -493,8 +495,10 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
                     htmlString[currentPosition + 3] == '-') {
                     while (ch != '\0' &&
                            (ch != '>' ||
-                            htmlString[MAX(0, currentPosition - 1)] != '-' ||
-                            htmlString[MAX(0, currentPosition - 2)] != '-')) {
+                            (currentPosition >= 1 &&
+                             htmlString[currentPosition - 1] != '-') ||
+                            (currentPosition >= 2 &&
+                             htmlString[currentPosition - 2] != '-'))) {
                         ch = htmlString[++currentPosition];
                     }
                     if (ch != '\0') {

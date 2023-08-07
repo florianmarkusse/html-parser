@@ -29,6 +29,8 @@
 #define TEST_FILE_14_MIN CURRENT_DIR "test-14-min.html"
 #define TEST_FILE_15 CURRENT_DIR "test-15.html"
 #define TEST_FILE_15_MIN CURRENT_DIR "test-15-min.html"
+#define TEST_FILE_16 CURRENT_DIR "test-16.html"
+#define TEST_FILE_16_MIN CURRENT_DIR "test-16-min.html"
 
 TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
                         const ComparisonStatus expectedResult) {
@@ -128,6 +130,8 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
                     &localFailures);
     parseAndCompare(TEST_FILE_15, TEST_FILE_15_MIN, COMPARISON_SUCCESS,
                     "quotes as attribute key", &localSuccesses, &localFailures);
+    parseAndCompare(TEST_FILE_16, TEST_FILE_16_MIN, COMPARISON_SUCCESS,
+                    "close tag start", &localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 
