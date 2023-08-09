@@ -27,8 +27,8 @@ typedef uint16_t element_id;
 // The size of each page of each global.
 #define TAGS_PAGE_SIZE (1U << 12U)
 #define PROP_KEYS_PAGE_SIZE (1U << 12U)
-#define PROP_VALUES_PAGE_SIZE (1U << 12U)
-#define TEXT_PAGE_SIZE (1U << 16U)
+#define PROP_VALUES_PAGE_SIZE (1U << 14U)
+#define TEXT_PAGE_SIZE (1U << 17U)
 
 typedef struct {
     char *elements[TOTAL_ELEMENTS];

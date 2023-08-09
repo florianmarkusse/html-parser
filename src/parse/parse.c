@@ -133,9 +133,10 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
             element_id attrValueID = 0;
 
             // Expected syntax: key="value" OR
-            // Expected syntax: key='value'
-            // We can do some more interesting stuff but
-            // currently not required.
+            // Expected syntax: key='value' OR
+            // Expected syntax: key=value (This is invalid html, but will still
+            // support it) We can do some more interesting stuff but currently
+            // not required.
             if (elementToIndex(&gPropKeys.container, &gPropKeys.pairedLen,
                                &htmlString[attrKeyStartIndex], attrKeyLen, 1, 1,
                                &attrKeyID) != ELEMENT_SUCCESS) {
@@ -143,13 +144,23 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
                 return DOCUMENT_NO_ELEMENT;
             }
             ch = htmlString[++(*currentPosition)];
-            char quote = ch;
-            ch = htmlString[++(*currentPosition)];
 
             size_t attrValueStartIndex = *currentPosition;
-            while (ch != quote) {
+            if (ch == '\'' || ch == '"') {
+                attrValueStartIndex++;
+                char quote = ch;
                 ch = htmlString[++(*currentPosition)];
+
+                while (ch != quote && ch != '\0') {
+                    ch = htmlString[++(*currentPosition)];
+                }
+            } else {
+                while (ch != ' ' && !isSpecialSpace(ch) && ch != '>' &&
+                       ch != '\0') {
+                    ch = htmlString[++(*currentPosition)];
+                }
             }
+
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
 
             if (elementToIndex(&gPropValues.container, &gPropValues.len,
@@ -484,8 +495,8 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
 
                 if (nodeStack.len > 0) {
                     nodeStack.len--;
+                    currentNodeID = nodeStack.stack[nodeStack.len];
                 }
-                currentNodeID = nodeStack.stack[nodeStack.len];
                 context = BASIC_CONTEXT;
             }
             // Comments or <!DOCTYPE>.

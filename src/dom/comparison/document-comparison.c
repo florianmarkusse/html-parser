@@ -57,7 +57,7 @@ ComparisonStatus compareProps(const Node *node1, const Document *doc1,
     if (node1PropsLen != node2PropsLen) {
         if (printDifferences) {
             PRINT_ERROR(
-                "Nodes have different number of boolean properties.\nnode "
+                "Nodes have different number of key/boolean properties.\nnode "
                 "1: %u\nnode 2: %u\n",
                 node1PropsLen, node2PropsLen);
 
@@ -71,7 +71,7 @@ ComparisonStatus compareProps(const Node *node1, const Document *doc1,
     for (size_t i = 0; i < node1PropsLen; i++) {
         if (node1Keys[i] != node2Keys[i] || node1Values[i] != node2Values[i]) {
             if (printDifferences) {
-                PRINT_ERROR("Nodes have different key-value properties.\n");
+                PRINT_ERROR("Nodes have different value properties.\n");
                 printProps(node1->tagID, node1PropsLen, node1Keys, node1Values,
                            node2->tagID, node2PropsLen, node2Keys, node2Values);
             }

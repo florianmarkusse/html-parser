@@ -12,18 +12,18 @@
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"
 
 unsigned char parseFile(const char *fileLocation) {
+    createGlobals();
     Document doc1;
     if (createFromFile(fileLocation, &doc1) != DOCUMENT_SUCCESS) {
         destroyGlobals();
         return 0;
     }
     destroyDocument(&doc1);
+    destroyGlobals();
     return 1;
 }
 
 void benchmark() {
-    createGlobals();
-
     // Open the inputs directory
     DIR *dir = NULL;
     struct dirent *ent = NULL;
@@ -48,8 +48,6 @@ void benchmark() {
     }
 
     closedir(dir);
-
-    destroyGlobals();
 }
 
 int main() {
