@@ -9,13 +9,16 @@
 #include "utils/memory/memory.h"
 #include "utils/print/error.h"
 
-QueryingStatus getTagID(const char *tag, element_id *tagID) {
-    if (findElement(&gTags.container, &gTags.pairedLen, tag, 0, tagID) ==
-        ELEMENT_SUCCESS) {
+QueryingStatus getTagID(const char *tag, element_id *tagID,
+                        const DataContainer *dataContainer) {
+    if (findElement(&dataContainer->tags.container,
+                    &dataContainer->tags.pairedLen, tag, 0,
+                    tagID) == ELEMENT_SUCCESS) {
         return QUERYING_SUCCESS;
     }
 
-    if (findElement(&gTags.container, &gTags.singleLen, tag, SINGLES_OFFSET,
+    if (findElement(&dataContainer->tags.container,
+                    &dataContainer->tags.singleLen, tag, SINGLES_OFFSET,
                     tagID) == ELEMENT_SUCCESS) {
         return QUERYING_SUCCESS;
     }
@@ -72,7 +75,7 @@ unsigned char isParentIn(const node_id parentID, const node_id *array,
 }
 
 QueryingStatus getDescendantsOf(node_id **results, size_t *len,
-                                size_t *currentCap, Document *doc) {
+                                size_t *currentCap, const Document *doc) {
     if (*results == NULL) {
         PRINT_ERROR("Provide the node ID(s) of which you want all the "
                     "descendants of in the results array.\n");

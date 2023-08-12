@@ -6,7 +6,8 @@
 #include "type/element/element-status.h"
 #include "type/element/elements-container.h"
 
-QueryingStatus getTagID(const char *tag, element_id *tagID);
+QueryingStatus getTagID(const char *tag, element_id *tagID,
+                        const DataContainer *dataContainer);
 QueryingStatus getNodesWithTagID(element_id tagID, const Document *doc,
                                  node_id **results, size_t *len,
                                  size_t *currentCap);
@@ -14,5 +15,5 @@ QueryingStatus getNodesWithTagID(element_id tagID, const Document *doc,
 QueryingStatus filterByTagID(element_id tagID, const Document *doc,
                              node_id *results, size_t *len);
 QueryingStatus getDescendantsOf(node_id **results, size_t *len,
-                                size_t *currentCap, Document *doc);
+                                size_t *currentCap, const Document *doc);
 #endif

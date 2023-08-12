@@ -18,15 +18,17 @@ typedef struct {
     element_id len;
 } __attribute__((aligned(128))) Elements;
 
-extern CombinedElements gTags;
-extern CombinedElements gPropKeys;
-extern Elements gPropValues;
-extern Elements gText;
+typedef struct {
+    CombinedElements tags;
+    CombinedElements propKeys;
+    Elements propValues;
+    Elements text;
+} DataContainer;
 
-ElementStatus createGlobals();
-void destroyGlobals();
+ElementStatus createDataContainer(DataContainer *dataContainer);
+void destroyDataContainer(DataContainer *dataContainer);
 
-ElementStatus findElement(ElementsContainer *container,
+ElementStatus findElement(const ElementsContainer *container,
                           const element_id *currentElementLen,
                           const char *elementName, element_id offsetMask,
                           element_id *elementID);
@@ -45,8 +47,8 @@ ElementStatus createElement(ElementsContainer *container, const char *element,
 unsigned char isSingle(element_id index);
 unsigned char isText(element_id index);
 
-void printGlobalTagStatus();
-void printGlobalAttributeStatus();
-void printGlobalTextStatus();
+void printTagStatus(DataContainer *dataContainer);
+void printAttributeStatus(DataContainer *dataContainer);
+void printTextStatus(DataContainer *dataContainer);
 
 #endif

@@ -5,7 +5,8 @@
 #include "utils/memory/memory.h"
 #include "utils/print/error.h"
 
-DocumentStatus createDocument(const char *htmlString, Document *doc) {
+DocumentStatus createDocument(const char *htmlString, Document *doc,
+                              DataContainer *dataContainer) {
     doc->firstNodeID = 0;
 
     doc->nodes = malloc(NODES_PAGE_SIZE);
@@ -49,7 +50,7 @@ DocumentStatus createDocument(const char *htmlString, Document *doc) {
         return DOCUMENT_ERROR_MEMORY;
     }
 
-    DocumentStatus documentStatus = parse(htmlString, doc);
+    DocumentStatus documentStatus = parse(htmlString, doc, dataContainer);
     if (documentStatus != DOCUMENT_SUCCESS) {
         PRINT_ERROR("Failed to parse document.\n");
     }

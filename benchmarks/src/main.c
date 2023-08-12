@@ -12,14 +12,16 @@
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"
 
 unsigned char parseFile(const char *fileLocation) {
-    createGlobals();
+    DataContainer dataContainer;
+    createDataContainer(&dataContainer);
     Document doc1;
-    if (createFromFile(fileLocation, &doc1) != DOCUMENT_SUCCESS) {
-        destroyGlobals();
+    if (createFromFile(fileLocation, &doc1, &dataContainer) !=
+        DOCUMENT_SUCCESS) {
+        destroyDataContainer(&dataContainer);
         return 0;
     }
     destroyDocument(&doc1);
-    destroyGlobals();
+    destroyDataContainer(&dataContainer);
     return 1;
 }
 

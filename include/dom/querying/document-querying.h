@@ -6,6 +6,7 @@
 
 #define INITIAL_QUERY_CAP (1U << 6U)
 
-QueryingStatus querySelectorAll(Document *doc, const char *cssQuery);
+QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
+                                const DataContainer *dataContainer);
 
 #endif

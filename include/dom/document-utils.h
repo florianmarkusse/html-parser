@@ -3,6 +3,7 @@
 
 #include "document.h"
 
-const char *getText(node_id nodeID, const Document *doc);
+const char *getText(node_id nodeID, const Document *doc,
+                    const DataContainer *dataContainer);
 
 #endif

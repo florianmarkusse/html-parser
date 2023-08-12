@@ -14,18 +14,20 @@
 
 TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                      const QueryingStatus expected) {
-    createGlobals();
+    DataContainer dataContainer;
+    createDataContainer(&dataContainer);
 
     Document doc;
-    if (createFromFile(fileLocation, &doc) != DOCUMENT_SUCCESS) {
-        destroyGlobals();
+    if (createFromFile(fileLocation, &doc, &dataContainer) !=
+        DOCUMENT_SUCCESS) {
+        destroyDataContainer(&dataContainer);
         return TEST_ERROR_INITIALIZATION;
     }
 
     //    printGlobalTagStatus();
     //    printDocumentStatus(&doc);
     //    printHTML(&doc);
-    QueryingStatus actual = querySelectorAll(&doc, cssQuery);
+    QueryingStatus actual = querySelectorAll(cssQuery, &doc, &dataContainer);
     // TODO(florian): need to free the result from querySelectors..
 
     TestStatus result = TEST_FAILURE;
@@ -42,7 +44,7 @@ TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
     destroyDocument(&doc);
-    destroyGlobals();
+    destroyDataContainer(&dataContainer);
 
     return result;
 }

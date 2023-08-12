@@ -5,7 +5,8 @@
 #include "utils/file/read.h"
 #include "utils/print/error.h"
 
-DocumentStatus createFromFile(const char *fileLocation, Document *doc) {
+DocumentStatus createFromFile(const char *fileLocation, Document *doc,
+                              DataContainer *dataContainer) {
     char *buffer = NULL;
     FileStatus fileStatus = readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
@@ -14,7 +15,7 @@ DocumentStatus createFromFile(const char *fileLocation, Document *doc) {
         return DOCUMENT_ERROR_MEMORY;
     }
 
-    DocumentStatus documentStatus = createDocument(buffer, doc);
+    DocumentStatus documentStatus = createDocument(buffer, doc, dataContainer);
     if (documentStatus != DOCUMENT_SUCCESS) {
         free(buffer);
         ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),

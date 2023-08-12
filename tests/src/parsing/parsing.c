@@ -11,25 +11,25 @@
 #include "test-status.h"
 #include "test.h"
 
-#define INPUTS_DIR "tests/src/parsing/"
+#define INPUTS_DIR "tests/src/parsing/inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
 unsigned char parseFile(const char *fileLocation) {
+    DataContainer dataContainer;
+    createDataContainer(&dataContainer);
+
     Document doc1;
-    if (createFromFile(fileLocation, &doc1) != DOCUMENT_SUCCESS) {
-        destroyGlobals();
+    if (createFromFile(fileLocation, &doc1, &dataContainer) !=
+        DOCUMENT_SUCCESS) {
+        destroyDataContainer(&dataContainer);
         return 0;
     }
     destroyDocument(&doc1);
+    destroyDataContainer(&dataContainer);
     return 1;
 }
 
-TestStatus parseFiles() { return TEST_SUCCESS; }
-
 static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
-    createGlobals();
-
-    // Open the inputs directory
     DIR *dir = NULL;
     struct dirent *ent = NULL;
     if ((dir = opendir(INPUTS_DIR)) == NULL) {
@@ -38,7 +38,6 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
         return;
     }
 
-    // Traverse the directory and parse all the HTML files
     while ((ent = readdir(dir)) != NULL) {
         if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
             continue;
@@ -60,8 +59,6 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
     }
 
     closedir(dir);
-
-    destroyGlobals();
 }
 
 unsigned char testParsings(size_t *successes, size_t *failures) {

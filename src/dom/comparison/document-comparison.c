@@ -9,28 +9,34 @@
 void printProps(const element_id node1Tag, const element_id node1PropsLen,
                 const element_id node1Keys[MAX_PROPERTIES],
                 const element_id node1Values[MAX_PROPERTIES],
-                const element_id node2Tag, const element_id node2PropsLen,
+                const DataContainer *dataContainer1, const element_id node2Tag,
+                const element_id node2PropsLen,
                 const element_id node2Keys[MAX_PROPERTIES],
-                const element_id node2Values[MAX_PROPERTIES]) {
-    const char *tag1 = gTags.container.elements[node1Tag];
+                const element_id node2Values[MAX_PROPERTIES],
+                const DataContainer *dataContainer2) {
+    const char *tag1 = dataContainer1->tags.container.elements[node1Tag];
     PRINT_ERROR("Printing key-value props of node 1 with tag %s:\n", tag1);
     for (size_t i = 0; i < node1PropsLen; i++) {
-        char *key = gPropKeys.container.elements[node1Keys[i]];
-        char *value = gPropValues.container.elements[node1Values[i]];
+        char *key = dataContainer1->propKeys.container.elements[node1Keys[i]];
+        char *value =
+            dataContainer1->propValues.container.elements[node1Values[i]];
         PRINT_ERROR("%s=\"%s\"\n", key, value);
     }
 
-    const char *tag2 = gTags.container.elements[node2Tag];
+    const char *tag2 = dataContainer2->tags.container.elements[node2Tag];
     PRINT_ERROR("Printing key-value props of node 2 with tag %s:\n", tag2);
     for (size_t i = 0; i < node2PropsLen; i++) {
-        char *key = gPropKeys.container.elements[node2Keys[i]];
-        char *value = gPropValues.container.elements[node2Values[i]];
+        char *key = dataContainer2->propKeys.container.elements[node2Keys[i]];
+        char *value =
+            dataContainer2->propValues.container.elements[node2Values[i]];
         PRINT_ERROR("%s=\"%s\"\n", key, value);
     }
 }
 
 ComparisonStatus compareProps(const Node *node1, const Document *doc1,
+                              const DataContainer *dataContainer1,
                               const Node *node2, const Document *doc2,
+                              const DataContainer *dataContainer2,
                               const unsigned char printDifferences) {
     element_id node1Keys[MAX_PROPERTIES];
     element_id node1Values[MAX_PROPERTIES];
@@ -62,7 +68,8 @@ ComparisonStatus compareProps(const Node *node1, const Document *doc1,
                 node1PropsLen, node2PropsLen);
 
             printProps(node1->tagID, node1PropsLen, node1Keys, node1Values,
-                       node2->tagID, node2PropsLen, node2Keys, node2Values);
+                       dataContainer1, node2->tagID, node2PropsLen, node2Keys,
+                       node2Values, dataContainer2);
         }
 
         return COMPARISON_MISSING_PROPERTIES;
@@ -73,7 +80,8 @@ ComparisonStatus compareProps(const Node *node1, const Document *doc1,
             if (printDifferences) {
                 PRINT_ERROR("Nodes have different value properties.\n");
                 printProps(node1->tagID, node1PropsLen, node1Keys, node1Values,
-                           node2->tagID, node2PropsLen, node2Keys, node2Values);
+                           dataContainer1, node2->tagID, node2PropsLen,
+                           node2Keys, node2Values, dataContainer2);
             }
             return COMPARISON_DIFFERENT_PROPERTIES;
         }
@@ -84,25 +92,29 @@ ComparisonStatus compareProps(const Node *node1, const Document *doc1,
 
 void printBoolProps(const element_id node1Tag, const element_id node1PropsLen,
                     const element_id node1Props[MAX_PROPERTIES],
+                    const DataContainer *dataContainer1,
                     const element_id node2Tag, const element_id node2PropsLen,
-                    const element_id node2Props[MAX_PROPERTIES]) {
-    const char *tag1 = gTags.container.elements[node1Tag];
+                    const element_id node2Props[MAX_PROPERTIES],
+                    const DataContainer *dataContainer2) {
+    const char *tag1 = dataContainer1->tags.container.elements[node1Tag];
     PRINT_ERROR("Printing bool props of node 1 with tag %s:\n", tag1);
     for (size_t i = 0; i < node1PropsLen; i++) {
-        char *prop = gPropKeys.container.elements[node1Props[i]];
+        char *prop = dataContainer1->propKeys.container.elements[node1Props[i]];
         PRINT_ERROR("%s\n", prop);
     }
 
-    const char *tag2 = gTags.container.elements[node2Tag];
+    const char *tag2 = dataContainer2->tags.container.elements[node2Tag];
     PRINT_ERROR("Printing bool props of node 2 with tag %s:\n", tag2);
     for (size_t i = 0; i < node2PropsLen; i++) {
-        char *prop = gPropKeys.container.elements[node2Props[i]];
+        char *prop = dataContainer2->propKeys.container.elements[node2Props[i]];
         PRINT_ERROR("%s\n", prop);
     }
 }
 
 ComparisonStatus compareBoolProps(const Node *node1, const Document *doc1,
+                                  const DataContainer *dataContainer1,
                                   const Node *node2, const Document *doc2,
+                                  const DataContainer *dataContainer2,
                                   const unsigned char printDifferences) {
     element_id node1Props[MAX_PROPERTIES];
     element_id node1PropsLen = 0;
@@ -130,7 +142,8 @@ ComparisonStatus compareBoolProps(const Node *node1, const Document *doc1,
                 node1PropsLen, node2PropsLen);
 
             printBoolProps(node1->tagID, node1PropsLen, node1Props,
-                           node2->tagID, node2PropsLen, node2Props);
+                           dataContainer1, node2->tagID, node2PropsLen,
+                           node2Props, dataContainer2);
         }
 
         return COMPARISON_MISSING_PROPERTIES;
@@ -141,7 +154,8 @@ ComparisonStatus compareBoolProps(const Node *node1, const Document *doc1,
             if (printDifferences) {
                 PRINT_ERROR("Nodes have different boolean properties.\n");
                 printBoolProps(node1->tagID, node1PropsLen, node1Props,
-                               node2->tagID, node2PropsLen, node2Props);
+                               dataContainer1, node2->tagID, node2PropsLen,
+                               node2Props, dataContainer2);
             }
             return COMPARISON_DIFFERENT_PROPERTIES;
         }
@@ -151,7 +165,9 @@ ComparisonStatus compareBoolProps(const Node *node1, const Document *doc1,
 }
 
 ComparisonStatus compareTags(const Node *node1, const Document *doc1,
+                             const DataContainer *dataContainer1,
                              const Node *node2, const Document *doc2,
+                             const DataContainer *dataContainer2,
                              const unsigned char printDifferences) {
     if (isText(node1->tagID) ^ isText(node2->tagID)) {
         if (printDifferences) {
@@ -159,12 +175,12 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
             const char *tag = NULL;
             char textNode = '1';
             if (isText(node1->tagID)) {
-                text = getText(node1->nodeID, doc1);
-                tag = gTags.container.elements[node2->tagID];
+                text = getText(node1->nodeID, doc1, dataContainer1);
+                tag = dataContainer1->tags.container.elements[node2->tagID];
             } else {
                 textNode++;
-                text = getText(node2->nodeID, doc2);
-                tag = gTags.container.elements[node1->tagID];
+                text = getText(node2->nodeID, doc2, dataContainer2);
+                tag = dataContainer1->tags.container.elements[node1->tagID];
             }
 
             PRINT_ERROR(
@@ -177,8 +193,8 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
     }
 
     if (isText(node1->tagID) & isText(node2->tagID)) {
-        const char *text1 = getText(node1->nodeID, doc1);
-        const char *text2 = getText(node2->nodeID, doc2);
+        const char *text1 = getText(node1->nodeID, doc1, dataContainer1);
+        const char *text2 = getText(node2->nodeID, doc2, dataContainer2);
 
         if (strcmp(text1, text2) == 0) {
             return COMPARISON_SUCCESS;
@@ -198,8 +214,10 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
                 singleNode++;
             }
 
-            const char *tag1 = gTags.container.elements[node1->tagID];
-            const char *tag2 = gTags.container.elements[node2->tagID];
+            const char *tag1 =
+                dataContainer1->tags.container.elements[node1->tagID];
+            const char *tag2 =
+                dataContainer2->tags.container.elements[node2->tagID];
             PRINT_ERROR(
                 "Uncomparable nodes: single node and paired node.\nFound "
                 "single node in node %c.\n"
@@ -211,8 +229,10 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
 
     if (node1->tagID != node2->tagID) {
         if (printDifferences) {
-            const char *tag1 = gTags.container.elements[node1->tagID];
-            const char *tag2 = gTags.container.elements[node2->tagID];
+            const char *tag1 =
+                dataContainer1->tags.container.elements[node1->tagID];
+            const char *tag2 =
+                dataContainer2->tags.container.elements[node2->tagID];
             PRINT_ERROR("Nodes have different tags.\nnode 1 tag: %s\nnode "
                         "2 tag: %s\n",
                         tag1, tag2);
@@ -224,21 +244,26 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
 }
 
 ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
-                             node_id *currNodeID2, const Document *doc2) {
+                             const DataContainer *dataContainer1,
+                             node_id *currNodeID2, const Document *doc2,
+                             const DataContainer *dataContainer2) {
     Node node1 = doc1->nodes[*currNodeID1];
     Node node2 = doc2->nodes[*currNodeID2];
 
-    ComparisonStatus result = compareTags(&node1, doc1, &node2, doc2, 0);
+    ComparisonStatus result = compareTags(&node1, doc1, dataContainer1, &node2,
+                                          doc2, dataContainer2, 0);
     if (result != COMPARISON_SUCCESS) {
         return result;
     }
 
     if (!isText(node1.tagID)) {
-        result = compareBoolProps(&node1, doc1, &node2, doc2, 0);
+        result = compareBoolProps(&node1, doc1, dataContainer1, &node2, doc2,
+                                  dataContainer2, 0);
         if (result != COMPARISON_SUCCESS) {
             return result;
         }
-        result = compareProps(&node1, doc1, &node2, doc2, 0);
+        result = compareProps(&node1, doc1, dataContainer1, &node2, doc2,
+                              dataContainer2, 0);
         if (result != COMPARISON_SUCCESS) {
             return result;
         }
@@ -250,8 +275,8 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
     *currNodeID2 = getFirstChild(*currNodeID2, doc2);
 
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp =
-            compareNode(currNodeID1, doc1, currNodeID2, doc2);
+        ComparisonStatus comp = compareNode(currNodeID1, doc1, dataContainer1,
+                                            currNodeID2, doc2, dataContainer2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -270,13 +295,15 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus equals(const Document *doc1, node_id *currNodeID1,
-                        const Document *doc2, node_id *currNodeID2) {
+ComparisonStatus equals(node_id *currNodeID1, const Document *doc1,
+                        const DataContainer *dataContainer1,
+                        node_id *currNodeID2, const Document *doc2,
+                        const DataContainer *dataContainer2) {
     *currNodeID1 = doc1->firstNodeID;
     *currNodeID2 = doc2->firstNodeID;
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp =
-            compareNode(currNodeID1, doc1, currNodeID2, doc2);
+        ComparisonStatus comp = compareNode(currNodeID1, doc1, dataContainer1,
+                                            currNodeID2, doc2, dataContainer2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -293,20 +320,24 @@ ComparisonStatus equals(const Document *doc1, node_id *currNodeID1,
 }
 
 void printFirstDifference(const node_id nodeID1, const Document *doc1,
-                          const node_id nodeID2, const Document *doc2) {
+                          const DataContainer *dataContainer1,
+                          const node_id nodeID2, const Document *doc2,
+                          const DataContainer *dataContainer2) {
     Node *node1 = &doc1->nodes[nodeID1];
     Node *node2 = &doc2->nodes[nodeID2];
 
-    if (compareTags(node1, doc1, node2, doc2, 1) != COMPARISON_SUCCESS) {
+    if (compareTags(node1, doc1, dataContainer1, node2, doc2, dataContainer2,
+                    1) != COMPARISON_SUCCESS) {
         return;
     }
 
     if (!isText(node1->tagID)) {
-        if (compareBoolProps(node1, doc1, node2, doc2, 1) !=
-            COMPARISON_SUCCESS) {
+        if (compareBoolProps(node1, doc1, dataContainer1, node2, doc2,
+                             dataContainer2, 1) != COMPARISON_SUCCESS) {
             return;
         }
-        if (compareProps(node1, doc1, node2, doc2, 1) != COMPARISON_SUCCESS) {
+        if (compareProps(node1, doc1, dataContainer1, node2, doc2,
+                         dataContainer2, 1) != COMPARISON_SUCCESS) {
             return;
         }
     }

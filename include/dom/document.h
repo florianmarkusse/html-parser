@@ -68,7 +68,8 @@ typedef struct {
     size_t textCap;
 } __attribute__((aligned(128))) Document;
 
-DocumentStatus createDocument(const char *htmlString, Document *doc);
+DocumentStatus createDocument(const char *htmlString, Document *doc,
+                              DataContainer *dataContainer);
 
 DocumentStatus createNode(node_id *nodeID, Document *doc);
 DocumentStatus setTagID(node_id nodeID, element_id tagID, Document *doc);

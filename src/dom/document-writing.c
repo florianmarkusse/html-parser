@@ -27,32 +27,34 @@ void getBits(const element_id tagID, char *bits, const size_t size) {
         unsigned char bit = (tagID >> (numBits - 1 - i)) & 1;
         bits[i] = '0' + bit;
     }
-    bits[numBits] = '\0'; // Add null terminator
+    bits[numBits] = '\0';
 }
 
 void printNode(const node_id nodeID, const size_t indentation,
-               const Document *doc, FILE *output) {
+               const Document *doc, const DataContainer *dataContainer,
+               FILE *output) {
     if (nodeID == ERROR_NODE_ID) {
         return;
     }
     Node node = doc->nodes[nodeID];
 
     if (isText(node.tagID)) {
-        const char *text = getText(node.nodeID, doc);
+        const char *text = getText(node.nodeID, doc, dataContainer);
         if (text != NULL) {
             fprintf(output, "%s", text);
         }
         return;
     }
 
-    const char *tag = gTags.container.elements[node.tagID];
+    const char *tag = dataContainer->tags.container.elements[node.tagID];
     fprintf(output, "<%s", tag);
 
     for (size_t i = 0; i < doc->boolPropsLen; i++) {
         BooleanProperty boolProp = doc->boolProps[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            char *prop = gPropKeys.container.elements[boolProp.propID];
+            char *prop =
+                dataContainer->propKeys.container.elements[boolProp.propID];
             fprintf(output, " %s", prop);
         }
     }
@@ -61,8 +63,9 @@ void printNode(const node_id nodeID, const size_t indentation,
         Property prop = doc->props[i];
 
         if (prop.nodeID == node.nodeID) {
-            char *key = gPropKeys.container.elements[prop.keyID];
-            char *value = gPropValues.container.elements[prop.valueID];
+            char *key = dataContainer->propKeys.container.elements[prop.keyID];
+            char *value =
+                dataContainer->propValues.container.elements[prop.valueID];
             fprintf(output, " %s=\"%s\"", key, value);
         }
     }
@@ -78,23 +81,25 @@ void printNode(const node_id nodeID, const size_t indentation,
     fprintf(output, ">");
     node_id childNode = getFirstChild(nodeID, doc);
     while (childNode) {
-        printNode(childNode, indentation + 1, doc, output);
+        printNode(childNode, indentation + 1, doc, dataContainer, output);
         childNode = getNextNode(childNode, doc);
     }
     fprintf(output, "</%s>", tag);
 }
 
-void printHTML(const Document *doc) {
+void printHTML(const Document *doc, const DataContainer *dataContainer) {
     printf("printing HTML...\n\n");
     node_id currentNodeID = doc->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, doc, stdout);
+        printNode(currentNodeID, 0, doc, dataContainer, stdout);
         currentNodeID = getNextNode(currentNodeID, doc);
     }
     printf("\n\n");
 }
 
-FileStatus writeHTMLToFile(const Document *doc, const char *filePath) {
+FileStatus writeHTMLToFile(const Document *doc,
+                           const DataContainer *dataContainer,
+                           const char *filePath) {
     createPath(filePath);
     FILE *file = fopen(filePath, "wbe");
     if (file == NULL) {
@@ -104,7 +109,7 @@ FileStatus writeHTMLToFile(const Document *doc, const char *filePath) {
 
     node_id currentNodeID = doc->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, doc, file);
+        printNode(currentNodeID, 0, doc, dataContainer, file);
         currentNodeID = getNextNode(currentNodeID, doc);
     }
 
@@ -113,7 +118,8 @@ FileStatus writeHTMLToFile(const Document *doc, const char *filePath) {
     return FILE_SUCCESS;
 }
 
-void printDocumentStatus(const Document *doc) {
+void printDocumentStatus(const Document *doc,
+                         const DataContainer *dataContainer) {
     printf("printing document status...\n\n");
 
     printf("nodes inside document...\n");
@@ -126,7 +132,8 @@ void printDocumentStatus(const Document *doc) {
             printf("%-8s %-20s with node ID: %-4hu\n", "error", "internal use",
                    node.nodeID);
         } else {
-            const char *type = gTags.container.elements[node.tagID];
+            const char *type =
+                dataContainer->tags.container.elements[node.tagID];
 
             size_t bufferSize = sizeof(element_id) * 8 + 1;
             char bitBuffer[bufferSize];
@@ -147,7 +154,8 @@ void printDocumentStatus(const Document *doc) {
     printf("total number of text nodes: %zu\n", doc->textLen);
     for (size_t i = 0; i < doc->textLen; i++) {
         TextNode textNode = doc->text[i];
-        const char *type = gText.container.elements[textNode.textID];
+        const char *type =
+            dataContainer->text.container.elements[textNode.textID];
 
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
@@ -161,7 +169,8 @@ void printDocumentStatus(const Document *doc) {
     printf("total number of boolean properties: %zu\n", doc->boolPropsLen);
     for (size_t i = 0; i < doc->boolPropsLen; i++) {
         BooleanProperty boolProps = doc->boolProps[i];
-        const char *type = gPropKeys.container.elements[boolProps.propID];
+        const char *type =
+            dataContainer->propKeys.container.elements[boolProps.propID];
 
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];
@@ -177,8 +186,10 @@ void printDocumentStatus(const Document *doc) {
     printf("total number of key-value properties: %zu\n", doc->propsLen);
     for (size_t i = 0; i < doc->propsLen; i++) {
         Property property = doc->props[i];
-        const char *key = gPropKeys.container.elements[property.keyID];
-        const char *value = gPropValues.container.elements[property.valueID];
+        const char *key =
+            dataContainer->propKeys.container.elements[property.keyID];
+        const char *value =
+            dataContainer->propValues.container.elements[property.valueID];
 
         size_t bufferSize = sizeof(element_id) * 8 + 1;
         char bitBuffer[bufferSize];

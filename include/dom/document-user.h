@@ -3,6 +3,7 @@
 
 #include "document.h"
 
-DocumentStatus createFromFile(const char *fileLocation, Document *doc);
+DocumentStatus createFromFile(const char *fileLocation, Document *doc,
+                              DataContainer *dataContainer);
 
 #endif

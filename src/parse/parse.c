@@ -72,7 +72,8 @@ DocumentStatus updateReferences(const node_id newNodeID,
 DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
                             node_id *prevNodeID, node_id *newNodeID,
                             unsigned char *isSingle, TextParsing *context,
-                            unsigned char exclamStart, Document *doc) {
+                            unsigned char exclamStart, Document *doc,
+                            DataContainer *dataContainer) {
     DocumentStatus documentStatus = DOCUMENT_SUCCESS;
     char ch = htmlString[++(*currentPosition)];
 
@@ -137,7 +138,8 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
             // Expected syntax: key=value (This is invalid html, but will still
             // support it) We can do some more interesting stuff but currently
             // not required.
-            if (elementToIndex(&gPropKeys.container, &gPropKeys.pairedLen,
+            if (elementToIndex(&dataContainer->propKeys.container,
+                               &dataContainer->propKeys.pairedLen,
                                &htmlString[attrKeyStartIndex], attrKeyLen, 1, 1,
                                &attrKeyID) != ELEMENT_SUCCESS) {
                 PRINT_ERROR("Failed to create element ID for key.\n");
@@ -163,7 +165,8 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
 
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
 
-            if (elementToIndex(&gPropValues.container, &gPropValues.len,
+            if (elementToIndex(&dataContainer->propValues.container,
+                               &dataContainer->propValues.len,
                                &htmlString[attrValueStartIndex], attrValueLen,
                                1, 1, &attrValueID) != ELEMENT_SUCCESS) {
                 PRINT_ERROR("Failed to create element ID for value.\n");
@@ -180,7 +183,8 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
             // Move past '"'
             ch = htmlString[++(*currentPosition)];
         } else {
-            if (elementToIndex(&gPropKeys.container, &gPropKeys.singleLen,
+            if (elementToIndex(&dataContainer->propKeys.container,
+                               &dataContainer->propKeys.singleLen,
                                &htmlString[attrKeyStartIndex], attrKeyLen, 0, 1,
                                &attrKeyID) != ELEMENT_SUCCESS) {
                 PRINT_ERROR("Failed to create element ID for key.\n");
@@ -198,9 +202,9 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
     }
 
     element_id tagID = 0;
-    element_id *elementTypeLen = &gTags.pairedLen;
+    element_id *elementTypeLen = &dataContainer->tags.pairedLen;
     if (*isSingle) {
-        elementTypeLen = &gTags.singleLen;
+        elementTypeLen = &dataContainer->tags.singleLen;
     }
 
     char tagName[elementLen + 1];
@@ -215,7 +219,7 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
         *context = STYLE_CONTEXT;
     }
 
-    if (elementToIndex(&gTags.container, elementTypeLen,
+    if (elementToIndex(&dataContainer->tags.container, elementTypeLen,
                        &htmlString[elementStartIndex], elementLen, !(*isSingle),
                        1, &tagID) != ELEMENT_SUCCESS) {
         PRINT_ERROR("Failed to create tag ID for element "
@@ -242,18 +246,20 @@ DocumentStatus parseDocNode(const char *htmlString, size_t *currentPosition,
 DocumentStatus parseBasicDocNode(const char *htmlString,
                                  size_t *currentPosition, node_id *prevNodeID,
                                  node_id *newNodeID, unsigned char *isSingle,
-                                 TextParsing *context, Document *doc) {
+                                 TextParsing *context, Document *doc,
+                                 DataContainer *dataContainer) {
     return parseDocNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        isSingle, context, 0, doc);
+                        isSingle, context, 0, doc, dataContainer);
 }
 
 DocumentStatus parseExclamDocNode(const char *htmlString,
                                   size_t *currentPosition, node_id *prevNodeID,
-                                  node_id *newNodeID, Document *doc) {
+                                  node_id *newNodeID, Document *doc,
+                                  DataContainer *dataContainer) {
     unsigned char ignore = 0;
     TextParsing ignore2 = BASIC_CONTEXT;
     return parseDocNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        &ignore, &ignore2, 1, doc);
+                        &ignore, &ignore2, 1, doc, dataContainer);
 }
 
 unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
@@ -266,7 +272,8 @@ unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
 DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                              node_id *prevNodeID, node_id *currentNodeID,
                              const element_id textTagID, TextParsing *context,
-                             unsigned char *isMerge, Document *doc) {
+                             unsigned char *isMerge, Document *doc,
+                             DataContainer *dataContainer) {
     DocumentStatus documentStatus = DOCUMENT_SUCCESS;
     size_t elementStartIndex = *currentPosition;
     char ch = htmlString[*currentPosition];
@@ -373,7 +380,7 @@ DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     Node prevNode = doc->nodes[*currentNodeID];
     if (isText(prevNode.tagID)) {
         *isMerge = 1;
-        const char *prevText = getText(prevNode.nodeID, doc);
+        const char *prevText = getText(prevNode.nodeID, doc, dataContainer);
         const size_t mergedLen = strlen(prevText) + elementLen +
                                  2; // Adding a whitespace in between.
 
@@ -383,8 +390,9 @@ DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
         strncat(buffer, &htmlString[elementStartIndex], elementLen);
         buffer[mergedLen - 1] = '\0';
 
-        if (elementToIndex(&gText.container, &gText.len, buffer, mergedLen, 1,
-                           0, &textID) != ELEMENT_SUCCESS) {
+        if (elementToIndex(&dataContainer->text.container,
+                           &dataContainer->text.len, buffer, mergedLen, 1, 0,
+                           &textID) != ELEMENT_SUCCESS) {
             PRINT_ERROR("Failed to create text ID for merging text nodes.\n");
             return DOCUMENT_NO_ELEMENT;
         }
@@ -401,7 +409,8 @@ DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             return documentStatus;
         }
 
-        if (elementToIndex(&gText.container, &gText.len,
+        if (elementToIndex(&dataContainer->text.container,
+                           &dataContainer->text.len,
                            &htmlString[elementStartIndex], elementLen, 1, 0,
                            &textID) != ELEMENT_SUCCESS) {
             PRINT_ERROR("Failed to create text ID.\n");
@@ -424,7 +433,8 @@ DocumentStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     return documentStatus;
 }
 
-DocumentStatus parse(const char *htmlString, Document *doc) {
+DocumentStatus parse(const char *htmlString, Document *doc,
+                     DataContainer *dataContainer) {
     DocumentStatus documentStatus = DOCUMENT_SUCCESS;
 
     element_id textTagID = 0;
@@ -466,7 +476,8 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
 
             if ((documentStatus = parseTextNode(
                      htmlString, &currentPosition, &prevNodeID, &currentNodeID,
-                     textTagID, &context, &isMerge, doc)) != DOCUMENT_SUCCESS) {
+                     textTagID, &context, &isMerge, doc, dataContainer)) !=
+                DOCUMENT_SUCCESS) {
                 return documentStatus;
             }
 
@@ -522,7 +533,8 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
                 else {
                     if ((documentStatus = parseExclamDocNode(
                              htmlString, &currentPosition, &prevNodeID,
-                             &currentNodeID, doc)) != DOCUMENT_SUCCESS) {
+                             &currentNodeID, doc, dataContainer)) !=
+                        DOCUMENT_SUCCESS) {
                         return documentStatus;
                     }
                     if ((documentStatus = updateReferences(
@@ -537,8 +549,8 @@ DocumentStatus parse(const char *htmlString, Document *doc) {
                 unsigned char isSingle = 0;
                 if ((documentStatus = parseBasicDocNode(
                          htmlString, &currentPosition, &prevNodeID,
-                         &currentNodeID, &isSingle, &context, doc)) !=
-                    DOCUMENT_SUCCESS) {
+                         &currentNodeID, &isSingle, &context, doc,
+                         dataContainer)) != DOCUMENT_SUCCESS) {
                     return documentStatus;
                 }
                 if ((documentStatus =

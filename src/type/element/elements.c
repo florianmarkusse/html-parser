@@ -6,29 +6,24 @@
 #include "type/element/elements.h"
 #include "utils/print/error.h"
 
-CombinedElements gTags;
-CombinedElements gPropKeys;
-Elements gPropValues;
-Elements gText;
+ElementStatus createDataContainer(DataContainer *dataContainer) {
+    dataContainer->tags.pairedLen = 0;
+    dataContainer->tags.singleLen = 0;
+    dataContainer->tags.container.pageLen = 0;
+    dataContainer->tags.container.pageSize = TAGS_PAGE_SIZE;
 
-ElementStatus createGlobals() {
-    gTags.pairedLen = 0;
-    gTags.singleLen = 0;
-    gTags.container.pageLen = 0;
-    gTags.container.pageSize = TAGS_PAGE_SIZE;
+    dataContainer->propKeys.pairedLen = 0;
+    dataContainer->propKeys.singleLen = 0;
+    dataContainer->propKeys.container.pageLen = 0;
+    dataContainer->propKeys.container.pageSize = PROP_KEYS_PAGE_SIZE;
 
-    gPropKeys.pairedLen = 0;
-    gPropKeys.singleLen = 0;
-    gPropKeys.container.pageLen = 0;
-    gPropKeys.container.pageSize = PROP_KEYS_PAGE_SIZE;
+    dataContainer->propValues.len = 0;
+    dataContainer->propValues.container.pageLen = 0;
+    dataContainer->propValues.container.pageSize = PROP_VALUES_PAGE_SIZE;
 
-    gPropValues.len = 0;
-    gPropValues.container.pageLen = 0;
-    gPropValues.container.pageSize = PROP_VALUES_PAGE_SIZE;
-
-    gText.len = 0;
-    gText.container.pageLen = 0;
-    gText.container.pageSize = TEXT_PAGE_SIZE;
+    dataContainer->text.len = 0;
+    dataContainer->text.container.pageLen = 0;
+    dataContainer->text.container.pageSize = TEXT_PAGE_SIZE;
 
     return ELEMENT_SUCCESS;
 }
@@ -40,20 +35,20 @@ void destroyElementsContainer(ElementsContainer *container) {
     container->pageLen = 0;
 }
 
-void destroyGlobals() {
-    destroyElementsContainer(&gTags.container);
-    gTags.pairedLen = 0;
-    gTags.singleLen = 0;
+void destroyDataContainer(DataContainer *dataContainer) {
+    destroyElementsContainer(&dataContainer->tags.container);
+    dataContainer->tags.pairedLen = 0;
+    dataContainer->tags.singleLen = 0;
 
-    destroyElementsContainer(&gPropKeys.container);
-    gPropKeys.pairedLen = 0;
-    gPropKeys.singleLen = 0;
+    destroyElementsContainer(&dataContainer->propKeys.container);
+    dataContainer->propKeys.pairedLen = 0;
+    dataContainer->propKeys.singleLen = 0;
 
-    destroyElementsContainer(&gPropValues.container);
-    gPropValues.len = 0;
+    destroyElementsContainer(&dataContainer->propValues.container);
+    dataContainer->propValues.len = 0;
 
-    destroyElementsContainer(&gText.container);
-    gText.len = 0;
+    destroyElementsContainer(&dataContainer->text.container);
+    dataContainer->text.len = 0;
 }
 
 ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
@@ -103,7 +98,7 @@ ElementStatus createElement(ElementsContainer *container, const char *element,
     return ELEMENT_SUCCESS;
 }
 
-ElementStatus findElement(ElementsContainer *container,
+ElementStatus findElement(const ElementsContainer *container,
                           const element_id *currentElementLen,
                           const char *elementName, element_id offsetMask,
                           element_id *elementID) {
@@ -218,18 +213,19 @@ void printCombinedElementStatus(const CombinedElements *global) {
 
     printElementPages(&global->container);
 }
-void printGlobalTagStatus() {
-    printf("printing global tag status...\n\n");
-    printCombinedElementStatus(&gTags);
+
+void printTagStatus(DataContainer *dataContainer) {
+    printf("printing tag status...\n\n");
+    printCombinedElementStatus(&dataContainer->tags);
 }
 
-void printGlobalAttributeStatus() {
-    printf("printing global property status...\n\n");
-    printCombinedElementStatus(&gPropKeys);
-    printElementStatus(&gPropValues);
+void printAttributeStatus(DataContainer *dataContainer) {
+    printf("printing property status...\n\n");
+    printCombinedElementStatus(&dataContainer->propKeys);
+    printElementStatus(&dataContainer->propValues);
 }
 
-void printGlobalTextStatus() {
-    printf("printing global text status...\n\n");
-    printElementStatus(&gText);
+void printTextStatus(DataContainer *dataContainer) {
+    printf("printing text status...\n\n");
+    printElementStatus(&dataContainer->text);
 }

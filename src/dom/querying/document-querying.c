@@ -43,7 +43,8 @@ static inline const char *stateToString(State state) {
     return "UNKNOWN";
 }
 
-QueryingStatus querySelectorAll(Document *doc, const char *cssQuery) {
+QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
+                                const DataContainer *dataContainer) {
     State state = FREE;
     Combinator combinator = NO_COMBINATOR;
 
@@ -95,7 +96,8 @@ QueryingStatus querySelectorAll(Document *doc, const char *cssQuery) {
                 buffer[tagLength - 1] = '\0';
 
                 element_id tagID = 0;
-                if ((result = getTagID(buffer, &tagID)) != QUERYING_SUCCESS) {
+                if ((result = getTagID(buffer, &tagID, dataContainer)) !=
+                    QUERYING_SUCCESS) {
                     return result;
                 }
 
