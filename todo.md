@@ -1,3 +1,4 @@
+- Update README.md
 - Relax max sizes for real word scenarios
 - Instead of hardcoded 8 for bits in byte we can use define that is defined somewhere.
 - Deleting/Modifying global elements
