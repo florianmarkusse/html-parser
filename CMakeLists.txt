@@ -34,6 +34,7 @@ add_library(${LIBRARY_NAME} SHARED
     "src/dom/document-user.c"
     "src/dom/comparison/document-comparison.c"
     "src/dom/querying/document-querying.c"
+    "src/dom/querying/document-querying-new.c"
     "src/dom/querying/document-querying-util.c"
     "src/dom/document-utils.c"
 )

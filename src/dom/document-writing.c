@@ -121,6 +121,10 @@ FileStatus writeHTMLToFile(const Document *doc,
 void printDocumentStatus(const Document *doc,
                          const DataContainer *dataContainer) {
     printf("printing document status...\n\n");
+    printf(" in here\n");
+    printf("single lenn %u\n", dataContainer->tags.singleLen);
+    printf("single offset %u\n", SINGLES_OFFSET);
+    printf("paired len %u\n", dataContainer->tags.pairedLen);
 
     printf("nodes inside document...\n");
     printf("total number of nodes: %zu\n", doc->nodeLen);

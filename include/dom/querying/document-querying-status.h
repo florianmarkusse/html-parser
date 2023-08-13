@@ -3,7 +3,9 @@
 
 typedef enum {
     QUERYING_SUCCESS,
-    QUERYING_INVALID_SELECTOR,
+    QUERYING_INVALID_ELEMENT,
+    QUERYING_INVALID_COMBINATOR,
+    QUERYING_TOO_MANY_ELEMENT_FILTERS,
     QUERYING_NOT_FOUND,
     QUERYING_MEMORY_ERROR,
     QUERYING_NUM_STATUS
@@ -11,7 +13,9 @@ typedef enum {
 
 static const char *const QueryingStatusStrings[QUERYING_NUM_STATUS] = {
     "Success",
-    "Invalid selector",
+    "Invalid element",
+    "Invalid combinator",
+    "Too many filters for a single element",
     "Did not find any match",
     "Memory error",
 };

@@ -9,7 +9,7 @@
 #include "test.h"
 #include "type/element/elements.h"
 
-#define CURRENT_DIR "tests/src/querying/"
+#define CURRENT_DIR "tests/src/querying/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 TestStatus testQuery(const char *fileLocation, const char *cssQuery,
@@ -25,9 +25,13 @@ TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
     //    printGlobalTagStatus();
-    //    printDocumentStatus(&doc);
+    printDocumentStatus(&doc, &dataContainer);
+    printAttributeStatus(&dataContainer);
     //    printHTML(&doc);
     QueryingStatus actual = querySelectorAll(cssQuery, &doc, &dataContainer);
+    const char *actualStatus = queryingStatusToString(actual);
+    printf("recevied the following result code: %s\n", actualStatus);
+
     // TODO(florian): need to free the result from querySelectors..
 
     TestStatus result = TEST_FAILURE;
@@ -70,8 +74,9 @@ unsigned char testQueries(size_t *successes, size_t *failures) {
     // testAndCount(TEST_FILE_1, "body div p h1 lalalal input",
     // QUERYING_SUCCESS,
     //              "tag selector", &localSuccesses, &localFailures);
-    testAndCount(TEST_FILE_1, "body div p", QUERYING_SUCCESS, "tag selector",
-                 &localSuccesses, &localFailures);
+    testAndCount(TEST_FILE_1, "body[required][text=free] div p      ",
+                 QUERYING_SUCCESS, "tag selector", &localSuccesses,
+                 &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 

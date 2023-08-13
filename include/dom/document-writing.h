@@ -3,8 +3,11 @@
 
 #include "document.h"
 
-void printDocumentStatus(const Document *doc);
-void printHTML(const Document *doc);
-FileStatus writeHTMLToFile(const Document *doc, const char *filePath);
+void printDocumentStatus(const Document *doc,
+                         const DataContainer *dataContainer);
+void printHTML(const Document *doc, const DataContainer *dataContainer);
+FileStatus writeHTMLToFile(const Document *doc,
+                           const DataContainer *dataContainer,
+                           const char *filePath);
 
 #endif

@@ -19,10 +19,6 @@ typedef enum {
     ROGUE_OPEN_TAG
 } TextParsing;
 
-unsigned char isSpecialSpace(char ch) {
-    return ch == '\t' || ch == '\n' || ch == '\r';
-}
-
 DocumentStatus getNewNodeID(node_id *currentNodeID, node_id *prevNodeID,
                             Document *doc) {
     *prevNodeID = *currentNodeID;

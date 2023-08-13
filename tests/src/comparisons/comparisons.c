@@ -8,7 +8,7 @@
 #include "test-status.h"
 #include "test.h"
 
-#define CURRENT_DIR "tests/src/comparisons/"
+#define CURRENT_DIR "tests/src/comparisons/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 #define TEST_FILE_2 CURRENT_DIR "test-2.html"
 #define TEST_FILE_3 CURRENT_DIR "test-3.html"

@@ -3,11 +3,61 @@
 #include <string.h>
 
 #include "dom/querying/document-querying-util.h"
-#include "dom/querying/document-querying.h"
-#include "type/element/elements.h"
-#include "type/node/parent-child.h"
 #include "utils/memory/memory.h"
 #include "utils/print/error.h"
+
+bool filterNode(const node_id nodeID, FilterType *filters,
+                const size_t filterslen, const Document *doc) {
+    for (size_t i = 0; i < filterslen; i++) {
+        FilterType filterType = filters[i];
+        switch (filterType.attributeSelector) {
+        case TAG: {
+            if (doc->nodes[nodeID].tagID != filterType.data.tagID) {
+                return false;
+            }
+            break;
+        }
+        case BOOLEAN_PROPERTY: {
+            bool hasBoolProp = false;
+            // TODO(florian): find way to improve this.
+            for (size_t j = 0; j < doc->boolPropsLen; j++) {
+                if (doc->boolProps[j].nodeID == nodeID &&
+                    doc->boolProps[j].propID == filterType.data.propID) {
+                    hasBoolProp = true;
+                    break;
+                }
+            }
+            if (!hasBoolProp) {
+                return false;
+            }
+            break;
+        }
+        case PROPERTY: {
+            bool hasProp = false;
+            // TODO(florian): find way to improve this.
+            for (size_t j = 0; j < doc->propsLen; j++) {
+                if (doc->props[j].nodeID == nodeID &&
+                    doc->props[j].keyID == filterType.data.keyValuePair.keyID &&
+                    doc->props[j].valueID ==
+                        filterType.data.keyValuePair.valueID) {
+                    hasProp = true;
+                    break;
+                }
+            }
+            if (!hasProp) {
+                return false;
+            }
+            break;
+        }
+        default: {
+            PRINT_ERROR("Unknown attribute selector in filter function\n");
+            return false;
+        }
+        }
+    }
+
+    return true;
+}
 
 QueryingStatus getTagID(const char *tag, element_id *tagID,
                         const DataContainer *dataContainer) {
@@ -20,6 +70,39 @@ QueryingStatus getTagID(const char *tag, element_id *tagID,
     if (findElement(&dataContainer->tags.container,
                     &dataContainer->tags.singleLen, tag, SINGLES_OFFSET,
                     tagID) == ELEMENT_SUCCESS) {
+        return QUERYING_SUCCESS;
+    }
+
+    return QUERYING_NOT_FOUND;
+}
+
+QueryingStatus getBoolPropID(const char *tag, element_id *propID,
+                             const DataContainer *dataContainer) {
+    if (findElement(&dataContainer->propKeys.container,
+                    &dataContainer->propKeys.singleLen, tag, SINGLES_OFFSET,
+                    propID) == ELEMENT_SUCCESS) {
+        return QUERYING_SUCCESS;
+    }
+
+    return QUERYING_NOT_FOUND;
+}
+
+QueryingStatus getKeyPropID(const char *tag, element_id *keyID,
+                            const DataContainer *dataContainer) {
+    if (findElement(&dataContainer->propKeys.container,
+                    &dataContainer->propKeys.pairedLen, tag, 0,
+                    keyID) == ELEMENT_SUCCESS) {
+        return QUERYING_SUCCESS;
+    }
+
+    return QUERYING_NOT_FOUND;
+}
+
+QueryingStatus getValuePropID(const char *tag, element_id *valueID,
+                              const DataContainer *dataContainer) {
+    if (findElement(&dataContainer->propValues.container,
+                    &dataContainer->propValues.len, tag, 0,
+                    valueID) == ELEMENT_SUCCESS) {
         return QUERYING_SUCCESS;
     }
 
@@ -75,7 +158,8 @@ unsigned char isParentIn(const node_id parentID, const node_id *array,
 }
 
 QueryingStatus getDescendantsOf(node_id **results, size_t *len,
-                                size_t *currentCap, const Document *doc) {
+                                size_t *currentCap, const Document *doc,
+                                size_t depth) {
     if (*results == NULL) {
         PRINT_ERROR("Provide the node ID(s) of which you want all the "
                     "descendants of in the results array.\n");
@@ -90,20 +174,20 @@ QueryingStatus getDescendantsOf(node_id **results, size_t *len,
         return QUERYING_MEMORY_ERROR;
     }
 
-    size_t nodesAdded = *len;
+    size_t nodesFound = *len;
     *len = 0;
     size_t startLen = 0;
 
-    while (nodesAdded > 0) {
-        if (nodesAdded > parentCap) {
-            if ((parents = resizeArray(parents, nodesAdded, &parentCap,
+    while (depth > 0 && nodesFound > 0) {
+        if (nodesFound > parentCap) {
+            if ((parents = resizeArray(parents, nodesFound, &parentCap,
                                        sizeof(node_id), parentCap)) == NULL) {
                 free(parents);
                 return QUERYING_MEMORY_ERROR;
             }
         }
-        memcpy(parents, (*results) + startLen, nodesAdded * sizeof(node_id));
-        parentLen = nodesAdded;
+        memcpy(parents, (*results) + startLen, nodesFound * sizeof(node_id));
+        parentLen = nodesFound;
 
         startLen = *len;
         for (size_t i = 0; i < doc->parentChildLen; i++) {
@@ -117,6 +201,10 @@ QueryingStatus getDescendantsOf(node_id **results, size_t *len,
                     return QUERYING_MEMORY_ERROR;
                 }
 
+                nodesFound++;
+
+                // TODO(florian): not very nice way of doing this. Use a hash or
+                // something.
                 unsigned char isDuplicate = 0;
                 for (size_t i = 0; i < *len; i++) {
                     if ((*results)[i] == parentChildNode.childID) {
@@ -131,7 +219,7 @@ QueryingStatus getDescendantsOf(node_id **results, size_t *len,
             }
         }
 
-        nodesAdded = *len - startLen;
+        depth--;
     }
 
     free(parents);

@@ -9,15 +9,7 @@
 #include "utils/memory/memory.h"
 #include "utils/text/text.h"
 
-typedef enum { FREE, TAG, NUM_STATES } State;
-
-typedef enum {
-    NO_COMBINATOR,
-    ADJACENT,
-    CHILD,
-    DESCENDANT, // Default combinator
-    NUM_COMBINATORS,
-} Combinator;
+typedef enum { FREE, OLD_TAG, NUM_STATES } State;
 
 Combinator setCombinator(char c) {
     switch (c) {
@@ -33,7 +25,7 @@ Combinator setCombinator(char c) {
 static inline const char *stateToString(State state) {
     static const char *stateStrings[NUM_STATES] = {
         "FREE",
-        "TAG",
+        "OLD_TAG",
     };
 
     if (state >= 0 && state < NUM_STATES) {
@@ -43,8 +35,8 @@ static inline const char *stateToString(State state) {
     return "UNKNOWN";
 }
 
-QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
-                                const DataContainer *dataContainer) {
+QueryingStatus querySelectorAllOld(const char *cssQuery, const Document *doc,
+                                   const DataContainer *dataContainer) {
     State state = FREE;
     Combinator combinator = NO_COMBINATOR;
 
@@ -68,7 +60,7 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
         switch (state) {
         case FREE: {
             if (isAlphaBetical(ch) || ch == '!') {
-                state = TAG;
+                state = OLD_TAG;
                 tagStart = currentPosition;
             } else if (resultsLen > 0) {
                 while (!isAlphaBetical(ch) && ch != '!') {
@@ -87,7 +79,7 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
             }
             break;
         }
-        case TAG: {
+        case OLD_TAG: {
             if (ch == ' ' || ch == '\0') {
                 const size_t tagLength = currentPosition - tagStart +
                                          1; // add one for the holy spirit
@@ -111,9 +103,9 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
                     break;
                 }
                 case DESCENDANT: {
-                    if ((result = getDescendantsOf(&results, &resultsLen,
-                                                   &currentCap, doc)) !=
-                        QUERYING_SUCCESS) {
+                    if ((result = getDescendantsOf(
+                             &results, &resultsLen, &currentCap, doc,
+                             SIZE_MAX)) != QUERYING_SUCCESS) {
                         return result;
                     }
 
