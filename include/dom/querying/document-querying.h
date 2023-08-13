@@ -5,6 +5,7 @@
 #include "dom/document.h"
 
 #define INITIAL_QUERY_CAP (1U << 6U)
+#define MAX_FILTERS_PER_ELEMENT (1U << 3U)
 
 typedef enum { TAG, BOOLEAN_PROPERTY, PROPERTY } AttributeSelector;
 
@@ -30,6 +31,7 @@ typedef struct {
 } __attribute__((aligned(8))) FilterType;
 
 QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
-                                const DataContainer *dataContainer);
+                                const DataContainer *dataContainer,
+                                node_id **results, size_t *resultsLen);
 
 #endif

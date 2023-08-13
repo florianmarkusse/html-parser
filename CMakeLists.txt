@@ -6,8 +6,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-option(PROJECT_ONLY "Build only the main project without tests" OFF)
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "release" CACHE STRING "Choose the type of build (debug, release)" FORCE)
 endif()
@@ -34,7 +32,6 @@ add_library(${LIBRARY_NAME} SHARED
     "src/dom/document-user.c"
     "src/dom/comparison/document-comparison.c"
     "src/dom/querying/document-querying.c"
-    "src/dom/querying/document-querying-new.c"
     "src/dom/querying/document-querying-util.c"
     "src/dom/document-utils.c"
 )

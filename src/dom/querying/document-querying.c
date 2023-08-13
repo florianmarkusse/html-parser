@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,140 +10,258 @@
 #include "utils/memory/memory.h"
 #include "utils/text/text.h"
 
-typedef enum { FREE, OLD_TAG, NUM_STATES } State;
+/**
+ * Css queries are built up of 2 parts:
+ * TODO: implemenet the universal selector.;
+ * - elements: For example, "body", ".special-class", "#my-id", "!DOCTYPE", '*',
+ * or an attribute selector such as: [required] or [type=text]. These can also
+ * be strung together like body[required]. There can be at most 1 tag selector
+ * present in an element. Moreover, if this tag selector is present, it is
+ * always the first one, followed by any number of attribute selectors.
+ * - combinators: For example, ' ', '>', '+', or '~'.
+ *
+ * A css query must start and end with an element. Combinators connect the
+ * elements with a relationship.
+ */
 
-Combinator setCombinator(char c) {
-    switch (c) {
-    case '+':
-        return ADJACENT;
-    case '>':
-        return CHILD;
-    default:
-        return NO_COMBINATOR;
-    }
+#define CHECK_FILTERS_LIMIT(filtersLen)                                        \
+    do {                                                                       \
+        if ((filtersLen) >= MAX_FILTERS_PER_ELEMENT) {                         \
+            PRINT_ERROR("Too many filters in a single element detected!\n");   \
+            return QUERYING_TOO_MANY_ELEMENT_FILTERS;                          \
+        }                                                                      \
+    } while (0)
+
+bool isPropStartChar(char ch) { return isAlphaBetical(ch) || ch == '!'; }
+
+bool isElementStartChar(char ch) {
+    return isPropStartChar(ch) || ch == '.' || ch == '#';
 }
 
-static inline const char *stateToString(State state) {
-    static const char *stateStrings[NUM_STATES] = {
-        "FREE",
-        "OLD_TAG",
-    };
-
-    if (state >= 0 && state < NUM_STATES) {
-        return stateStrings[state];
-    }
-
-    return "UNKNOWN";
+bool isSpecifiedCombinator(char ch) {
+    return ch == '>' || ch == '+' || ch == '~';
 }
 
-QueryingStatus querySelectorAllOld(const char *cssQuery, const Document *doc,
-                                   const DataContainer *dataContainer) {
-    State state = FREE;
-    Combinator combinator = NO_COMBINATOR;
+bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
 
+QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
+                                const DataContainer *dataContainer,
+                                node_id **results, size_t *resultsLen) {
     QueryingStatus result = QUERYING_SUCCESS;
 
-    node_id *results = NULL;
-    size_t resultsLen = 0;
+    //    node_id *results = NULL;
+    //    size_t resultsLen = 0;
     size_t currentCap = INITIAL_QUERY_CAP;
 
-    size_t tagStart = 0;
+    FilterType filters[MAX_FILTERS_PER_ELEMENT];
+    size_t filtersLen = 0;
+
+    Combinator currentCombinator = NO_COMBINATOR;
+
+    size_t tokenStart = 0;
+    size_t tokenLength = 0;
+    element_id tokenID = 0;
+
     size_t currentPosition = 0;
     char ch = cssQuery[currentPosition];
 
-    // Assuming that all css queries have a space between their operations
-    // e.g. "body > div" and not "body>div"
-    while (1) {
-        // printf("Current state: %s\n", stateToString(state));
-        // printf("Current char: %c\n", ch);
-        // printf("char pos: %zu\n", currentPosition);
+    // Skip ahead until an element is found.
+    while (!isElementStartChar(ch) && ch != '[' && ch != '\0') {
+        ch = cssQuery[++currentPosition];
+    }
 
-        switch (state) {
-        case FREE: {
-            if (isAlphaBetical(ch) || ch == '!') {
-                state = OLD_TAG;
-                tagStart = currentPosition;
-            } else if (resultsLen > 0) {
-                while (!isAlphaBetical(ch) && ch != '!') {
-                    Combinator foundCombinator = setCombinator(ch);
-                    if (setCombinator(ch) != NO_COMBINATOR) {
-                        combinator = foundCombinator;
-                    }
+    while (ch != '\0') {
+        ch = cssQuery[currentPosition];
 
-                    ch = cssQuery[++currentPosition];
-                }
-
-                if (combinator == NO_COMBINATOR) {
-                    combinator = DESCENDANT;
-                }
-                currentPosition--;
+        if (isElementStartChar(ch)) {
+            tokenStart = currentPosition;
+            while (!isCombinator(ch) && !isSpecialSpace(ch) && ch != '[' &&
+                   ch != '\0') {
+                ch = cssQuery[++currentPosition];
             }
-            break;
-        }
-        case OLD_TAG: {
-            if (ch == ' ' || ch == '\0') {
-                const size_t tagLength = currentPosition - tagStart +
-                                         1; // add one for the holy spirit
-                char buffer[tagLength];
-                strncpy(buffer, &cssQuery[tagStart], tagLength);
-                buffer[tagLength - 1] = '\0';
+            tokenLength =
+                currentPosition - tokenStart + 1; // Add 1 for the holy spirit.
 
-                element_id tagID = 0;
-                if ((result = getTagID(buffer, &tagID, dataContainer)) !=
+            char buffer[tokenLength];
+            strncpy(buffer, &cssQuery[tokenStart], tokenLength);
+            buffer[tokenLength - 1] = '\0';
+
+            tokenID = 0;
+            if ((result = getTagID(buffer, &tokenID, dataContainer)) !=
+                QUERYING_SUCCESS) {
+                return result;
+            }
+
+            CHECK_FILTERS_LIMIT(filtersLen);
+            filters[filtersLen].attributeSelector = TAG;
+            filters[filtersLen].data.propID = tokenID;
+            filtersLen++;
+        }
+
+        while (ch == '[') {
+            while (!isElementStartChar(ch) && ch != '\0') {
+                ch = cssQuery[++currentPosition];
+            }
+
+            tokenStart = currentPosition;
+            while (ch != ' ' && !isSpecialSpace(ch) && ch != '=' && ch != ']' &&
+                   ch != '\0') {
+                ch = cssQuery[++currentPosition];
+            }
+            tokenLength =
+                currentPosition - tokenStart + 1; // Add 1 for the holy spirit.
+
+            while (ch != '=' && ch != ']' && ch != '\0') {
+                ch = cssQuery[++currentPosition];
+            }
+
+            if (ch == ']') {
+                char boolBuffer[tokenLength];
+                strncpy(boolBuffer, &cssQuery[tokenStart], tokenLength);
+                boolBuffer[tokenLength - 1] = '\0';
+
+                tokenID = 0;
+                if ((result =
+                         getBoolPropID(boolBuffer, &tokenID, dataContainer)) !=
                     QUERYING_SUCCESS) {
                     return result;
                 }
 
-                switch (combinator) {
-                case NO_COMBINATOR: {
-                    if ((result = getNodesWithTagID(
-                             tagID, doc, &results, &resultsLen, &currentCap)) !=
-                        QUERYING_SUCCESS) {
-                        return result;
-                    }
-                    break;
-                }
-                case DESCENDANT: {
-                    if ((result = getDescendantsOf(
-                             &results, &resultsLen, &currentCap, doc,
-                             SIZE_MAX)) != QUERYING_SUCCESS) {
-                        return result;
-                    }
+                CHECK_FILTERS_LIMIT(filtersLen);
+                filters[filtersLen].attributeSelector = BOOLEAN_PROPERTY;
+                filters[filtersLen].data.propID = tokenID;
+                filtersLen++;
+            } else if (ch == '=') {
+                char keyBuffer[tokenLength];
+                strncpy(keyBuffer, &cssQuery[tokenStart], tokenLength);
+                keyBuffer[tokenLength - 1] = '\0';
 
-                    if ((result =
-                             filterByTagID(tagID, doc, results, &resultsLen)) !=
-                        QUERYING_SUCCESS) {
-                        return result;
-                    }
+                tokenID = 0;
+                if ((result =
+                         getKeyPropID(keyBuffer, &tokenID, dataContainer)) !=
+                    QUERYING_SUCCESS) {
+                    return result;
                 }
-                default:
-                    break;
+                // Adding to filter already because I want to reuse tokenID :)
+                CHECK_FILTERS_LIMIT(filtersLen);
+                filters[filtersLen].attributeSelector = PROPERTY;
+                filters[filtersLen].data.keyValuePair.keyID = tokenID;
+
+                // Skip the '='
+                ch = cssQuery[++currentPosition];
+
+                while (!isElementStartChar(ch) && ch != '\0') {
+                    ch = cssQuery[++currentPosition];
+                }
+                tokenStart = currentPosition;
+                while (ch != ' ' && !isSpecialSpace(ch) && ch != ']' &&
+                       ch != '\0') {
+                    ch = cssQuery[++currentPosition];
+                }
+                tokenLength = currentPosition - tokenStart +
+                              1; // Add 1 for the holy spirit.
+                while (ch != ']' && ch != '\0') {
+                    ch = cssQuery[++currentPosition];
                 }
 
-                printf("Size of results: %zu\n", resultsLen);
-                for (size_t i = 0; i < resultsLen; i++) {
-                    printf("Node ID: %u, Tag ID: %u\n", results[i],
-                           doc->nodes[results[i]].tagID);
+                char valueBuffer[tokenLength];
+                strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
+                valueBuffer[tokenLength - 1] = '\0';
+
+                tokenID = 0;
+                if ((result = getValuePropID(valueBuffer, &tokenID,
+                                             dataContainer)) !=
+                    QUERYING_SUCCESS) {
+                    return result;
                 }
 
-                currentPosition--;
-
-                combinator = NO_COMBINATOR;
-                state = FREE;
+                filters[filtersLen].data.keyValuePair.valueID = tokenID;
+                filtersLen++;
             }
+            if (ch == ']') {
+                ch = cssQuery[++currentPosition];
+            }
+        }
 
+        if (filtersLen < 1) {
+            PRINT_ERROR("Did not receive any filters in the css query\n");
+            return QUERYING_INVALID_ELEMENT;
+        }
+
+        // Do filtering :)
+        switch (currentCombinator) {
+        case NO_COMBINATOR: {
+            if ((result = getNodesWithoutCombinator(
+                     filters, filtersLen, doc, results, resultsLen,
+                     &currentCap)) != QUERYING_SUCCESS) {
+                return result;
+            }
+            break;
+        }
+        case ADJACENT: {
+            printf("I am not implemented yet!\n");
+            break;
+        }
+        case CHILD: {
+            if ((result = getFilteredDescendants(
+                     filters, filtersLen, doc, 1, results, resultsLen,
+                     &currentCap)) != QUERYING_SUCCESS) {
+                return result;
+            }
+            break;
+        }
+        case GENERAL_SIBLING: {
+            printf("I am not implemented yet!\n");
+            break;
+        }
+        case DESCENDANT: {
+            if ((result = getFilteredDescendants(
+                     filters, filtersLen, doc, SIZE_MAX, results, resultsLen,
+                     &currentCap)) != QUERYING_SUCCESS) {
+                return result;
+            }
             break;
         }
         default: {
-            break;
+            PRINT_ERROR("Unknown current combinator, aborting css query!\n");
+            return QUERYING_INVALID_COMBINATOR;
         }
         }
 
-        if (ch == '\0') {
-            break;
+        filtersLen = 0;
+
+        // Swoop up any possible next combinator and move on to a potentially
+        // next element.
+        char combinator = ' ';
+        while (!isElementStartChar(ch) && ch != '[' && ch != '\0') {
+            if (isSpecifiedCombinator(ch)) {
+                combinator = ch;
+            }
+            ch = cssQuery[++currentPosition];
         }
 
-        ch = cssQuery[++currentPosition];
+        switch (combinator) {
+        case ' ': {
+            currentCombinator = DESCENDANT;
+            break;
+        }
+        case '+': {
+            currentCombinator = ADJACENT;
+            break;
+        }
+        case '>': {
+            currentCombinator = CHILD;
+            break;
+        }
+        case '~': {
+            currentCombinator = GENERAL_SIBLING;
+            break;
+        }
+        default: {
+            PRINT_ERROR("Could not determine combinator!\n");
+            return QUERYING_INVALID_COMBINATOR;
+        }
+        }
     }
 
     return result;

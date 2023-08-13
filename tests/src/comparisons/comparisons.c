@@ -68,9 +68,9 @@ TestStatus compareFiles(const char *fileLocation1,
     } else {
         printTestFailure();
         printTestDemarcation();
-        printTestResultDifference(expectedResult,
-                                  comparisonStatusToString(expectedResult),
-                                  comp, comparisonStatusToString(comp));
+        printTestResultDifferenceString(
+            expectedResult, comparisonStatusToString(expectedResult), comp,
+            comparisonStatusToString(comp));
         printFirstDifference(nodeID1, &doc1, dataContainer1, nodeID2, &doc2,
                              dataContainer2);
         printTestDemarcation();

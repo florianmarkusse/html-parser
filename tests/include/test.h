@@ -32,12 +32,20 @@ static inline void printTestDemarcation() {
            "---\n");
 }
 
-static inline void printTestResultDifference(const size_t expected,
-                                             const char *expectedString,
-                                             const size_t actual,
-                                             const char *actualString) {
+static inline void printTestResultDifferenceString(const size_t expected,
+                                                   const char *expectedString,
+                                                   const size_t actual,
+                                                   const char *actualString) {
     printf("%-10s: %-4zu - %s\n", "Expected", expected, expectedString);
     printf("%-10s: %-4zu - %s\n", "Actual", actual, actualString);
+}
+
+static inline void printTestResultDifferenceNumber(const size_t expected,
+                                                   const size_t expectedNumber,
+                                                   const size_t actual,
+                                                   const size_t actualNumber) {
+    printf("%-20s: %-4zu - %zu\n", "Expected number", expected, expectedNumber);
+    printf("%-20s: %-4zu - %zu\n", "Actual number", actual, actualNumber);
 }
 
 #endif

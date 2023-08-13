@@ -9,7 +9,7 @@
 #include "type/element/element-status.h"
 #include "type/element/elements-container.h"
 
-bool filterNode(node_id nodeID, FilterType *filters, size_t filterslen,
+bool filterNode(node_id nodeID, const FilterType *filters, size_t filterslen,
                 const Document *doc);
 QueryingStatus getTagID(const char *tag, element_id *tagID,
                         const DataContainer *dataContainer);
@@ -25,7 +25,13 @@ QueryingStatus getNodesWithTagID(element_id tagID, const Document *doc,
 
 QueryingStatus filterByTagID(element_id tagID, const Document *doc,
                              node_id *results, size_t *len);
-QueryingStatus getDescendantsOf(node_id **results, size_t *len,
-                                size_t *currentCap, const Document *doc,
-                                size_t depth);
+QueryingStatus
+getNodesWithoutCombinator(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
+                          size_t filtersLen, const Document *doc,
+                          node_id **results, size_t *len, size_t *currentCap);
+
+QueryingStatus
+getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
+                       size_t filtersLen, const Document *doc, size_t depth,
+                       node_id **results, size_t *len, size_t *currentCap);
 #endif

@@ -6,7 +6,7 @@
 #include "utils/memory/memory.h"
 #include "utils/print/error.h"
 
-bool filterNode(const node_id nodeID, FilterType *filters,
+bool filterNode(const node_id nodeID, const FilterType *filters,
                 const size_t filterslen, const Document *doc) {
     for (size_t i = 0; i < filterslen; i++) {
         FilterType filterType = filters[i];
@@ -109,9 +109,10 @@ QueryingStatus getValuePropID(const char *tag, element_id *valueID,
     return QUERYING_NOT_FOUND;
 }
 
-QueryingStatus getNodesWithTagID(element_id tagID, const Document *doc,
-                                 node_id **results, size_t *len,
-                                 size_t *currentCap) {
+QueryingStatus
+getNodesWithoutCombinator(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
+                          const size_t filtersLen, const Document *doc,
+                          node_id **results, size_t *len, size_t *currentCap) {
     if (*results == NULL) {
         *results = malloc(sizeof(node_id) * *(currentCap));
         if (*results == NULL) {
@@ -120,7 +121,7 @@ QueryingStatus getNodesWithTagID(element_id tagID, const Document *doc,
     }
 
     for (size_t i = 0; i < doc->nodeLen; i++) {
-        if (doc->nodes[i].tagID == tagID) {
+        if (filterNode(doc->nodes[i].nodeID, filters, filtersLen, doc)) {
             if ((*(results) = resizeArray(*results, *len, currentCap,
                                           sizeof(node_id), *currentCap)) ==
                 NULL) {
@@ -157,9 +158,11 @@ unsigned char isParentIn(const node_id parentID, const node_id *array,
     return 0;
 }
 
-QueryingStatus getDescendantsOf(node_id **results, size_t *len,
-                                size_t *currentCap, const Document *doc,
-                                size_t depth) {
+QueryingStatus
+getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
+                       const size_t filtersLen, const Document *doc,
+                       size_t depth, node_id **results, size_t *len,
+                       size_t *currentCap) {
     if (*results == NULL) {
         PRINT_ERROR("Provide the node ID(s) of which you want all the "
                     "descendants of in the results array.\n");
@@ -174,47 +177,70 @@ QueryingStatus getDescendantsOf(node_id **results, size_t *len,
         return QUERYING_MEMORY_ERROR;
     }
 
-    size_t nodesFound = *len;
+    node_id *foundNodes = malloc(*currentCap * sizeof(node_id));
+    size_t foundNodesLen = *len;
+    size_t foundNodesCap = *currentCap;
+    if (foundNodes == NULL) {
+        free(parents);
+        PRINT_ERROR("Could not allocate memory for the parents array.\n");
+        return QUERYING_MEMORY_ERROR;
+    }
+    memcpy(foundNodes, *results, *len * sizeof(node_id));
+
     *len = 0;
     size_t startLen = 0;
 
-    while (depth > 0 && nodesFound > 0) {
-        if (nodesFound > parentCap) {
-            if ((parents = resizeArray(parents, nodesFound, &parentCap,
+    while (depth > 0 && foundNodesLen > 0) {
+        if (foundNodesLen > parentCap) {
+            if ((parents = resizeArray(parents, foundNodesLen, &parentCap,
                                        sizeof(node_id), parentCap)) == NULL) {
                 free(parents);
+                free(foundNodes);
                 return QUERYING_MEMORY_ERROR;
             }
         }
-        memcpy(parents, (*results) + startLen, nodesFound * sizeof(node_id));
-        parentLen = nodesFound;
+        memcpy(parents, foundNodes, foundNodesLen * sizeof(node_id));
+        parentLen = foundNodesLen;
+        foundNodesLen = 0;
 
         startLen = *len;
+        // TODO(florian): can replace this with looping over the parents array
+        // instead once a performant lookup is available.
         for (size_t i = 0; i < doc->parentChildLen; i++) {
             ParentChild parentChildNode = doc->parentChilds[i];
             if (!(isText(doc->nodes[parentChildNode.childID].tagID)) &&
                 isParentIn(parentChildNode.parentID, parents, parentLen)) {
-                if ((*(results) = resizeArray(*results, *len, currentCap,
-                                              sizeof(node_id), *currentCap)) ==
-                    NULL) {
+                if ((foundNodes =
+                         resizeArray(foundNodes, foundNodesLen, &foundNodesCap,
+                                     sizeof(node_id), foundNodesCap)) == NULL) {
                     free(parents);
+                    free(foundNodes);
                     return QUERYING_MEMORY_ERROR;
                 }
+                foundNodes[foundNodesLen++] = parentChildNode.childID;
 
-                nodesFound++;
-
-                // TODO(florian): not very nice way of doing this. Use a hash or
-                // something.
-                unsigned char isDuplicate = 0;
-                for (size_t i = 0; i < *len; i++) {
-                    if ((*results)[i] == parentChildNode.childID) {
-                        isDuplicate = 1;
-                        break;
+                if (filterNode(parentChildNode.childID, filters, filtersLen,
+                               doc)) {
+                    // TODO(florian): not very nice way of doing this. Use a
+                    // hash or something.
+                    unsigned char isDuplicate = 0;
+                    for (size_t i = 0; i < *len; i++) {
+                        if ((*results)[i] == parentChildNode.childID) {
+                            isDuplicate = 1;
+                            break;
+                        }
                     }
-                }
 
-                if (!isDuplicate) {
-                    (*results)[(*len)++] = parentChildNode.childID;
+                    if (!isDuplicate) {
+                        if ((*(results) = resizeArray(
+                                 *results, *len, currentCap, sizeof(node_id),
+                                 *currentCap)) == NULL) {
+                            free(parents);
+                            free(foundNodes);
+                            return QUERYING_MEMORY_ERROR;
+                        }
+                        (*results)[(*len)++] = parentChildNode.childID;
+                    }
                 }
             }
         }
@@ -223,5 +249,6 @@ QueryingStatus getDescendantsOf(node_id **results, size_t *len,
     }
 
     free(parents);
+    free(foundNodes);
     return QUERYING_SUCCESS;
 }
