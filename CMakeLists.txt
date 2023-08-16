@@ -14,11 +14,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")  # Add debug flags, disable optimization
 set(CMAKE_C_FLAGS_RELEASE "-O3")  # Enable optimization
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(LIBRARY_NAME "${PROJECT_NAME}-debug")
-else()
-    set(LIBRARY_NAME "${PROJECT_NAME}-release")
-endif()
+set(LIBRARY_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
 
 # Create a shared library for the main project
 add_library(${LIBRARY_NAME} SHARED
@@ -36,6 +32,9 @@ add_library(${LIBRARY_NAME} SHARED
     "src/dom/document-utils.c"
 )
 
+if (CMAKE_BUILD_TYPE STREQUAL "debug")
+    add_definitions(-DENABLE_DEBUG_MACRO)
+endif()
 target_include_directories(${LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(RUN_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")

@@ -8,6 +8,7 @@ typedef enum {
     QUERYING_TOO_MANY_ELEMENT_FILTERS,
     QUERYING_NOT_FOUND,
     QUERYING_MEMORY_ERROR,
+    QUERYING_INITIALIZATION_ERROR,
     QUERYING_NUM_STATUS
 } QueryingStatus;
 
@@ -16,9 +17,9 @@ static const char *const QueryingStatusStrings[QUERYING_NUM_STATUS] = {
     "Invalid element",
     "Invalid combinator",
     "Too many filters for a single element",
-    "Did not find any match",
+    "Detected unforeseen tag or attribute",
     "Memory error",
-};
+    "Initialization error"};
 
 __attribute__((unused)) static const char *
 queryingStatusToString(QueryingStatus status) {

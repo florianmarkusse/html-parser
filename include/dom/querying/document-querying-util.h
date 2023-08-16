@@ -31,6 +31,11 @@ getNodesWithoutCombinator(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                           node_id **results, size_t *len, size_t *currentCap);
 
 QueryingStatus
+getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
+                     size_t filtersLen, const Document *doc,
+                     size_t numberOfSiblings, node_id **results, size_t *len,
+                     size_t *currentCap);
+QueryingStatus
 getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                        size_t filtersLen, const Document *doc, size_t depth,
                        node_id **results, size_t *len, size_t *currentCap);

@@ -47,6 +47,18 @@ bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
 QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
                                 const DataContainer *dataContainer,
                                 node_id **results, size_t *resultsLen) {
+    if (*results == NULL && *resultsLen == 0) {
+        *results = malloc(sizeof(node_id) * INITIAL_QUERY_CAP);
+        if (*results == NULL) {
+            PRINT_ERROR("Failed to allocate memory at the outset\n");
+            return QUERYING_MEMORY_ERROR;
+        }
+    } else {
+        PRINT_ERROR("The **results parameter must be pointing to NULL and its "
+                    "corresponding *resultsLen pointing to 0\n");
+        return QUERYING_INITIALIZATION_ERROR;
+    }
+
     QueryingStatus result = QUERYING_SUCCESS;
 
     //    node_id *results = NULL;
@@ -199,7 +211,11 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
             break;
         }
         case ADJACENT: {
-            printf("I am not implemented yet!\n");
+            if ((result = getFilteredAdjacents(
+                     filters, filtersLen, doc, 1, results, resultsLen,
+                     &currentCap)) != QUERYING_SUCCESS) {
+                return result;
+            }
             break;
         }
         case CHILD: {
@@ -211,7 +227,11 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
             break;
         }
         case GENERAL_SIBLING: {
-            printf("I am not implemented yet!\n");
+            if ((result = getFilteredAdjacents(
+                     filters, filtersLen, doc, SIZE_MAX, results, resultsLen,
+                     &currentCap)) != QUERYING_SUCCESS) {
+                return result;
+            }
             break;
         }
         case DESCENDANT: {

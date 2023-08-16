@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "dom/querying/document-querying-util.h"
+#include "type/node/next-node.h"
 #include "utils/memory/memory.h"
 #include "utils/print/error.h"
 
@@ -113,13 +114,6 @@ QueryingStatus
 getNodesWithoutCombinator(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                           const size_t filtersLen, const Document *doc,
                           node_id **results, size_t *len, size_t *currentCap) {
-    if (*results == NULL) {
-        *results = malloc(sizeof(node_id) * *(currentCap));
-        if (*results == NULL) {
-            return QUERYING_MEMORY_ERROR;
-        }
-    }
-
     for (size_t i = 0; i < doc->nodeLen; i++) {
         if (filterNode(doc->nodes[i].nodeID, filters, filtersLen, doc)) {
             if ((*(results) = resizeArray(*results, *len, currentCap,
@@ -147,10 +141,12 @@ QueryingStatus filterByTagID(const element_id tagID, const Document *doc,
     return QUERYING_SUCCESS;
 }
 
-unsigned char isParentIn(const node_id parentID, const node_id *array,
-                         const size_t arrayLen) {
+// TODO(florian): not very nice way of doing this. Use a
+// hash or something.
+unsigned char isPresentIn(const node_id nodeID, const node_id *array,
+                          const size_t arrayLen) {
     for (size_t j = 0; j < arrayLen; j++) {
-        if (parentID == array[j]) {
+        if (nodeID == array[j]) {
             return 1;
         }
     }
@@ -159,16 +155,59 @@ unsigned char isParentIn(const node_id parentID, const node_id *array,
 }
 
 QueryingStatus
+getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
+                     const size_t filtersLen, const Document *doc,
+                     const size_t numberOfSiblings, node_id **results,
+                     size_t *len, size_t *currentCap) {
+    size_t filteredAdjacentsCap = *len;
+    size_t filteredAdjacentsLen = 0;
+    node_id *filteredAdjacents = malloc(filteredAdjacentsCap * sizeof(node_id));
+    if (filteredAdjacents == NULL) {
+        PRINT_ERROR(
+            "Could not allocate memory for the filtered adjacents array\n");
+        return QUERYING_MEMORY_ERROR;
+    }
+
+    for (size_t i = 0; i < *len; i++) {
+        node_id nextNodeID = getNextNode((*results)[i], doc);
+        size_t siblingsNumberCopy = numberOfSiblings;
+        while (siblingsNumberCopy && nextNodeID) {
+            if (filterNode(nextNodeID, filters, filtersLen, doc)) {
+                if (!isPresentIn(nextNodeID, filteredAdjacents,
+                                 filteredAdjacentsLen)) {
+                    if ((filteredAdjacents = resizeArray(
+                             filteredAdjacents, filteredAdjacentsLen,
+                             &filteredAdjacentsCap, sizeof(node_id),
+                             filteredAdjacentsCap)) == NULL) {
+                        free(filteredAdjacents);
+                        PRINT_ERROR(
+                            "Failed to allocate memory finding adjacent "
+                            "elements!\n");
+                        return QUERYING_MEMORY_ERROR;
+                    }
+
+                    filteredAdjacents[filteredAdjacentsLen++] = nextNodeID;
+                }
+            }
+
+            siblingsNumberCopy--;
+            nextNodeID = getNextNode(nextNodeID, doc);
+        }
+    }
+
+    free(*results);
+    *results = filteredAdjacents;
+    *len = filteredAdjacentsLen;
+    *currentCap = filteredAdjacentsCap;
+
+    return QUERYING_SUCCESS;
+}
+
+QueryingStatus
 getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                        const size_t filtersLen, const Document *doc,
                        size_t depth, node_id **results, size_t *len,
                        size_t *currentCap) {
-    if (*results == NULL) {
-        PRINT_ERROR("Provide the node ID(s) of which you want all the "
-                    "descendants of in the results array.\n");
-        return QUERYING_MEMORY_ERROR;
-    }
-
     node_id *parents = malloc(*currentCap * sizeof(node_id));
     size_t parentLen = *len;
     size_t parentCap = *currentCap;
@@ -188,8 +227,6 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
     memcpy(foundNodes, *results, *len * sizeof(node_id));
 
     *len = 0;
-    size_t startLen = 0;
-
     while (depth > 0 && foundNodesLen > 0) {
         if (foundNodesLen > parentCap) {
             if ((parents = resizeArray(parents, foundNodesLen, &parentCap,
@@ -202,14 +239,12 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
         memcpy(parents, foundNodes, foundNodesLen * sizeof(node_id));
         parentLen = foundNodesLen;
         foundNodesLen = 0;
-
-        startLen = *len;
-        // TODO(florian): can replace this with looping over the parents array
-        // instead once a performant lookup is available.
+        // TODO(florian): can replace this with looping over the parents
+        // array instead once a performant lookup is available.
         for (size_t i = 0; i < doc->parentChildLen; i++) {
             ParentChild parentChildNode = doc->parentChilds[i];
             if (!(isText(doc->nodes[parentChildNode.childID].tagID)) &&
-                isParentIn(parentChildNode.parentID, parents, parentLen)) {
+                isPresentIn(parentChildNode.parentID, parents, parentLen)) {
                 if ((foundNodes =
                          resizeArray(foundNodes, foundNodesLen, &foundNodesCap,
                                      sizeof(node_id), foundNodesCap)) == NULL) {
@@ -221,17 +256,7 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
 
                 if (filterNode(parentChildNode.childID, filters, filtersLen,
                                doc)) {
-                    // TODO(florian): not very nice way of doing this. Use a
-                    // hash or something.
-                    unsigned char isDuplicate = 0;
-                    for (size_t i = 0; i < *len; i++) {
-                        if ((*results)[i] == parentChildNode.childID) {
-                            isDuplicate = 1;
-                            break;
-                        }
-                    }
-
-                    if (!isDuplicate) {
+                    if (!isPresentIn(parentChildNode.childID, *results, *len)) {
                         if ((*(results) = resizeArray(
                                  *results, *len, currentCap, sizeof(node_id),
                                  *currentCap)) == NULL) {
