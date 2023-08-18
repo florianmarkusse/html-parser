@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "dom/comparison/document-comparison.h"
-#include "dom/document-utils.h"
-#include "parse/parse.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/dom/comparison/document-comparison.h"
+#include "flo/html-parser/dom/document-utils.h"
+#include "flo/html-parser/parse/parse.h"
+#include "flo/html-parser/utils/print/error.h"
 
 void printProps(const element_id node1Tag, const element_id node1PropsLen,
                 const element_id node1Keys[MAX_PROPERTIES],

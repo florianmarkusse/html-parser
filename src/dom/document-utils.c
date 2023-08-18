@@ -1,5 +1,5 @@
 
-#include "dom/document-utils.h"
+#include "flo/html-parser/dom/document-utils.h"
 
 const char *getText(const node_id nodeID, const Document *doc,
                     const DataContainer *dataContainer) {

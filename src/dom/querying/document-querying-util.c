@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dom/querying/document-querying-util.h"
-#include "type/node/next-node.h"
-#include "utils/memory/memory.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/dom/querying/document-querying-util.h"
+#include "flo/html-parser/type/node/next-node.h"
+#include "flo/html-parser/utils/memory/memory.h"
+#include "flo/html-parser/utils/print/error.h"
 
 bool filterNode(const node_id nodeID, const FilterType *filters,
                 const size_t filterslen, const Document *doc) {

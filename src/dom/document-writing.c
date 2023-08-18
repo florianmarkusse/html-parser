@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "dom/document-utils.h"
-#include "dom/document.h"
-#include "type/node/text-node.h"
-#include "utils/file/path.h"
+#include "flo/html-parser/dom/document-utils.h"
+#include "flo/html-parser/dom/document.h"
+#include "flo/html-parser/type/node/text-node.h"
+#include "flo/html-parser/utils/file/path.h"
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 

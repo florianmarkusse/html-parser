@@ -1,7 +1,7 @@
-#include <dom/comparison/document-comparison.h>
-#include <dom/document-user.h>
-#include <dom/document-writing.h>
-#include <dom/document.h>
+#include <flo/html-parser/dom/comparison/document-comparison.h>
+#include <flo/html-parser/dom/document-user.h>
+#include <flo/html-parser/dom/document-writing.h>
+#include <flo/html-parser/dom/document.h>
 #include <stdio.h>
 
 #include "comparisons/comparisons.h"

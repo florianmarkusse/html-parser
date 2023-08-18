@@ -1,9 +1,9 @@
 #include <stdlib.h>
 
-#include "dom/document.h"
-#include "parse/parse.h"
-#include "utils/memory/memory.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/dom/document.h"
+#include "flo/html-parser/parse/parse.h"
+#include "flo/html-parser/utils/memory/memory.h"
+#include "flo/html-parser/utils/print/error.h"
 
 DocumentStatus createDocument(const char *htmlString, Document *doc,
                               DataContainer *dataContainer) {

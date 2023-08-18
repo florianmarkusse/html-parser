@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "dom/querying/document-querying-util.h"
-#include "dom/querying/document-querying.h"
-#include "type/element/element-status.h"
-#include "type/element/elements.h"
-#include "utils/memory/memory.h"
-#include "utils/text/text.h"
+#include "flo/html-parser/dom/querying/document-querying-util.h"
+#include "flo/html-parser/dom/querying/document-querying.h"
+#include "flo/html-parser/type/element/element-status.h"
+#include "flo/html-parser/type/element/elements.h"
+#include "flo/html-parser/utils/memory/memory.h"
+#include "flo/html-parser/utils/text/text.h"
 
 /**
  * Css queries are built up of 2 parts:

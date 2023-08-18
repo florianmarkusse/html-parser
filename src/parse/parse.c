@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dom/document-utils.h"
-#include "dom/document.h"
-#include "parse/parse-property.h"
-#include "parse/parse.h"
-#include "type/element/elements.h"
-#include "utils/print/error.h"
-#include "utils/text/text.h"
+#include "flo/html-parser/dom/document-utils.h"
+#include "flo/html-parser/dom/document.h"
+#include "flo/html-parser/parse/parse-property.h"
+#include "flo/html-parser/parse/parse.h"
+#include "flo/html-parser/type/element/elements.h"
+#include "flo/html-parser/utils/print/error.h"
+#include "flo/html-parser/utils/text/text.h"
 
 typedef enum {
     BASIC_CONTEXT,

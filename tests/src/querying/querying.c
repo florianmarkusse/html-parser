@@ -1,10 +1,10 @@
-#include <dom/document-user.h>
-#include <dom/document-writing.h>
-#include <dom/document.h>
-#include <dom/querying/document-querying.h>
+#include <flo/html-parser/dom/document-user.h>
+#include <flo/html-parser/dom/document-writing.h>
+#include <flo/html-parser/dom/document.h>
+#include <flo/html-parser/dom/querying/document-querying.h>
+#include <flo/html-parser/type/element/elements.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <type/element/elements.h>
 
 #include "querying/querying.h"
 #include "test-status.h"

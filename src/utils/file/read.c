@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "utils/file/read.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/utils/file/read.h"
+#include "flo/html-parser/utils/print/error.h"
 
 FileStatus readFile(const char *srcPath, char **buffer) {
     FILE *srcFile = fopen(srcPath, "rbe");

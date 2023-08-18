@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type/data/data-functions.h"
-#include "type/element/elements.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/type/data/data-functions.h"
+#include "flo/html-parser/type/element/elements.h"
+#include "flo/html-parser/utils/print/error.h"
 
 ElementStatus createDataContainer(DataContainer *dataContainer) {
     dataContainer->tags.pairedLen = 0;

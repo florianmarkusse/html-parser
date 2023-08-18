@@ -1,9 +1,9 @@
 
 #include <stdlib.h>
 
-#include "dom/document-user.h"
-#include "utils/file/read.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/dom/document-user.h"
+#include "flo/html-parser/utils/file/read.h"
+#include "flo/html-parser/utils/print/error.h"
 
 DocumentStatus createFromFile(const char *fileLocation, Document *doc,
                               DataContainer *dataContainer) {

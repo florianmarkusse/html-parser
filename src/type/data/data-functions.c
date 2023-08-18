@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type/data/data-functions.h"
-#include "type/data/data-page.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/type/data/data-functions.h"
+#include "flo/html-parser/type/data/data-page.h"
+#include "flo/html-parser/utils/print/error.h"
 
 DataPage createDataPage(const size_t pageSize) {
     DataPage dataPage;

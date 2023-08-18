@@ -1,8 +1,8 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "utils/file/file-status.h"
-#include "utils/print/error.h"
+#include "flo/html-parser/utils/file/file-status.h"
+#include "flo/html-parser/utils/print/error.h"
 
 #define FULL_ACCESS 0700
 
