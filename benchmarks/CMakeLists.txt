@@ -5,10 +5,10 @@ list(APPEND BENCHMARK_SOURCE_FILES
     "src/main.c"
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "debug")
-    set(EXECUTABLE_NAME "${PROJECT_NAME}-debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(EXECUTABLE_NAME "${PROJECT_NAME}-Debug")
 else()
-    set(EXECUTABLE_NAME "${PROJECT_NAME}-release")
+    set(EXECUTABLE_NAME "${PROJECT_NAME}-Release")
 endif()
 
 # Define the test executable target
