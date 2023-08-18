@@ -1,14 +1,14 @@
+#include <dom/document-user.h>
+#include <dom/document-writing.h>
+#include <dom/document.h>
+#include <dom/querying/document-querying.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <type/element/elements.h>
 
-#include "dom/document-user.h"
-#include "dom/document-writing.h"
-#include "dom/document.h"
-#include "dom/querying/document-querying.h"
 #include "querying/querying.h"
 #include "test-status.h"
 #include "test.h"
-#include "type/element/elements.h"
 
 #define CURRENT_DIR "tests/src/querying/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"

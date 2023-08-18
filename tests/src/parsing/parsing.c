@@ -1,12 +1,12 @@
 
 
 #include <dirent.h>
+#include <dom/document-user.h>
+#include <dom/document-writing.h>
+#include <dom/document.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "dom/document-user.h"
-#include "dom/document-writing.h"
-#include "dom/document.h"
 #include "parsing/parsing.h"
 #include "test-status.h"
 #include "test.h"

@@ -1,10 +1,10 @@
+#include <dom/comparison/document-comparison.h>
+#include <dom/document-user.h>
+#include <dom/document-writing.h>
+#include <dom/document.h>
 #include <stdio.h>
 
 #include "comparisons/comparisons.h"
-#include "dom/comparison/document-comparison.h"
-#include "dom/document-user.h"
-#include "dom/document-writing.h"
-#include "dom/document.h"
 #include "test-status.h"
 #include "test.h"
 
