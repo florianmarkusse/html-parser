@@ -4,7 +4,7 @@ project(html-parser-tests)
 list(APPEND TEST_SOURCE_FILES
     "src/main.c"
     "src/parsing/parsing.c"
-    "src/comparisons/comparisons.c"
+    "src/comparing/comparing.c"
     "src/querying/querying.c"
 )
 

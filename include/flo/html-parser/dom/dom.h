@@ -1,7 +1,7 @@
-#ifndef FLO_HTML_PARSER_DOM_DOCUMENT_H
-#define FLO_HTML_PARSER_DOM_DOCUMENT_H
+#ifndef FLO_HTML_PARSER_DOM_DOM_H
+#define FLO_HTML_PARSER_DOM_DOM_H
 
-#include "document-status.h"
+#include "dom-status.h"
 #include "flo/html-parser/type/node/boolean-property.h"
 #include "flo/html-parser/type/node/next-node.h"
 #include "flo/html-parser/type/node/node.h"
@@ -66,29 +66,25 @@ typedef struct {
     TextNode *text;
     size_t textLen;
     size_t textCap;
-} __attribute__((aligned(128))) Document;
+} __attribute__((aligned(128))) Dom;
 
-DocumentStatus createDocument(const char *htmlString, Document *doc,
-                              DataContainer *dataContainer);
+DomStatus createDom(const char *htmlString, Dom *dom,
+                    DataContainer *dataContainer);
 
-DocumentStatus createNode(node_id *nodeID, Document *doc);
-DocumentStatus setTagID(node_id nodeID, element_id tagID, Document *doc);
-DocumentStatus addNode(node_id *nodeID, element_id tagID, Document *doc);
-DocumentStatus addParentFirstChild(node_id parentID, node_id childID,
-                                   Document *doc);
-DocumentStatus addParentChild(node_id parentID, node_id childID, Document *doc);
-DocumentStatus addNextNode(node_id currentNodeID, node_id nextNodeID,
-                           Document *doc);
-DocumentStatus addBooleanProperty(node_id nodeID, element_id propID,
-                                  Document *doc);
-DocumentStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
-                           Document *doc);
-DocumentStatus addTextNode(node_id nodeID, element_id textID, Document *doc);
-DocumentStatus replaceTextNode(node_id nodeID, element_id newTextID,
-                               Document *doc);
-node_id getFirstChild(node_id parentID, const Document *doc);
-node_id getNextNode(node_id currentNodeID, const Document *doc);
+DomStatus createNode(node_id *nodeID, Dom *dom);
+DomStatus setTagID(node_id nodeID, element_id tagID, Dom *dom);
+DomStatus addNode(node_id *nodeID, element_id tagID, Dom *dom);
+DomStatus addParentFirstChild(node_id parentID, node_id childID, Dom *dom);
+DomStatus addParentChild(node_id parentID, node_id childID, Dom *dom);
+DomStatus addNextNode(node_id currentNodeID, node_id nextNodeID, Dom *dom);
+DomStatus addBooleanProperty(node_id nodeID, element_id propID, Dom *dom);
+DomStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
+                      Dom *dom);
+DomStatus addTextNode(node_id nodeID, element_id textID, Dom *dom);
+DomStatus replaceTextNode(node_id nodeID, element_id newTextID, Dom *dom);
+node_id getFirstChild(node_id parentID, const Dom *dom);
+node_id getNextNode(node_id currentNodeID, const Dom *dom);
 
-void destroyDocument(const Document *doc);
+void destroyDom(const Dom *dom);
 
 #endif

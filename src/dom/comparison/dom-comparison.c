@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/comparison/document-comparison.h"
-#include "flo/html-parser/dom/document-utils.h"
-#include "flo/html-parser/parse/parse.h"
+#include "flo/html-parser/dom/comparison/dom-comparison.h"
+#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/print/error.h"
 
 void printProps(const element_id node1Tag, const element_id node1PropsLen,
@@ -33,18 +33,18 @@ void printProps(const element_id node1Tag, const element_id node1PropsLen,
     }
 }
 
-ComparisonStatus compareProps(const Node *node1, const Document *doc1,
+ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
                               const DataContainer *dataContainer1,
-                              const Node *node2, const Document *doc2,
+                              const Node *node2, const Dom *dom2,
                               const DataContainer *dataContainer2,
                               const unsigned char printDifferences) {
     element_id node1Keys[MAX_PROPERTIES];
     element_id node1Values[MAX_PROPERTIES];
     element_id node1PropsLen = 0;
-    for (size_t i = 0; i < doc1->propsLen; i++) {
-        if (doc1->props[i].nodeID == node1->nodeID) {
-            node1Keys[node1PropsLen] = doc1->props[i].keyID;
-            node1Values[node1PropsLen] = doc1->props[i].valueID;
+    for (size_t i = 0; i < dom1->propsLen; i++) {
+        if (dom1->props[i].nodeID == node1->nodeID) {
+            node1Keys[node1PropsLen] = dom1->props[i].keyID;
+            node1Values[node1PropsLen] = dom1->props[i].valueID;
             node1PropsLen++;
         }
     }
@@ -52,10 +52,10 @@ ComparisonStatus compareProps(const Node *node1, const Document *doc1,
     element_id node2Keys[MAX_PROPERTIES];
     element_id node2Values[MAX_PROPERTIES];
     element_id node2PropsLen = 0;
-    for (size_t i = 0; i < doc2->propsLen; i++) {
-        if (doc2->props[i].nodeID == node2->nodeID) {
-            node2Keys[node2PropsLen] = doc2->props[i].keyID;
-            node2Values[node2PropsLen] = doc2->props[i].valueID;
+    for (size_t i = 0; i < dom2->propsLen; i++) {
+        if (dom2->props[i].nodeID == node2->nodeID) {
+            node2Keys[node2PropsLen] = dom2->props[i].keyID;
+            node2Values[node2PropsLen] = dom2->props[i].valueID;
             node2PropsLen++;
         }
     }
@@ -111,25 +111,25 @@ void printBoolProps(const element_id node1Tag, const element_id node1PropsLen,
     }
 }
 
-ComparisonStatus compareBoolProps(const Node *node1, const Document *doc1,
+ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
                                   const DataContainer *dataContainer1,
-                                  const Node *node2, const Document *doc2,
+                                  const Node *node2, const Dom *dom2,
                                   const DataContainer *dataContainer2,
                                   const unsigned char printDifferences) {
     element_id node1Props[MAX_PROPERTIES];
     element_id node1PropsLen = 0;
-    for (size_t i = 0; i < doc1->boolPropsLen; i++) {
-        if (doc1->boolProps[i].nodeID == node1->nodeID) {
-            node1Props[node1PropsLen] = doc1->boolProps[i].propID;
+    for (size_t i = 0; i < dom1->boolPropsLen; i++) {
+        if (dom1->boolProps[i].nodeID == node1->nodeID) {
+            node1Props[node1PropsLen] = dom1->boolProps[i].propID;
             node1PropsLen++;
         }
     }
 
     element_id node2Props[MAX_PROPERTIES];
     element_id node2PropsLen = 0;
-    for (size_t i = 0; i < doc2->boolPropsLen; i++) {
-        if (doc2->boolProps[i].nodeID == node2->nodeID) {
-            node2Props[node2PropsLen] = doc2->boolProps[i].propID;
+    for (size_t i = 0; i < dom2->boolPropsLen; i++) {
+        if (dom2->boolProps[i].nodeID == node2->nodeID) {
+            node2Props[node2PropsLen] = dom2->boolProps[i].propID;
             node2PropsLen++;
         }
     }
@@ -164,9 +164,9 @@ ComparisonStatus compareBoolProps(const Node *node1, const Document *doc1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus compareTags(const Node *node1, const Document *doc1,
+ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
                              const DataContainer *dataContainer1,
-                             const Node *node2, const Document *doc2,
+                             const Node *node2, const Dom *dom2,
                              const DataContainer *dataContainer2,
                              const unsigned char printDifferences) {
     if (isText(node1->tagID) ^ isText(node2->tagID)) {
@@ -175,11 +175,11 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
             const char *tag = NULL;
             char textNode = '1';
             if (isText(node1->tagID)) {
-                text = getText(node1->nodeID, doc1, dataContainer1);
+                text = getText(node1->nodeID, dom1, dataContainer1);
                 tag = dataContainer1->tags.container.elements[node2->tagID];
             } else {
                 textNode++;
-                text = getText(node2->nodeID, doc2, dataContainer2);
+                text = getText(node2->nodeID, dom2, dataContainer2);
                 tag = dataContainer1->tags.container.elements[node1->tagID];
             }
 
@@ -193,8 +193,8 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
     }
 
     if (isText(node1->tagID) & isText(node2->tagID)) {
-        const char *text1 = getText(node1->nodeID, doc1, dataContainer1);
-        const char *text2 = getText(node2->nodeID, doc2, dataContainer2);
+        const char *text1 = getText(node1->nodeID, dom1, dataContainer1);
+        const char *text2 = getText(node2->nodeID, dom2, dataContainer2);
 
         if (strcmp(text1, text2) == 0) {
             return COMPARISON_SUCCESS;
@@ -243,26 +243,26 @@ ComparisonStatus compareTags(const Node *node1, const Document *doc1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
+ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
                              const DataContainer *dataContainer1,
-                             node_id *currNodeID2, const Document *doc2,
+                             node_id *currNodeID2, const Dom *dom2,
                              const DataContainer *dataContainer2) {
-    Node node1 = doc1->nodes[*currNodeID1];
-    Node node2 = doc2->nodes[*currNodeID2];
+    Node node1 = dom1->nodes[*currNodeID1];
+    Node node2 = dom2->nodes[*currNodeID2];
 
-    ComparisonStatus result = compareTags(&node1, doc1, dataContainer1, &node2,
-                                          doc2, dataContainer2, 0);
+    ComparisonStatus result = compareTags(&node1, dom1, dataContainer1, &node2,
+                                          dom2, dataContainer2, 0);
     if (result != COMPARISON_SUCCESS) {
         return result;
     }
 
     if (!isText(node1.tagID)) {
-        result = compareBoolProps(&node1, doc1, dataContainer1, &node2, doc2,
+        result = compareBoolProps(&node1, dom1, dataContainer1, &node2, dom2,
                                   dataContainer2, 0);
         if (result != COMPARISON_SUCCESS) {
             return result;
         }
-        result = compareProps(&node1, doc1, dataContainer1, &node2, doc2,
+        result = compareProps(&node1, dom1, dataContainer1, &node2, dom2,
                               dataContainer2, 0);
         if (result != COMPARISON_SUCCESS) {
             return result;
@@ -271,18 +271,18 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
 
     const node_id parentNodeID1 = *currNodeID1;
     const node_id parentNodeID2 = *currNodeID2;
-    *currNodeID1 = getFirstChild(*currNodeID1, doc1);
-    *currNodeID2 = getFirstChild(*currNodeID2, doc2);
+    *currNodeID1 = getFirstChild(*currNodeID1, dom1);
+    *currNodeID2 = getFirstChild(*currNodeID2, dom2);
 
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp = compareNode(currNodeID1, doc1, dataContainer1,
-                                            currNodeID2, doc2, dataContainer2);
+        ComparisonStatus comp = compareNode(currNodeID1, dom1, dataContainer1,
+                                            currNodeID2, dom2, dataContainer2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
 
-        *currNodeID1 = getNextNode(*currNodeID1, doc1);
-        *currNodeID2 = getNextNode(*currNodeID2, doc2);
+        *currNodeID1 = getNextNode(*currNodeID1, dom1);
+        *currNodeID2 = getNextNode(*currNodeID2, dom2);
     }
 
     if (*currNodeID1 ^ *currNodeID2) {
@@ -295,21 +295,21 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Document *doc1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus equals(node_id *currNodeID1, const Document *doc1,
+ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,
                         const DataContainer *dataContainer1,
-                        node_id *currNodeID2, const Document *doc2,
+                        node_id *currNodeID2, const Dom *dom2,
                         const DataContainer *dataContainer2) {
-    *currNodeID1 = doc1->firstNodeID;
-    *currNodeID2 = doc2->firstNodeID;
+    *currNodeID1 = dom1->firstNodeID;
+    *currNodeID2 = dom2->firstNodeID;
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp = compareNode(currNodeID1, doc1, dataContainer1,
-                                            currNodeID2, doc2, dataContainer2);
+        ComparisonStatus comp = compareNode(currNodeID1, dom1, dataContainer1,
+                                            currNodeID2, dom2, dataContainer2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
 
-        *currNodeID1 = getNextNode(*currNodeID1, doc1);
-        *currNodeID2 = getNextNode(*currNodeID2, doc2);
+        *currNodeID1 = getNextNode(*currNodeID1, dom1);
+        *currNodeID2 = getNextNode(*currNodeID2, dom2);
     }
 
     if (*currNodeID1 ^ *currNodeID2) {
@@ -319,24 +319,24 @@ ComparisonStatus equals(node_id *currNodeID1, const Document *doc1,
     return COMPARISON_SUCCESS;
 }
 
-void printFirstDifference(const node_id nodeID1, const Document *doc1,
+void printFirstDifference(const node_id nodeID1, const Dom *dom1,
                           const DataContainer *dataContainer1,
-                          const node_id nodeID2, const Document *doc2,
+                          const node_id nodeID2, const Dom *dom2,
                           const DataContainer *dataContainer2) {
-    Node *node1 = &doc1->nodes[nodeID1];
-    Node *node2 = &doc2->nodes[nodeID2];
+    Node *node1 = &dom1->nodes[nodeID1];
+    Node *node2 = &dom2->nodes[nodeID2];
 
-    if (compareTags(node1, doc1, dataContainer1, node2, doc2, dataContainer2,
+    if (compareTags(node1, dom1, dataContainer1, node2, dom2, dataContainer2,
                     1) != COMPARISON_SUCCESS) {
         return;
     }
 
     if (!isText(node1->tagID)) {
-        if (compareBoolProps(node1, doc1, dataContainer1, node2, doc2,
+        if (compareBoolProps(node1, dom1, dataContainer1, node2, dom2,
                              dataContainer2, 1) != COMPARISON_SUCCESS) {
             return;
         }
-        if (compareProps(node1, doc1, dataContainer1, node2, doc2,
+        if (compareProps(node1, dom1, dataContainer1, node2, dom2,
                          dataContainer2, 1) != COMPARISON_SUCCESS) {
             return;
         }

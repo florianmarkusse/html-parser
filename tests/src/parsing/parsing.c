@@ -1,7 +1,7 @@
 #include <dirent.h>
-#include <flo/html-parser/dom/document-user.h>
-#include <flo/html-parser/dom/document-writing.h>
-#include <flo/html-parser/dom/document.h>
+#include <flo/html-parser/dom/dom-user.h>
+#include <flo/html-parser/dom/dom-writing.h>
+#include <flo/html-parser/dom/dom.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -16,13 +16,12 @@ unsigned char parseFile(const char *fileLocation) {
     DataContainer dataContainer;
     createDataContainer(&dataContainer);
 
-    Document doc1;
-    if (createFromFile(fileLocation, &doc1, &dataContainer) !=
-        DOCUMENT_SUCCESS) {
+    Dom dom1;
+    if (createFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
         destroyDataContainer(&dataContainer);
         return 0;
     }
-    destroyDocument(&doc1);
+    destroyDom(&dom1);
     destroyDataContainer(&dataContainer);
     return 1;
 }
@@ -48,7 +47,7 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
             (*localFailures)++;
             printTestFailure();
             printTestDemarcation();
-            printf("Parsing document %s failed\n", fileLocation);
+            printf("Parsing DOM %s failed\n", fileLocation);
             printTestDemarcation();
         } else {
             (*localSuccesses)++;
@@ -60,7 +59,7 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
 }
 
 unsigned char testParsings(size_t *successes, size_t *failures) {
-    printTestTopicStart("document parsings");
+    printTestTopicStart("DOM parsings");
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 

@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/querying/document-querying-util.h"
-#include "flo/html-parser/dom/querying/document-querying.h"
+#include "flo/html-parser/dom/query/dom-query-util.h"
+#include "flo/html-parser/dom/query/dom-query.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/utils/memory/memory.h"
@@ -28,7 +28,7 @@
     do {                                                                       \
         if ((filtersLen) >= MAX_FILTERS_PER_ELEMENT) {                         \
             PRINT_ERROR("Too many filters in a single element detected!\n");   \
-            return QUERYING_TOO_MANY_ELEMENT_FILTERS;                          \
+            return QUERY_TOO_MANY_ELEMENT_FILTERS;                             \
         }                                                                      \
     } while (0)
 
@@ -44,25 +44,23 @@ bool isSpecifiedCombinator(char ch) {
 
 bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
 
-QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
-                                const DataContainer *dataContainer,
-                                node_id **results, size_t *resultsLen) {
+QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
+                             const DataContainer *dataContainer,
+                             node_id **results, size_t *resultsLen) {
     if (*results == NULL && *resultsLen == 0) {
         *results = malloc(sizeof(node_id) * INITIAL_QUERY_CAP);
         if (*results == NULL) {
             PRINT_ERROR("Failed to allocate memory at the outset\n");
-            return QUERYING_MEMORY_ERROR;
+            return QUERY_MEMORY_ERROR;
         }
     } else {
         PRINT_ERROR("The **results parameter must be pointing to NULL and its "
                     "corresponding *resultsLen pointing to 0\n");
-        return QUERYING_INITIALIZATION_ERROR;
+        return QUERY_INITIALIZATION_ERROR;
     }
 
-    QueryingStatus result = QUERYING_SUCCESS;
+    QueryStatus result = QUERY_SUCCESS;
 
-    //    node_id *results = NULL;
-    //    size_t resultsLen = 0;
     size_t currentCap = INITIAL_QUERY_CAP;
 
     FilterType filters[MAX_FILTERS_PER_ELEMENT];
@@ -100,7 +98,7 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
 
             tokenID = 0;
             if ((result = getTagID(buffer, &tokenID, dataContainer)) !=
-                QUERYING_SUCCESS) {
+                QUERY_SUCCESS) {
                 return result;
             }
 
@@ -133,9 +131,8 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
                 boolBuffer[tokenLength - 1] = '\0';
 
                 tokenID = 0;
-                if ((result =
-                         getBoolPropID(boolBuffer, &tokenID, dataContainer)) !=
-                    QUERYING_SUCCESS) {
+                if ((result = getBoolPropID(boolBuffer, &tokenID,
+                                            dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }
 
@@ -149,9 +146,8 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
                 keyBuffer[tokenLength - 1] = '\0';
 
                 tokenID = 0;
-                if ((result =
-                         getKeyPropID(keyBuffer, &tokenID, dataContainer)) !=
-                    QUERYING_SUCCESS) {
+                if ((result = getKeyPropID(keyBuffer, &tokenID,
+                                           dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }
                 // Adding to filter already because I want to reuse tokenID :)
@@ -182,8 +178,7 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
 
                 tokenID = 0;
                 if ((result = getValuePropID(valueBuffer, &tokenID,
-                                             dataContainer)) !=
-                    QUERYING_SUCCESS) {
+                                             dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }
 
@@ -197,54 +192,54 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
 
         if (filtersLen < 1) {
             PRINT_ERROR("Did not receive any filters in the css query\n");
-            return QUERYING_INVALID_ELEMENT;
+            return QUERY_INVALID_ELEMENT;
         }
 
         // Do filtering :)
         switch (currentCombinator) {
         case NO_COMBINATOR: {
             if ((result = getNodesWithoutCombinator(
-                     filters, filtersLen, doc, results, resultsLen,
-                     &currentCap)) != QUERYING_SUCCESS) {
+                     filters, filtersLen, dom, results, resultsLen,
+                     &currentCap)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case ADJACENT: {
-            if ((result = getFilteredAdjacents(
-                     filters, filtersLen, doc, 1, results, resultsLen,
-                     &currentCap)) != QUERYING_SUCCESS) {
+            if ((result = getFilteredAdjacents(filters, filtersLen, dom, 1,
+                                               results, resultsLen,
+                                               &currentCap)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case CHILD: {
             if ((result = getFilteredDescendants(
-                     filters, filtersLen, doc, 1, results, resultsLen,
-                     &currentCap)) != QUERYING_SUCCESS) {
+                     filters, filtersLen, dom, 1, results, resultsLen,
+                     &currentCap)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case GENERAL_SIBLING: {
-            if ((result = getFilteredAdjacents(
-                     filters, filtersLen, doc, SIZE_MAX, results, resultsLen,
-                     &currentCap)) != QUERYING_SUCCESS) {
+            if ((result = getFilteredAdjacents(filters, filtersLen, dom,
+                                               SIZE_MAX, results, resultsLen,
+                                               &currentCap)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case DESCENDANT: {
             if ((result = getFilteredDescendants(
-                     filters, filtersLen, doc, SIZE_MAX, results, resultsLen,
-                     &currentCap)) != QUERYING_SUCCESS) {
+                     filters, filtersLen, dom, SIZE_MAX, results, resultsLen,
+                     &currentCap)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         default: {
             PRINT_ERROR("Unknown current combinator, aborting css query!\n");
-            return QUERYING_INVALID_COMBINATOR;
+            return QUERY_INVALID_COMBINATOR;
         }
         }
 
@@ -279,7 +274,7 @@ QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
         }
         default: {
             PRINT_ERROR("Could not determine combinator!\n");
-            return QUERYING_INVALID_COMBINATOR;
+            return QUERY_INVALID_COMBINATOR;
         }
         }
     }

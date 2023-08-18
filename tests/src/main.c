@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "comparisons/comparisons.h"
+#include "comparing/comparing.h"
 #include "parsing/parsing.h"
 #include "pretty-print.h"
 #include "querying/querying.h"

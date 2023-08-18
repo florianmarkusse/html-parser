@@ -5,8 +5,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "flo/html-parser/dom/document-user.h"
-#include "flo/html-parser/dom/document.h"
+#include "flo/html-parser/dom/dom-user.h"
+#include "flo/html-parser/dom/dom.h"
 
 #define INPUTS_DIR "benchmarks/inputs/"
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"
@@ -14,13 +14,12 @@
 unsigned char parseFile(const char *fileLocation) {
     DataContainer dataContainer;
     createDataContainer(&dataContainer);
-    Document doc1;
-    if (createFromFile(fileLocation, &doc1, &dataContainer) !=
-        DOCUMENT_SUCCESS) {
+    Dom dom1;
+    if (createFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
         destroyDataContainer(&dataContainer);
         return 0;
     }
-    destroyDocument(&doc1);
+    destroyDom(&dom1);
     destroyDataContainer(&dataContainer);
     return 1;
 }
@@ -44,7 +43,7 @@ void benchmark() {
                  ent->d_name);
         printf("parsing %s\n", fileLocation);
         if (!parseFile(fileLocation)) {
-            printf("Parsing document %s failed\n", fileLocation);
+            printf("Parsing DOM %s failed\n", fileLocation);
             break;
         }
     }

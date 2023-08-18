@@ -1,8 +1,8 @@
-#ifndef FLO_HTML_PARSER_DOM_QUERYING_DOCUMENT_QUERYING_H
-#define FLO_HTML_PARSER_DOM_QUERYING_DOCUMENT_QUERYING_H
+#ifndef FLO_HTML_PARSER_DOM_QUERY_DOM_QUERY_H
+#define FLO_HTML_PARSER_DOM_QUERY_DOM_QUERY_H
 
-#include "document-querying-status.h"
-#include "flo/html-parser/dom/document.h"
+#include "dom-query-status.h"
+#include "flo/html-parser/dom/dom.h"
 
 #define INITIAL_QUERY_CAP (1U << 6U)
 #define MAX_FILTERS_PER_ELEMENT (1U << 3U)
@@ -30,8 +30,8 @@ typedef struct {
     } data;
 } __attribute__((aligned(8))) FilterType;
 
-QueryingStatus querySelectorAll(const char *cssQuery, const Document *doc,
-                                const DataContainer *dataContainer,
-                                node_id **results, size_t *resultsLen);
+QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
+                             const DataContainer *dataContainer,
+                             node_id **results, size_t *resultsLen);
 
 #endif

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/document-utils.h"
-#include "flo/html-parser/dom/document.h"
+#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/path.h"
 
@@ -30,16 +30,15 @@ void getBits(const element_id tagID, char *bits, const size_t size) {
     bits[numBits] = '\0';
 }
 
-void printNode(const node_id nodeID, const size_t indentation,
-               const Document *doc, const DataContainer *dataContainer,
-               FILE *output) {
+void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
+               const DataContainer *dataContainer, FILE *output) {
     if (nodeID == ERROR_NODE_ID) {
         return;
     }
-    Node node = doc->nodes[nodeID];
+    Node node = dom->nodes[nodeID];
 
     if (isText(node.tagID)) {
-        const char *text = getText(node.nodeID, doc, dataContainer);
+        const char *text = getText(node.nodeID, dom, dataContainer);
         if (text != NULL) {
             fprintf(output, "%s", text);
         }
@@ -49,8 +48,8 @@ void printNode(const node_id nodeID, const size_t indentation,
     const char *tag = dataContainer->tags.container.elements[node.tagID];
     fprintf(output, "<%s", tag);
 
-    for (size_t i = 0; i < doc->boolPropsLen; i++) {
-        BooleanProperty boolProp = doc->boolProps[i];
+    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+        BooleanProperty boolProp = dom->boolProps[i];
 
         if (boolProp.nodeID == node.nodeID) {
             char *prop =
@@ -59,8 +58,8 @@ void printNode(const node_id nodeID, const size_t indentation,
         }
     }
 
-    for (size_t i = 0; i < doc->propsLen; i++) {
-        Property prop = doc->props[i];
+    for (size_t i = 0; i < dom->propsLen; i++) {
+        Property prop = dom->props[i];
 
         if (prop.nodeID == node.nodeID) {
             char *key = dataContainer->propKeys.container.elements[prop.keyID];
@@ -71,7 +70,7 @@ void printNode(const node_id nodeID, const size_t indentation,
     }
 
     if (isSingle(node.tagID)) {
-        if (strcmp(tag, "!DOCTYPE") == 0) {
+        if (strcmp(tag, "!domTYPE") == 0) {
             fprintf(output, ">");
         } else {
             fprintf(output, "/>");
@@ -79,26 +78,25 @@ void printNode(const node_id nodeID, const size_t indentation,
         return;
     }
     fprintf(output, ">");
-    node_id childNode = getFirstChild(nodeID, doc);
+    node_id childNode = getFirstChild(nodeID, dom);
     while (childNode) {
-        printNode(childNode, indentation + 1, doc, dataContainer, output);
-        childNode = getNextNode(childNode, doc);
+        printNode(childNode, indentation + 1, dom, dataContainer, output);
+        childNode = getNextNode(childNode, dom);
     }
     fprintf(output, "</%s>", tag);
 }
 
-void printHTML(const Document *doc, const DataContainer *dataContainer) {
+void printHTML(const Dom *dom, const DataContainer *dataContainer) {
     printf("printing HTML...\n\n");
-    node_id currentNodeID = doc->firstNodeID;
+    node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, doc, dataContainer, stdout);
-        currentNodeID = getNextNode(currentNodeID, doc);
+        printNode(currentNodeID, 0, dom, dataContainer, stdout);
+        currentNodeID = getNextNode(currentNodeID, dom);
     }
     printf("\n\n");
 }
 
-FileStatus writeHTMLToFile(const Document *doc,
-                           const DataContainer *dataContainer,
+FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
                            const char *filePath) {
     createPath(filePath);
     FILE *file = fopen(filePath, "wbe");
@@ -107,10 +105,10 @@ FileStatus writeHTMLToFile(const Document *doc,
         return FILE_CANT_OPEN;
     }
 
-    node_id currentNodeID = doc->firstNodeID;
+    node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, doc, dataContainer, file);
-        currentNodeID = getNextNode(currentNodeID, doc);
+        printNode(currentNodeID, 0, dom, dataContainer, file);
+        currentNodeID = getNextNode(currentNodeID, dom);
     }
 
     fclose(file);
@@ -118,18 +116,17 @@ FileStatus writeHTMLToFile(const Document *doc,
     return FILE_SUCCESS;
 }
 
-void printDocumentStatus(const Document *doc,
-                         const DataContainer *dataContainer) {
-    printf("printing document status...\n\n");
+void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
+    printf("printing domument status...\n\n");
     printf(" in here\n");
     printf("single lenn %u\n", dataContainer->tags.singleLen);
     printf("single offset %u\n", SINGLES_OFFSET);
     printf("paired len %u\n", dataContainer->tags.pairedLen);
 
-    printf("nodes inside document...\n");
-    printf("total number of nodes: %zu\n", doc->nodeLen);
-    for (size_t i = 0; i < doc->nodeLen; i++) {
-        Node node = doc->nodes[i];
+    printf("nodes inside domument...\n");
+    printf("total number of nodes: %zu\n", dom->nodeLen);
+    for (size_t i = 0; i < dom->nodeLen; i++) {
+        Node node = dom->nodes[i];
 
         if (node.nodeID == 0) {
             printf("tag: %-6s bits: %-18s", "xxxxx", "xxxxxxxxxxxxxxxx");
@@ -154,10 +151,10 @@ void printDocumentStatus(const Document *doc,
     }
     printf("\n");
 
-    printf("text nodes inside document...\n");
-    printf("total number of text nodes: %zu\n", doc->textLen);
-    for (size_t i = 0; i < doc->textLen; i++) {
-        TextNode textNode = doc->text[i];
+    printf("text nodes inside dom...\n");
+    printf("total number of text nodes: %zu\n", dom->textLen);
+    for (size_t i = 0; i < dom->textLen; i++) {
+        TextNode textNode = dom->text[i];
         const char *type =
             dataContainer->text.container.elements[textNode.textID];
 
@@ -169,10 +166,10 @@ void printDocumentStatus(const Document *doc,
     }
     printf("\n");
 
-    printf("boolean property nodes inside document...\n");
-    printf("total number of boolean properties: %zu\n", doc->boolPropsLen);
-    for (size_t i = 0; i < doc->boolPropsLen; i++) {
-        BooleanProperty boolProps = doc->boolProps[i];
+    printf("boolean property nodes inside dom...\n");
+    printf("total number of boolean properties: %zu\n", dom->boolPropsLen);
+    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+        BooleanProperty boolProps = dom->boolProps[i];
         const char *type =
             dataContainer->propKeys.container.elements[boolProps.propID];
 
@@ -186,10 +183,10 @@ void printDocumentStatus(const Document *doc,
     }
     printf("\n");
 
-    printf("key-value property nodes inside document...\n");
-    printf("total number of key-value properties: %zu\n", doc->propsLen);
-    for (size_t i = 0; i < doc->propsLen; i++) {
-        Property property = doc->props[i];
+    printf("key-value property nodes inside dom...\n");
+    printf("total number of key-value properties: %zu\n", dom->propsLen);
+    for (size_t i = 0; i < dom->propsLen; i++) {
+        Property property = dom->props[i];
         const char *key =
             dataContainer->propKeys.container.elements[property.keyID];
         const char *value =
@@ -207,29 +204,29 @@ void printDocumentStatus(const Document *doc,
     }
     printf("\n");
 
-    printf("parent-first-child inside document...\n");
+    printf("parent-first-child inside dom...\n");
     printf("total number of parent-first-child: %zu\n",
-           doc->parentFirstChildLen);
-    for (size_t i = 0; i < doc->parentFirstChildLen; i++) {
+           dom->parentFirstChildLen);
+    for (size_t i = 0; i < dom->parentFirstChildLen; i++) {
         printf("parent: %-4hu first child: %-4hu\n",
-               doc->parentFirstChilds[i].parentID,
-               doc->parentFirstChilds[i].childID);
+               dom->parentFirstChilds[i].parentID,
+               dom->parentFirstChilds[i].childID);
     }
     printf("\n");
 
-    printf("parent-child inside document...\n");
-    printf("total number of parent-child: %zu\n", doc->parentChildLen);
-    for (size_t i = 0; i < doc->parentChildLen; i++) {
-        printf("parent: %-4hu child: %-4hu\n", doc->parentChilds[i].parentID,
-               doc->parentChilds[i].childID);
+    printf("parent-child inside dom...\n");
+    printf("total number of parent-child: %zu\n", dom->parentChildLen);
+    for (size_t i = 0; i < dom->parentChildLen; i++) {
+        printf("parent: %-4hu child: %-4hu\n", dom->parentChilds[i].parentID,
+               dom->parentChilds[i].childID);
     }
     printf("\n");
 
-    printf("next nodes inside document...\n");
-    printf("total number of next nodes: %zu\n", doc->nextNodeLen);
-    for (size_t i = 0; i < doc->nextNodeLen; i++) {
+    printf("next nodes inside dom...\n");
+    printf("total number of next nodes: %zu\n", dom->nextNodeLen);
+    for (size_t i = 0; i < dom->nextNodeLen; i++) {
         printf("current node: %-4hu next node: %-4hu\n",
-               doc->nextNodes[i].currentNodeID, doc->nextNodes[i].nextNodeID);
+               dom->nextNodes[i].currentNodeID, dom->nextNodes[i].nextNodeID);
     }
     printf("\n\n");
 }

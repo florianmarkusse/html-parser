@@ -1,14 +1,14 @@
-#include <flo/html-parser/dom/comparison/document-comparison.h>
-#include <flo/html-parser/dom/document-user.h>
-#include <flo/html-parser/dom/document-writing.h>
-#include <flo/html-parser/dom/document.h>
+#include <flo/html-parser/dom/comparison/dom-comparison.h>
+#include <flo/html-parser/dom/dom-user.h>
+#include <flo/html-parser/dom/dom-writing.h>
+#include <flo/html-parser/dom/dom.h>
 #include <stdio.h>
 
-#include "comparisons/comparisons.h"
+#include "comparing/comparing.h"
 #include "test-status.h"
 #include "test.h"
 
-#define CURRENT_DIR "tests/src/comparisons/inputs/"
+#define CURRENT_DIR "tests/src/comparing/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 #define TEST_FILE_2 CURRENT_DIR "test-2.html"
 #define TEST_FILE_3 CURRENT_DIR "test-3.html"
@@ -39,17 +39,15 @@ TestStatus compareFiles(const char *fileLocation1,
                         const char *fileLocation2,
                         DataContainer *dataContainer2,
                         const ComparisonStatus expectedResult) {
-    Document doc1;
-    if (createFromFile(fileLocation1, &doc1, dataContainer1) !=
-        DOCUMENT_SUCCESS) {
+    Dom dom1;
+    if (createFromFile(fileLocation1, &dom1, dataContainer1) != DOM_SUCCESS) {
         destroyDataContainer(dataContainer1);
         destroyDataContainer(dataContainer2);
         return TEST_ERROR_INITIALIZATION;
     }
 
-    Document doc2;
-    if (createFromFile(fileLocation2, &doc2, dataContainer2) !=
-        DOCUMENT_SUCCESS) {
+    Dom dom2;
+    if (createFromFile(fileLocation2, &dom2, dataContainer2) != DOM_SUCCESS) {
         destroyDataContainer(dataContainer1);
         destroyDataContainer(dataContainer2);
         return TEST_ERROR_INITIALIZATION;
@@ -57,8 +55,8 @@ TestStatus compareFiles(const char *fileLocation1,
 
     node_id nodeID1 = 0;
     node_id nodeID2 = 0;
-    ComparisonStatus comp = equals(&nodeID1, &doc1, dataContainer1, &nodeID2,
-                                   &doc2, dataContainer2);
+    ComparisonStatus comp = equals(&nodeID1, &dom1, dataContainer1, &nodeID2,
+                                   &dom2, dataContainer2);
 
     TestStatus result = TEST_FAILURE;
 
@@ -71,13 +69,13 @@ TestStatus compareFiles(const char *fileLocation1,
         printTestResultDifferenceString(
             expectedResult, comparisonStatusToString(expectedResult), comp,
             comparisonStatusToString(comp));
-        printFirstDifference(nodeID1, &doc1, dataContainer1, nodeID2, &doc2,
+        printFirstDifference(nodeID1, &dom1, dataContainer1, nodeID2, &dom2,
                              dataContainer2);
         printTestDemarcation();
     }
 
-    destroyDocument(&doc1);
-    destroyDocument(&doc2);
+    destroyDom(&dom1);
+    destroyDom(&dom2);
 
     destroyDataContainer(dataContainer1);
     destroyDataContainer(dataContainer2);
@@ -138,7 +136,7 @@ static inline void diffContainerParseAndCompare(
 }
 
 unsigned char testComparisons(size_t *successes, size_t *failures) {
-    printTestTopicStart("document comparisons");
+    printTestTopicStart("domument comparisons");
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
@@ -162,7 +160,7 @@ unsigned char testComparisons(size_t *successes, size_t *failures) {
         "missing key-value property", &localSuccesses, &localFailures);
     sameContainerParseAndCompare(
         TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
-        "text node and document node", &localSuccesses, &localFailures);
+        "text node and domument node", &localSuccesses, &localFailures);
     sameContainerParseAndCompare(TEST_FILE_1, TEST_FILE_7,
                                  COMPARISON_DIFFERENT_SIZES, "different sizes",
                                  &localSuccesses, &localFailures);
