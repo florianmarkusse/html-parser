@@ -3,6 +3,14 @@
 
 #include "dom.h"
 
+const char *getTag(node_id nodeID, const Dom *dom,
+                   const DataContainer *dataContainer);
+const char *getBoolProp(node_id nodeID, const Dom *dom,
+                        const DataContainer *dataContainer);
+const char *getPropKey(node_id nodeID, const Dom *dom,
+                       const DataContainer *dataContainer);
+const char *getPropValue(node_id nodeID, const Dom *dom,
+                         const DataContainer *dataContainer);
 const char *getText(node_id nodeID, const Dom *dom,
                     const DataContainer *dataContainer);
 node_id getFirstChild(node_id parentID, const Dom *dom);

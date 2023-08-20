@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -33,11 +34,26 @@ void printProps(const element_id node1Tag, const element_id node1PropsLen,
     }
 }
 
+bool propertyEquals(const element_id propKeyID1, const element_id propValueID1,
+                    const DataContainer *dataContainer1,
+                    const element_id propKeyID2, const element_id propValueID2,
+                    const DataContainer *dataContainer2) {
+    const char *key1 = dataContainer1->propKeys.container.elements[propKeyID1];
+    const char *value1 =
+        dataContainer1->propValues.container.elements[propValueID1];
+    const char *key2 = dataContainer2->propKeys.container.elements[propKeyID2];
+    const char *value2 =
+        dataContainer2->propValues.container.elements[propValueID2];
+
+    return strcmp(key1, key2) == 0 && strcmp(value1, value2) == 0;
+}
+
 ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
                               const DataContainer *dataContainer1,
                               const Node *node2, const Dom *dom2,
                               const DataContainer *dataContainer2,
-                              const unsigned char printDifferences) {
+                              const bool printDifferences,
+                              const bool shallowCompare) {
     element_id node1Keys[MAX_PROPERTIES];
     element_id node1Values[MAX_PROPERTIES];
     element_id node1PropsLen = 0;
@@ -75,15 +91,47 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
         return COMPARISON_MISSING_PROPERTIES;
     }
 
+    // TODO(florian): hash...
     for (size_t i = 0; i < node1PropsLen; i++) {
-        if (node1Keys[i] != node2Keys[i] || node1Values[i] != node2Values[i]) {
-            if (printDifferences) {
-                PRINT_ERROR("Nodes have different value properties.\n");
-                printProps(node1->tagID, node1PropsLen, node1Keys, node1Values,
-                           dataContainer1, node2->tagID, node2PropsLen,
-                           node2Keys, node2Values, dataContainer2);
+        if (shallowCompare) {
+            bool foundSamePropID = false;
+            for (size_t j = 0; j < node2PropsLen; j++) {
+                if (node1Keys[i] == node2Keys[j] &&
+                    node1Values[i] == node2Values[j]) {
+                    foundSamePropID = true;
+                    break;
+                }
             }
-            return COMPARISON_DIFFERENT_PROPERTIES;
+            if (!foundSamePropID) {
+                if (printDifferences) {
+                    PRINT_ERROR("Nodes have different properties.\n");
+                    printProps(node1->tagID, node1PropsLen, node1Keys,
+                               node1Values, dataContainer1, node2->tagID,
+                               node2PropsLen, node2Keys, node2Values,
+                               dataContainer2);
+                }
+                return COMPARISON_DIFFERENT_PROPERTIES;
+            }
+        } else {
+            bool foundSameProp = false;
+            for (size_t j = 0; j < node2PropsLen; j++) {
+                if (propertyEquals(node1Keys[i], node1Values[i], dataContainer1,
+                                   node2Keys[j], node2Values[j],
+                                   dataContainer2)) {
+                    foundSameProp = true;
+                    break;
+                }
+            }
+            if (!foundSameProp) {
+                if (printDifferences) {
+                    PRINT_ERROR("Nodes have different properties.\n");
+                    printProps(node1->tagID, node1PropsLen, node1Keys,
+                               node1Values, dataContainer1, node2->tagID,
+                               node2PropsLen, node2Keys, node2Values,
+                               dataContainer2);
+                }
+                return COMPARISON_DIFFERENT_PROPERTIES;
+            }
         }
     }
 
@@ -111,11 +159,24 @@ void printBoolProps(const element_id node1Tag, const element_id node1PropsLen,
     }
 }
 
+bool boolPropStringEquals(const element_id boolPropID1,
+                          const DataContainer *dataContainer1,
+                          const element_id boolPropID2,
+                          const DataContainer *dataContainer2) {
+    const char *string1 =
+        dataContainer1->propKeys.container.elements[boolPropID1];
+    const char *string2 =
+        dataContainer2->propKeys.container.elements[boolPropID2];
+
+    return strcmp(string1, string2) == 0;
+}
+
 ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
                                   const DataContainer *dataContainer1,
                                   const Node *node2, const Dom *dom2,
                                   const DataContainer *dataContainer2,
-                                  const unsigned char printDifferences) {
+                                  const bool printDifferences,
+                                  const bool shallowCompare) {
     element_id node1Props[MAX_PROPERTIES];
     element_id node1PropsLen = 0;
     for (size_t i = 0; i < dom1->boolPropsLen; i++) {
@@ -149,26 +210,63 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
         return COMPARISON_MISSING_PROPERTIES;
     }
 
+    // TODO(florian): hash...
     for (size_t i = 0; i < node1PropsLen; i++) {
-        if (node1Props[i] != node2Props[i]) {
-            if (printDifferences) {
-                PRINT_ERROR("Nodes have different boolean properties.\n");
-                printBoolProps(node1->tagID, node1PropsLen, node1Props,
-                               dataContainer1, node2->tagID, node2PropsLen,
-                               node2Props, dataContainer2);
+        if (shallowCompare) {
+            bool foundSamePropID = false;
+            for (size_t j = 0; j < node2PropsLen; j++) {
+                if (node1Props[i] == node2Props[j]) {
+                    foundSamePropID = true;
+                    break;
+                }
             }
-            return COMPARISON_DIFFERENT_PROPERTIES;
+            if (!foundSamePropID) {
+                if (printDifferences) {
+                    PRINT_ERROR("Nodes have different boolean properties.\n");
+                    printBoolProps(node1->tagID, node1PropsLen, node1Props,
+                                   dataContainer1, node2->tagID, node2PropsLen,
+                                   node2Props, dataContainer2);
+                }
+                return COMPARISON_DIFFERENT_PROPERTIES;
+            }
+        } else {
+            bool foundSameProp = false;
+            for (size_t j = 0; j < node2PropsLen; j++) {
+                if (boolPropStringEquals(node1Props[i], dataContainer1,
+                                         node2Props[j], dataContainer2)) {
+                    foundSameProp = true;
+                }
+            }
+            if (!foundSameProp) {
+                if (printDifferences) {
+                    PRINT_ERROR("Nodes have different boolean properties.\n");
+                    printBoolProps(node1->tagID, node1PropsLen, node1Props,
+                                   dataContainer1, node2->tagID, node2PropsLen,
+                                   node2Props, dataContainer2);
+                }
+                return COMPARISON_DIFFERENT_PROPERTIES;
+            }
         }
     }
 
     return COMPARISON_SUCCESS;
 }
 
+bool tagStringEquals(const element_id tagID1,
+                     const DataContainer *dataContainer1,
+                     const element_id tagID2,
+                     const DataContainer *dataContainer2) {
+    const char *string1 = dataContainer1->tags.container.elements[tagID1];
+    const char *string2 = dataContainer2->tags.container.elements[tagID2];
+    return strcmp(string1, string2) == 0;
+}
+
 ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
                              const DataContainer *dataContainer1,
                              const Node *node2, const Dom *dom2,
                              const DataContainer *dataContainer2,
-                             const unsigned char printDifferences) {
+                             const bool printDifferences,
+                             const bool shallowCompare) {
     if (isText(node1->tagID) ^ isText(node2->tagID)) {
         if (printDifferences) {
             const char *text = NULL;
@@ -192,7 +290,7 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
 
-    if (isText(node1->tagID) & isText(node2->tagID)) {
+    if (isText(node1->tagID) && isText(node2->tagID)) {
         const char *text1 = getText(node1->nodeID, dom1, dataContainer1);
         const char *text2 = getText(node2->nodeID, dom2, dataContainer2);
 
@@ -227,12 +325,12 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
         }
     }
 
-    if (node1->tagID != node2->tagID) {
+    if ((shallowCompare && node1->tagID != node2->tagID) ||
+        (!shallowCompare && !tagStringEquals(node1->tagID, dataContainer1,
+                                             node2->tagID, dataContainer2))) {
         if (printDifferences) {
-            const char *tag1 =
-                dataContainer1->tags.container.elements[node1->tagID];
-            const char *tag2 =
-                dataContainer2->tags.container.elements[node2->tagID];
+            const char *tag1 = getTag(node1->nodeID, dom1, dataContainer1);
+            const char *tag2 = getTag(node2->nodeID, dom2, dataContainer2);
             PRINT_ERROR("Nodes have different tags.\nnode 1 tag: %s\nnode "
                         "2 tag: %s\n",
                         tag1, tag2);
@@ -246,24 +344,26 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
 ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
                              const DataContainer *dataContainer1,
                              node_id *currNodeID2, const Dom *dom2,
-                             const DataContainer *dataContainer2) {
+                             const DataContainer *dataContainer2,
+                             bool shallowCompare) {
     Node node1 = dom1->nodes[*currNodeID1];
     Node node2 = dom2->nodes[*currNodeID2];
 
-    ComparisonStatus result = compareTags(&node1, dom1, dataContainer1, &node2,
-                                          dom2, dataContainer2, 0);
+    ComparisonStatus result =
+        compareTags(&node1, dom1, dataContainer1, &node2, dom2, dataContainer2,
+                    false, shallowCompare);
     if (result != COMPARISON_SUCCESS) {
         return result;
     }
 
     if (!isText(node1.tagID)) {
         result = compareBoolProps(&node1, dom1, dataContainer1, &node2, dom2,
-                                  dataContainer2, 0);
+                                  dataContainer2, false, shallowCompare);
         if (result != COMPARISON_SUCCESS) {
             return result;
         }
         result = compareProps(&node1, dom1, dataContainer1, &node2, dom2,
-                              dataContainer2, 0);
+                              dataContainer2, false, shallowCompare);
         if (result != COMPARISON_SUCCESS) {
             return result;
         }
@@ -275,8 +375,9 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
     *currNodeID2 = getFirstChild(*currNodeID2, dom2);
 
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp = compareNode(currNodeID1, dom1, dataContainer1,
-                                            currNodeID2, dom2, dataContainer2);
+        ComparisonStatus comp =
+            compareNode(currNodeID1, dom1, dataContainer1, currNodeID2, dom2,
+                        dataContainer2, shallowCompare);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -299,11 +400,13 @@ ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,
                         const DataContainer *dataContainer1,
                         node_id *currNodeID2, const Dom *dom2,
                         const DataContainer *dataContainer2) {
+    bool shallowCompare = dataContainer1 == dataContainer2;
     *currNodeID1 = dom1->firstNodeID;
     *currNodeID2 = dom2->firstNodeID;
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp = compareNode(currNodeID1, dom1, dataContainer1,
-                                            currNodeID2, dom2, dataContainer2);
+        ComparisonStatus comp =
+            compareNode(currNodeID1, dom1, dataContainer1, currNodeID2, dom2,
+                        dataContainer2, shallowCompare);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -327,17 +430,18 @@ void printFirstDifference(const node_id nodeID1, const Dom *dom1,
     Node *node2 = &dom2->nodes[nodeID2];
 
     if (compareTags(node1, dom1, dataContainer1, node2, dom2, dataContainer2,
-                    1) != COMPARISON_SUCCESS) {
+                    true, false) != COMPARISON_SUCCESS) {
         return;
     }
 
     if (!isText(node1->tagID)) {
         if (compareBoolProps(node1, dom1, dataContainer1, node2, dom2,
-                             dataContainer2, 1) != COMPARISON_SUCCESS) {
+                             dataContainer2, true,
+                             false) != COMPARISON_SUCCESS) {
             return;
         }
         if (compareProps(node1, dom1, dataContainer1, node2, dom2,
-                         dataContainer2, 1) != COMPARISON_SUCCESS) {
+                         dataContainer2, true, false) != COMPARISON_SUCCESS) {
             return;
         }
     }

@@ -1,6 +1,59 @@
 
 #include "flo/html-parser/dom/dom-utils.h"
 
+const char *getTag(const node_id nodeID, const Dom *dom,
+                   const DataContainer *dataContainer) {
+    Node node = dom->nodes[nodeID];
+
+    char *text = dataContainer->tags.container.elements[node.tagID];
+    return text;
+}
+
+const char *getBoolProp(const node_id nodeID, const Dom *dom,
+                        const DataContainer *dataContainer) {
+    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+        BooleanProperty boolPropNode = dom->boolProps[i];
+
+        if (boolPropNode.nodeID == nodeID) {
+            char *text =
+                dataContainer->propKeys.container.elements[boolPropNode.propID];
+            return text;
+        }
+    }
+
+    return NULL;
+}
+
+const char *getPropKey(const node_id nodeID, const Dom *dom,
+                       const DataContainer *dataContainer) {
+    for (size_t i = 0; i < dom->propsLen; i++) {
+        Property propNode = dom->props[i];
+
+        if (propNode.nodeID == nodeID) {
+            char *text =
+                dataContainer->propKeys.container.elements[propNode.valueID];
+            return text;
+        }
+    }
+
+    return NULL;
+}
+
+const char *getPropValue(const node_id nodeID, const Dom *dom,
+                         const DataContainer *dataContainer) {
+    for (size_t i = 0; i < dom->propsLen; i++) {
+        Property propNode = dom->props[i];
+
+        if (propNode.nodeID == nodeID) {
+            char *text =
+                dataContainer->propValues.container.elements[propNode.valueID];
+            return text;
+        }
+    }
+
+    return NULL;
+}
+
 const char *getText(const node_id nodeID, const Dom *dom,
                     const DataContainer *dataContainer) {
     for (size_t i = 0; i < dom->textLen; i++) {
