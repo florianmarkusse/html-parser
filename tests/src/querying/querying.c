@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "querying/querying.h"
 #include "test.h"
 
@@ -7,8 +9,8 @@ unsigned char testQueries(size_t *successes, size_t *failures) {
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
-    testQuerySelectorAll(&localSuccesses, &localSuccesses);
-    testQuerySelector(&localSuccesses, &localSuccesses);
+    testQuerySelectorAll(&localSuccesses, &localFailures);
+    testQuerySelector(&localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 

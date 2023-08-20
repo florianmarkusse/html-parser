@@ -26,6 +26,8 @@
  * elements with a relationship.
  */
 
+typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
+
 #define CHECK_FILTERS_LIMIT(filtersLen)                                        \
     do {                                                                       \
         if ((filtersLen) >= MAX_FILTERS_PER_ELEMENT) {                         \
@@ -45,39 +47,6 @@ bool isSpecifiedCombinator(char ch) {
 }
 
 bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
-
-QueryStatus querySelector(const char *cssQuery, const Dom *dom,
-                          const DataContainer *dataContainer, node_id *result) {
-    node_id *results = NULL;
-    size_t resultsLen = 0;
-
-    QueryStatus status =
-        querySelectorAll(cssQuery, dom, dataContainer, &results, &resultsLen);
-    if (status != QUERY_SUCCESS) {
-        free(results);
-        return status;
-    }
-
-    if (resultsLen == 0) {
-        free(results);
-        *result = 0;
-        return QUERY_SUCCESS;
-    }
-
-    node_id currentNode = dom->firstNodeID;
-    while (currentNode) {
-        for (size_t i = 0; i < resultsLen; i++) {
-            if (results[i] == currentNode) {
-                free(results);
-                *result = currentNode;
-                return QUERY_SUCCESS;
-            }
-        }
-        currentNode = traverseDom(currentNode, dom);
-    }
-    free(results);
-    return status;
-}
 
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                              const DataContainer *dataContainer,
@@ -103,6 +72,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
     size_t filtersLen = 0;
 
     Combinator currentCombinator = NO_COMBINATOR;
+    Selector currentSelector = NORMAL;
 
     size_t tokenStart = 0;
     size_t tokenLength = 0;
@@ -119,10 +89,10 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
     while (ch != '\0') {
         ch = cssQuery[currentPosition];
 
-        if (isElementStartChar(ch)) {
+        if (isPropStartChar(ch)) {
             tokenStart = currentPosition;
             while (!isCombinator(ch) && !isSpecialSpace(ch) && ch != '[' &&
-                   ch != '\0') {
+                   ch != '.' && ch != '#' && ch != '\0') {
                 ch = cssQuery[++currentPosition];
             }
             tokenLength =
@@ -144,8 +114,28 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
             filtersLen++;
         }
 
-        while (ch == '[') {
-            while (!isElementStartChar(ch) && ch != '\0') {
+        while (ch == '[' || ch == '.' || ch == '#') {
+            switch (ch) {
+            case '.': {
+                currentSelector = CLASS;
+                break;
+            }
+            case '#': {
+                currentSelector = ID;
+                break;
+            }
+            case '[': {
+                currentSelector = NORMAL;
+                break;
+            }
+            default: {
+                PRINT_ERROR("Unable to select selector!\n");
+                currentSelector = NORMAL;
+                break;
+            }
+            }
+
+            while (!isPropStartChar(ch) && ch != '\0') {
                 ch = cssQuery[++currentPosition];
             }
 
@@ -157,11 +147,40 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
             tokenLength =
                 currentPosition - tokenStart + 1; // Add 1 for the holy spirit.
 
-            while (ch != '=' && ch != ']' && ch != '\0') {
+            while (ch != '=' && ch != ']' && ch != '.' && ch != '#' &&
+                   ch != '\0') {
                 ch = cssQuery[++currentPosition];
             }
 
-            if (ch == ']') {
+            // If ch == '.' or ch == '#', it means we had to have had '.' or '#'
+            // at the beginnging. This is a bit of a funky inference to make,
+            // but it is correct (I think).
+            if (currentSelector == CLASS || currentSelector == ID) {
+                const char *keyBuffer =
+                    currentSelector == CLASS ? "class" : "id";
+                tokenID = 0;
+                if ((result = getKeyPropID(keyBuffer, &tokenID,
+                                           dataContainer)) != QUERY_SUCCESS) {
+                    return result;
+                }
+
+                CHECK_FILTERS_LIMIT(filtersLen);
+                filters[filtersLen].attributeSelector = PROPERTY;
+                filters[filtersLen].data.keyValuePair.keyID = tokenID;
+
+                char valueBuffer[tokenLength];
+                strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
+                valueBuffer[tokenLength - 1] = '\0';
+
+                tokenID = 0;
+                if ((result = getValuePropID(valueBuffer, &tokenID,
+                                             dataContainer)) != QUERY_SUCCESS) {
+                    return result;
+                }
+
+                filters[filtersLen].data.keyValuePair.valueID = tokenID;
+                filtersLen++;
+            } else if (ch == ']') {
                 char boolBuffer[tokenLength];
                 strncpy(boolBuffer, &cssQuery[tokenStart], tokenLength);
                 boolBuffer[tokenLength - 1] = '\0';
@@ -186,7 +205,8 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                                            dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }
-                // Adding to filter already because I want to reuse tokenID :)
+                // Adding to filter already because I want to reuse tokenID
+                // :)
                 CHECK_FILTERS_LIMIT(filtersLen);
                 filters[filtersLen].attributeSelector = PROPERTY;
                 filters[filtersLen].data.keyValuePair.keyID = tokenID;
@@ -316,4 +336,63 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
     }
 
     return result;
+}
+
+QueryStatus getElementsByClassName(const char *class, const Dom *dom,
+                                   const DataContainer *dataContainer,
+                                   node_id **results, size_t *resultsLen) {
+    size_t cssQueryLen = strlen(class) + 2;
+    char cssQuery[cssQueryLen];
+    snprintf(cssQuery, cssQueryLen, ".%s", class);
+
+    return querySelectorAll(cssQuery, dom, dataContainer, results, resultsLen);
+}
+
+QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
+                                 const DataContainer *dataContainer,
+                                 node_id **results, size_t *resultsLen) {
+    return querySelectorAll(tag, dom, dataContainer, results, resultsLen);
+}
+
+QueryStatus querySelector(const char *cssQuery, const Dom *dom,
+                          const DataContainer *dataContainer, node_id *result) {
+    node_id *results = NULL;
+    size_t resultsLen = 0;
+
+    QueryStatus status =
+        querySelectorAll(cssQuery, dom, dataContainer, &results, &resultsLen);
+    if (status != QUERY_SUCCESS) {
+        free(results);
+        return status;
+    }
+
+    if (resultsLen == 0) {
+        free(results);
+        *result = 0;
+        return QUERY_SUCCESS;
+    }
+
+    node_id currentNode = dom->firstNodeID;
+    while (currentNode) {
+        for (size_t i = 0; i < resultsLen; i++) {
+            if (results[i] == currentNode) {
+                free(results);
+                *result = currentNode;
+                return QUERY_SUCCESS;
+            }
+        }
+        currentNode = traverseDom(currentNode, dom);
+    }
+    free(results);
+    return status;
+}
+
+QueryStatus getElementByID(const char *id, const Dom *dom,
+                           const DataContainer *dataContainer,
+                           node_id *result) {
+    size_t cssQueryLen = strlen(id) + 2;
+    char cssQuery[cssQueryLen];
+    snprintf(cssQuery, cssQueryLen, "#%s", id);
+
+    return querySelector(cssQuery, dom, dataContainer, result);
 }

@@ -44,7 +44,7 @@ typedef struct {
     const char *testName;
 } __attribute__((aligned(32))) TestFile;
 
-const TestFile testFiles[] = {
+static const TestFile testFiles[] = {
     {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file"},
     {TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_PROPERTIES,
      "different key-value property"},
@@ -76,7 +76,7 @@ const TestFile testFiles[] = {
     {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
 };
 
-const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 TestStatus compareFiles(const char *fileLocation1,
                         DataContainer *dataContainer1,

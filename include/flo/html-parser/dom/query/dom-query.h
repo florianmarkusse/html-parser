@@ -33,7 +33,15 @@ typedef struct {
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                              const DataContainer *dataContainer,
                              node_id **results, size_t *resultsLen);
+QueryStatus getElementsByClassName(const char *class, const Dom *dom,
+                                   const DataContainer *dataContainer,
+                                   node_id **results, size_t *resultsLen);
+QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
+                                 const DataContainer *dataContainer,
+                                 node_id **results, size_t *resultsLen);
 QueryStatus querySelector(const char *cssQuery, const Dom *dom,
                           const DataContainer *dataContainer, node_id *result);
+QueryStatus getElementByID(const char *id, const Dom *dom,
+                           const DataContainer *dataContainer, node_id *result);
 
 #endif
