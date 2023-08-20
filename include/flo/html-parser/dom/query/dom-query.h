@@ -33,5 +33,7 @@ typedef struct {
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                              const DataContainer *dataContainer,
                              node_id **results, size_t *resultsLen);
+QueryStatus querySelector(const char *cssQuery, const Dom *dom,
+                          const DataContainer *dataContainer, node_id *result);
 
 #endif

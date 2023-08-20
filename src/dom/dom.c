@@ -132,15 +132,6 @@ DomStatus addParentChild(const node_id parentID, const node_id childID,
     return DOM_SUCCESS;
 }
 
-node_id getFirstChild(const node_id parentID, const Dom *dom) {
-    for (node_id i = 0; i < dom->parentFirstChildLen; i++) {
-        if (dom->parentFirstChilds[i].parentID == parentID) {
-            return dom->parentFirstChilds[i].childID;
-        }
-    }
-    return 0;
-}
-
 DomStatus addNextNode(const node_id currentNodeID, const node_id nextNodeID,
                       Dom *dom) {
     if ((dom->nextNodes =
@@ -154,15 +145,6 @@ DomStatus addNextNode(const node_id currentNodeID, const node_id nextNodeID,
     newNextNode->nextNodeID = nextNodeID;
     dom->nextNodeLen++;
     return DOM_SUCCESS;
-}
-
-node_id getNextNode(const node_id currentNodeID, const Dom *dom) {
-    for (node_id i = 0; i < dom->nextNodeLen; i++) {
-        if (dom->nextNodes[i].currentNodeID == currentNodeID) {
-            return dom->nextNodes[i].nextNodeID;
-        }
-    }
-    return 0;
 }
 
 DomStatus addBooleanProperty(const node_id nodeID, const element_id propID,

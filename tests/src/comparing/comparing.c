@@ -136,7 +136,7 @@ static inline void diffContainerParseAndCompare(
 }
 
 unsigned char testComparisons(size_t *successes, size_t *failures) {
-    printTestTopicStart("domument comparisons");
+    printTestTopicStart("DOM comparisons");
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 

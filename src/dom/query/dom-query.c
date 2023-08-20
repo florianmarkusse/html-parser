@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/dom-query-util.h"
 #include "flo/html-parser/dom/query/dom-query.h"
 #include "flo/html-parser/type/element/element-status.h"
@@ -44,13 +46,47 @@ bool isSpecifiedCombinator(char ch) {
 
 bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
 
+QueryStatus querySelector(const char *cssQuery, const Dom *dom,
+                          const DataContainer *dataContainer, node_id *result) {
+    node_id *results = NULL;
+    size_t resultsLen = 0;
+
+    QueryStatus status =
+        querySelectorAll(cssQuery, dom, dataContainer, &results, &resultsLen);
+    if (status != QUERY_SUCCESS) {
+        free(results);
+        return status;
+    }
+
+    if (resultsLen == 0) {
+        free(results);
+        *result = 0;
+        return QUERY_SUCCESS;
+    }
+
+    node_id currentNode = dom->firstNodeID;
+    while (currentNode) {
+        for (size_t i = 0; i < resultsLen; i++) {
+            if (results[i] == currentNode) {
+                free(results);
+                *result = currentNode;
+                return QUERY_SUCCESS;
+            }
+        }
+        currentNode = traverseDom(currentNode, dom);
+    }
+    free(results);
+    return status;
+}
+
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                              const DataContainer *dataContainer,
                              node_id **results, size_t *resultsLen) {
     if (*results == NULL && *resultsLen == 0) {
         *results = malloc(sizeof(node_id) * INITIAL_QUERY_CAP);
         if (*results == NULL) {
-            PRINT_ERROR("Failed to allocate memory at the outset\n");
+            PRINT_ERROR(
+                "Failed to allocate memory initializating querySelectorAll\n");
             return QUERY_MEMORY_ERROR;
         }
     } else {

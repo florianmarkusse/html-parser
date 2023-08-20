@@ -74,7 +74,7 @@ QueryStatus getTagID(const char *tag, element_id *tagID,
         return QUERY_SUCCESS;
     }
 
-    return QUERY_NOT_FOUND;
+    return QUERY_NOT_SEEN_BEFORE;
 }
 
 QueryStatus getBoolPropID(const char *tag, element_id *propID,
@@ -85,7 +85,7 @@ QueryStatus getBoolPropID(const char *tag, element_id *propID,
         return QUERY_SUCCESS;
     }
 
-    return QUERY_NOT_FOUND;
+    return QUERY_NOT_SEEN_BEFORE;
 }
 
 QueryStatus getKeyPropID(const char *tag, element_id *keyID,
@@ -96,7 +96,7 @@ QueryStatus getKeyPropID(const char *tag, element_id *keyID,
         return QUERY_SUCCESS;
     }
 
-    return QUERY_NOT_FOUND;
+    return QUERY_NOT_SEEN_BEFORE;
 }
 
 QueryStatus getValuePropID(const char *tag, element_id *valueID,
@@ -107,7 +107,7 @@ QueryStatus getValuePropID(const char *tag, element_id *valueID,
         return QUERY_SUCCESS;
     }
 
-    return QUERY_NOT_FOUND;
+    return QUERY_NOT_SEEN_BEFORE;
 }
 
 QueryStatus

@@ -3,9 +3,12 @@ project(html-parser-tests)
 
 list(APPEND TEST_SOURCE_FILES
     "src/main.c"
+    "src/test.c"
     "src/parsing/parsing.c"
     "src/comparing/comparing.c"
     "src/querying/querying.c"
+    "src/querying/querySelectorAll.c"
+    "src/querying/querySelector.c"
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

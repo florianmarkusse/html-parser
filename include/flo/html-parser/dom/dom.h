@@ -82,8 +82,6 @@ DomStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
                       Dom *dom);
 DomStatus addTextNode(node_id nodeID, element_id textID, Dom *dom);
 DomStatus replaceTextNode(node_id nodeID, element_id newTextID, Dom *dom);
-node_id getFirstChild(node_id parentID, const Dom *dom);
-node_id getNextNode(node_id currentNodeID, const Dom *dom);
 
 void destroyDom(const Dom *dom);
 

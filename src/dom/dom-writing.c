@@ -116,14 +116,14 @@ FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
     return FILE_SUCCESS;
 }
 
-void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
-    printf("printing domument status...\n\n");
+void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
+    printf("printing DOM status...\n\n");
     printf(" in here\n");
     printf("single lenn %u\n", dataContainer->tags.singleLen);
     printf("single offset %u\n", SINGLES_OFFSET);
     printf("paired len %u\n", dataContainer->tags.pairedLen);
 
-    printf("nodes inside domument...\n");
+    printf("nodes inside DOM...\n");
     printf("total number of nodes: %zu\n", dom->nodeLen);
     for (size_t i = 0; i < dom->nodeLen; i++) {
         Node node = dom->nodes[i];
@@ -151,7 +151,7 @@ void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
     }
     printf("\n");
 
-    printf("text nodes inside dom...\n");
+    printf("text nodes inside DOM...\n");
     printf("total number of text nodes: %zu\n", dom->textLen);
     for (size_t i = 0; i < dom->textLen; i++) {
         TextNode textNode = dom->text[i];
@@ -166,7 +166,7 @@ void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
     }
     printf("\n");
 
-    printf("boolean property nodes inside dom...\n");
+    printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
         BooleanProperty boolProps = dom->boolProps[i];
@@ -183,7 +183,7 @@ void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
     }
     printf("\n");
 
-    printf("key-value property nodes inside dom...\n");
+    printf("key-value property nodes inside DOM...\n");
     printf("total number of key-value properties: %zu\n", dom->propsLen);
     for (size_t i = 0; i < dom->propsLen; i++) {
         Property property = dom->props[i];
@@ -204,7 +204,7 @@ void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
     }
     printf("\n");
 
-    printf("parent-first-child inside dom...\n");
+    printf("parent-first-child inside DOM...\n");
     printf("total number of parent-first-child: %zu\n",
            dom->parentFirstChildLen);
     for (size_t i = 0; i < dom->parentFirstChildLen; i++) {
@@ -214,7 +214,7 @@ void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
     }
     printf("\n");
 
-    printf("parent-child inside dom...\n");
+    printf("parent-child inside DOM...\n");
     printf("total number of parent-child: %zu\n", dom->parentChildLen);
     for (size_t i = 0; i < dom->parentChildLen; i++) {
         printf("parent: %-4hu child: %-4hu\n", dom->parentChilds[i].parentID,
@@ -222,7 +222,7 @@ void printdomumentStatus(const Dom *dom, const DataContainer *dataContainer) {
     }
     printf("\n");
 
-    printf("next nodes inside dom...\n");
+    printf("next nodes inside DOM...\n");
     printf("total number of next nodes: %zu\n", dom->nextNodeLen);
     for (size_t i = 0; i < dom->nextNodeLen; i++) {
         printf("current node: %-4hu next node: %-4hu\n",
