@@ -6,22 +6,27 @@
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/utils/print/error.h"
 
+#define LEN_START_VALUE 1
+
 ElementStatus createDataContainer(DataContainer *dataContainer) {
-    dataContainer->tags.pairedLen = 0;
-    dataContainer->tags.singleLen = 0;
+    // The Len here start at LEN_START_VALUE, because we hash the numbers and
+    // use 0 as an indication that there is no value at the location yet.
+
+    dataContainer->tags.pairedLen = LEN_START_VALUE;
+    dataContainer->tags.singleLen = LEN_START_VALUE;
     dataContainer->tags.container.pageLen = 0;
     dataContainer->tags.container.pageSize = TAGS_PAGE_SIZE;
 
-    dataContainer->propKeys.pairedLen = 0;
-    dataContainer->propKeys.singleLen = 0;
+    dataContainer->propKeys.pairedLen = LEN_START_VALUE;
+    dataContainer->propKeys.singleLen = LEN_START_VALUE;
     dataContainer->propKeys.container.pageLen = 0;
     dataContainer->propKeys.container.pageSize = PROP_KEYS_PAGE_SIZE;
 
-    dataContainer->propValues.len = 0;
+    dataContainer->propValues.len = LEN_START_VALUE;
     dataContainer->propValues.container.pageLen = 0;
     dataContainer->propValues.container.pageSize = PROP_VALUES_PAGE_SIZE;
 
-    dataContainer->text.len = 0;
+    dataContainer->text.len = LEN_START_VALUE;
     dataContainer->text.container.pageLen = 0;
     dataContainer->text.container.pageSize = TEXT_PAGE_SIZE;
 
@@ -102,8 +107,8 @@ ElementStatus findElement(const ElementsContainer *container,
                           const element_id *currentElementLen,
                           const char *elementName, element_id offsetMask,
                           element_id *elementID) {
-    for (element_id i = offsetMask; i < (offsetMask | *currentElementLen);
-         ++i) {
+    for (element_id i = offsetMask + LEN_START_VALUE;
+         i < (offsetMask | *currentElementLen); ++i) {
         if (strcmp(container->elements[i], elementName) == 0) {
             *elementID = i;
             return ELEMENT_SUCCESS;

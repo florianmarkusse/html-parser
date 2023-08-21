@@ -25,6 +25,8 @@ endif()
 add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/utils/file/read.c"
     "src/utils/file/path.c"
+    "src/hash/element-id-hash.c"
+    "src/hash/string-hash.c"
     "src/type/element/elements.c"
     "src/type/data/data-functions.c"
     "src/dom/dom.c"

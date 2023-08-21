@@ -4,6 +4,7 @@
 
 #include "flo/html-parser/dom/comparison/dom-comparison.h"
 #include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/hash/element-id-hash.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/print/error.h"
 
@@ -92,6 +93,9 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     }
 
     // TODO(florian): hash...
+    // Have 2 sets {a, b, c} and {d, e, f}
+    // If shallowCompare -> number hash
+    // Else -> string hash
     for (size_t i = 0; i < node1PropsLen; i++) {
         if (shallowCompare) {
             bool foundSamePropID = false;
@@ -138,23 +142,27 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-void printBoolProps(const element_id node1Tag, const element_id node1PropsLen,
-                    const element_id node1Props[MAX_PROPERTIES],
+void printBoolProps(const element_id node1Tag, const ElementHashSet *hash1,
                     const DataContainer *dataContainer1,
-                    const element_id node2Tag, const element_id node2PropsLen,
-                    const element_id node2Props[MAX_PROPERTIES],
+                    const element_id node2Tag, const ElementHashSet *hash2,
                     const DataContainer *dataContainer2) {
     const char *tag1 = dataContainer1->tags.container.elements[node1Tag];
     PRINT_ERROR("Printing bool props of node 1 with tag %s:\n", tag1);
-    for (size_t i = 0; i < node1PropsLen; i++) {
-        char *prop = dataContainer1->propKeys.container.elements[node1Props[i]];
+
+    ElementHashSetIterator iterator;
+    elementHashSetIteratorInit(&iterator, hash1);
+
+    while (elementHashSetIteratorHasNext(&iterator)) {
+        element_id id = elementHashSetIteratorNext(&iterator);
+        char *prop = dataContainer1->propKeys.container.elements[id];
         PRINT_ERROR("%s\n", prop);
     }
 
-    const char *tag2 = dataContainer2->tags.container.elements[node2Tag];
-    PRINT_ERROR("Printing bool props of node 2 with tag %s:\n", tag2);
-    for (size_t i = 0; i < node2PropsLen; i++) {
-        char *prop = dataContainer2->propKeys.container.elements[node2Props[i]];
+    elementHashSetIteratorInit(&iterator, hash2);
+
+    while (elementHashSetIteratorHasNext(&iterator)) {
+        element_id id = elementHashSetIteratorNext(&iterator);
+        char *prop = dataContainer1->propKeys.container.elements[id];
         PRINT_ERROR("%s\n", prop);
     }
 }
@@ -171,81 +179,98 @@ bool boolPropStringEquals(const element_id boolPropID1,
     return strcmp(string1, string2) == 0;
 }
 
+// TODO(florian): actually replace with set solution for shallow and deep
+// compare
 ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
                                   const DataContainer *dataContainer1,
                                   const Node *node2, const Dom *dom2,
                                   const DataContainer *dataContainer2,
                                   const bool printDifferences,
                                   const bool shallowCompare) {
+    HashStatus hashStatus = HASH_SUCCESS;
+    ElementHashSet hash1;
+    elementHashSetInit(&hash1, MAX_PROPERTIES * 2);
     element_id node1Props[MAX_PROPERTIES];
     element_id node1PropsLen = 0;
     for (size_t i = 0; i < dom1->boolPropsLen; i++) {
         if (dom1->boolProps[i].nodeID == node1->nodeID) {
-            node1Props[node1PropsLen] = dom1->boolProps[i].propID;
+            element_id propID = dom1->boolProps[i].propID;
+            node1Props[node1PropsLen] = propID;
             node1PropsLen++;
+
+            if ((hashStatus = elementHashSetInsert(&hash1, propID)) !=
+                HASH_SUCCESS) {
+                ERROR_WITH_CODE_FORMAT(hashStatus,
+                                       "Failed to insert %u into hash", propID);
+            }
         }
     }
 
+    ElementHashSet hash2;
+    elementHashSetInit(&hash2, MAX_PROPERTIES * 2);
     element_id node2Props[MAX_PROPERTIES];
     element_id node2PropsLen = 0;
     for (size_t i = 0; i < dom2->boolPropsLen; i++) {
         if (dom2->boolProps[i].nodeID == node2->nodeID) {
-            node2Props[node2PropsLen] = dom2->boolProps[i].propID;
+            element_id propID = dom1->boolProps[i].propID;
+            node2Props[node2PropsLen] = propID;
             node2PropsLen++;
+            if ((hashStatus = elementHashSetInsert(&hash2, propID)) !=
+                HASH_SUCCESS) {
+                ERROR_WITH_CODE_FORMAT(hashStatus,
+                                       "Failed to insert %u into hash", propID);
+            }
         }
     }
 
-    if (node1PropsLen != node2PropsLen) {
+    if (hash1.entries != hash2.entries) {
         if (printDifferences) {
             PRINT_ERROR(
                 "Nodes have different number of boolean properties.\nnode "
                 "1: %u\nnode 2: %u\n",
                 node1PropsLen, node2PropsLen);
 
-            printBoolProps(node1->tagID, node1PropsLen, node1Props,
-                           dataContainer1, node2->tagID, node2PropsLen,
-                           node2Props, dataContainer2);
+            printBoolProps(node1->tagID, &hash1, dataContainer1, node2->tagID,
+                           &hash2, dataContainer2);
         }
 
         return COMPARISON_MISSING_PROPERTIES;
     }
 
+    if (shallowCompare) {
+        ElementHashSetIterator iterator;
+        elementHashSetIteratorInit(&iterator, &hash1);
+
+        while (elementHashSetIteratorHasNext(&iterator)) {
+            element_id id = elementHashSetIteratorNext(&iterator);
+            if (!elementHashSetContains(&hash2, id)) {
+                if (printDifferences) {
+                    PRINT_ERROR("Nodes have different boolean properties.\n");
+                    printBoolProps(node1->tagID, &hash1, dataContainer1,
+                                   node2->tagID, &hash2, dataContainer2);
+                }
+                return COMPARISON_MISSING_PROPERTIES;
+            }
+        }
+        return COMPARISON_SUCCESS;
+    }
+
     // TODO(florian): hash...
     for (size_t i = 0; i < node1PropsLen; i++) {
-        if (shallowCompare) {
-            bool foundSamePropID = false;
-            for (size_t j = 0; j < node2PropsLen; j++) {
-                if (node1Props[i] == node2Props[j]) {
-                    foundSamePropID = true;
-                    break;
-                }
+        bool foundSameProp = false;
+        for (size_t j = 0; j < node2PropsLen; j++) {
+            if (boolPropStringEquals(node1Props[i], dataContainer1,
+                                     node2Props[j], dataContainer2)) {
+                foundSameProp = true;
             }
-            if (!foundSamePropID) {
-                if (printDifferences) {
-                    PRINT_ERROR("Nodes have different boolean properties.\n");
-                    printBoolProps(node1->tagID, node1PropsLen, node1Props,
-                                   dataContainer1, node2->tagID, node2PropsLen,
-                                   node2Props, dataContainer2);
-                }
-                return COMPARISON_DIFFERENT_PROPERTIES;
+        }
+        if (!foundSameProp) {
+            if (printDifferences) {
+                PRINT_ERROR("Nodes have different boolean properties.\n");
+                printBoolProps(node1->tagID, &hash1, dataContainer1,
+                               node2->tagID, &hash2, dataContainer2);
             }
-        } else {
-            bool foundSameProp = false;
-            for (size_t j = 0; j < node2PropsLen; j++) {
-                if (boolPropStringEquals(node1Props[i], dataContainer1,
-                                         node2Props[j], dataContainer2)) {
-                    foundSameProp = true;
-                }
-            }
-            if (!foundSameProp) {
-                if (printDifferences) {
-                    PRINT_ERROR("Nodes have different boolean properties.\n");
-                    printBoolProps(node1->tagID, node1PropsLen, node1Props,
-                                   dataContainer1, node2->tagID, node2PropsLen,
-                                   node2Props, dataContainer2);
-                }
-                return COMPARISON_DIFFERENT_PROPERTIES;
-            }
+            return COMPARISON_DIFFERENT_PROPERTIES;
         }
     }
 

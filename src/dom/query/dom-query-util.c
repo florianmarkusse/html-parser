@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/query/dom-query-util.h"
 #include "flo/html-parser/type/node/next-node.h"
 #include "flo/html-parser/utils/memory/memory.h"
