@@ -3,6 +3,7 @@
 #include <flo/html-parser/dom/dom.h>
 #include <flo/html-parser/dom/query/dom-query.h>
 #include <flo/html-parser/type/element/elements.h>
+#include <flo/html-parser/utils/print/error.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,7 +30,12 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                             const QueryStatus expectedStatus,
                             const node_id expectedNode) {
     DataContainer dataContainer;
-    createDataContainer(&dataContainer);
+    ElementStatus initStatus = createDataContainer(&dataContainer);
+    if (initStatus != ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(elementStatusToString(initStatus),
+                               "Failed to initialize data container");
+        return TEST_ERROR_INITIALIZATION;
+    }
 
     Dom dom;
     if (createFromFile(fileLocation, &dom, &dataContainer) != DOM_SUCCESS) {

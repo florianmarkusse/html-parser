@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "flo/html-parser/type/data/data-functions.h"
+#include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/utils/print/error.h"
 
@@ -12,35 +13,61 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
     // The Len here start at LEN_START_VALUE, because we hash the numbers and
     // use 0 as an indication that there is no value at the location yet.
 
+    ElementStatus result = ELEMENT_SUCCESS;
+    ElementStatus currentStatus = ELEMENT_SUCCESS;
+
+    if (initStringHashSet(&dataContainer->tagNames.set, TAGS_PAGE_SIZE) !=
+        HASH_SUCCESS) {
+        PRINT_ERROR("Failure initing hash set!\n");
+        return ELEMENT_MEMORY;
+    }
+    if ((currentStatus =
+             initElementsContainer(&dataContainer->tagNames.container,
+                                   TAGS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+        result = currentStatus;
+    }
+
+    if ((currentStatus = initElementsContainer(&dataContainer->tags.container,
+                                               TAGS_PAGE_SIZE)) !=
+        ELEMENT_SUCCESS) {
+        result = currentStatus;
+    }
     dataContainer->tags.pairedLen = LEN_START_VALUE;
     dataContainer->tags.singleLen = LEN_START_VALUE;
-    dataContainer->tags.container.pageLen = 0;
-    dataContainer->tags.container.pageSize = TAGS_PAGE_SIZE;
 
+    if ((currentStatus =
+             initElementsContainer(&dataContainer->propKeys.container,
+                                   PROP_KEYS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+        result = currentStatus;
+    }
     dataContainer->propKeys.pairedLen = LEN_START_VALUE;
     dataContainer->propKeys.singleLen = LEN_START_VALUE;
-    dataContainer->propKeys.container.pageLen = 0;
-    dataContainer->propKeys.container.pageSize = PROP_KEYS_PAGE_SIZE;
 
-    dataContainer->propValues.len = LEN_START_VALUE;
-    dataContainer->propValues.container.pageLen = 0;
-    dataContainer->propValues.container.pageSize = PROP_VALUES_PAGE_SIZE;
-
-    dataContainer->text.len = LEN_START_VALUE;
-    dataContainer->text.container.pageLen = 0;
-    dataContainer->text.container.pageSize = TEXT_PAGE_SIZE;
-
-    return ELEMENT_SUCCESS;
-}
-
-void destroyElementsContainer(ElementsContainer *container) {
-    for (int i = 0; i < container->pageLen; i++) {
-        free(container->pages[i].start);
+    if ((currentStatus =
+             initElementsContainer(&dataContainer->propValues.container,
+                                   PROP_VALUES_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+        result = currentStatus;
     }
-    container->pageLen = 0;
+    dataContainer->propValues.len = LEN_START_VALUE;
+
+    if ((currentStatus = initElementsContainer(&dataContainer->text.container,
+                                               TEXT_PAGE_SIZE)) !=
+        ELEMENT_SUCCESS) {
+        result = currentStatus;
+    }
+    dataContainer->text.len = LEN_START_VALUE;
+
+    if (result != ELEMENT_SUCCESS) {
+        destroyDataContainer(dataContainer);
+    }
+
+    return result;
 }
 
 void destroyDataContainer(DataContainer *dataContainer) {
+    destroyStringHashSet(&dataContainer->tagNames.set);
+    destroyElementsContainer(&dataContainer->tagNames.container);
+
     destroyElementsContainer(&dataContainer->tags.container);
     dataContainer->tags.pairedLen = 0;
     dataContainer->tags.singleLen = 0;
@@ -168,69 +195,51 @@ unsigned char isText(const element_id index) {
     return (index >> TEXT_MASK) != 0;
 }
 
-void printElements(const size_t currentLen,
-                   char *const elements[TOTAL_ELEMENTS],
-                   const size_t offsetMask) {
-    printf("capacity: %zu/%u\n", currentLen, POSSIBLE_ELEMENTS);
-    for (size_t i = offsetMask; i < (offsetMask | currentLen); i++) {
-        printf("element ID: %-7zuelement: %-20s\n", i, elements[i]);
-    }
-    printf("\n\n");
-}
-
-void printElementPages(const ElementsContainer *container) {
-    printf("element pages...\n");
-    printf("%-15s: %hhu\n", "pages length", container->pageLen);
-    for (size_t i = 0; i < container->pageLen; i++) {
-        printf("%-15s: %lu\n", "space left", container->pages[i].spaceLeft);
-
-        int printedChars = 0;
-        char *copy = container->pages[i].start;
-        while (printedChars < container->pageSize) {
-            if (*copy == '\0') {
-                printf("~");
-            } else {
-                printf("%c", *copy);
-            }
-            copy++;
-            printedChars++;
-        }
-        printf("\n");
+ElementStatus createNewElement(NewElements *newElements, const char *element) {
+    // insert element into the has table.
+    HashStatus hashStatus = HASH_SUCCESS;
+    if ((hashStatus =
+             insertStringHashSet(&newElements->set, element) != HASH_SUCCESS)) {
+        ERROR_WITH_CODE_ONLY(hashStatusToString(hashStatus),
+                             "Could not create new element");
+        return ELEMENT_ARRAY_FULL;
     }
 
-    printf("\n\n");
+    DataPageStatus insertStatus = newInsertIntoPage(
+        element, strlen(element) + 1, TOTAL_PAGES, newElements);
+    if (insertStatus != DATA_PAGE_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
+                               "Could not find or create element \"%s\"",
+                               element);
+        return ELEMENT_NOT_FOUND_OR_CREATED;
+    }
+
+    // TODO(florian): Need to retrieve the hash STILL!!!!!
+    //
+    //
+    //    *elementID = (offsetMask | (*currentElementsLen));
+    //    (*currentElementsLen)++;
+    //
+    //    return ELEMENT_SUCCESS;
+    //
+    //
+
+    return ELEMENT_SUCCESS;
 }
 
-void printElementStatus(const Elements *global) {
-    printf("elements...\n");
-    printElements(global->len, global->container.elements, 0);
+ElementStatus newElementToIndex(NewElements *newElements,
+                                const char *elementStart, size_t elementLength,
+                                const bool isPaired,
+                                const bool searchElements) {
+    char buffer[newElements->container.pageSize];
+    const ElementStatus sizeCheck = elementSizeCheck(
+        buffer, newElements->container.pageSize, elementStart, elementLength);
+    if (sizeCheck != ELEMENT_SUCCESS) {
+        return sizeCheck;
+    }
 
-    printElementPages(&global->container);
-}
+    memcpy(buffer, elementStart, elementLength);
+    buffer[elementLength] = '\0';
 
-void printCombinedElementStatus(const CombinedElements *global) {
-    printf("single elements...\n");
-    printElements(global->singleLen, global->container.elements,
-                  SINGLES_OFFSET);
-
-    printf("paired elements...\n");
-    printElements(global->pairedLen, global->container.elements, 0);
-
-    printElementPages(&global->container);
-}
-
-void printTagStatus(DataContainer *dataContainer) {
-    printf("printing tag status...\n\n");
-    printCombinedElementStatus(&dataContainer->tags);
-}
-
-void printAttributeStatus(DataContainer *dataContainer) {
-    printf("printing property status...\n\n");
-    printCombinedElementStatus(&dataContainer->propKeys);
-    printElementStatus(&dataContainer->propValues);
-}
-
-void printTextStatus(DataContainer *dataContainer) {
-    printf("printing text status...\n\n");
-    printElementStatus(&dataContainer->text);
+    return createNewElement(newElements, buffer);
 }

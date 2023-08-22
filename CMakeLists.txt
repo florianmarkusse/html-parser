@@ -28,6 +28,8 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/hash/element-id-hash.c"
     "src/hash/string-hash.c"
     "src/type/element/elements.c"
+    "src/type/element/elements-container.c"
+    "src/type/element/elements-print.c"
     "src/type/data/data-functions.c"
     "src/dom/dom.c"
     "src/dom/dom-writing.c"

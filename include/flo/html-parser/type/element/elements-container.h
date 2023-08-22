@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "element-status.h"
 #include "flo/html-parser/type/data/data-page.h"
 
 typedef uint16_t element_id;
@@ -32,11 +33,19 @@ typedef uint16_t element_id;
 #define PROP_VALUES_PAGE_SIZE (1U << 14U)
 #define TEXT_PAGE_SIZE (1U << 17U)
 
+// TODO(florian): imeplement realloc with normal growth, for elements array at
+// least
+// TODO(florian): maybe also do smth similar with the pages array instead of
+// having fixed pagesize?
 typedef struct {
-    char *elements[TOTAL_ELEMENTS];
-    DataPage pages[TOTAL_PAGES];
+    char **elements;
+    DataPage *pages;
     page_id pageLen;
     size_t pageSize;
-} __attribute__((aligned(128))) ElementsContainer;
+} __attribute__((aligned(32))) ElementsContainer;
+
+ElementStatus initElementsContainer(ElementsContainer *elementsContainer,
+                                    size_t pageSize);
+void destroyElementsContainer(ElementsContainer *elementsContainer);
 
 #endif

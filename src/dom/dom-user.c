@@ -3,6 +3,7 @@
 
 #include "flo/html-parser/dom/dom-user.h"
 #include "flo/html-parser/utils/file/read.h"
+#include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/print/error.h"
 
 DomStatus createFromFile(const char *fileLocation, Dom *dom,
@@ -17,13 +18,13 @@ DomStatus createFromFile(const char *fileLocation, Dom *dom,
 
     DomStatus documentStatus = createDom(buffer, dom, dataContainer);
     if (documentStatus != DOM_SUCCESS) {
-        free(buffer);
+        FREE_TO_NULL(buffer);
         ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),
                                "Failed to create document from file \"%s\"",
                                fileLocation);
         return documentStatus;
     }
-    free(buffer);
+    FREE_TO_NULL(buffer);
 
     return DOM_SUCCESS;
 }

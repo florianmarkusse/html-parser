@@ -204,12 +204,12 @@ DomStatus replaceTextNode(const node_id nodeID, element_id newTextID,
     return DOM_SUCCESS;
 }
 
-void destroyDom(const Dom *dom) {
-    free((void *)dom->nodes);
-    free((void *)dom->parentFirstChilds);
-    free((void *)dom->parentChilds);
-    free((void *)dom->nextNodes);
-    free((void *)dom->boolProps);
-    free((void *)dom->props);
-    free((void *)dom->text);
+void destroyDom(Dom *dom) {
+    FREE_TO_NULL(dom->nodes);
+    FREE_TO_NULL(dom->parentFirstChilds);
+    FREE_TO_NULL(dom->parentChilds);
+    FREE_TO_NULL(dom->nextNodes);
+    FREE_TO_NULL(dom->boolProps);
+    FREE_TO_NULL(dom->props);
+    FREE_TO_NULL(dom->text);
 }

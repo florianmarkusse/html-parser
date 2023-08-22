@@ -212,11 +212,17 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
         *context = STYLE_CONTEXT;
     }
 
+    if (newElementToIndex(&dataContainer->tagNames,
+                          &htmlString[elementStartIndex], elementLen,
+                          !(*isSingle), 1) != ELEMENT_SUCCESS) {
+        PRINT_ERROR("Failed to insert into new tag names!\n");
+        return DOM_NO_ELEMENT;
+    }
+
     if (elementToIndex(&dataContainer->tags.container, elementTypeLen,
                        &htmlString[elementStartIndex], elementLen, !(*isSingle),
                        1, &tagID) != ELEMENT_SUCCESS) {
-        PRINT_ERROR("Failed to create tag ID for element "
-                    "starting with '!'.\n");
+        PRINT_ERROR("Failed to create tag ID for element!\n");
         return DOM_NO_ELEMENT;
     }
 

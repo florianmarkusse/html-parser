@@ -3,6 +3,8 @@
 #include <flo/html-parser/dom/dom.h>
 #include <flo/html-parser/dom/query/dom-query.h>
 #include <flo/html-parser/type/element/elements.h>
+#include <flo/html-parser/utils/memory/memory.h>
+#include <flo/html-parser/utils/print/error.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -53,7 +55,12 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                             const QueryStatus expectedStatus,
                             const size_t expectedNumberOfNodes) {
     DataContainer dataContainer;
-    createDataContainer(&dataContainer);
+    ElementStatus initStatus = createDataContainer(&dataContainer);
+    if (initStatus != ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(elementStatusToString(initStatus),
+                               "Failed to initialize data container");
+        return TEST_ERROR_INITIALIZATION;
+    }
 
     Dom dom;
     if (createFromFile(fileLocation, &dom, &dataContainer) != DOM_SUCCESS) {
@@ -93,7 +100,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         printTestDemarcation();
     }
 
-    free(results);
+    FREE_TO_NULL(results);
     destroyDom(&dom);
     destroyDataContainer(&dataContainer);
 
@@ -113,7 +120,7 @@ static void testBadInit(size_t *localSuccsses, size_t *localFailures) {
     node_id *withVals = malloc(sizeof(node_id));
     QueryStatus wrongArrayStatus =
         querySelectorAll("", &dom, &dataContainer, &withVals, &resultsLen);
-    free(withVals);
+    FREE_TO_NULL(results);
 
     if (wrongLenStatus == QUERY_INITIALIZATION_ERROR &&
         wrongArrayStatus == QUERY_INITIALIZATION_ERROR) {

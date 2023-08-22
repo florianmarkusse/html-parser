@@ -3,6 +3,7 @@
 
 typedef enum {
     COMPARISON_SUCCESS,
+    COMPARISON_MEMORY,
     COMPARISON_DIFFERENT_NODE_TYPE,
     COMPARISON_DIFFERENT_TAGS,
     COMPARISON_MISSING_PROPERTIES,
@@ -14,6 +15,7 @@ typedef enum {
 
 static const char *const ComparisonStatusStrings[COMPARISON_NUM_STATUS] = {
     "Success",
+    "Memory error",
     "Different type of node",
     "Different tags",
     "Nodes have different number of properties",

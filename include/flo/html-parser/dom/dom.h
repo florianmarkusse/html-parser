@@ -83,6 +83,6 @@ DomStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
 DomStatus addTextNode(node_id nodeID, element_id textID, Dom *dom);
 DomStatus replaceTextNode(node_id nodeID, element_id newTextID, Dom *dom);
 
-void destroyDom(const Dom *dom);
+void destroyDom(Dom *dom);
 
 #endif

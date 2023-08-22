@@ -142,6 +142,8 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
+// TODO(florian): fix this print bool props to print actual values not just the
+// IDs.
 void printBoolProps(const element_id node1Tag, const ElementHashSet *hash1,
                     const DataContainer *dataContainer1,
                     const element_id node2Tag, const ElementHashSet *hash2,
@@ -150,18 +152,18 @@ void printBoolProps(const element_id node1Tag, const ElementHashSet *hash1,
     PRINT_ERROR("Printing bool props of node 1 with tag %s:\n", tag1);
 
     ElementHashSetIterator iterator;
-    elementHashSetIteratorInit(&iterator, hash1);
+    initElementHashSetIterator(&iterator, hash1);
 
-    while (elementHashSetIteratorHasNext(&iterator)) {
-        element_id id = elementHashSetIteratorNext(&iterator);
+    while (hasNextElementHashSetIterator(&iterator)) {
+        element_id id = nextElementHashSetIterator(&iterator);
         char *prop = dataContainer1->propKeys.container.elements[id];
         PRINT_ERROR("%s\n", prop);
     }
 
-    elementHashSetIteratorInit(&iterator, hash2);
+    initElementHashSetIterator(&iterator, hash2);
 
-    while (elementHashSetIteratorHasNext(&iterator)) {
-        element_id id = elementHashSetIteratorNext(&iterator);
+    while (hasNextElementHashSetIterator(&iterator)) {
+        element_id id = nextElementHashSetIterator(&iterator);
         char *prop = dataContainer1->propKeys.container.elements[id];
         PRINT_ERROR("%s\n", prop);
     }
@@ -189,7 +191,7 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
                                   const bool shallowCompare) {
     HashStatus hashStatus = HASH_SUCCESS;
     ElementHashSet hash1;
-    elementHashSetInit(&hash1, MAX_PROPERTIES * 2);
+    initElementHashSet(&hash1, MAX_PROPERTIES * 2);
     element_id node1Props[MAX_PROPERTIES];
     element_id node1PropsLen = 0;
     for (size_t i = 0; i < dom1->boolPropsLen; i++) {
@@ -198,16 +200,19 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
             node1Props[node1PropsLen] = propID;
             node1PropsLen++;
 
-            if ((hashStatus = elementHashSetInsert(&hash1, propID)) !=
+            if ((hashStatus = insertElementHashSet(&hash1, propID)) !=
                 HASH_SUCCESS) {
-                ERROR_WITH_CODE_FORMAT(hashStatus,
-                                       "Failed to insert %u into hash", propID);
+                ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
+                                       "Failed to insert %u into hash 1",
+                                       propID);
+                destroyElementHashSet(&hash1);
+                return COMPARISON_MEMORY;
             }
         }
     }
 
     ElementHashSet hash2;
-    elementHashSetInit(&hash2, MAX_PROPERTIES * 2);
+    initElementHashSet(&hash2, MAX_PROPERTIES * 2);
     element_id node2Props[MAX_PROPERTIES];
     element_id node2PropsLen = 0;
     for (size_t i = 0; i < dom2->boolPropsLen; i++) {
@@ -215,10 +220,14 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
             element_id propID = dom1->boolProps[i].propID;
             node2Props[node2PropsLen] = propID;
             node2PropsLen++;
-            if ((hashStatus = elementHashSetInsert(&hash2, propID)) !=
+            if ((hashStatus = insertElementHashSet(&hash2, propID)) !=
                 HASH_SUCCESS) {
-                ERROR_WITH_CODE_FORMAT(hashStatus,
-                                       "Failed to insert %u into hash", propID);
+                ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
+                                       "Failed to insert %u into hash 2",
+                                       propID);
+                destroyElementHashSet(&hash1);
+                destroyElementHashSet(&hash2);
+                return COMPARISON_MEMORY;
             }
         }
     }
@@ -234,24 +243,30 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
                            &hash2, dataContainer2);
         }
 
+        destroyElementHashSet(&hash1);
+        destroyElementHashSet(&hash2);
         return COMPARISON_MISSING_PROPERTIES;
     }
 
     if (shallowCompare) {
         ElementHashSetIterator iterator;
-        elementHashSetIteratorInit(&iterator, &hash1);
+        initElementHashSetIterator(&iterator, &hash1);
 
-        while (elementHashSetIteratorHasNext(&iterator)) {
-            element_id id = elementHashSetIteratorNext(&iterator);
-            if (!elementHashSetContains(&hash2, id)) {
+        while (hasNextElementHashSetIterator(&iterator)) {
+            element_id id = nextElementHashSetIterator(&iterator);
+            if (!containsElementHashSet(&hash2, id)) {
                 if (printDifferences) {
                     PRINT_ERROR("Nodes have different boolean properties.\n");
                     printBoolProps(node1->tagID, &hash1, dataContainer1,
                                    node2->tagID, &hash2, dataContainer2);
                 }
+                destroyElementHashSet(&hash1);
+                destroyElementHashSet(&hash2);
                 return COMPARISON_MISSING_PROPERTIES;
             }
         }
+        destroyElementHashSet(&hash1);
+        destroyElementHashSet(&hash2);
         return COMPARISON_SUCCESS;
     }
 
@@ -270,10 +285,14 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
                 printBoolProps(node1->tagID, &hash1, dataContainer1,
                                node2->tagID, &hash2, dataContainer2);
             }
+            destroyElementHashSet(&hash1);
+            destroyElementHashSet(&hash2);
             return COMPARISON_DIFFERENT_PROPERTIES;
         }
     }
 
+    destroyElementHashSet(&hash1);
+    destroyElementHashSet(&hash2);
     return COMPARISON_SUCCESS;
 }
 

@@ -1,36 +1,24 @@
 
 
 #include "flo/html-parser/hash/element-id-hash.h"
+#include "flo/html-parser/hash/hashes.h"
+#include "flo/html-parser/utils/memory/memory.h"
 
-#ifdef ELEMENT_ID_UINT_16
-
-// https://github.com/skeeto/hash-prospector
-// 3-round xorshift-multiply (-Xn3)
-// bias = 0.0045976709018820602
-uint16_t hash16_xm3(uint16_t x) {
-    x ^= x >> 7;
-    x *= 0x2993U;
-    x ^= x >> 5;
-    x *= 0xe877U;
-    x ^= x >> 9;
-    x *= 0x0235U;
-    x ^= x >> 10;
-    return x;
-}
-#endif
-
-HashStatus elementHashSetInit(ElementHashSet *set, const size_t capacity) {
+HashStatus initElementHashSet(ElementHashSet *set, const size_t capacity) {
     set->arrayLen = capacity;
     set->entries = 0;
     set->array = calloc(capacity, sizeof(element_id));
     if (set->array == NULL) {
+        PRINT_ERROR("Could not allocate memory for element hash set!\n");
         return HASH_ERROR_MEMORY;
     }
     return HASH_SUCCESS;
 }
 
-HashStatus elementHashSetInsert(ElementHashSet *set, const element_id id) {
+HashStatus insertElementHashSet(ElementHashSet *set, const element_id id) {
     if (set->entries >= set->arrayLen) {
+        PRINT_ERROR("Element hash set is at full capacity!\n");
+        PRINT_ERROR("Could not insert %u!\n", id);
         return HASH_FULL_CAPACITY;
     }
 
@@ -49,7 +37,7 @@ HashStatus elementHashSetInsert(ElementHashSet *set, const element_id id) {
     return HASH_SUCCESS;
 }
 
-bool elementHashSetContains(const ElementHashSet *set, const element_id id) {
+bool containsElementHashSet(const ElementHashSet *set, const element_id id) {
     size_t index = hash16_xm3(id) % set->arrayLen;
 
     while (set->array[index] != 0) {
@@ -62,19 +50,19 @@ bool elementHashSetContains(const ElementHashSet *set, const element_id id) {
     return false;
 }
 
-void elementHashSetDestroy(ElementHashSet *set) {
-    free(set->array);
+void destroyElementHashSet(ElementHashSet *set) {
+    FREE_TO_NULL(set->array);
     set->arrayLen = 0;
     set->entries = 0;
 }
 
-void elementHashSetIteratorInit(ElementHashSetIterator *iterator,
+void initElementHashSetIterator(ElementHashSetIterator *iterator,
                                 const ElementHashSet *set) {
     iterator->set = set;
     iterator->index = 0;
 }
 
-element_id elementHashSetIteratorNext(ElementHashSetIterator *iterator) {
+element_id nextElementHashSetIterator(ElementHashSetIterator *iterator) {
     const ElementHashSet *set = iterator->set;
 
     while (iterator->index < set->arrayLen) {
@@ -87,7 +75,7 @@ element_id elementHashSetIteratorNext(ElementHashSetIterator *iterator) {
     return 0;
 }
 
-bool elementHashSetIteratorHasNext(ElementHashSetIterator *iterator) {
+bool hasNextElementHashSetIterator(ElementHashSetIterator *iterator) {
     const ElementHashSet *set = iterator->set;
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index] != 0) {
@@ -98,6 +86,6 @@ bool elementHashSetIteratorHasNext(ElementHashSetIterator *iterator) {
     return false;
 }
 
-void elementHashSetIteratorReset(ElementHashSetIterator *iterator) {
+void resetElementHashSetIterator(ElementHashSetIterator *iterator) {
     iterator->index = 0;
 }

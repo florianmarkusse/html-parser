@@ -5,6 +5,12 @@
 
 #include "flo/html-parser/utils/print/error.h"
 
+#define FREE_TO_NULL(ptr)                                                      \
+    do {                                                                       \
+        free(ptr);                                                             \
+        (ptr) = NULL;                                                          \
+    } while (0)
+
 static inline void *resizeArray(void *array, size_t currentLen,
                                 size_t *currentCap, size_t elementSize,
                                 size_t extraElements) {

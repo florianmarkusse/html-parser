@@ -2,6 +2,7 @@
 #include <flo/html-parser/dom/dom-user.h>
 #include <flo/html-parser/dom/dom-writing.h>
 #include <flo/html-parser/dom/dom.h>
+#include <flo/html-parser/utils/print/error.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -14,7 +15,12 @@
 
 unsigned char parseFile(const char *fileLocation) {
     DataContainer dataContainer;
-    createDataContainer(&dataContainer);
+    ElementStatus initStatus = createDataContainer(&dataContainer);
+    if (initStatus != ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(elementStatusToString(initStatus),
+                               "Failed to initialize data container");
+        return TEST_ERROR_INITIALIZATION;
+    }
 
     Dom dom1;
     if (createFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {

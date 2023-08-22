@@ -2,6 +2,9 @@
 #include <flo/html-parser/dom/dom-user.h>
 #include <flo/html-parser/dom/dom-writing.h>
 #include <flo/html-parser/dom/dom.h>
+#include <flo/html-parser/type/element/element-status.h>
+#include <flo/html-parser/type/element/elements-print.h>
+#include <flo/html-parser/utils/print/error.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -104,6 +107,8 @@ TestStatus compareFiles(const char *fileLocation1,
 
     TestStatus result = TEST_FAILURE;
 
+    printTagNamesStatus(dataContainer1);
+
     if (comp == expectedResult) {
         printTestSuccess();
         result = TEST_SUCCESS;
@@ -132,9 +137,21 @@ compareFilesDiffDataContainer(const char *fileLocation1,
                               const char *fileLocation2,
                               const ComparisonStatus expectedResult) {
     DataContainer dataContainer1;
-    createDataContainer(&dataContainer1);
+    ElementStatus status1 = createDataContainer(&dataContainer1);
     DataContainer dataContainer2;
-    createDataContainer(&dataContainer2);
+    ElementStatus status2 = createDataContainer(&dataContainer2);
+
+    if (status1 != ELEMENT_SUCCESS || status2 != ELEMENT_SUCCESS) {
+        if (status1 != ELEMENT_SUCCESS) {
+            ERROR_WITH_CODE_FORMAT(elementStatusToString(status1),
+                                   "Failed to initialize data container 1");
+        }
+        if (status2 != ELEMENT_SUCCESS) {
+            ERROR_WITH_CODE_FORMAT(elementStatusToString(status2),
+                                   "Failed to initialize data container 2");
+        }
+        return TEST_ERROR_INITIALIZATION;
+    }
 
     return compareFiles(fileLocation1, &dataContainer1, fileLocation2,
                         &dataContainer2, expectedResult);
@@ -145,7 +162,9 @@ compareFilesSameDataContainer(const char *fileLocation1,
                               const char *fileLocation2,
                               const ComparisonStatus expectedResult) {
     DataContainer dataContainer;
-    createDataContainer(&dataContainer);
+    if (createDataContainer(&dataContainer) != ELEMENT_SUCCESS) {
+        return TEST_ERROR_INITIALIZATION;
+    }
 
     return compareFiles(fileLocation1, &dataContainer, fileLocation2,
                         &dataContainer, expectedResult);

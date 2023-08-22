@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "flo/html-parser/utils/file/read.h"
+#include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/print/error.h"
 
 FileStatus readFile(const char *srcPath, char **buffer) {
@@ -26,7 +27,7 @@ FileStatus readFile(const char *srcPath, char **buffer) {
     if (result != dataLen) {
         PRINT_ERROR("Failed to read the file.\n");
         fclose(srcFile);
-        free(*buffer);
+        FREE_TO_NULL(*buffer);
         return FILE_CANT_READ;
     }
 

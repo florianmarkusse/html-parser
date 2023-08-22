@@ -17,26 +17,27 @@ typedef struct {
     size_t entries;
 } __attribute__((aligned(32))) StringHashSet;
 
-HashStatus stringHashSetInit(StringHashSet *set, size_t capacity);
+HashStatus initStringHashSet(StringHashSet *set, size_t capacity);
 
-HashStatus stringHashSetInsert(StringHashSet *set, const char *string);
+HashStatus insertStringHashSet(StringHashSet *set, const char *string);
+HashStatus insertWithHashStringHashSet(StringHashSet *set, size_t hash);
 
-bool stringHashSetContains(const StringHashSet *set, const char *string);
+bool containsStringHashSet(const StringHashSet *set, const char *string);
 
-void stringHashSetDestroy(StringHashSet *set);
+void destroyStringHashSet(StringHashSet *set);
 
 typedef struct {
     const StringHashSet *set;
     size_t index;
 } __attribute__((aligned(16))) StringHashSetIterator;
 
-void stringHashSetIteratorInit(StringHashSetIterator *iterator,
+void initStringHashSetIterator(StringHashSetIterator *iterator,
                                const StringHashSet *set);
 
-const char *stringHashSetIteratorNext(StringHashSetIterator *iterator);
+const char *nextStringHashSetIterator(StringHashSetIterator *iterator);
 
-bool stringHashSetIteratorHasNext(StringHashSetIterator *iterator);
+bool hasNextStringHashSetIterator(StringHashSetIterator *iterator);
 
-void stringHashSetIteratorReset(StringHashSetIterator *iterator);
+void resetStringHashSetIterator(StringHashSetIterator *iterator);
 
 #endif

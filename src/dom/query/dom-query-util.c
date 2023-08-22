@@ -180,7 +180,7 @@ getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                              filteredAdjacents, filteredAdjacentsLen,
                              &filteredAdjacentsCap, sizeof(node_id),
                              filteredAdjacentsCap)) == NULL) {
-                        free(filteredAdjacents);
+                        FREE_TO_NULL(filteredAdjacents);
                         PRINT_ERROR(
                             "Failed to allocate memory finding adjacent "
                             "elements!\n");
@@ -196,7 +196,7 @@ getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
         }
     }
 
-    free(*results);
+    FREE_TO_NULL(*results);
     *results = filteredAdjacents;
     *len = filteredAdjacentsLen;
     *currentCap = filteredAdjacentsCap;
@@ -220,7 +220,7 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
     size_t foundNodesLen = *len;
     size_t foundNodesCap = *currentCap;
     if (foundNodes == NULL) {
-        free(parents);
+        FREE_TO_NULL(parents);
         PRINT_ERROR("Could not allocate memory for the parents array.\n");
         return QUERY_MEMORY_ERROR;
     }
@@ -231,8 +231,8 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
         if (foundNodesLen > parentCap) {
             if ((parents = resizeArray(parents, foundNodesLen, &parentCap,
                                        sizeof(node_id), parentCap)) == NULL) {
-                free(parents);
-                free(foundNodes);
+                FREE_TO_NULL(parents);
+                FREE_TO_NULL(foundNodes);
                 return QUERY_MEMORY_ERROR;
             }
         }
@@ -248,8 +248,8 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                 if ((foundNodes =
                          resizeArray(foundNodes, foundNodesLen, &foundNodesCap,
                                      sizeof(node_id), foundNodesCap)) == NULL) {
-                    free(parents);
-                    free(foundNodes);
+                    FREE_TO_NULL(parents);
+                    FREE_TO_NULL(foundNodes);
                     return QUERY_MEMORY_ERROR;
                 }
                 foundNodes[foundNodesLen++] = parentChildNode.childID;
@@ -260,8 +260,8 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                         if ((*(results) = resizeArray(
                                  *results, *len, currentCap, sizeof(node_id),
                                  *currentCap)) == NULL) {
-                            free(parents);
-                            free(foundNodes);
+                            FREE_TO_NULL(parents);
+                            FREE_TO_NULL(foundNodes);
                             return QUERY_MEMORY_ERROR;
                         }
                         (*results)[(*len)++] = parentChildNode.childID;
@@ -273,7 +273,7 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
         depth--;
     }
 
-    free(parents);
-    free(foundNodes);
+    FREE_TO_NULL(parents);
+    FREE_TO_NULL(foundNodes);
     return QUERY_SUCCESS;
 }

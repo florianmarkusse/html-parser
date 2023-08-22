@@ -3,6 +3,7 @@
 
 typedef enum {
     ELEMENT_SUCCESS,
+    ELEMENT_MEMORY,
     ELEMENT_NOT_FOUND_OR_CREATED,
     ELEMENT_TOO_LONG,
     ELEMENT_ARRAY_FULL,
@@ -11,6 +12,7 @@ typedef enum {
 
 static const char *const ElementStatusStrings[ELEMENT_NUM_STATUS] = {
     "Success",
+    "Memory error detected",
     "Element not found or created",
     "Element too long",
     "Element array max size reached",
@@ -19,7 +21,7 @@ static const char *const ElementStatusStrings[ELEMENT_NUM_STATUS] = {
 // Not always used, but very handy for those that actually do want readable
 // error codes.
 __attribute__((unused)) static const char *
-tagStatusToString(ElementStatus status) {
+elementStatusToString(ElementStatus status) {
     if (status >= 0 && status < ELEMENT_NUM_STATUS) {
         return ElementStatusStrings[status];
     }

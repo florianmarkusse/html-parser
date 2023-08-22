@@ -362,12 +362,12 @@ QueryStatus querySelector(const char *cssQuery, const Dom *dom,
     QueryStatus status =
         querySelectorAll(cssQuery, dom, dataContainer, &results, &resultsLen);
     if (status != QUERY_SUCCESS) {
-        free(results);
+        FREE_TO_NULL(results);
         return status;
     }
 
     if (resultsLen == 0) {
-        free(results);
+        FREE_TO_NULL(results);
         *result = 0;
         return QUERY_SUCCESS;
     }
@@ -376,14 +376,14 @@ QueryStatus querySelector(const char *cssQuery, const Dom *dom,
     while (currentNode) {
         for (size_t i = 0; i < resultsLen; i++) {
             if (results[i] == currentNode) {
-                free(results);
+                FREE_TO_NULL(results);
                 *result = currentNode;
                 return QUERY_SUCCESS;
             }
         }
         currentNode = traverseDom(currentNode, dom);
     }
-    free(results);
+    FREE_TO_NULL(results);
     return status;
 }
 

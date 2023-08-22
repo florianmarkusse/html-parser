@@ -6,24 +6,31 @@
 
 #include "element-status.h"
 #include "elements-container.h"
+#include "flo/html-parser/hash/string-hash.h"
+
+typedef struct {
+    ElementsContainer container;
+    StringHashSet set;
+} __attribute__((aligned(64))) NewElements;
 
 typedef struct {
     ElementsContainer container;
     element_id pairedLen;
     element_id singleLen;
-} __attribute__((aligned(128))) CombinedElements;
+} __attribute__((aligned(64))) CombinedElements;
 
 typedef struct {
     ElementsContainer container;
     element_id len;
-} __attribute__((aligned(128))) Elements;
+} __attribute__((aligned(64))) Elements;
 
 typedef struct {
+    NewElements tagNames;
     CombinedElements tags;
     CombinedElements propKeys;
     Elements propValues;
     Elements text;
-} DataContainer;
+} __attribute__((aligned(128))) DataContainer;
 
 ElementStatus createDataContainer(DataContainer *dataContainer);
 void destroyDataContainer(DataContainer *dataContainer);
@@ -47,8 +54,8 @@ ElementStatus createElement(ElementsContainer *container, const char *element,
 unsigned char isSingle(element_id index);
 unsigned char isText(element_id index);
 
-void printTagStatus(DataContainer *dataContainer);
-void printAttributeStatus(DataContainer *dataContainer);
-void printTextStatus(DataContainer *dataContainer);
+ElementStatus newElementToIndex(NewElements *newElements,
+                                const char *elementStart, size_t elementLength,
+                                bool isPaired, bool searchElements);
 
 #endif

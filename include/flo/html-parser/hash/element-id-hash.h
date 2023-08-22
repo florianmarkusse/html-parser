@@ -17,26 +17,26 @@ typedef struct {
     size_t entries;
 } __attribute__((aligned(32))) ElementHashSet;
 
-HashStatus elementHashSetInit(ElementHashSet *set, size_t capacity);
+HashStatus initElementHashSet(ElementHashSet *set, size_t capacity);
 
-HashStatus elementHashSetInsert(ElementHashSet *set, element_id id);
+HashStatus insertElementHashSet(ElementHashSet *set, element_id id);
 
-bool elementHashSetContains(const ElementHashSet *set, element_id id);
+bool containsElementHashSet(const ElementHashSet *set, element_id id);
 
-void elementHashSetDestroy(ElementHashSet *set);
+void destroyElementHashSet(ElementHashSet *set);
 
 typedef struct {
     const ElementHashSet *set;
     size_t index;
 } __attribute__((aligned(16))) ElementHashSetIterator;
 
-void elementHashSetIteratorInit(ElementHashSetIterator *iterator,
+void initElementHashSetIterator(ElementHashSetIterator *iterator,
                                 const ElementHashSet *set);
 
-element_id elementHashSetIteratorNext(ElementHashSetIterator *iterator);
+element_id nextElementHashSetIterator(ElementHashSetIterator *iterator);
 
-bool elementHashSetIteratorHasNext(ElementHashSetIterator *iterator);
+bool hasNextElementHashSetIterator(ElementHashSetIterator *iterator);
 
-void elementHashSetIteratorReset(ElementHashSetIterator *iterator);
+void resetElementHashSetIterator(ElementHashSetIterator *iterator);
 
 #endif
