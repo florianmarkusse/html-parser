@@ -26,7 +26,7 @@ HashStatus insertElementHashSet(ElementHashSet *set, const element_id id) {
 
     while (set->array[index] != 0) {
         if (set->array[index] == id) {
-            return HASH_SUCCESS;
+            break;
         }
         index = (index + 1) % set->arrayLen;
     }

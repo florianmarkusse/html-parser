@@ -4,15 +4,22 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements-container.h"
+#include "hash-element.h"
 #include "hash-status.h"
+
+typedef struct {
+    indexID indexID;
+    const char *string;
+} __attribute__((aligned(16))) HashEntry;
 
 /**
  * Hashing with linear probing for natural values > 0 up until size_t max
  * size.
  */
 typedef struct {
-    const char **array;
+    HashEntry *array;
     size_t arrayLen;
     size_t entries;
 } __attribute__((aligned(32))) StringHashSet;
@@ -20,9 +27,16 @@ typedef struct {
 HashStatus initStringHashSet(StringHashSet *set, size_t capacity);
 
 HashStatus insertStringHashSet(StringHashSet *set, const char *string);
-HashStatus insertWithHashStringHashSet(StringHashSet *set, size_t hash);
+
+HashStatus insertStringWithDataHashSet(StringHashSet *set, const char *string,
+                                       HashElement *hashElement,
+                                       indexID *indexID);
 
 bool containsStringHashSet(const StringHashSet *set, const char *string);
+bool containsStringWithDataHashSet(const StringHashSet *set, const char *string,
+                                   indexID *indexID);
+const char *getStringFromHashSet(const StringHashSet *set,
+                                 const HashElement *hashElement);
 
 void destroyStringHashSet(StringHashSet *set);
 

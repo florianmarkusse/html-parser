@@ -151,6 +151,19 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     }
     printf("\n");
 
+    printf("tag registration nodes inside DOM...\n");
+    printf("total number of tag registration nodes: %zu\n",
+           dom->tagRegistryLen);
+    for (size_t i = 0; i < dom->tagRegistryLen; i++) {
+        TagRegistration tagRegistration = dom->tagRegistry[i];
+        const char *type = getStringFromHashSet(&dataContainer->tagNames.set,
+                                                &tagRegistration.hashElement);
+        printf("tag: %-20s isPaired: %d hash: %zu offset: %u", type,
+               tagRegistration.isPaired, tagRegistration.hashElement.hash,
+               tagRegistration.hashElement.offset);
+    }
+    printf("\n");
+
     printf("text nodes inside DOM...\n");
     printf("total number of text nodes: %zu\n", dom->textLen);
     for (size_t i = 0; i < dom->textLen; i++) {

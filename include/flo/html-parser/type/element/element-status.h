@@ -3,6 +3,8 @@
 
 typedef enum {
     ELEMENT_SUCCESS,
+    ELEMENT_CREATED,
+    ELEMENT_FOUND,
     ELEMENT_MEMORY,
     ELEMENT_NOT_FOUND_OR_CREATED,
     ELEMENT_TOO_LONG,
@@ -12,6 +14,8 @@ typedef enum {
 
 static const char *const ElementStatusStrings[ELEMENT_NUM_STATUS] = {
     "Success",
+    "Element created",
+    "Element found",
     "Memory error detected",
     "Element not found or created",
     "Element too long",

@@ -48,7 +48,7 @@ DataPageStatus insertIntoPage(const void *data, const size_t byteLen,
 
     container->elements[elementIndex] =
         container->pages[suitableIndex].freeSpace;
-    memcpy(container->elements[elementIndex], data, byteLen);
+    memcpy(container->pages[suitableIndex].freeSpace, data, byteLen);
     container->pages[suitableIndex].freeSpace += byteLen;
     container->pages[suitableIndex].spaceLeft -= byteLen;
 
@@ -57,24 +57,26 @@ DataPageStatus insertIntoPage(const void *data, const size_t byteLen,
 
 DataPageStatus newInsertIntoPage(const void *data, const size_t byteLen,
                                  const size_t totalPages,
-                                 NewElements *newElements) {
-    ElementsContainer container = newElements->container;
-    page_id suitableIndex = container.pageLen;
-    for (page_id i = 0; i < container.pageLen; ++i) {
-        if (container.pages[i].spaceLeft >= byteLen) {
+                                 NewElements *newElements,
+                                 HashElement *hashElement, indexID *indexID) {
+    ElementsContainer *container = &newElements->container;
+    page_id suitableIndex = container->pageLen;
+    for (page_id i = 0; i < container->pageLen; ++i) {
+        if (container->pages[i].spaceLeft >= byteLen) {
             suitableIndex = i;
             break;
         }
     }
 
-    if (suitableIndex == container.pageLen) {
-        if (container.pageLen < totalPages) {
-            container.pages[suitableIndex] = createDataPage(container.pageSize);
-            if (container.pages[suitableIndex].start == NULL) {
+    if (suitableIndex == container->pageLen) {
+        if (container->pageLen < totalPages) {
+            container->pages[suitableIndex] =
+                createDataPage(container->pageSize);
+            if (container->pages[suitableIndex].start == NULL) {
                 PRINT_ERROR("Failed to allocate memory for new tag page.\n");
                 return DATA_PAGE_ERROR_MEMORY;
             }
-            container.pageLen++;
+            container->pageLen++;
         } else {
             PRINT_ERROR("No more capacity to create new pages.\n");
             PRINT_ERROR("All %zu page(s) of %zu bytes are full.\n", totalPages,
@@ -83,11 +85,11 @@ DataPageStatus newInsertIntoPage(const void *data, const size_t byteLen,
         }
     }
 
-    memcpy(container.pages[suitableIndex].freeSpace, data, byteLen);
+    memcpy(container->pages[suitableIndex].freeSpace, data, byteLen);
     insertStringHashSet(&newElements->set,
-                        container.pages[suitableIndex].freeSpace);
-    container.pages[suitableIndex].freeSpace += byteLen;
-    container.pages[suitableIndex].spaceLeft -= byteLen;
+                        container->pages[suitableIndex].freeSpace);
+    container->pages[suitableIndex].freeSpace += byteLen;
+    container->pages[suitableIndex].spaceLeft -= byteLen;
 
     return DATA_PAGE_SUCCESS;
 }

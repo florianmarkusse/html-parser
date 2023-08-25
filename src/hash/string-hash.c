@@ -5,10 +5,12 @@
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/utils/memory/memory.h"
 
+#define MAX_PROBES (1U << 4U)
+
 HashStatus initStringHashSet(StringHashSet *set, const size_t capacity) {
     set->arrayLen = capacity;
     set->entries = 0;
-    set->array = calloc(capacity, sizeof(char *));
+    set->array = calloc(capacity, sizeof(HashEntry));
     if (set->array == NULL) {
         PRINT_ERROR("Could not allocate memory for string hash set!\n");
         return HASH_ERROR_MEMORY;
@@ -16,41 +18,72 @@ HashStatus initStringHashSet(StringHashSet *set, const size_t capacity) {
     return HASH_SUCCESS;
 }
 
-HashStatus insertStringHashSet(StringHashSet *set, const char *string) {
+HashStatus insertStringWithDataHashSet(StringHashSet *set, const char *string,
+                                       HashElement *hashElement,
+                                       indexID *indexID) {
     if (set->entries >= set->arrayLen) {
         PRINT_ERROR("String hash set is at full capacity!\n");
-        PRINT_ERROR("Could not insert %s!\n", string);
         return HASH_FULL_CAPACITY;
     }
 
     size_t hash = hashString(string) % set->arrayLen;
+    hashElement->hash = hash;
 
-    while (set->array[hash] != NULL) {
-        if (strcmp(set->array[hash], string) == 0) {
-            return HASH_SUCCESS;
+    size_t probes = 0;
+    while (set->array[hash].string != NULL) {
+        if (strcmp(set->array[hash].string, string) == 0) {
+            break;
         }
+        if (probes > MAX_PROBES) {
+            PRINT_ERROR("Reached maximum number of probes, %zu!\n", probes);
+            return HASH_MAX_PROBES;
+        }
+        probes++;
         hash = (hash + 1) % set->arrayLen;
     }
+    hashElement->offset = probes;
 
-    set->array[hash] = string;
     set->entries++;
+
+    set->array[hash].string = string;
+    set->array[hash].indexID = set->entries;
+    *indexID = set->entries;
 
     return HASH_SUCCESS;
 }
 
-HashStatus insertWithHashStringHashSet(StringHashSet *set, size_t hash) {}
+HashStatus insertStringHashSet(StringHashSet *set, const char *string) {
+    HashElement ignore;
+    indexID ignore2 = 0;
+    return insertStringWithDataHashSet(set, string, &ignore, &ignore2);
+}
 
 bool containsStringHashSet(const StringHashSet *set, const char *string) {
+    indexID ignore = 0;
+    return containsStringWithDataHashSet(set, string, &ignore);
+}
+
+bool containsStringWithDataHashSet(const StringHashSet *set, const char *string,
+                                   indexID *indexID) {
     size_t index = hashString(string) % set->arrayLen;
 
-    while (set->array[index] != NULL) {
-        if (strcmp(set->array[index], string) == 0) {
+    while (set->array[index].string != NULL) {
+        HashEntry entry = set->array[index];
+        if (strcmp(entry.string, string) == 0) {
+            *indexID = entry.indexID;
             return true;
         }
         index = (index + 1) % set->arrayLen;
     }
 
     return false;
+}
+
+const char *getStringFromHashSet(const StringHashSet *set,
+                                 const HashElement *hashElement) {
+    return set
+        ->array[((hashElement->hash % set->arrayLen) + hashElement->offset)]
+        .string;
 }
 
 void destroyStringHashSet(StringHashSet *set) {
@@ -69,19 +102,19 @@ const char *nextStringHashSetIterator(StringHashSetIterator *iterator) {
     const StringHashSet *set = iterator->set;
 
     while (iterator->index < set->arrayLen) {
-        if (set->array[iterator->index] != NULL) {
-            return set->array[iterator->index++];
+        if (set->array[iterator->index].string != NULL) {
+            return set->array[iterator->index++].string;
         }
         iterator->index++;
     }
 
-    return 0;
+    return NULL;
 }
 
 bool hasNextStringHashSetIterator(StringHashSetIterator *iterator) {
     const StringHashSet *set = iterator->set;
     while (iterator->index < set->arrayLen) {
-        if (set->array[iterator->index] != 0) {
+        if (&set->array[iterator->index] != NULL) {
             return true;
         }
         iterator->index++;
@@ -89,6 +122,6 @@ bool hasNextStringHashSetIterator(StringHashSetIterator *iterator) {
     return false;
 }
 
-void stringHashSetIteratorReset(StringHashSetIterator *iterator) {
+void resetStringHashSetIterator(StringHashSetIterator *iterator) {
     iterator->index = 0;
 }

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "flo/html-parser/dom/dom.h"
@@ -8,6 +9,10 @@
 DomStatus createDom(const char *htmlString, Dom *dom,
                     DataContainer *dataContainer) {
     dom->firstNodeID = 0;
+
+    dom->tagRegistry = malloc(TAG_REGISTRY_PAGE_SIZE);
+    dom->tagRegistryLen = 0;
+    dom->tagRegistryCap = TAG_REGISTRATIONS_PER_PAGE;
 
     dom->nodes = malloc(NODES_PAGE_SIZE);
     Node errorNode;
@@ -42,9 +47,10 @@ DomStatus createDom(const char *htmlString, Dom *dom,
     dom->textLen = 0;
     dom->textCap = TEXT_NODES_PER_PAGE;
 
-    if (dom->nodes == NULL || dom->parentFirstChilds == NULL ||
-        dom->parentChilds == NULL || dom->nextNodes == NULL ||
-        dom->boolProps == NULL || dom->props == NULL || dom->text == NULL) {
+    if (dom->nodes == NULL || dom->tagRegistry == NULL ||
+        dom->parentFirstChilds == NULL || dom->parentChilds == NULL ||
+        dom->nextNodes == NULL || dom->boolProps == NULL ||
+        dom->props == NULL || dom->text == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDom(dom);
         return DOM_ERROR_MEMORY;
@@ -97,6 +103,22 @@ DomStatus addNode(node_id *nodeID, element_id tagID, Dom *dom) {
 
     dom->nodeLen++;
     *nodeID = newNode->nodeID;
+    return DOM_SUCCESS;
+}
+
+DomStatus addTagRegistration(const indexID tagID,
+                             const HashElement *hashElement, Dom *dom) {
+    if ((dom->tagRegistry = resizeArray(
+             dom->tagRegistry, dom->tagRegistryLen, &dom->tagRegistryCap,
+             sizeof(TagRegistration), TAG_REGISTRATIONS_PER_PAGE)) == NULL) {
+        return DOM_ERROR_MEMORY;
+    }
+
+    TagRegistration *tagRegistry = &(dom->tagRegistry[dom->tagRegistryLen]);
+    tagRegistry->tagID = tagID;
+    tagRegistry->hashElement.hash = hashElement->hash;
+    tagRegistry->hashElement.offset = hashElement->offset;
+    dom->tagRegistryLen++;
     return DOM_SUCCESS;
 }
 
@@ -206,6 +228,7 @@ DomStatus replaceTextNode(const node_id nodeID, element_id newTextID,
 
 void destroyDom(Dom *dom) {
     FREE_TO_NULL(dom->nodes);
+    FREE_TO_NULL(dom->tagRegistry);
     FREE_TO_NULL(dom->parentFirstChilds);
     FREE_TO_NULL(dom->parentChilds);
     FREE_TO_NULL(dom->nextNodes);

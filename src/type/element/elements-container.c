@@ -27,6 +27,5 @@ void destroyElementsContainer(ElementsContainer *elementsContainer) {
         FREE_TO_NULL(elementsContainer->pages[i].start);
     }
     FREE_TO_NULL(elementsContainer->pages);
-    elementsContainer->pages = NULL;
     elementsContainer->pageLen = 0;
 }

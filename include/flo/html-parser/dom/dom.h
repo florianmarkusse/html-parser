@@ -8,6 +8,7 @@
 #include "flo/html-parser/type/node/parent-child.h"
 #include "flo/html-parser/type/node/parent-first-child.h"
 #include "flo/html-parser/type/node/property.h"
+#include "flo/html-parser/type/node/tag-registration.h"
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/file-status.h"
 
@@ -15,6 +16,10 @@
 #define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
 
 #define ERROR_NODE_ID 0
+
+#define TAG_REGISTRY_PAGE_SIZE (1U << 8U)
+#define TAG_REGISTRATIONS_PER_PAGE                                             \
+    (TAG_REGISTRY_PAGE_SIZE / sizeof(TagRegistration))
 
 #define PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
 #define PARENT_FIRST_CHILDS_PER_PAGE                                           \
@@ -42,6 +47,10 @@ typedef struct {
     Node *nodes;
     size_t nodeLen;
     size_t nodeCap;
+
+    TagRegistration *tagRegistry;
+    size_t tagRegistryLen;
+    size_t tagRegistryCap;
 
     ParentFirstChild *parentFirstChilds;
     size_t parentFirstChildLen;
@@ -74,6 +83,8 @@ DomStatus createDom(const char *htmlString, Dom *dom,
 DomStatus createNode(node_id *nodeID, Dom *dom);
 DomStatus setTagID(node_id nodeID, element_id tagID, Dom *dom);
 DomStatus addNode(node_id *nodeID, element_id tagID, Dom *dom);
+DomStatus addTagRegistration(indexID tagID, const HashElement *hashElement,
+                             Dom *dom);
 DomStatus addParentFirstChild(node_id parentID, node_id childID, Dom *dom);
 DomStatus addParentChild(node_id parentID, node_id childID, Dom *dom);
 DomStatus addNextNode(node_id currentNodeID, node_id nextNodeID, Dom *dom);

@@ -4,12 +4,14 @@
 typedef enum {
     HASH_SUCCESS,
     HASH_ERROR_MEMORY,
+    HASH_MAX_PROBES,
     HASH_FULL_CAPACITY,
     HASH_NUM_STATUS
 } HashStatus;
 
 static const char *const HashStatusStrings[HASH_NUM_STATUS] = {
-    "Success", "Memory Error", "Reached capacity"};
+    "Success", "Memory Error", "Reached maximum number of probes",
+    "Reached capacity"};
 
 __attribute__((unused)) static const char *
 hashStatusToString(HashStatus status) {

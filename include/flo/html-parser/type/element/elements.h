@@ -56,6 +56,7 @@ unsigned char isText(element_id index);
 
 ElementStatus newElementToIndex(NewElements *newElements,
                                 const char *elementStart, size_t elementLength,
-                                bool isPaired, bool searchElements);
+                                bool searchElements, HashElement *hashElement,
+                                indexID *indexID);
 
 #endif

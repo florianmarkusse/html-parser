@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 #include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/parser/parser.h"
+#include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/utils/print/error.h"
 #include "flo/html-parser/utils/text/text.h"
@@ -212,11 +214,29 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
         *context = STYLE_CONTEXT;
     }
 
-    if (newElementToIndex(&dataContainer->tagNames,
-                          &htmlString[elementStartIndex], elementLen,
-                          !(*isSingle), 1) != ELEMENT_SUCCESS) {
+    HashElement hashElement;
+    indexID newTagID = 0;
+    ElementStatus indexStatus = newElementToIndex(
+        &dataContainer->tagNames, &htmlString[elementStartIndex], elementLen,
+        true, &hashElement, &newTagID);
+
+    printf("trying to add new tag regsitraiotn\n");
+    switch (indexStatus) {
+    case ELEMENT_FOUND: {
+        printf("I need to set a node id to this tag id\n");
+        break;
+    }
+    case ELEMENT_CREATED: {
+        if (addTagRegistration(newTagID, &hashElement, dom) != DOM_SUCCESS) {
+            PRINT_ERROR("Failed to add tag registration.\n");
+        }
+        printf("I need to set a node id to this tag id\n");
+        break;
+    }
+    default: {
         PRINT_ERROR("Failed to insert into new tag names!\n");
         return DOM_NO_ELEMENT;
+    }
     }
 
     if (elementToIndex(&dataContainer->tags.container, elementTypeLen,

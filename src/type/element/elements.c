@@ -5,6 +5,7 @@
 #include "flo/html-parser/type/data/data-functions.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/type/element/elements.h"
+#include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/utils/print/error.h"
 
 #define LEN_START_VALUE 1
@@ -195,42 +196,30 @@ unsigned char isText(const element_id index) {
     return (index >> TEXT_MASK) != 0;
 }
 
-ElementStatus createNewElement(NewElements *newElements, const char *element) {
+ElementStatus createNewElement(NewElements *newElements, const char *element,
+                               HashElement *hashElement, indexID *indexID) {
     // insert element into the has table.
-    HashStatus hashStatus = HASH_SUCCESS;
-    if ((hashStatus =
-             insertStringHashSet(&newElements->set, element) != HASH_SUCCESS)) {
-        ERROR_WITH_CODE_ONLY(hashStatusToString(hashStatus),
-                             "Could not create new element");
-        return ELEMENT_ARRAY_FULL;
-    }
-
-    DataPageStatus insertStatus = newInsertIntoPage(
-        element, strlen(element) + 1, TOTAL_PAGES, newElements);
+    DataPageStatus insertStatus =
+        newInsertIntoPage(element, strlen(element) + 1, TOTAL_PAGES,
+                          newElements, hashElement, indexID);
     if (insertStatus != DATA_PAGE_SUCCESS) {
-        ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
+        ERROR_WITH_CODE_FORMAT(dataPageStatusToString(insertStatus),
                                "Could not find or create element \"%s\"",
                                element);
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
 
-    // TODO(florian): Need to retrieve the hash STILL!!!!!
-    //
-    //
-    //    *elementID = (offsetMask | (*currentElementsLen));
-    //    (*currentElementsLen)++;
-    //
-    //    return ELEMENT_SUCCESS;
-    //
-    //
-
     return ELEMENT_SUCCESS;
 }
 
+/**
+ * If the element is found, then only indexID is set. Otherwise, if a new
+ * element had to be created, hashElement is also filled.
+ */
 ElementStatus newElementToIndex(NewElements *newElements,
                                 const char *elementStart, size_t elementLength,
-                                const bool isPaired,
-                                const bool searchElements) {
+                                const bool searchElements,
+                                HashElement *hashElement, indexID *indexID) {
     char buffer[newElements->container.pageSize];
     const ElementStatus sizeCheck = elementSizeCheck(
         buffer, newElements->container.pageSize, elementStart, elementLength);
@@ -241,5 +230,10 @@ ElementStatus newElementToIndex(NewElements *newElements,
     memcpy(buffer, elementStart, elementLength);
     buffer[elementLength] = '\0';
 
-    return createNewElement(newElements, buffer);
+    if (searchElements) {
+        if (containsStringWithDataHashSet(&newElements->set, buffer, indexID)) {
+            return ELEMENT_SUCCESS;
+        }
+    }
+    return createNewElement(newElements, buffer, hashElement, indexID);
 }
