@@ -4,9 +4,9 @@
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/type/element/elements.h"
 
-DataPageStatus insertIntoPage(const void *data, size_t byteLen,
-                              size_t totalPages, size_t elementIndex,
-                              ElementsContainer *container);
+// DataPageStatus insertIntoPage(const void *data, size_t byteLen,
+//                               size_t totalPages, size_t elementIndex,
+//                               ElementsContainer *container);
 
 DataPageStatus newInsertIntoPage(const void *data, size_t byteLen,
                                  size_t totalPages, StringRegistry *newElements,

@@ -222,6 +222,8 @@ ElementStatus createNewElement(StringRegistry *newElements, const char *element,
  */
 // TODO(florian): remove seaarchElement parameter once text values completely
 // bypass the hash
+// TODO(florian): if not found, we insert, but we shouldn't need to recalculate
+// the hashhhh
 ElementStatus newElementToIndex(StringRegistry *newElements,
                                 const char *elementStart, size_t elementLength,
                                 const bool searchElements,

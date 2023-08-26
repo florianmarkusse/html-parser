@@ -239,12 +239,21 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
             // Move past '"'
             ch = htmlString[++(*currentPosition)];
         } else {
-            if (elementToIndex(&dataContainer->propKeys.container,
-                               &dataContainer->propKeys.singleLen,
-                               &htmlString[attrKeyStartIndex], attrKeyLen, 0, 1,
-                               &attrKeyID) != ELEMENT_SUCCESS) {
-                PRINT_ERROR("Failed to create element ID for key.\n");
+            elementStatus = newElementToIndex(
+                &dataContainer->propKeys, &htmlString[attrKeyStartIndex],
+                attrKeyLen, true, &hashKey, &attrKeyID);
+            if (elementStatus != ELEMENT_FOUND &&
+                elementStatus != ELEMENT_CREATED) {
+                ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+                                     "Failed to get keyID");
                 return DOM_NO_ELEMENT;
+            }
+            if (elementStatus == ELEMENT_CREATED) {
+                if (addBoolPropRegistration(attrKeyID, &hashKey, dom) !=
+                    DOM_SUCCESS) {
+                    PRINT_ERROR("Failed to add bool prop registration.\n");
+                    return DOM_NO_ELEMENT;
+                }
             }
             if ((documentStatus = addBooleanProperty(*newNodeID, attrKeyID,
                                                      dom)) != DOM_SUCCESS) {
@@ -312,9 +321,9 @@ unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
 
 DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                         node_id *prevNodeID, node_id *currentNodeID,
-                        const element_id textTagID, TextParsing *context,
-                        unsigned char *isMerge, Dom *dom,
+                        TextParsing *context, unsigned char *isMerge, Dom *dom,
                         DataContainer *dataContainer) {
+    ElementStatus elementStatus = ELEMENT_SUCCESS;
     DomStatus documentStatus = DOM_SUCCESS;
     size_t elementStartIndex = *currentPosition;
     char ch = htmlString[*currentPosition];
@@ -431,11 +440,20 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
         strncat(buffer, &htmlString[elementStartIndex], elementLen);
         buffer[mergedLen - 1] = '\0';
 
-        if (elementToIndex(&dataContainer->text.container,
-                           &dataContainer->text.len, buffer, mergedLen, 1, 0,
-                           &textID) != ELEMENT_SUCCESS) {
-            PRINT_ERROR("Failed to create text ID for merging text nodes.\n");
+        HashElement hashKey;
+        elementStatus = newElementToIndex(&dataContainer->text, buffer,
+                                          mergedLen, false, &hashKey, &textID);
+        if (elementStatus != ELEMENT_FOUND &&
+            elementStatus != ELEMENT_CREATED) {
+            ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+                                 "Failed to text ID");
             return DOM_NO_ELEMENT;
+        }
+        if (elementStatus == ELEMENT_CREATED) {
+            if (addTextRegistration(textID, &hashKey, dom) != DOM_SUCCESS) {
+                PRINT_ERROR("Failed to add text registration.\n");
+                return DOM_NO_ELEMENT;
+            }
         }
 
         if ((documentStatus = replaceTextNode(*currentNodeID, textID, dom)) !=
@@ -450,12 +468,21 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             return documentStatus;
         }
 
-        if (elementToIndex(&dataContainer->text.container,
-                           &dataContainer->text.len,
-                           &htmlString[elementStartIndex], elementLen, 1, 0,
-                           &textID) != ELEMENT_SUCCESS) {
-            PRINT_ERROR("Failed to create text ID.\n");
+        HashElement hashKey;
+        elementStatus = newElementToIndex(&dataContainer->text,
+                                          &htmlString[elementStartIndex],
+                                          elementLen, false, &hashKey, &textID);
+        if (elementStatus != ELEMENT_FOUND &&
+            elementStatus != ELEMENT_CREATED) {
+            ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+                                 "Failed to get text ID");
             return DOM_NO_ELEMENT;
+        }
+        if (elementStatus == ELEMENT_CREATED) {
+            if (addTextRegistration(textID, &hashKey, dom) != DOM_SUCCESS) {
+                PRINT_ERROR("Failed to add text registration.\n");
+                return DOM_NO_ELEMENT;
+            }
         }
 
         if ((documentStatus = addTextNode(*currentNodeID, textID, dom)) !=
@@ -464,7 +491,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             return documentStatus;
         }
 
-        if ((documentStatus = setNodeTagID(*currentNodeID, textTagID, dom)) !=
+        if ((documentStatus = setNodeTagID(*currentNodeID, textID, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to set tag ID to text id to domument.\n");
             return documentStatus;
@@ -477,12 +504,6 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
 DomStatus parse(const char *htmlString, Dom *dom,
                 DataContainer *dataContainer) {
     DomStatus documentStatus = DOM_SUCCESS;
-
-    element_id textTagID = 0;
-    if (textElementToIndex(&textTagID) != ELEMENT_SUCCESS) {
-        PRINT_ERROR("Failed to initialize tag ID for text nodes\n");
-        return DOM_NO_ELEMENT;
-    }
 
     size_t currentPosition = 0;
 
@@ -517,8 +538,7 @@ DomStatus parse(const char *htmlString, Dom *dom,
 
             if ((documentStatus = parseTextNode(
                      htmlString, &currentPosition, &prevNodeID, &currentNodeID,
-                     textTagID, &context, &isMerge, dom, dataContainer)) !=
-                DOM_SUCCESS) {
+                     &context, &isMerge, dom, dataContainer)) != DOM_SUCCESS) {
                 return documentStatus;
             }
 
