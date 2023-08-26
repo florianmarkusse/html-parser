@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_DOM_COMPARISON_DOM_COMPARISON_STATUS_H
-#define FLO_HTML_PARSER_DOM_COMPARISON_DOM_COMPARISON_STATUS_H
+#ifndef FLO_HTML_PARSER_COMPARISON_COMPARISON_STATUS_H
+#define FLO_HTML_PARSER_COMPARISON_COMPARISON_STATUS_H
 
 typedef enum {
     COMPARISON_SUCCESS,
@@ -9,7 +9,7 @@ typedef enum {
     COMPARISON_MISSING_PROPERTIES,
     COMPARISON_DIFFERENT_PROPERTIES,
     COMPARISON_DIFFERENT_SIZES,
-    COMPARISON_DIFFERENT_TEXT,
+    COMPARISON_DIFFERENT_CONTENT,
     COMPARISON_NUM_STATUS
 } ComparisonStatus;
 
@@ -20,8 +20,8 @@ static const char *const ComparisonStatusStrings[COMPARISON_NUM_STATUS] = {
     "Different tags",
     "Nodes have different number of properties",
     "Nodes have different properties",
-    "Different number of nodes",
-    "Text nodes have different content"};
+    "Collections have different sizes",
+    "Collections have different content"};
 
 // Not always used, but very handy for those that actually do want readable
 // error codes.

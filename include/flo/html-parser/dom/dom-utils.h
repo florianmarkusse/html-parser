@@ -3,16 +3,20 @@
 
 #include "dom.h"
 
-const char *getTag(node_id nodeID, const Dom *dom,
+const char *getTag(indexID tagID, const Dom *dom,
                    const DataContainer *dataContainer);
-const char *getBoolProp(node_id nodeID, const Dom *dom,
+void getTagRegistration(indexID tagID, const Dom *dom,
+                        TagRegistration **tagRegistration);
+
+const char *getBoolProp(indexID boolPropID, const Dom *dom,
                         const DataContainer *dataContainer);
-const char *getPropKey(node_id nodeID, const Dom *dom,
+const char *getPropKey(indexID propKeyID, const Dom *dom,
                        const DataContainer *dataContainer);
-const char *getPropValue(node_id nodeID, const Dom *dom,
+const char *getPropValue(indexID propValueID, const Dom *dom,
                          const DataContainer *dataContainer);
-const char *getText(node_id nodeID, const Dom *dom,
+const char *getText(indexID textID, const Dom *dom,
                     const DataContainer *dataContainer);
+
 node_id getFirstChild(node_id parentID, const Dom *dom);
 node_id getNextNode(node_id currentNodeID, const Dom *dom);
 node_id getParentNode(node_id currentNodeID, const Dom *dom);

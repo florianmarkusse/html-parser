@@ -11,7 +11,7 @@
 
 bool filterNode(node_id nodeID, const FilterType *filters, size_t filterslen,
                 const Dom *dom);
-QueryStatus getTagID(const char *tag, element_id *tagID,
+QueryStatus getTagID(const char *tag, indexID *tagID,
                      const DataContainer *dataContainer);
 QueryStatus getBoolPropID(const char *tag, element_id *propID,
                           const DataContainer *dataContainer);

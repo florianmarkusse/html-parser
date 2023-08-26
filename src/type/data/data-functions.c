@@ -57,7 +57,7 @@ DataPageStatus insertIntoPage(const void *data, const size_t byteLen,
 
 DataPageStatus newInsertIntoPage(const void *data, const size_t byteLen,
                                  const size_t totalPages,
-                                 NewElements *newElements,
+                                 StringRegistry *newElements,
                                  HashElement *hashElement, indexID *indexID) {
     ElementsContainer *container = &newElements->container;
     page_id suitableIndex = container->pageLen;
@@ -86,8 +86,9 @@ DataPageStatus newInsertIntoPage(const void *data, const size_t byteLen,
     }
 
     memcpy(container->pages[suitableIndex].freeSpace, data, byteLen);
-    insertStringHashSet(&newElements->set,
-                        container->pages[suitableIndex].freeSpace);
+    insertStringWithDataHashSet(&newElements->set,
+                                container->pages[suitableIndex].freeSpace,
+                                hashElement, indexID);
     container->pages[suitableIndex].freeSpace += byteLen;
     container->pages[suitableIndex].spaceLeft -= byteLen;
 

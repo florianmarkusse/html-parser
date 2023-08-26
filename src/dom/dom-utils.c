@@ -1,72 +1,45 @@
 
 #include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/type/node/tag-registration.h"
 
-const char *getTag(const node_id nodeID, const Dom *dom,
+const char *getTag(const indexID tagID, const Dom *dom,
                    const DataContainer *dataContainer) {
-    Node node = dom->nodes[nodeID];
-
-    char *text = dataContainer->tags.container.elements[node.tagID];
-    return text;
+    TagRegistration *tagRegistration = &dom->tagRegistry[tagID];
+    return getStringFromHashSet(&dataContainer->tags.set,
+                                &tagRegistration->hashElement);
 }
 
-const char *getBoolProp(const node_id nodeID, const Dom *dom,
+void getTagRegistration(indexID tagID, const Dom *dom,
+                        TagRegistration **tagRegistration) {
+    *tagRegistration = &dom->tagRegistry[tagID];
+}
+
+const char *getBoolProp(const indexID boolPropID, const Dom *dom,
                         const DataContainer *dataContainer) {
-    for (size_t i = 0; i < dom->boolPropsLen; i++) {
-        BooleanProperty boolPropNode = dom->boolProps[i];
-
-        if (boolPropNode.nodeID == nodeID) {
-            char *text =
-                dataContainer->propKeys.container.elements[boolPropNode.propID];
-            return text;
-        }
-    }
-
-    return NULL;
+    Registration registration = dom->boolPropRegistry.registry[boolPropID];
+    return getStringFromHashSet(&dataContainer->tags.set,
+                                &registration.hashElement);
 }
 
-const char *getPropKey(const node_id nodeID, const Dom *dom,
+const char *getPropKey(const indexID propKeyID, const Dom *dom,
                        const DataContainer *dataContainer) {
-    for (size_t i = 0; i < dom->propsLen; i++) {
-        Property propNode = dom->props[i];
-
-        if (propNode.nodeID == nodeID) {
-            char *text =
-                dataContainer->propKeys.container.elements[propNode.valueID];
-            return text;
-        }
-    }
-
-    return NULL;
+    Registration registration = dom->propKeyRegistry.registry[propKeyID];
+    return getStringFromHashSet(&dataContainer->tags.set,
+                                &registration.hashElement);
 }
 
-const char *getPropValue(const node_id nodeID, const Dom *dom,
+const char *getPropValue(const indexID propValueID, const Dom *dom,
                          const DataContainer *dataContainer) {
-    for (size_t i = 0; i < dom->propsLen; i++) {
-        Property propNode = dom->props[i];
-
-        if (propNode.nodeID == nodeID) {
-            char *text =
-                dataContainer->propValues.container.elements[propNode.valueID];
-            return text;
-        }
-    }
-
-    return NULL;
+    Registration registration = dom->propValueRegistry.registry[propValueID];
+    return getStringFromHashSet(&dataContainer->tags.set,
+                                &registration.hashElement);
 }
 
-const char *getText(const node_id nodeID, const Dom *dom,
+const char *getText(const indexID textID, const Dom *dom,
                     const DataContainer *dataContainer) {
-    for (size_t i = 0; i < dom->textLen; i++) {
-        TextNode textNode = dom->text[i];
-
-        if (textNode.nodeID == nodeID) {
-            char *text =
-                dataContainer->text.container.elements[textNode.textID];
-            return text;
-        }
-    }
-
-    return NULL;
+    Registration registration = dom->textRegistry.registry[textID];
+    return getStringFromHashSet(&dataContainer->tags.set,
+                                &registration.hashElement);
 }
 
 // TODO(florian): make faster.

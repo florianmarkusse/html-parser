@@ -5,12 +5,9 @@
 
 ElementStatus initElementsContainer(ElementsContainer *elementsContainer,
                                     const size_t pageSize) {
-    elementsContainer->elements = malloc(sizeof(char *) * TOTAL_ELEMENTS);
     elementsContainer->pages = malloc(sizeof(DataPage) * TOTAL_PAGES);
 
-    if (elementsContainer->elements == NULL ||
-        elementsContainer->pages == NULL) {
-        FREE_TO_NULL(elementsContainer->elements);
+    if (elementsContainer->pages == NULL) {
         FREE_TO_NULL(elementsContainer->pages);
         return ELEMENT_MEMORY;
     }
@@ -22,7 +19,6 @@ ElementStatus initElementsContainer(ElementsContainer *elementsContainer,
 }
 
 void destroyElementsContainer(ElementsContainer *elementsContainer) {
-    FREE_TO_NULL(elementsContainer->elements);
     for (int i = 0; i < elementsContainer->pageLen; i++) {
         FREE_TO_NULL(elementsContainer->pages[i].start);
     }

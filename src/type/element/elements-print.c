@@ -35,7 +35,7 @@ void printElementPages(const ElementsContainer *container) {
     printf("\n\n");
 }
 
-void printNewElementsStatus(const NewElements *newElements) {
+void printStringRegistryStatus(const StringRegistry *newElements) {
     printf("hash set contents...\n");
     StringHashSetIterator iterator;
     initStringHashSetIterator(&iterator, &newElements->set);
@@ -48,41 +48,25 @@ void printNewElementsStatus(const NewElements *newElements) {
     printElementPages(&newElements->container);
 }
 
-void printElementStatus(const Elements *global) {
-    printf("elements...\n");
-    printElements(global->len, global->container.elements, 0);
-
-    printElementPages(&global->container);
-}
-
-void printCombinedElementStatus(const CombinedElements *global) {
-    printf("single elements...\n");
-    printElements(global->singleLen, global->container.elements,
-                  SINGLES_OFFSET);
-
-    printf("paired elements...\n");
-    printElements(global->pairedLen, global->container.elements, 0);
-
-    printElementPages(&global->container);
-}
-
-void printTagStatus(DataContainer *dataContainer) {
-    printf("printing tag status...\n\n");
-    printCombinedElementStatus(&dataContainer->tags);
-}
-
-void printAttributeStatus(DataContainer *dataContainer) {
+void printPropertyStatus(DataContainer *dataContainer) {
     printf("printing property status...\n\n");
-    printCombinedElementStatus(&dataContainer->propKeys);
-    printElementStatus(&dataContainer->propValues);
+    printf("printing keys...\n");
+    printStringRegistryStatus(&dataContainer->propKeys);
+    printf("printing values...\n");
+    printStringRegistryStatus(&dataContainer->propValues);
+}
+
+void printBoolPropStatus(DataContainer *dataContainer) {
+    printf("printing bool property status...\n\n");
+    printStringRegistryStatus(&dataContainer->boolProps);
 }
 
 void printTextStatus(DataContainer *dataContainer) {
     printf("printing text status...\n\n");
-    printElementStatus(&dataContainer->text);
+    printStringRegistryStatus(&dataContainer->text);
 }
 
-void printTagNamesStatus(DataContainer *dataContainer) {
-    printf("printing tagNames status...\n\n");
-    printNewElementsStatus(&dataContainer->tagNames);
+void printTagStatus(DataContainer *dataContainer) {
+    printf("printing tags status...\n\n");
+    printStringRegistryStatus(&dataContainer->tags);
 }

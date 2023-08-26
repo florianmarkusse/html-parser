@@ -5,11 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "flo/html-parser/dom/dom-registry.h"
 #include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements.h"
+#include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/utils/print/error.h"
 #include "flo/html-parser/utils/text/text.h"
 
@@ -20,9 +22,10 @@ typedef enum {
     ROGUE_OPEN_TAG
 } TextParsing;
 
-DomStatus getNewNodeID(node_id *currentNodeID, node_id *prevNodeID, Dom *dom) {
+DomStatus getNewNodeID(node_id *currentNodeID, const NodeType nodeType,
+                       node_id *prevNodeID, Dom *dom) {
     *prevNodeID = *currentNodeID;
-    return createNode(currentNodeID, dom);
+    return createNode(currentNodeID, nodeType, dom);
 }
 
 typedef struct {
@@ -33,36 +36,73 @@ typedef struct {
 DomStatus updateReferences(const node_id newNodeID,
                            const node_id previousNodeID,
                            const NodeDepth *depthStack, Dom *dom) {
-    DomStatus domumentStatus = DOM_SUCCESS;
+    DomStatus documentStatus = DOM_SUCCESS;
 
     if (newNodeID > 0 && previousNodeID > 0) {
         if (depthStack->len == 0) {
-            if ((domumentStatus = addNextNode(previousNodeID, newNodeID,
+            if ((documentStatus = addNextNode(previousNodeID, newNodeID,
                                               dom)) != DOM_SUCCESS) {
-                return domumentStatus;
+                return documentStatus;
             }
         } else {
             const unsigned int parentNodeID =
                 depthStack->stack[depthStack->len - 1];
-            if ((domumentStatus = addParentChild(parentNodeID, newNodeID,
+            if ((documentStatus = addParentChild(parentNodeID, newNodeID,
                                                  dom)) != DOM_SUCCESS) {
-                return domumentStatus;
+                return documentStatus;
             }
             if (parentNodeID == previousNodeID) {
-                if ((domumentStatus = addParentFirstChild(
+                if ((documentStatus = addParentFirstChild(
                          parentNodeID, newNodeID, dom)) != DOM_SUCCESS) {
-                    return domumentStatus;
+                    return documentStatus;
                 }
             } else {
-                if ((domumentStatus = addNextNode(previousNodeID, newNodeID,
+                if ((documentStatus = addNextNode(previousNodeID, newNodeID,
                                                   dom)) != DOM_SUCCESS) {
-                    return domumentStatus;
+                    return documentStatus;
                 }
             }
         }
     }
 
-    return domumentStatus;
+    return documentStatus;
+}
+
+DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
+                         const size_t elementLen, const node_id nodeID,
+                         const bool isPaired, Dom *dom,
+                         DataContainer *dataContainer) {
+    DomStatus domStatus = DOM_SUCCESS;
+    HashElement hashElement;
+    indexID newTagID = 0;
+    ElementStatus indexStatus =
+        newElementToIndex(&dataContainer->tags, &htmlString[elementStartIndex],
+                          elementLen, true, &hashElement, &newTagID);
+
+    switch (indexStatus) {
+    case ELEMENT_CREATED: {
+        if (addTagRegistration(newTagID, isPaired, &hashElement, dom) !=
+            DOM_SUCCESS) {
+            PRINT_ERROR("Failed to add tag registration.\n");
+            return DOM_NO_ELEMENT;
+        }
+        // Intentional fall through!!!
+    }
+    case ELEMENT_FOUND: {
+        if ((domStatus = setNodeTagID(nodeID, newTagID, dom)) != DOM_SUCCESS) {
+            PRINT_ERROR("Failed to set tag ID for new dom node.\n");
+            return domStatus;
+        }
+        break;
+    }
+    default: {
+        ERROR_WITH_CODE_ONLY(elementStatusToString(indexStatus),
+                             "Failed to insert into new tag names!\n");
+        return DOM_NO_ELEMENT;
+    }
+    }
+
+    return domStatus;
 }
 
 DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
@@ -70,13 +110,14 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
                        unsigned char *isSingle, TextParsing *context,
                        unsigned char exclamStart, Dom *dom,
                        DataContainer *dataContainer) {
-    DomStatus domumentStatus = DOM_SUCCESS;
+    ElementStatus elementStatus = ELEMENT_SUCCESS;
+    DomStatus documentStatus = DOM_SUCCESS;
     char ch = htmlString[++(*currentPosition)];
 
-    if ((domumentStatus = getNewNodeID(newNodeID, prevNodeID, dom)) !=
-        DOM_SUCCESS) {
+    if ((documentStatus = getNewNodeID(newNodeID, NODE_TYPE_DOCUMENT,
+                                       prevNodeID, dom)) != DOM_SUCCESS) {
         PRINT_ERROR("Failed to create node.\n");
-        return domumentStatus;
+        return documentStatus;
     }
 
     size_t elementStartIndex = *currentPosition;
@@ -126,6 +167,7 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
         }
 
         element_id attrKeyID = 0;
+        HashElement hashKey;
         if (ch == '=') {
             element_id attrValueID = 0;
 
@@ -134,12 +176,21 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
             // Expected syntax: key=value (This is invalid html, but will still
             // support it) We can do some more interesting stuff but currently
             // not required.
-            if (elementToIndex(&dataContainer->propKeys.container,
-                               &dataContainer->propKeys.pairedLen,
-                               &htmlString[attrKeyStartIndex], attrKeyLen, 1, 1,
-                               &attrKeyID) != ELEMENT_SUCCESS) {
-                PRINT_ERROR("Failed to create element ID for key.\n");
+            elementStatus = newElementToIndex(
+                &dataContainer->propKeys, &htmlString[attrKeyStartIndex],
+                attrKeyLen, true, &hashKey, &attrKeyID);
+            if (elementStatus != ELEMENT_FOUND &&
+                elementStatus != ELEMENT_CREATED) {
+                ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+                                     "Failed to get keyID");
                 return DOM_NO_ELEMENT;
+            }
+            if (elementStatus == ELEMENT_CREATED) {
+                if (addPropKeyRegistration(attrKeyID, &hashKey, dom) !=
+                    DOM_SUCCESS) {
+                    PRINT_ERROR("Failed to add prop key registration.\n");
+                    return DOM_NO_ELEMENT;
+                }
             }
             ch = htmlString[++(*currentPosition)];
 
@@ -160,16 +211,26 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
             }
 
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
+            HashElement hashValue;
 
-            if (elementToIndex(&dataContainer->propValues.container,
-                               &dataContainer->propValues.len,
-                               &htmlString[attrValueStartIndex], attrValueLen,
-                               1, 1, &attrValueID) != ELEMENT_SUCCESS) {
-                PRINT_ERROR("Failed to create element ID for value.\n");
+            elementStatus = newElementToIndex(
+                &dataContainer->propValues, &htmlString[attrValueStartIndex],
+                attrValueLen, true, &hashValue, &attrValueID);
+            if (elementStatus != ELEMENT_FOUND &&
+                elementStatus != ELEMENT_CREATED) {
+                ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+                                     "Failed to get value ID");
                 return DOM_NO_ELEMENT;
             }
+            if (elementStatus == ELEMENT_CREATED) {
+                if (addPropValueRegistration(attrValueID, &hashValue, dom) !=
+                    DOM_SUCCESS) {
+                    PRINT_ERROR("Failed to add prop value registration.\n");
+                    return DOM_NO_ELEMENT;
+                }
+            }
 
-            if ((domumentStatus = addProperty(
+            if ((documentStatus = addProperty(
                      *newNodeID, attrKeyID, attrValueID, dom)) != DOM_SUCCESS) {
                 PRINT_ERROR("Failed to add key-value property.\n");
                 return DOM_NO_ELEMENT;
@@ -185,21 +246,15 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
                 PRINT_ERROR("Failed to create element ID for key.\n");
                 return DOM_NO_ELEMENT;
             }
-            if ((domumentStatus = addBooleanProperty(*newNodeID, attrKeyID,
+            if ((documentStatus = addBooleanProperty(*newNodeID, attrKeyID,
                                                      dom)) != DOM_SUCCESS) {
                 PRINT_ERROR("Failed to add boolean property.\n");
-                return domumentStatus;
+                return documentStatus;
             }
         }
     }
     if (ch == '/') {
         *isSingle = 1;
-    }
-
-    element_id tagID = 0;
-    element_id *elementTypeLen = &dataContainer->tags.pairedLen;
-    if (*isSingle) {
-        elementTypeLen = &dataContainer->tags.singleLen;
     }
 
     char tagName[elementLen + 1];
@@ -214,41 +269,11 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
         *context = STYLE_CONTEXT;
     }
 
-    HashElement hashElement;
-    indexID newTagID = 0;
-    ElementStatus indexStatus = newElementToIndex(
-        &dataContainer->tagNames, &htmlString[elementStartIndex], elementLen,
-        true, &hashElement, &newTagID);
-
-    printf("trying to add new tag regsitraiotn\n");
-    switch (indexStatus) {
-    case ELEMENT_FOUND: {
-        printf("I need to set a node id to this tag id\n");
-        break;
-    }
-    case ELEMENT_CREATED: {
-        if (addTagRegistration(newTagID, &hashElement, dom) != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to add tag registration.\n");
-        }
-        printf("I need to set a node id to this tag id\n");
-        break;
-    }
-    default: {
-        PRINT_ERROR("Failed to insert into new tag names!\n");
-        return DOM_NO_ELEMENT;
-    }
-    }
-
-    if (elementToIndex(&dataContainer->tags.container, elementTypeLen,
-                       &htmlString[elementStartIndex], elementLen, !(*isSingle),
-                       1, &tagID) != ELEMENT_SUCCESS) {
-        PRINT_ERROR("Failed to create tag ID for element!\n");
-        return DOM_NO_ELEMENT;
-    }
-
-    if ((domumentStatus = setTagID(*newNodeID, tagID, dom)) != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to set tag ID to text id to domument.\n");
-        return domumentStatus;
+    if ((documentStatus = addTagToNodeID(htmlString, elementStartIndex,
+                                         elementLen, *newNodeID, !(*isSingle),
+                                         dom, dataContainer)) != DOM_SUCCESS) {
+        PRINT_ERROR("Failed to add tag to node ID.\n");
+        return documentStatus;
     }
 
     while (ch != '>' && ch != '\0') {
@@ -258,7 +283,7 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
         ch = htmlString[++(*currentPosition)];
     }
 
-    return domumentStatus;
+    return documentStatus;
 }
 
 DomStatus parseBasicdomNode(const char *htmlString, size_t *currentPosition,
@@ -290,7 +315,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                         const element_id textTagID, TextParsing *context,
                         unsigned char *isMerge, Dom *dom,
                         DataContainer *dataContainer) {
-    DomStatus domumentStatus = DOM_SUCCESS;
+    DomStatus documentStatus = DOM_SUCCESS;
     size_t elementStartIndex = *currentPosition;
     char ch = htmlString[*currentPosition];
     // Always consume at least a single character
@@ -332,7 +357,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                     strlen("</style")) == 0) {
             *context = BASIC_CONTEXT;
             if (elementLen < 1) {
-                return domumentStatus;
+                return documentStatus;
             }
         }
 
@@ -364,7 +389,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                     strlen("</script")) == 0) {
             *context = BASIC_CONTEXT;
             if (elementLen < 1) {
-                return domumentStatus;
+                return documentStatus;
             }
         }
 
@@ -394,7 +419,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     element_id textID = 0;
 
     Node prevNode = dom->nodes[*currentNodeID];
-    if (isText(prevNode.tagID)) {
+    if (prevNode.nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
         const char *prevText = getText(prevNode.nodeID, dom, dataContainer);
         const size_t mergedLen = strlen(prevText) + elementLen +
@@ -413,16 +438,16 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             return DOM_NO_ELEMENT;
         }
 
-        if ((domumentStatus = replaceTextNode(*currentNodeID, textID, dom)) !=
+        if ((documentStatus = replaceTextNode(*currentNodeID, textID, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to replace the text node for a merge.\n");
-            return domumentStatus;
+            return documentStatus;
         }
     } else {
-        if ((domumentStatus = getNewNodeID(currentNodeID, prevNodeID, dom)) !=
-            DOM_SUCCESS) {
+        if ((documentStatus = getNewNodeID(currentNodeID, NODE_TYPE_TEXT,
+                                           prevNodeID, dom)) != DOM_SUCCESS) {
             PRINT_ERROR("Failed to create node for domument.\n");
-            return domumentStatus;
+            return documentStatus;
         }
 
         if (elementToIndex(&dataContainer->text.container,
@@ -433,25 +458,25 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             return DOM_NO_ELEMENT;
         }
 
-        if ((domumentStatus = addTextNode(*currentNodeID, textID, dom)) !=
+        if ((documentStatus = addTextNode(*currentNodeID, textID, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to add text node to domument.\n");
-            return domumentStatus;
+            return documentStatus;
         }
 
-        if ((domumentStatus = setTagID(*currentNodeID, textTagID, dom)) !=
+        if ((documentStatus = setNodeTagID(*currentNodeID, textTagID, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to set tag ID to text id to domument.\n");
-            return domumentStatus;
+            return documentStatus;
         }
     }
 
-    return domumentStatus;
+    return documentStatus;
 }
 
 DomStatus parse(const char *htmlString, Dom *dom,
                 DataContainer *dataContainer) {
-    DomStatus domumentStatus = DOM_SUCCESS;
+    DomStatus documentStatus = DOM_SUCCESS;
 
     element_id textTagID = 0;
     if (textElementToIndex(&textTagID) != ELEMENT_SUCCESS) {
@@ -490,11 +515,11 @@ DomStatus parse(const char *htmlString, Dom *dom,
             }
             unsigned char isMerge = 0;
 
-            if ((domumentStatus = parseTextNode(
+            if ((documentStatus = parseTextNode(
                      htmlString, &currentPosition, &prevNodeID, &currentNodeID,
                      textTagID, &context, &isMerge, dom, dataContainer)) !=
                 DOM_SUCCESS) {
-                return domumentStatus;
+                return documentStatus;
             }
 
             if (context == ROGUE_OPEN_TAG) {
@@ -502,10 +527,10 @@ DomStatus parse(const char *htmlString, Dom *dom,
             }
 
             if (!isMerge) {
-                if ((domumentStatus =
+                if ((documentStatus =
                          updateReferences(currentNodeID, prevNodeID, &nodeStack,
                                           dom)) != DOM_SUCCESS) {
-                    return domumentStatus;
+                    return documentStatus;
                 }
             }
         }
@@ -547,32 +572,32 @@ DomStatus parse(const char *htmlString, Dom *dom,
                 // Any <! is treated as a standard single tag and during
                 // printing !domTYPE is special case.
                 else {
-                    if ((domumentStatus = parseExclamdomNode(
+                    if ((documentStatus = parseExclamdomNode(
                              htmlString, &currentPosition, &prevNodeID,
                              &currentNodeID, dom, dataContainer)) !=
                         DOM_SUCCESS) {
-                        return domumentStatus;
+                        return documentStatus;
                     }
-                    if ((domumentStatus = updateReferences(
+                    if ((documentStatus = updateReferences(
                              currentNodeID, prevNodeID, &nodeStack, dom)) !=
                         DOM_SUCCESS) {
-                        return domumentStatus;
+                        return documentStatus;
                     }
                 }
             }
             // basic dom node.
             else {
                 unsigned char isSingle = 0;
-                if ((domumentStatus = parseBasicdomNode(
+                if ((documentStatus = parseBasicdomNode(
                          htmlString, &currentPosition, &prevNodeID,
                          &currentNodeID, &isSingle, &context, dom,
                          dataContainer)) != DOM_SUCCESS) {
-                    return domumentStatus;
+                    return documentStatus;
                 }
-                if ((domumentStatus =
+                if ((documentStatus =
                          updateReferences(currentNodeID, prevNodeID, &nodeStack,
                                           dom)) != DOM_SUCCESS) {
-                    return domumentStatus;
+                    return documentStatus;
                 }
                 if (!isSingle) {
                     nodeStack.stack[nodeStack.len] = currentNodeID;
@@ -582,5 +607,5 @@ DomStatus parse(const char *htmlString, Dom *dom,
         }
     }
 
-    return domumentStatus;
+    return documentStatus;
 }

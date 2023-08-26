@@ -61,17 +61,10 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
     return true;
 }
 
-QueryStatus getTagID(const char *tag, element_id *tagID,
+QueryStatus getTagID(const char *tag, indexID *tagID,
                      const DataContainer *dataContainer) {
-    if (findElement(&dataContainer->tags.container,
-                    &dataContainer->tags.pairedLen, tag, 0,
-                    tagID) == ELEMENT_SUCCESS) {
-        return QUERY_SUCCESS;
-    }
-
-    if (findElement(&dataContainer->tags.container,
-                    &dataContainer->tags.singleLen, tag, SINGLES_OFFSET,
-                    tagID) == ELEMENT_SUCCESS) {
+    if (containsStringWithDataHashSet(&dataContainer->tags.set, tag,
+                                      tagID)) {
         return QUERY_SUCCESS;
     }
 

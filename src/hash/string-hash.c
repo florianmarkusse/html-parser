@@ -18,6 +18,8 @@ HashStatus initStringHashSet(StringHashSet *set, const size_t capacity) {
     return HASH_SUCCESS;
 }
 
+// Sets the indexID that is used in the DOM, starting at 1 because then 0 can be
+// used as an error/init value.
 HashStatus insertStringWithDataHashSet(StringHashSet *set, const char *string,
                                        HashElement *hashElement,
                                        indexID *indexID) {
@@ -82,7 +84,7 @@ bool containsStringWithDataHashSet(const StringHashSet *set, const char *string,
 const char *getStringFromHashSet(const StringHashSet *set,
                                  const HashElement *hashElement) {
     return set
-        ->array[((hashElement->hash % set->arrayLen) + hashElement->offset)]
+        ->array[((hashElement->hash + hashElement->offset) % set->arrayLen)]
         .string;
 }
 
@@ -90,6 +92,34 @@ void destroyStringHashSet(StringHashSet *set) {
     FREE_TO_NULL(set->array);
     set->arrayLen = 0;
     set->entries = 0;
+}
+
+ComparisonStatus equalsStringHashSet(const StringHashSet *set1,
+                                     const StringHashSet *set2) {
+    if (set1->entries != set2->entries) {
+        return COMPARISON_DIFFERENT_SIZES;
+    }
+
+    StringHashSetIterator iterator;
+    initStringHashSetIterator(&iterator, set1);
+
+    while (hasNextStringHashSetIterator(&iterator)) {
+        const char *element = nextStringHashSetIterator(&iterator);
+        if (!containsStringHashSet(set2, element)) {
+            return COMPARISON_DIFFERENT_CONTENT;
+        }
+    }
+
+    initStringHashSetIterator(&iterator, set2);
+
+    while (hasNextStringHashSetIterator(&iterator)) {
+        const char *element = nextStringHashSetIterator(&iterator);
+        if (!containsStringHashSet(set1, element)) {
+            return COMPARISON_DIFFERENT_CONTENT;
+        }
+    }
+
+    return COMPARISON_SUCCESS;
 }
 
 void initStringHashSetIterator(StringHashSetIterator *iterator,
@@ -103,6 +133,8 @@ const char *nextStringHashSetIterator(StringHashSetIterator *iterator) {
 
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index].string != NULL) {
+            printf("the index is %hu\n", set->array[iterator->index].indexID);
+            printf("the hash is %zu\n", iterator->index);
             return set->array[iterator->index++].string;
         }
         iterator->index++;
@@ -114,7 +146,7 @@ const char *nextStringHashSetIterator(StringHashSetIterator *iterator) {
 bool hasNextStringHashSetIterator(StringHashSetIterator *iterator) {
     const StringHashSet *set = iterator->set;
     while (iterator->index < set->arrayLen) {
-        if (&set->array[iterator->index] != NULL) {
+        if (set->array[iterator->index].string != NULL) {
             return true;
         }
         iterator->index++;

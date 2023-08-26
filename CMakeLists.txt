@@ -34,6 +34,7 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/dom/dom.c"
     "src/dom/dom-writing.c"
     "src/dom/dom-utils.c"
+    "src/dom/dom-registry.c"
     "src/dom/dom-user.c"
     "src/parser/parser.c" 
     "src/dom/comparison/dom-comparison.c"

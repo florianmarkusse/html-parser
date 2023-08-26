@@ -32,12 +32,13 @@ void getBits(const element_id tagID, char *bits, const size_t size) {
 
 void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
                const DataContainer *dataContainer, FILE *output) {
-    if (nodeID == ERROR_NODE_ID) {
-        return;
-    }
     Node node = dom->nodes[nodeID];
 
-    if (isText(node.tagID)) {
+    if (node.nodeType == NODE_TYPE_ERROR) {
+        return;
+    }
+
+    if (node.nodeType == NODE_TYPE_TEXT) {
         const char *text = getText(node.nodeID, dom, dataContainer);
         if (text != NULL) {
             fprintf(output, "%s", text);
@@ -45,15 +46,14 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
         return;
     }
 
-    const char *tag = dataContainer->tags.container.elements[node.tagID];
+    const char *tag = getTag(node.tagID, dom, dataContainer);
     fprintf(output, "<%s", tag);
 
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
         BooleanProperty boolProp = dom->boolProps[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            char *prop =
-                dataContainer->propKeys.container.elements[boolProp.propID];
+            const char *prop = getBoolProp(boolProp.propID, dom, dataContainer);
             fprintf(output, " %s", prop);
         }
     }
@@ -62,15 +62,16 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
         Property prop = dom->props[i];
 
         if (prop.nodeID == node.nodeID) {
-            char *key = dataContainer->propKeys.container.elements[prop.keyID];
-            char *value =
-                dataContainer->propValues.container.elements[prop.valueID];
+            const char *key = getPropKey(prop.keyID, dom, dataContainer);
+            const char *value = getPropValue(prop.valueID, dom, dataContainer);
             fprintf(output, " %s=\"%s\"", key, value);
         }
     }
 
-    if (isSingle(node.tagID)) {
-        if (strcmp(tag, "!domTYPE") == 0) {
+    TagRegistration *tagRegistration = NULL;
+    getTagRegistration(node.tagID, dom, &tagRegistration);
+    if (!tagRegistration->isPaired) {
+        if (strcmp(tag, "!DOCTYPE") == 0) {
             fprintf(output, ">");
         } else {
             fprintf(output, "/>");
@@ -116,38 +117,32 @@ FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
     return FILE_SUCCESS;
 }
 
+void printBasicRegistry(const char *registryName,
+                        const BasicRegistry *basicRegistry,
+                        const StringHashSet *set) {
+    printf("%-20s registration nodes inside DOM...\n", registryName);
+    printf("total number of nodes: %zu\n", basicRegistry->len);
+    for (size_t i = 0; i < basicRegistry->len; i++) {
+        Registration registration = basicRegistry->registry[i];
+        const char *value =
+            getStringFromHashSet(set, &registration.hashElement);
+        printf("index ID: %-5u value: %-20s hash: %zu offset: %u\n",
+               registration.indexID, value, registration.hashElement.hash,
+               registration.hashElement.offset);
+    }
+    printf("\n");
+}
+
 void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("printing DOM status...\n\n");
-    printf(" in here\n");
-    printf("single lenn %u\n", dataContainer->tags.singleLen);
-    printf("single offset %u\n", SINGLES_OFFSET);
-    printf("paired len %u\n", dataContainer->tags.pairedLen);
 
     printf("nodes inside DOM...\n");
     printf("total number of nodes: %zu\n", dom->nodeLen);
     for (size_t i = 0; i < dom->nodeLen; i++) {
         Node node = dom->nodes[i];
 
-        if (node.nodeID == 0) {
-            printf("tag: %-6s bits: %-18s", "xxxxx", "xxxxxxxxxxxxxxxx");
-            printf("%-8s %-20s with node ID: %-4hu\n", "error", "internal use",
-                   node.nodeID);
-        } else {
-            const char *type =
-                dataContainer->tags.container.elements[node.tagID];
-
-            size_t bufferSize = sizeof(element_id) * 8 + 1;
-            char bitBuffer[bufferSize];
-            getBits(node.tagID, bitBuffer, bufferSize);
-            printf("tag: %-6u bits: %-18s", node.tagID, bitBuffer);
-            if (isSingle(node.tagID)) {
-                printf("%-8s %-20s with node ID: %-4hu\n", "single",
-                       isText(node.tagID) ? "--text--" : type, node.nodeID);
-            } else {
-                printf("%-8s %-20s with node ID: %-4hu\n", "paired", type,
-                       node.nodeID);
-            }
-        }
+        printf("node ID: %-5u node type: %-10s with tag ID: %-5u\n",
+               node.nodeID, nodeTypeToString(node.nodeType), node.tagID);
     }
     printf("\n");
 
@@ -156,26 +151,28 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
            dom->tagRegistryLen);
     for (size_t i = 0; i < dom->tagRegistryLen; i++) {
         TagRegistration tagRegistration = dom->tagRegistry[i];
-        const char *type = getStringFromHashSet(&dataContainer->tagNames.set,
-                                                &tagRegistration.hashElement);
-        printf("tag: %-20s isPaired: %d hash: %zu offset: %u", type,
-               tagRegistration.isPaired, tagRegistration.hashElement.hash,
+        const char *tag = getStringFromHashSet(&dataContainer->tags.set,
+                                               &tagRegistration.hashElement);
+        printf("tag ID: %-5u tag: %-20s isPaired: %d hash: %zu offset: %u\n",
+               tagRegistration.tagID, tag, tagRegistration.isPaired,
+               tagRegistration.hashElement.hash,
                tagRegistration.hashElement.offset);
     }
     printf("\n");
+
+    printBasicRegistry("bool props", &dom->boolPropRegistry,
+                       &dataContainer->boolProps.set);
+    printBasicRegistry("key props", &dom->propKeyRegistry,
+                       &dataContainer->propKeys.set);
+    printBasicRegistry("value props", &dom->propValueRegistry,
+                       &dataContainer->propValues.set);
+    printBasicRegistry("text", &dom->textRegistry, &dataContainer->text.set);
 
     printf("text nodes inside DOM...\n");
     printf("total number of text nodes: %zu\n", dom->textLen);
     for (size_t i = 0; i < dom->textLen; i++) {
         TextNode textNode = dom->text[i];
-        const char *type =
-            dataContainer->text.container.elements[textNode.textID];
-
-        size_t bufferSize = sizeof(element_id) * 8 + 1;
-        char bitBuffer[bufferSize];
-        getBits(textNode.textID, bitBuffer, bufferSize);
-        printf("text: %-6u bits: %-18s", textNode.textID, bitBuffer);
-        printf("%-20s with node ID: %-4hu\n", type, textNode.nodeID);
+        printf("node ID: %-5u text ID: %-5u", textNode.nodeID, textNode.textID);
     }
     printf("\n");
 
@@ -183,16 +180,8 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
         BooleanProperty boolProps = dom->boolProps[i];
-        const char *type =
-            dataContainer->propKeys.container.elements[boolProps.propID];
-
-        size_t bufferSize = sizeof(element_id) * 8 + 1;
-        char bitBuffer[bufferSize];
-        getBits(boolProps.propID, bitBuffer, bufferSize);
-        printf("boolean property: %-6u bits: %-18s", boolProps.propID,
-               bitBuffer);
-
-        printf("%-20s with node ID: %-4hu\n", type, boolProps.nodeID);
+        printf("node ID: %-5u prop ID: %-5u", boolProps.nodeID,
+               boolProps.propID);
     }
     printf("\n");
 
@@ -200,20 +189,8 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("total number of key-value properties: %zu\n", dom->propsLen);
     for (size_t i = 0; i < dom->propsLen; i++) {
         Property property = dom->props[i];
-        const char *key =
-            dataContainer->propKeys.container.elements[property.keyID];
-        const char *value =
-            dataContainer->propValues.container.elements[property.valueID];
-
-        size_t bufferSize = sizeof(element_id) * 8 + 1;
-        char bitBuffer[bufferSize];
-        getBits(property.keyID, bitBuffer, bufferSize);
-        printf("key: %-6u bits: %-18s", property.keyID, bitBuffer);
-        getBits(property.valueID, bitBuffer, bufferSize);
-        printf("value: %-6u bits: %-18s", property.valueID, bitBuffer);
-
-        printf("%-20s %-20s with node ID: %-4hu\n", key, value,
-               property.nodeID);
+        printf("node ID: %-5u key ID: %-5u value ID: %-5u", property.nodeID,
+               property.keyID, property.valueID);
     }
     printf("\n");
 
@@ -221,7 +198,7 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("total number of parent-first-child: %zu\n",
            dom->parentFirstChildLen);
     for (size_t i = 0; i < dom->parentFirstChildLen; i++) {
-        printf("parent: %-4hu first child: %-4hu\n",
+        printf("parent node ID: %-5u first child node ID: %-5u\n",
                dom->parentFirstChilds[i].parentID,
                dom->parentFirstChilds[i].childID);
     }
@@ -230,7 +207,7 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("parent-child inside DOM...\n");
     printf("total number of parent-child: %zu\n", dom->parentChildLen);
     for (size_t i = 0; i < dom->parentChildLen; i++) {
-        printf("parent: %-4hu child: %-4hu\n", dom->parentChilds[i].parentID,
+        printf("parent: %-5u child: %-5u\n", dom->parentChilds[i].parentID,
                dom->parentChilds[i].childID);
     }
     printf("\n");
@@ -238,7 +215,7 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("next nodes inside DOM...\n");
     printf("total number of next nodes: %zu\n", dom->nextNodeLen);
     for (size_t i = 0; i < dom->nextNodeLen; i++) {
-        printf("current node: %-4hu next node: %-4hu\n",
+        printf("current node: %-5u next node: %-5u\n",
                dom->nextNodes[i].currentNodeID, dom->nextNodes[i].nextNodeID);
     }
     printf("\n\n");

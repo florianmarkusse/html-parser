@@ -9,6 +9,6 @@ DataPageStatus insertIntoPage(const void *data, size_t byteLen,
                               ElementsContainer *container);
 
 DataPageStatus newInsertIntoPage(const void *data, size_t byteLen,
-                                 size_t totalPages, NewElements *newElements,
+                                 size_t totalPages, StringRegistry *newElements,
                                  HashElement *hashElement, indexID *indexID);
 #endif

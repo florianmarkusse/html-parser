@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "flo/html-parser/comparison/comparison-status.h"
 #include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "hash-element.h"
@@ -37,6 +38,9 @@ bool containsStringWithDataHashSet(const StringHashSet *set, const char *string,
                                    indexID *indexID);
 const char *getStringFromHashSet(const StringHashSet *set,
                                  const HashElement *hashElement);
+
+ComparisonStatus equalsStringHashSet(const StringHashSet *set1,
+                                     const StringHashSet *set2);
 
 void destroyStringHashSet(StringHashSet *set);
 

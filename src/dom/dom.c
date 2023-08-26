@@ -6,17 +6,53 @@
 #include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/print/error.h"
 
+void initBasicRegistry(BasicRegistry *basicRegistry,
+                       const Registration *initRegistration,
+                       const size_t pageSize, const size_t elementsPerPage) {
+    basicRegistry->registry = malloc(pageSize);
+    basicRegistry->registry[0] = *initRegistration;
+    basicRegistry->len =
+        1; // Start at 1 so we don't need to do tagRegistry[x - 1]
+    basicRegistry->cap = elementsPerPage;
+}
+
 DomStatus createDom(const char *htmlString, Dom *dom,
                     DataContainer *dataContainer) {
     dom->firstNodeID = 0;
 
+    TagRegistration initTag;
+    initTag.tagID = 0;
+    initTag.isPaired = false;
+    initTag.hashElement.hash = 0;
+    initTag.hashElement.offset = 0;
+
+    Registration initRegistration;
+    initRegistration.indexID = 0;
+    initRegistration.hashElement.hash = 0;
+    initRegistration.hashElement.offset = 0;
+
     dom->tagRegistry = malloc(TAG_REGISTRY_PAGE_SIZE);
-    dom->tagRegistryLen = 0;
+    dom->tagRegistry[0] = initTag;
+    dom->tagRegistryLen =
+        1; // Start at 1 so we don't need to do tagRegistry[x - 1]
     dom->tagRegistryCap = TAG_REGISTRATIONS_PER_PAGE;
+
+    initBasicRegistry(&dom->boolPropRegistry, &initRegistration,
+                      BOOL_PROP_REGISTRY_PAGE_SIZE,
+                      BOOL_PROP_REGISTRATIONS_PER_PAGE);
+    initBasicRegistry(&dom->propKeyRegistry, &initRegistration,
+                      PROP_KEY_REGISTRY_PAGE_SIZE,
+                      PROP_KEY_REGISTRATIONS_PER_PAGE);
+    initBasicRegistry(&dom->propValueRegistry, &initRegistration,
+                      PROP_VALUE_REGISTRY_PAGE_SIZE,
+                      PROP_VALUE_REGISTRATIONS_PER_PAGE);
+    initBasicRegistry(&dom->textRegistry, &initRegistration,
+                      TEXT_REGISTRY_PAGE_SIZE, TEXT_REGISTRATIONS_PER_PAGE);
 
     dom->nodes = malloc(NODES_PAGE_SIZE);
     Node errorNode;
     errorNode.nodeID = ERROR_NODE_ID;
+    errorNode.nodeType = NODE_TYPE_ERROR;
     errorNode.tagID = ERROR_NODE_ID;
     dom->nodes[0] = errorNode;
     dom->nodeLen = 1; // We start at 1 because 0 is used as error id, and
@@ -48,9 +84,12 @@ DomStatus createDom(const char *htmlString, Dom *dom,
     dom->textCap = TEXT_NODES_PER_PAGE;
 
     if (dom->nodes == NULL || dom->tagRegistry == NULL ||
-        dom->parentFirstChilds == NULL || dom->parentChilds == NULL ||
-        dom->nextNodes == NULL || dom->boolProps == NULL ||
-        dom->props == NULL || dom->text == NULL) {
+        dom->boolPropRegistry.registry == NULL ||
+        dom->propKeyRegistry.registry == NULL ||
+        dom->propValueRegistry.registry == NULL ||
+        dom->textRegistry.registry == NULL || dom->parentFirstChilds == NULL ||
+        dom->parentChilds == NULL || dom->nextNodes == NULL ||
+        dom->boolProps == NULL || dom->props == NULL || dom->text == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDom(dom);
         return DOM_ERROR_MEMORY;
@@ -63,62 +102,28 @@ DomStatus createDom(const char *htmlString, Dom *dom,
     return domumentStatus;
 }
 
-DomStatus createNode(node_id *nodeID, Dom *dom) {
+DomStatus createNode(node_id *nodeID, const NodeType nodeType, Dom *dom) {
     if ((dom->nodes = resizeArray(dom->nodes, dom->nodeLen, &dom->nodeCap,
                                   sizeof(Node), NODES_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 
     Node *newNode = &(dom->nodes[dom->nodeLen]);
+    newNode->nodeType = nodeType;
     newNode->nodeID = dom->nodeLen;
+    dom->nodeLen++;
 
     if (dom->firstNodeID == 0) {
         dom->firstNodeID = newNode->nodeID;
     }
 
-    dom->nodeLen++;
     *nodeID = newNode->nodeID;
     return DOM_SUCCESS;
 }
-DomStatus setTagID(const node_id nodeID, const element_id tagID, Dom *dom) {
+DomStatus setNodeTagID(const node_id nodeID, const indexID tagID, Dom *dom) {
     Node *createdNode = &(dom->nodes[nodeID]);
     createdNode->tagID = tagID;
 
-    return DOM_SUCCESS;
-}
-
-DomStatus addNode(node_id *nodeID, element_id tagID, Dom *dom) {
-    if ((dom->nodes = resizeArray(dom->nodes, dom->nodeLen, &dom->nodeCap,
-                                  sizeof(Node), NODES_PER_PAGE)) == NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    Node *newNode = &(dom->nodes[dom->nodeLen]);
-    newNode->nodeID = dom->nodeLen;
-    newNode->tagID = tagID;
-
-    if (dom->firstNodeID == 0) {
-        dom->firstNodeID = newNode->nodeID;
-    }
-
-    dom->nodeLen++;
-    *nodeID = newNode->nodeID;
-    return DOM_SUCCESS;
-}
-
-DomStatus addTagRegistration(const indexID tagID,
-                             const HashElement *hashElement, Dom *dom) {
-    if ((dom->tagRegistry = resizeArray(
-             dom->tagRegistry, dom->tagRegistryLen, &dom->tagRegistryCap,
-             sizeof(TagRegistration), TAG_REGISTRATIONS_PER_PAGE)) == NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    TagRegistration *tagRegistry = &(dom->tagRegistry[dom->tagRegistryLen]);
-    tagRegistry->tagID = tagID;
-    tagRegistry->hashElement.hash = hashElement->hash;
-    tagRegistry->hashElement.offset = hashElement->offset;
-    dom->tagRegistryLen++;
     return DOM_SUCCESS;
 }
 
@@ -229,6 +234,10 @@ DomStatus replaceTextNode(const node_id nodeID, element_id newTextID,
 void destroyDom(Dom *dom) {
     FREE_TO_NULL(dom->nodes);
     FREE_TO_NULL(dom->tagRegistry);
+    FREE_TO_NULL(dom->boolPropRegistry.registry);
+    FREE_TO_NULL(dom->propKeyRegistry.registry);
+    FREE_TO_NULL(dom->propValueRegistry.registry);
+    FREE_TO_NULL(dom->textRegistry.registry);
     FREE_TO_NULL(dom->parentFirstChilds);
     FREE_TO_NULL(dom->parentChilds);
     FREE_TO_NULL(dom->nextNodes);

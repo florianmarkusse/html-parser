@@ -27,18 +27,17 @@ typedef uint16_t element_id;
 
 #define TOTAL_PAGES (1U << 8U)
 
+// TODO(florian): THIS IS VERY BIG TO START WITH
 // The size of each page of each global.
 #define TAGS_PAGE_SIZE (1U << 12U)
+#define BOOL_PROPS_PAGE_SIZE (1U << 12U)
 #define PROP_KEYS_PAGE_SIZE (1U << 12U)
 #define PROP_VALUES_PAGE_SIZE (1U << 14U)
 #define TEXT_PAGE_SIZE (1U << 17U)
 
-// TODO(florian): imeplement realloc with normal growth, for elements array at
-// least
 // TODO(florian): maybe also do smth similar with the pages array instead of
 // having fixed pagesize?
 typedef struct {
-    char **elements;
     DataPage *pages;
     page_id pageLen;
     size_t pageSize;

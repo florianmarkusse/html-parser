@@ -5,8 +5,8 @@
 
 typedef struct {
     node_id nodeID;
-    element_id keyID;
-    element_id valueID;
+    indexID keyID;
+    indexID valueID;
 } __attribute__((aligned(8))) Property;
 
 #endif

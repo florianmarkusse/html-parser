@@ -8,55 +8,76 @@
 #include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/utils/print/error.h"
 
-#define LEN_START_VALUE 1
-
-ElementStatus createDataContainer(DataContainer *dataContainer) {
-    // The Len here start at LEN_START_VALUE, because we hash the numbers and
-    // use 0 as an indication that there is no value at the location yet.
-
-    ElementStatus result = ELEMENT_SUCCESS;
-    ElementStatus currentStatus = ELEMENT_SUCCESS;
-
-    if (initStringHashSet(&dataContainer->tagNames.set, TAGS_PAGE_SIZE) !=
+ElementStatus initStringRegistry(StringRegistry *stringRegistry,
+                                 const size_t stringsCapacity,
+                                 const size_t pageSize) {
+    if (initStringHashSet(&stringRegistry->set, stringsCapacity) !=
         HASH_SUCCESS) {
         PRINT_ERROR("Failure initing hash set!\n");
         return ELEMENT_MEMORY;
     }
-    if ((currentStatus =
-             initElementsContainer(&dataContainer->tagNames.container,
-                                   TAGS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
-        result = currentStatus;
+
+    ElementStatus result = ELEMENT_SUCCESS;
+    if ((result = initElementsContainer(&stringRegistry->container,
+                                        pageSize)) != ELEMENT_SUCCESS) {
+        destroyStringHashSet(&stringRegistry->set);
     }
 
-    if ((currentStatus = initElementsContainer(&dataContainer->tags.container,
-                                               TAGS_PAGE_SIZE)) !=
+    return result;
+}
+
+void destroyStringRegistry(StringRegistry *stringRegistry) {
+    destroyStringHashSet(&stringRegistry->set);
+    destroyElementsContainer(&stringRegistry->container);
+}
+
+// TODO(florian): USE MORE SENSIBLE VALUES THAN TOTAL_ELEMENTS
+ElementStatus createDataContainer(DataContainer *dataContainer) {
+    ElementStatus result = ELEMENT_SUCCESS;
+    ElementStatus currentStatus = ELEMENT_SUCCESS;
+
+    if ((currentStatus = initStringRegistry(&dataContainer->tags,
+                                            TOTAL_ELEMENTS, TAGS_PAGE_SIZE)) !=
         ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(elementStatusToString(currentStatus),
+                             "Failed to initialize tags string registry!\n");
         result = currentStatus;
     }
-    dataContainer->tags.pairedLen = LEN_START_VALUE;
-    dataContainer->tags.singleLen = LEN_START_VALUE;
 
     if ((currentStatus =
-             initElementsContainer(&dataContainer->propKeys.container,
-                                   PROP_KEYS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+             initStringRegistry(&dataContainer->boolProps, TOTAL_ELEMENTS,
+                                BOOL_PROPS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(
+            elementStatusToString(currentStatus),
+            "Failed to initialize bool props string registry!\n");
         result = currentStatus;
     }
-    dataContainer->propKeys.pairedLen = LEN_START_VALUE;
-    dataContainer->propKeys.singleLen = LEN_START_VALUE;
 
     if ((currentStatus =
-             initElementsContainer(&dataContainer->propValues.container,
-                                   PROP_VALUES_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+             initStringRegistry(&dataContainer->propKeys, TOTAL_ELEMENTS,
+                                PROP_KEYS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(
+            elementStatusToString(currentStatus),
+            "Failed to initialize prop keys string registry!\n");
         result = currentStatus;
     }
-    dataContainer->propValues.len = LEN_START_VALUE;
 
-    if ((currentStatus = initElementsContainer(&dataContainer->text.container,
-                                               TEXT_PAGE_SIZE)) !=
+    if ((currentStatus =
+             initStringRegistry(&dataContainer->propValues, TOTAL_ELEMENTS,
+                                PROP_VALUES_PAGE_SIZE)) != ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(
+            elementStatusToString(currentStatus),
+            "Failed to initialize prop values string registry!\n");
+        result = currentStatus;
+    }
+
+    if ((currentStatus = initStringRegistry(&dataContainer->text,
+                                            TOTAL_ELEMENTS, TEXT_PAGE_SIZE)) !=
         ELEMENT_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(elementStatusToString(currentStatus),
+                             "Failed to initialize text string registry!\n");
         result = currentStatus;
     }
-    dataContainer->text.len = LEN_START_VALUE;
 
     if (result != ELEMENT_SUCCESS) {
         destroyDataContainer(dataContainer);
@@ -66,22 +87,11 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
 }
 
 void destroyDataContainer(DataContainer *dataContainer) {
-    destroyStringHashSet(&dataContainer->tagNames.set);
-    destroyElementsContainer(&dataContainer->tagNames.container);
-
-    destroyElementsContainer(&dataContainer->tags.container);
-    dataContainer->tags.pairedLen = 0;
-    dataContainer->tags.singleLen = 0;
-
-    destroyElementsContainer(&dataContainer->propKeys.container);
-    dataContainer->propKeys.pairedLen = 0;
-    dataContainer->propKeys.singleLen = 0;
-
-    destroyElementsContainer(&dataContainer->propValues.container);
-    dataContainer->propValues.len = 0;
-
-    destroyElementsContainer(&dataContainer->text.container);
-    dataContainer->text.len = 0;
+    destroyStringRegistry(&dataContainer->tags);
+    destroyStringRegistry(&dataContainer->boolProps);
+    destroyStringRegistry(&dataContainer->propKeys);
+    destroyStringRegistry(&dataContainer->propValues);
+    destroyStringRegistry(&dataContainer->text);
 }
 
 ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
@@ -131,72 +141,66 @@ ElementStatus createElement(ElementsContainer *container, const char *element,
     return ELEMENT_SUCCESS;
 }
 
-ElementStatus findElement(const ElementsContainer *container,
-                          const element_id *currentElementLen,
-                          const char *elementName, element_id offsetMask,
-                          element_id *elementID) {
-    for (element_id i = offsetMask + LEN_START_VALUE;
-         i < (offsetMask | *currentElementLen); ++i) {
-        if (strcmp(container->elements[i], elementName) == 0) {
-            *elementID = i;
-            return ELEMENT_SUCCESS;
-        }
-    }
+// ElementStatus findElement(const ElementsContainer *container,
+//                           const element_id *currentElementLen,
+//                           const char *elementName, element_id offsetMask,
+//                           element_id *elementID) {
+//     for (element_id i = offsetMask + LEN_START_VALUE;
+//          i < (offsetMask | *currentElementLen); ++i) {
+//         if (strcmp(container->elements[i], elementName) == 0) {
+//             *elementID = i;
+//             return ELEMENT_SUCCESS;
+//         }
+//     }
+//
+//     return ELEMENT_NOT_FOUND_OR_CREATED;
+// }
+//
+// ElementStatus findOrCreateElement(ElementsContainer *container,
+//                                   const char *elementName,
+//                                   element_id *currentElementLen,
+//                                   const element_id offsetMask,
+//                                   element_id *elementID) {
+//     if (findElement(container, currentElementLen, elementName, offsetMask,
+//                     elementID) == ELEMENT_SUCCESS) {
+//         return ELEMENT_SUCCESS;
+//     }
+//
+//     return createElement(container, elementName, currentElementLen,
+//     offsetMask,
+//                          elementID);
+// }
+//
+// ElementStatus textElementToIndex(element_id *elementID) {
+//     *elementID = TEXT_OFFSET;
+//     return ELEMENT_SUCCESS;
+// }
+//
+// ElementStatus
+// elementToIndex(ElementsContainer *container, element_id *currentElementLen,
+//                const char *elementStart, const size_t elementLength,
+//                const unsigned char isPaired, const unsigned char
+//                searchElements, element_id *elementID) {
+//     char buffer[container->pageSize];
+//     const ElementStatus sizeCheck = elementSizeCheck(
+//         buffer, container->pageSize, elementStart, elementLength);
+//     if (sizeCheck != ELEMENT_SUCCESS) {
+//         return sizeCheck;
+//     }
+//
+//     memcpy(buffer, elementStart, elementLength);
+//     buffer[elementLength] = '\0';
+//
+//     if (searchElements) {
+//         return findOrCreateElement(container, buffer, currentElementLen,
+//                                    (isPaired ? 0 : SINGLES_OFFSET),
+//                                    elementID);
+//     }
+//     return createElement(container, buffer, currentElementLen,
+//                          (isPaired ? 0 : SINGLES_OFFSET), elementID);
+// }
 
-    return ELEMENT_NOT_FOUND_OR_CREATED;
-}
-
-ElementStatus findOrCreateElement(ElementsContainer *container,
-                                  const char *elementName,
-                                  element_id *currentElementLen,
-                                  const element_id offsetMask,
-                                  element_id *elementID) {
-    if (findElement(container, currentElementLen, elementName, offsetMask,
-                    elementID) == ELEMENT_SUCCESS) {
-        return ELEMENT_SUCCESS;
-    }
-
-    return createElement(container, elementName, currentElementLen, offsetMask,
-                         elementID);
-}
-
-ElementStatus textElementToIndex(element_id *elementID) {
-    *elementID = TEXT_OFFSET;
-    return ELEMENT_SUCCESS;
-}
-
-ElementStatus
-elementToIndex(ElementsContainer *container, element_id *currentElementLen,
-               const char *elementStart, const size_t elementLength,
-               const unsigned char isPaired, const unsigned char searchElements,
-               element_id *elementID) {
-    char buffer[container->pageSize];
-    const ElementStatus sizeCheck = elementSizeCheck(
-        buffer, container->pageSize, elementStart, elementLength);
-    if (sizeCheck != ELEMENT_SUCCESS) {
-        return sizeCheck;
-    }
-
-    memcpy(buffer, elementStart, elementLength);
-    buffer[elementLength] = '\0';
-
-    if (searchElements) {
-        return findOrCreateElement(container, buffer, currentElementLen,
-                                   (isPaired ? 0 : SINGLES_OFFSET), elementID);
-    }
-    return createElement(container, buffer, currentElementLen,
-                         (isPaired ? 0 : SINGLES_OFFSET), elementID);
-}
-
-unsigned char isSingle(const element_id index) {
-    return (index >> SINGLES_MASK) != 0;
-}
-
-unsigned char isText(const element_id index) {
-    return (index >> TEXT_MASK) != 0;
-}
-
-ElementStatus createNewElement(NewElements *newElements, const char *element,
+ElementStatus createNewElement(StringRegistry *newElements, const char *element,
                                HashElement *hashElement, indexID *indexID) {
     // insert element into the has table.
     DataPageStatus insertStatus =
@@ -209,14 +213,16 @@ ElementStatus createNewElement(NewElements *newElements, const char *element,
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
 
-    return ELEMENT_SUCCESS;
+    return ELEMENT_CREATED;
 }
 
 /**
  * If the element is found, then only indexID is set. Otherwise, if a new
  * element had to be created, hashElement is also filled.
  */
-ElementStatus newElementToIndex(NewElements *newElements,
+// TODO(florian): remove seaarchElement parameter once text values completely
+// bypass the hash
+ElementStatus newElementToIndex(StringRegistry *newElements,
                                 const char *elementStart, size_t elementLength,
                                 const bool searchElements,
                                 HashElement *hashElement, indexID *indexID) {
@@ -232,7 +238,7 @@ ElementStatus newElementToIndex(NewElements *newElements,
 
     if (searchElements) {
         if (containsStringWithDataHashSet(&newElements->set, buffer, indexID)) {
-            return ELEMENT_SUCCESS;
+            return ELEMENT_FOUND;
         }
     }
     return createNewElement(newElements, buffer, hashElement, indexID);

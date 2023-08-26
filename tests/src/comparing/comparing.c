@@ -49,35 +49,34 @@ typedef struct {
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file"},
-    //    {TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_PROPERTIES,
-    //     "different key-value property"},
-    //    {TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES, "empty file"},
-    //    {TEST_FILE_1, TEST_FILE_4, COMPARISON_MISSING_PROPERTIES,
-    //     "missing boolean property"},
-    //    {TEST_FILE_1, TEST_FILE_5, COMPARISON_MISSING_PROPERTIES,
-    //     "missing key-value property"},
-    //    {TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
-    //     "text node and document node"},
-    //    {TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES, "different
-    //    sizes"}, {TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_TAGS,
-    //    "different tags"}, {TEST_FILE_1, TEST_FILE_9,
-    //    COMPARISON_DIFFERENT_TEXT,
-    //     "different text nodes"},
-    //    {TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments"},
-    //    {TEST_FILE_11, TEST_FILE_11_MIN, COMPARISON_SUCCESS, "style tag"},
-    //    {TEST_FILE_12, TEST_FILE_12_MIN, COMPARISON_SUCCESS, "script tag"},
-    //    {TEST_FILE_13, TEST_FILE_13_MIN, COMPARISON_SUCCESS, "difficult style
-    //    tag"}, {TEST_FILE_14, TEST_FILE_14_MIN, COMPARISON_SUCCESS,
-    //     "different quotes in attributes"},
-    //    {TEST_FILE_15, TEST_FILE_15_MIN, COMPARISON_SUCCESS,
-    //     "quotes as attribute key"},
-    //    {TEST_FILE_16, TEST_FILE_16_MIN, COMPARISON_SUCCESS,
-    //     "additional close tags"},
-    //    {TEST_FILE_17, TEST_FILE_17_MIN, COMPARISON_SUCCESS,
-    //     "key-value property without quotes"},
-    //    {TEST_FILE_1, TEST_FILE_18, COMPARISON_SUCCESS,
-    //     "swapped boolean properties"},
-    //    {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
+    {TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_PROPERTIES,
+     "different key-value property"},
+    {TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES, "empty file"},
+    {TEST_FILE_1, TEST_FILE_4, COMPARISON_MISSING_PROPERTIES,
+     "missing boolean property"},
+    {TEST_FILE_1, TEST_FILE_5, COMPARISON_MISSING_PROPERTIES,
+     "missing key-value property"},
+    {TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
+     "text node and document node"},
+    {TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES, "different sizes"},
+    {TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_TAGS, "different tags"},
+    {TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_TEXT,
+     "different text nodes"},
+    {TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments"},
+    {TEST_FILE_11, TEST_FILE_11_MIN, COMPARISON_SUCCESS, "style tag"},
+    {TEST_FILE_12, TEST_FILE_12_MIN, COMPARISON_SUCCESS, "script tag"},
+    {TEST_FILE_13, TEST_FILE_13_MIN, COMPARISON_SUCCESS, "difficult style tag"},
+    {TEST_FILE_14, TEST_FILE_14_MIN, COMPARISON_SUCCESS,
+     "different quotes in attributes"},
+    {TEST_FILE_15, TEST_FILE_15_MIN, COMPARISON_SUCCESS,
+     "quotes as attribute key"},
+    {TEST_FILE_16, TEST_FILE_16_MIN, COMPARISON_SUCCESS,
+     "additional close tags"},
+    {TEST_FILE_17, TEST_FILE_17_MIN, COMPARISON_SUCCESS,
+     "key-value property without quotes"},
+    {TEST_FILE_1, TEST_FILE_18, COMPARISON_SUCCESS,
+     "swapped boolean properties"},
+    {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -101,6 +100,9 @@ TestStatus compareFiles(const char *fileLocation1,
         return TEST_ERROR_INITIALIZATION;
     }
 
+    // printDomStatus(&dom1, dataContainer1);
+    // printDomStatus(&dom2, dataContainer2);
+
     node_id nodeID1 = 0;
     node_id nodeID2 = 0;
     ComparisonStatus comp = equals(&nodeID1, &dom1, dataContainer1, &nodeID2,
@@ -108,8 +110,9 @@ TestStatus compareFiles(const char *fileLocation1,
 
     TestStatus result = TEST_FAILURE;
 
-    printTagNamesStatus(dataContainer1);
+    // printTagNamesStatus(dataContainer1);
     // printAttributeStatus(dataContainer1);
+    // printDomStatus(&dom1, dataContainer1);
 
     if (comp == expectedResult) {
         printTestSuccess();
@@ -159,33 +162,6 @@ compareFilesDiffDataContainer(const char *fileLocation1,
                         &dataContainer2, expectedResult);
 }
 
-TestStatus
-compareFilesSameDataContainer(const char *fileLocation1,
-                              const char *fileLocation2,
-                              const ComparisonStatus expectedResult) {
-    DataContainer dataContainer;
-    if (createDataContainer(&dataContainer) != ELEMENT_SUCCESS) {
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    return compareFiles(fileLocation1, &dataContainer, fileLocation2,
-                        &dataContainer, expectedResult);
-}
-
-static inline void sameContainerParseAndCompare(
-    const char *fileLocation1, const char *fileLocation2,
-    const ComparisonStatus expectedResult, const char *testName,
-    size_t *localSuccesses, size_t *localFailures) {
-    printTestStart(testName);
-
-    if (compareFilesSameDataContainer(fileLocation1, fileLocation2,
-                                      expectedResult) == TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
-}
-
 static inline void diffContainerParseAndCompare(
     const char *fileLocation1, const char *fileLocation2,
     const ComparisonStatus expectedResult, const char *testName,
@@ -200,8 +176,8 @@ static inline void diffContainerParseAndCompare(
     }
 }
 
-bool differentContainerTest(size_t *successes, size_t *failures) {
-    printTestTopicStart("different container");
+unsigned char testComparisons(size_t *successes, size_t *failures) {
+    printTestTopicStart("DOM comparisons");
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
@@ -212,42 +188,6 @@ bool differentContainerTest(size_t *successes, size_t *failures) {
                                      testFile.expectedStatus, testFile.testName,
                                      &localSuccesses, &localFailures);
     }
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
-}
-
-bool sameContainerTest(size_t *successes, size_t *failures) {
-    printTestTopicStart("same container");
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
-
-    for (size_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
-        sameContainerParseAndCompare(testFile.fileLocation1,
-                                     testFile.fileLocation2,
-                                     testFile.expectedStatus, testFile.testName,
-                                     &localSuccesses, &localFailures);
-    }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
-}
-
-unsigned char testComparisons(size_t *successes, size_t *failures) {
-    printTestTopicStart("DOM comparisons");
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
-
-    sameContainerTest(&localSuccesses, &localFailures);
-    differentContainerTest(&localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 
