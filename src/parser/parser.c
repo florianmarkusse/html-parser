@@ -458,8 +458,6 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             }
         }
 
-        printf("going to rpelace it with %u\n", textID);
-        printf("going to rpelace it add location %u\n", *currentNodeID);
         if ((documentStatus = setNodeIndexID(*currentNodeID, textID, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to replace the text node for a merge.\n");
@@ -487,12 +485,6 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                 PRINT_ERROR("Failed to add text registration.\n");
                 return DOM_NO_ELEMENT;
             }
-        }
-
-        if ((documentStatus = addTextNode(*currentNodeID, textID, dom)) !=
-            DOM_SUCCESS) {
-            PRINT_ERROR("Failed to add text node to domument.\n");
-            return documentStatus;
         }
 
         if ((documentStatus = setNodeIndexID(*currentNodeID, textID, dom)) !=

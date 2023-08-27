@@ -79,17 +79,13 @@ DomStatus createDom(const char *htmlString, Dom *dom,
     dom->propsLen = 0;
     dom->propsCap = PROPERTIES_PER_PAGE;
 
-    dom->text = malloc(TEXT_NODES_PAGE_SIZE);
-    dom->textLen = 0;
-    dom->textCap = TEXT_NODES_PER_PAGE;
-
     if (dom->nodes == NULL || dom->tagRegistry == NULL ||
         dom->boolPropRegistry.registry == NULL ||
         dom->propKeyRegistry.registry == NULL ||
         dom->propValueRegistry.registry == NULL ||
         dom->textRegistry.registry == NULL || dom->parentFirstChilds == NULL ||
         dom->parentChilds == NULL || dom->nextNodes == NULL ||
-        dom->boolProps == NULL || dom->props == NULL || dom->text == NULL) {
+        dom->boolProps == NULL || dom->props == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDom(dom);
         return DOM_ERROR_MEMORY;
@@ -206,20 +202,6 @@ DomStatus addProperty(const node_id nodeID, const element_id keyID,
     return DOM_SUCCESS;
 }
 
-DomStatus addTextNode(const node_id nodeID, const element_id textID, Dom *dom) {
-    if ((dom->text = resizeArray(dom->text, dom->textLen, &dom->textCap,
-                                 sizeof(TextNode), TEXT_NODES_PER_PAGE)) ==
-        NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    TextNode *newTextNode = &(dom->text[dom->textLen]);
-    newTextNode->nodeID = nodeID;
-    newTextNode->textID = textID;
-    dom->textLen++;
-    return DOM_SUCCESS;
-}
-
 void destroyDom(Dom *dom) {
     FREE_TO_NULL(dom->nodes);
     FREE_TO_NULL(dom->tagRegistry);
@@ -232,5 +214,4 @@ void destroyDom(Dom *dom) {
     FREE_TO_NULL(dom->nextNodes);
     FREE_TO_NULL(dom->boolProps);
     FREE_TO_NULL(dom->props);
-    FREE_TO_NULL(dom->text);
 }

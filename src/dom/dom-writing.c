@@ -168,15 +168,6 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
                        &dataContainer->propValues.set);
     printBasicRegistry("text", &dom->textRegistry, &dataContainer->text.set);
 
-    printf("text nodes inside DOM...\n");
-    printf("total number of text nodes: %zu\n", dom->textLen);
-    for (size_t i = 0; i < dom->textLen; i++) {
-        TextNode textNode = dom->text[i];
-        printf("node ID: %-5u text ID: %-5u\n", textNode.nodeID,
-               textNode.textID);
-    }
-    printf("\n");
-
     printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);
     for (size_t i = 0; i < dom->boolPropsLen; i++) {

@@ -33,9 +33,7 @@ typedef uint16_t element_id;
 #define BOOL_PROPS_PAGE_SIZE (1U << 12U)
 #define PROP_KEYS_PAGE_SIZE (1U << 12U)
 #define PROP_VALUES_PAGE_SIZE (1U << 14U)
-// #define TEXT_PAGE_SIZE (1U << 17U)
-// TODO(florian): set back to standard.
-#define TEXT_PAGE_SIZE (1U << 8U)
+#define TEXT_PAGE_SIZE (1U << 17U)
 
 // TODO(florian): maybe also do smth similar with the pages array instead of
 // having fixed pagesize?

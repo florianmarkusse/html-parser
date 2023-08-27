@@ -53,9 +53,6 @@
 #define PROPERTIES_PAGE_SIZE (1U << 8U)
 #define PROPERTIES_PER_PAGE (PROPERTIES_PAGE_SIZE / sizeof(Property))
 
-#define TEXT_NODES_PAGE_SIZE (1U << 8U)
-#define TEXT_NODES_PER_PAGE (TEXT_NODES_PAGE_SIZE / sizeof(TextNode))
-
 typedef struct {
     Registration *registry;
     size_t len;
@@ -97,10 +94,6 @@ typedef struct {
     Property *props;
     size_t propsLen;
     size_t propsCap;
-
-    TextNode *text;
-    size_t textLen;
-    size_t textCap;
 } __attribute__((aligned(128))) Dom;
 
 DomStatus createDom(const char *htmlString, Dom *dom,
@@ -119,8 +112,6 @@ DomStatus addBooleanProperty(node_id nodeID, element_id propID, Dom *dom);
 
 DomStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
                       Dom *dom);
-
-DomStatus addTextNode(node_id nodeID, element_id textID, Dom *dom);
 
 void destroyDom(Dom *dom);
 
