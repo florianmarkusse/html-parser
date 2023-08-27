@@ -1,6 +1,8 @@
 #ifndef FLO_HTML_PARSER_HASH_HASHES_H
 #define FLO_HTML_PARSER_HASH_HASHES_H
 
+#include <stdio.h>
+
 #include "flo/html-parser/type/element/elements-container.h"
 
 // http://www.cse.yorku.ca/~oz/hash.html

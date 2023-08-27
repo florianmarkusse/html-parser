@@ -16,8 +16,6 @@
 #define NODES_PAGE_SIZE (1U << 10U)
 #define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
 
-#define ERROR_NODE_ID 0
-
 #define TAG_REGISTRY_PAGE_SIZE (1U << 8U)
 #define TAG_REGISTRATIONS_PER_PAGE                                             \
     (TAG_REGISTRY_PAGE_SIZE / sizeof(TagRegistration))
@@ -109,7 +107,7 @@ DomStatus createDom(const char *htmlString, Dom *dom,
                     DataContainer *dataContainer);
 
 DomStatus createNode(node_id *nodeID, NodeType nodeType, Dom *dom);
-DomStatus setNodeTagID(node_id nodeID, indexID tagID, Dom *dom);
+DomStatus setNodeIndexID(node_id nodeID, indexID indexID, Dom *dom);
 
 DomStatus addParentFirstChild(node_id parentID, node_id childID, Dom *dom);
 
@@ -123,7 +121,6 @@ DomStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
                       Dom *dom);
 
 DomStatus addTextNode(node_id nodeID, element_id textID, Dom *dom);
-DomStatus replaceTextNode(node_id nodeID, element_id newTextID, Dom *dom);
 
 void destroyDom(Dom *dom);
 

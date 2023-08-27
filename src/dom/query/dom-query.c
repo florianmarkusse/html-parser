@@ -159,7 +159,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                 const char *keyBuffer =
                     currentSelector == CLASS ? "class" : "id";
                 tokenID = 0;
-                if ((result = getKeyPropID(keyBuffer, &tokenID,
+                if ((result = getPropKeyID(keyBuffer, &tokenID,
                                            dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }
@@ -173,7 +173,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                 valueBuffer[tokenLength - 1] = '\0';
 
                 tokenID = 0;
-                if ((result = getValuePropID(valueBuffer, &tokenID,
+                if ((result = getPropValueID(valueBuffer, &tokenID,
                                              dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }
@@ -201,7 +201,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                 keyBuffer[tokenLength - 1] = '\0';
 
                 tokenID = 0;
-                if ((result = getKeyPropID(keyBuffer, &tokenID,
+                if ((result = getPropKeyID(keyBuffer, &tokenID,
                                            dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }
@@ -233,7 +233,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                 valueBuffer[tokenLength - 1] = '\0';
 
                 tokenID = 0;
-                if ((result = getValuePropID(valueBuffer, &tokenID,
+                if ((result = getPropValueID(valueBuffer, &tokenID,
                                              dataContainer)) != QUERY_SUCCESS) {
                     return result;
                 }

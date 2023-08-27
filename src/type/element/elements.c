@@ -114,32 +114,33 @@ ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
     return ELEMENT_SUCCESS;
 }
 
-ElementStatus createElement(ElementsContainer *container, const char *element,
-                            element_id *currentElementsLen,
-                            const element_id offsetMask,
-                            element_id *elementID) {
-    if (*currentElementsLen >= POSSIBLE_ELEMENTS) {
-        PRINT_ERROR("Max size of elements array is reached: %u\n",
-                    POSSIBLE_ELEMENTS);
-        PRINT_ERROR("Could not insert \"%s\".\n", element);
-        return ELEMENT_ARRAY_FULL;
-    }
-
-    DataPageStatus dataPageStatus =
-        insertIntoPage(element, strlen(element) + 1, TOTAL_PAGES,
-                       offsetMask | (*currentElementsLen), container);
-    if (dataPageStatus != DATA_PAGE_SUCCESS) {
-        ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
-                               "Could not find or create element \"%s\"",
-                               element);
-        return ELEMENT_NOT_FOUND_OR_CREATED;
-    }
-
-    *elementID = (offsetMask | (*currentElementsLen));
-    (*currentElementsLen)++;
-
-    return ELEMENT_SUCCESS;
-}
+// ElementStatus createElement(ElementsContainer *container, const char
+// *element,
+//                             element_id *currentElementsLen,
+//                             const element_id offsetMask,
+//                             element_id *elementID) {
+//     if (*currentElementsLen >= POSSIBLE_ELEMENTS) {
+//         PRINT_ERROR("Max size of elements array is reached: %u\n",
+//                     POSSIBLE_ELEMENTS);
+//         PRINT_ERROR("Could not insert \"%s\".\n", element);
+//         return ELEMENT_ARRAY_FULL;
+//     }
+//
+//     DataPageStatus dataPageStatus =
+//         insertIntoPage(element, strlen(element) + 1, TOTAL_PAGES,
+//                        offsetMask | (*currentElementsLen), container);
+//     if (dataPageStatus != DATA_PAGE_SUCCESS) {
+//         ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
+//                                "Could not find or create element \"%s\"",
+//                                element);
+//         return ELEMENT_NOT_FOUND_OR_CREATED;
+//     }
+//
+//     *elementID = (offsetMask | (*currentElementsLen));
+//     (*currentElementsLen)++;
+//
+//     return ELEMENT_SUCCESS;
+// }
 
 // ElementStatus findElement(const ElementsContainer *container,
 //                           const element_id *currentElementLen,

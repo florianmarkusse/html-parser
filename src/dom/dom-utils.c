@@ -17,28 +17,28 @@ void getTagRegistration(indexID tagID, const Dom *dom,
 const char *getBoolProp(const indexID boolPropID, const Dom *dom,
                         const DataContainer *dataContainer) {
     Registration registration = dom->boolPropRegistry.registry[boolPropID];
-    return getStringFromHashSet(&dataContainer->tags.set,
+    return getStringFromHashSet(&dataContainer->boolProps.set,
                                 &registration.hashElement);
 }
 
 const char *getPropKey(const indexID propKeyID, const Dom *dom,
                        const DataContainer *dataContainer) {
     Registration registration = dom->propKeyRegistry.registry[propKeyID];
-    return getStringFromHashSet(&dataContainer->tags.set,
+    return getStringFromHashSet(&dataContainer->propKeys.set,
                                 &registration.hashElement);
 }
 
 const char *getPropValue(const indexID propValueID, const Dom *dom,
                          const DataContainer *dataContainer) {
     Registration registration = dom->propValueRegistry.registry[propValueID];
-    return getStringFromHashSet(&dataContainer->tags.set,
+    return getStringFromHashSet(&dataContainer->propValues.set,
                                 &registration.hashElement);
 }
 
 const char *getText(const indexID textID, const Dom *dom,
                     const DataContainer *dataContainer) {
     Registration registration = dom->textRegistry.registry[textID];
-    return getStringFromHashSet(&dataContainer->tags.set,
+    return getStringFromHashSet(&dataContainer->text.set,
                                 &registration.hashElement);
 }
 

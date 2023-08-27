@@ -4,6 +4,7 @@
 
 #include "flo/html-parser/dom/comparison/dom-comparison.h"
 #include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/dom-writing.h"
 #include "flo/html-parser/hash/element-id-hash.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/print/error.h"
@@ -40,14 +41,14 @@ HashStatus createPropsSet(const node_id nodeID, const Dom *dom,
     HashStatus status = HASH_SUCCESS;
     if ((status =
              initStringHashSet(keySet, MAX_PROPERTIES * 2) != HASH_SUCCESS)) {
-        ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
-                               "Failed to initialize hash key set", propID);
+        ERROR_WITH_CODE_ONLY(hashStatusToString(status),
+                             "Failed to initialize hash key set");
         return status;
     }
     if ((status =
              initStringHashSet(valueSet, MAX_PROPERTIES * 2) != HASH_SUCCESS)) {
-        ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
-                               "Failed to initialize hash value set", propID);
+        ERROR_WITH_CODE_ONLY(hashStatusToString(status),
+                             "Failed to initialize hash value set");
         return status;
     }
     // TODO(florian): make faster. (BTREE)
@@ -57,21 +58,21 @@ HashStatus createPropsSet(const node_id nodeID, const Dom *dom,
             const char *propKey = getPropKey(keyID, dom, dataContainer);
             if ((status = insertStringHashSet(keySet, propKey)) !=
                 HASH_SUCCESS) {
-                ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
-                                       "Failed to insert %u into hash set",
-                                       propID);
+                ERROR_WITH_CODE_FORMAT(hashStatusToString(status),
+                                       "Failed to insert %s into key hash set",
+                                       propKey);
                 destroyStringHashSet(keySet);
                 destroyStringHashSet(valueSet);
                 return status;
             }
 
             indexID valueID = dom->props[i].valueID;
-            const char *propValue = getPropKey(valueID, dom, dataContainer);
+            const char *propValue = getPropValue(valueID, dom, dataContainer);
             if ((status = insertStringHashSet(keySet, propValue)) !=
                 HASH_SUCCESS) {
-                ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
-                                       "Failed to insert %u into hash set",
-                                       propID);
+                ERROR_WITH_CODE_FORMAT(
+                    hashStatusToString(status),
+                    "Failed to insert %s into value hash set", propValue);
                 destroyStringHashSet(keySet);
                 destroyStringHashSet(valueSet);
                 return status;
@@ -119,8 +120,8 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     if (result != COMPARISON_SUCCESS) {
         if (printDifferences) {
             PRINT_ERROR("Nodes contain different key props\n");
-            printAttributes(node1->tagID, &keySet1, dom1, dataContainer1,
-                            node2->tagID, &keySet2, dom2, dataContainer2);
+            printAttributes(node1->indexID, &keySet1, dom1, dataContainer1,
+                            node2->indexID, &keySet2, dom2, dataContainer2);
         }
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -133,8 +134,8 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     if (result != COMPARISON_SUCCESS) {
         if (printDifferences) {
             PRINT_ERROR("Nodes contain different value props\n");
-            printAttributes(node1->tagID, &valueSet1, dom1, dataContainer1,
-                            node2->tagID, &valueSet2, dom2, dataContainer2);
+            printAttributes(node1->indexID, &valueSet1, dom1, dataContainer1,
+                            node2->indexID, &valueSet2, dom2, dataContainer2);
         }
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -151,8 +152,8 @@ HashStatus createBoolPropsSet(const node_id nodeID, const Dom *dom,
                               StringHashSet *set) {
     HashStatus status = HASH_SUCCESS;
     if ((status = initStringHashSet(set, MAX_PROPERTIES * 2) != HASH_SUCCESS)) {
-        ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
-                               "Failed to initialize hash set", propID);
+        ERROR_WITH_CODE_ONLY(hashStatusToString(status),
+                             "Failed to initialize hash set");
         return status;
     }
     // TODO(florian): make faster. (BTREE)
@@ -161,9 +162,9 @@ HashStatus createBoolPropsSet(const node_id nodeID, const Dom *dom,
             indexID propID = dom->boolProps[i].propID;
             const char *boolProp = getBoolProp(propID, dom, dataContainer);
             if ((status = insertStringHashSet(set, boolProp)) != HASH_SUCCESS) {
-                ERROR_WITH_CODE_FORMAT(hashStatusToString(hashStatus),
-                                       "Failed to insert %u into hash set",
-                                       propID);
+                ERROR_WITH_CODE_FORMAT(hashStatusToString(status),
+                                       "Failed to insert %s into hash set",
+                                       boolProp);
                 destroyStringHashSet(set);
                 return status;
             }
@@ -202,8 +203,8 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
 
     if (printDifferences && result != COMPARISON_SUCCESS) {
         PRINT_ERROR("Nodes contain different bool props\n");
-        printAttributes(node1->tagID, &set1, dom1, dataContainer1, node2->tagID,
-                        &set2, dom2, dataContainer2);
+        printAttributes(node1->indexID, &set1, dom1, dataContainer1,
+                        node2->indexID, &set2, dom2, dataContainer2);
     }
 
     destroyStringHashSet(&set1);
@@ -242,8 +243,8 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
 
     switch (node1->nodeType) {
     case NODE_TYPE_TEXT: {
-        const char *text1 = getText(node1->nodeID, dom1, dataContainer1);
-        const char *text2 = getText(node2->nodeID, dom2, dataContainer2);
+        const char *text1 = getText(node1->indexID, dom1, dataContainer1);
+        const char *text2 = getText(node2->indexID, dom2, dataContainer2);
 
         if (strcmp(text1, text2) == 0) {
             return COMPARISON_SUCCESS;
@@ -253,18 +254,18 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
             PRINT_ERROR("Different text nodes\nnode 1: %s\nnode 2: %s\n", text1,
                         text2);
         }
-        return COMPARISON_DIFFERENT_TAGS;
+        return COMPARISON_DIFFERENT_CONTENT;
     }
     case NODE_TYPE_DOCUMENT: {
         TagRegistration *tagRegistration1 = NULL;
-        getTagRegistration(node1->tagID, dom1, &tagRegistration1);
+        getTagRegistration(node1->indexID, dom1, &tagRegistration1);
         TagRegistration *tagRegistration2 = NULL;
-        getTagRegistration(node2->tagID, dom2, &tagRegistration2);
+        getTagRegistration(node2->indexID, dom2, &tagRegistration2);
 
         if (tagRegistration1->isPaired != tagRegistration2->isPaired) {
             if (printDifferences) {
                 char singleNode = '1';
-                if (isSingle(node2->tagID)) {
+                if (!tagRegistration2->isPaired) {
                     singleNode++;
                 }
 
@@ -290,7 +291,7 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
                             "2 tag: %s\n",
                             tag1, tag2);
             }
-            return COMPARISON_DIFFERENT_TAGS;
+            return COMPARISON_DIFFERENT_CONTENT;
         }
 
         return COMPARISON_SUCCESS;
@@ -299,7 +300,7 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
         if (printDifferences) {
             const char *nodeType1 = nodeTypeToString(node1->nodeType);
             PRINT_ERROR("Comparison not implemented for this node type:"
-                        "node type: %s",
+                        "node type: %s\n",
                         nodeType1);
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
@@ -395,7 +396,7 @@ void printFirstDifference(const node_id nodeID1, const Dom *dom1,
         return;
     }
 
-    if (!isText(node1->tagID)) {
+    if (node1->nodeType == NODE_TYPE_DOCUMENT) {
         if (compareBoolProps(node1, dom1, dataContainer1, node2, dom2,
                              dataContainer2, true) != COMPARISON_SUCCESS) {
             return;

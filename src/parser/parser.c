@@ -10,6 +10,7 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/data/definitions.h"
+#include "flo/html-parser/type/element/elements-print.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/utils/print/error.h"
@@ -89,7 +90,8 @@ DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
         // Intentional fall through!!!
     }
     case ELEMENT_FOUND: {
-        if ((domStatus = setNodeTagID(nodeID, newTagID, dom)) != DOM_SUCCESS) {
+        if ((domStatus = setNodeIndexID(nodeID, newTagID, dom)) !=
+            DOM_SUCCESS) {
             PRINT_ERROR("Failed to set tag ID for new dom node.\n");
             return domStatus;
         }
@@ -105,7 +107,7 @@ DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
     return domStatus;
 }
 
-DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
+DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
                        node_id *prevNodeID, node_id *newNodeID,
                        unsigned char *isSingle, TextParsing *context,
                        unsigned char exclamStart, Dom *dom,
@@ -240,7 +242,7 @@ DomStatus parsedomNode(const char *htmlString, size_t *currentPosition,
             ch = htmlString[++(*currentPosition)];
         } else {
             elementStatus = newElementToIndex(
-                &dataContainer->propKeys, &htmlString[attrKeyStartIndex],
+                &dataContainer->boolProps, &htmlString[attrKeyStartIndex],
                 attrKeyLen, true, &hashKey, &attrKeyID);
             if (elementStatus != ELEMENT_FOUND &&
                 elementStatus != ELEMENT_CREATED) {
@@ -299,7 +301,7 @@ DomStatus parseBasicdomNode(const char *htmlString, size_t *currentPosition,
                             node_id *prevNodeID, node_id *newNodeID,
                             unsigned char *isSingle, TextParsing *context,
                             Dom *dom, DataContainer *dataContainer) {
-    return parsedomNode(htmlString, currentPosition, prevNodeID, newNodeID,
+    return parseDomNode(htmlString, currentPosition, prevNodeID, newNodeID,
                         isSingle, context, 0, dom, dataContainer);
 }
 
@@ -308,7 +310,7 @@ DomStatus parseExclamdomNode(const char *htmlString, size_t *currentPosition,
                              DataContainer *dataContainer) {
     unsigned char ignore = 0;
     TextParsing ignore2 = BASIC_CONTEXT;
-    return parsedomNode(htmlString, currentPosition, prevNodeID, newNodeID,
+    return parseDomNode(htmlString, currentPosition, prevNodeID, newNodeID,
                         &ignore, &ignore2, 1, dom, dataContainer);
 }
 
@@ -430,7 +432,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     Node prevNode = dom->nodes[*currentNodeID];
     if (prevNode.nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
-        const char *prevText = getText(prevNode.nodeID, dom, dataContainer);
+        const char *prevText = getText(prevNode.indexID, dom, dataContainer);
         const size_t mergedLen = strlen(prevText) + elementLen +
                                  2; // Adding a whitespace in between.
 
@@ -456,7 +458,9 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             }
         }
 
-        if ((documentStatus = replaceTextNode(*currentNodeID, textID, dom)) !=
+        printf("going to rpelace it with %u\n", textID);
+        printf("going to rpelace it add location %u\n", *currentNodeID);
+        if ((documentStatus = setNodeIndexID(*currentNodeID, textID, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to replace the text node for a merge.\n");
             return documentStatus;
@@ -491,7 +495,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             return documentStatus;
         }
 
-        if ((documentStatus = setNodeTagID(*currentNodeID, textID, dom)) !=
+        if ((documentStatus = setNodeIndexID(*currentNodeID, textID, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to set tag ID to text id to domument.\n");
             return documentStatus;

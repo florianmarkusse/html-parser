@@ -51,9 +51,9 @@ DomStatus createDom(const char *htmlString, Dom *dom,
 
     dom->nodes = malloc(NODES_PAGE_SIZE);
     Node errorNode;
-    errorNode.nodeID = ERROR_NODE_ID;
+    errorNode.nodeID = 0;
     errorNode.nodeType = NODE_TYPE_ERROR;
-    errorNode.tagID = ERROR_NODE_ID;
+    errorNode.indexID = 0;
     dom->nodes[0] = errorNode;
     dom->nodeLen = 1; // We start at 1 because 0 is used as error id, and
                       // otherwise we have to do [nodeID - 1] every time.
@@ -120,9 +120,10 @@ DomStatus createNode(node_id *nodeID, const NodeType nodeType, Dom *dom) {
     *nodeID = newNode->nodeID;
     return DOM_SUCCESS;
 }
-DomStatus setNodeTagID(const node_id nodeID, const indexID tagID, Dom *dom) {
+DomStatus setNodeIndexID(const node_id nodeID, const indexID indexID,
+                         Dom *dom) {
     Node *createdNode = &(dom->nodes[nodeID]);
-    createdNode->tagID = tagID;
+    createdNode->indexID = indexID;
 
     return DOM_SUCCESS;
 }
@@ -216,18 +217,6 @@ DomStatus addTextNode(const node_id nodeID, const element_id textID, Dom *dom) {
     newTextNode->nodeID = nodeID;
     newTextNode->textID = textID;
     dom->textLen++;
-    return DOM_SUCCESS;
-}
-
-DomStatus replaceTextNode(const node_id nodeID, element_id newTextID,
-                          Dom *dom) {
-    for (size_t i = 0; i < dom->textLen; i++) {
-        if (dom->text[i].nodeID == nodeID) {
-            dom->text[i].textID = newTextID;
-            break;
-        }
-    }
-
     return DOM_SUCCESS;
 }
 

@@ -14,7 +14,7 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
         FilterType filterType = filters[i];
         switch (filterType.attributeSelector) {
         case TAG: {
-            if (dom->nodes[nodeID].tagID != filterType.data.tagID) {
+            if (dom->nodes[nodeID].indexID != filterType.data.tagID) {
                 return false;
             }
             break;
@@ -63,41 +63,37 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
 
 QueryStatus getTagID(const char *tag, indexID *tagID,
                      const DataContainer *dataContainer) {
-    if (containsStringWithDataHashSet(&dataContainer->tags.set, tag,
-                                      tagID)) {
+    if (containsStringWithDataHashSet(&dataContainer->tags.set, tag, tagID)) {
         return QUERY_SUCCESS;
     }
 
     return QUERY_NOT_SEEN_BEFORE;
 }
 
-QueryStatus getBoolPropID(const char *tag, element_id *propID,
+QueryStatus getBoolPropID(const char *boolProp, element_id *propID,
                           const DataContainer *dataContainer) {
-    if (findElement(&dataContainer->propKeys.container,
-                    &dataContainer->propKeys.singleLen, tag, SINGLES_OFFSET,
-                    propID) == ELEMENT_SUCCESS) {
+    if (containsStringWithDataHashSet(&dataContainer->boolProps.set, boolProp,
+                                      propID)) {
         return QUERY_SUCCESS;
     }
 
     return QUERY_NOT_SEEN_BEFORE;
 }
 
-QueryStatus getKeyPropID(const char *tag, element_id *keyID,
+QueryStatus getPropKeyID(const char *keyProp, element_id *keyID,
                          const DataContainer *dataContainer) {
-    if (findElement(&dataContainer->propKeys.container,
-                    &dataContainer->propKeys.pairedLen, tag, 0,
-                    keyID) == ELEMENT_SUCCESS) {
+    if (containsStringWithDataHashSet(&dataContainer->propKeys.set, keyProp,
+                                      keyID)) {
         return QUERY_SUCCESS;
     }
 
     return QUERY_NOT_SEEN_BEFORE;
 }
 
-QueryStatus getValuePropID(const char *tag, element_id *valueID,
+QueryStatus getPropValueID(const char *valueProp, element_id *valueID,
                            const DataContainer *dataContainer) {
-    if (findElement(&dataContainer->propValues.container,
-                    &dataContainer->propValues.len, tag, 0,
-                    valueID) == ELEMENT_SUCCESS) {
+    if (containsStringWithDataHashSet(&dataContainer->propValues.set, valueProp,
+                                      valueID)) {
         return QUERY_SUCCESS;
     }
 
@@ -126,7 +122,7 @@ QueryStatus filterByTagID(const element_id tagID, const Dom *dom,
                           node_id *results, size_t *len) {
     size_t nextFreeSpot = 0;
     for (size_t i = 0; i < *len; i++) {
-        if (dom->nodes[results[i]].tagID == tagID) {
+        if (dom->nodes[results[i]].indexID == tagID) {
             results[nextFreeSpot++] = results[i];
         }
     }
@@ -236,7 +232,8 @@ getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
         // array instead once a performant lookup is available.
         for (size_t i = 0; i < dom->parentChildLen; i++) {
             ParentChild parentChildNode = dom->parentChilds[i];
-            if (!(isText(dom->nodes[parentChildNode.childID].tagID)) &&
+            if ((dom->nodes[parentChildNode.childID].nodeType ==
+                 NODE_TYPE_DOCUMENT) &&
                 isPresentIn(parentChildNode.parentID, parents, parentLen)) {
                 if ((foundNodes =
                          resizeArray(foundNodes, foundNodesLen, &foundNodesCap,

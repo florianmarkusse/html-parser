@@ -39,14 +39,14 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
     }
 
     if (node.nodeType == NODE_TYPE_TEXT) {
-        const char *text = getText(node.nodeID, dom, dataContainer);
+        const char *text = getText(node.indexID, dom, dataContainer);
         if (text != NULL) {
             fprintf(output, "%s", text);
         }
         return;
     }
 
-    const char *tag = getTag(node.tagID, dom, dataContainer);
+    const char *tag = getTag(node.indexID, dom, dataContainer);
     fprintf(output, "<%s", tag);
 
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
@@ -69,7 +69,7 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
     }
 
     TagRegistration *tagRegistration = NULL;
-    getTagRegistration(node.tagID, dom, &tagRegistration);
+    getTagRegistration(node.indexID, dom, &tagRegistration);
     if (!tagRegistration->isPaired) {
         if (strcmp(tag, "!DOCTYPE") == 0) {
             fprintf(output, ">");
@@ -142,7 +142,7 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
         Node node = dom->nodes[i];
 
         printf("node ID: %-5u node type: %-10s with tag ID: %-5u\n",
-               node.nodeID, nodeTypeToString(node.nodeType), node.tagID);
+               node.nodeID, nodeTypeToString(node.nodeType), node.indexID);
     }
     printf("\n");
 
@@ -172,7 +172,8 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("total number of text nodes: %zu\n", dom->textLen);
     for (size_t i = 0; i < dom->textLen; i++) {
         TextNode textNode = dom->text[i];
-        printf("node ID: %-5u text ID: %-5u", textNode.nodeID, textNode.textID);
+        printf("node ID: %-5u text ID: %-5u\n", textNode.nodeID,
+               textNode.textID);
     }
     printf("\n");
 
@@ -180,7 +181,7 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
         BooleanProperty boolProps = dom->boolProps[i];
-        printf("node ID: %-5u prop ID: %-5u", boolProps.nodeID,
+        printf("node ID: %-5u prop ID: %-5u\n", boolProps.nodeID,
                boolProps.propID);
     }
     printf("\n");
@@ -189,7 +190,7 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("total number of key-value properties: %zu\n", dom->propsLen);
     for (size_t i = 0; i < dom->propsLen; i++) {
         Property property = dom->props[i];
-        printf("node ID: %-5u key ID: %-5u value ID: %-5u", property.nodeID,
+        printf("node ID: %-5u key ID: %-5u value ID: %-5u\n", property.nodeID,
                property.keyID, property.valueID);
     }
     printf("\n");

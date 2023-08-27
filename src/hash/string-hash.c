@@ -133,8 +133,6 @@ const char *nextStringHashSetIterator(StringHashSetIterator *iterator) {
 
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index].string != NULL) {
-            printf("the index is %hu\n", set->array[iterator->index].indexID);
-            printf("the hash is %zu\n", iterator->index);
             return set->array[iterator->index++].string;
         }
         iterator->index++;

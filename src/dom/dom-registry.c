@@ -50,12 +50,12 @@ DomStatus addPropKeyRegistration(indexID propKeyID,
 
 DomStatus addPropValueRegistration(indexID propValueID,
                                    const HashElement *hashElement, Dom *dom) {
-    return addRegistration(propValueID, hashElement, &dom->propKeyRegistry,
+    return addRegistration(propValueID, hashElement, &dom->propValueRegistry,
                            PROP_VALUE_REGISTRATIONS_PER_PAGE);
 }
 
 DomStatus addTextRegistration(indexID textID, const HashElement *hashElement,
                               Dom *dom) {
-    return addRegistration(textID, hashElement, &dom->propKeyRegistry,
+    return addRegistration(textID, hashElement, &dom->textRegistry,
                            TEXT_REGISTRATIONS_PER_PAGE);
 }

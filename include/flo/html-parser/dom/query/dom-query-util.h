@@ -13,11 +13,11 @@ bool filterNode(node_id nodeID, const FilterType *filters, size_t filterslen,
                 const Dom *dom);
 QueryStatus getTagID(const char *tag, indexID *tagID,
                      const DataContainer *dataContainer);
-QueryStatus getBoolPropID(const char *tag, element_id *propID,
+QueryStatus getBoolPropID(const char *boolProp, element_id *boolPropID,
                           const DataContainer *dataContainer);
-QueryStatus getKeyPropID(const char *tag, element_id *keyID,
+QueryStatus getPropKeyID(const char *keyProp, element_id *keyID,
                          const DataContainer *dataContainer);
-QueryStatus getValuePropID(const char *tag, element_id *valueID,
+QueryStatus getPropValueID(const char *valueProp, element_id *valueID,
                            const DataContainer *dataContainer);
 QueryStatus getNodesWithTagID(element_id tagID, const Dom *dom,
                               node_id **results, size_t *len,
