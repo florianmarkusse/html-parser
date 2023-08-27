@@ -57,8 +57,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     DataContainer dataContainer;
     ElementStatus initStatus = createDataContainer(&dataContainer);
     if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_FORMAT(elementStatusToString(initStatus),
-                               "Failed to initialize data container");
+        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
+                             "Failed to initialize data container");
         return TEST_ERROR_INITIALIZATION;
     }
 
@@ -121,6 +121,7 @@ static void testBadInit(size_t *localSuccsses, size_t *localFailures) {
     QueryStatus wrongArrayStatus =
         querySelectorAll("", &dom, &dataContainer, &withVals, &resultsLen);
     FREE_TO_NULL(results);
+    FREE_TO_NULL(withVals);
 
     if (wrongLenStatus == QUERY_INITIALIZATION_ERROR &&
         wrongArrayStatus == QUERY_INITIALIZATION_ERROR) {

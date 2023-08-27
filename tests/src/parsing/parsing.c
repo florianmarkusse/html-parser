@@ -17,8 +17,8 @@ unsigned char parseFile(const char *fileLocation) {
     DataContainer dataContainer;
     ElementStatus initStatus = createDataContainer(&dataContainer);
     if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_FORMAT(elementStatusToString(initStatus),
-                               "Failed to initialize data container");
+        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
+                             "Failed to initialize data container");
         return TEST_ERROR_INITIALIZATION;
     }
 

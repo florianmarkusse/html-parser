@@ -148,12 +148,12 @@ compareFilesDiffDataContainer(const char *fileLocation1,
 
     if (status1 != ELEMENT_SUCCESS || status2 != ELEMENT_SUCCESS) {
         if (status1 != ELEMENT_SUCCESS) {
-            ERROR_WITH_CODE_FORMAT(elementStatusToString(status1),
-                                   "Failed to initialize data container 1");
+            ERROR_WITH_CODE_ONLY(elementStatusToString(status1),
+                                 "Failed to initialize data container 1");
         }
         if (status2 != ELEMENT_SUCCESS) {
-            ERROR_WITH_CODE_FORMAT(elementStatusToString(status2),
-                                   "Failed to initialize data container 2");
+            ERROR_WITH_CODE_ONLY(elementStatusToString(status2),
+                                 "Failed to initialize data container 2");
         }
         return TEST_ERROR_INITIALIZATION;
     }

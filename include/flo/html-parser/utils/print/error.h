@@ -2,12 +2,13 @@
 #define FLO_HTML_PARSER_UTILS_PRINT_ERROR_H
 
 #include <stdio.h>
-
-#ifdef ENABLE_DEBUG_MACRO
 #define PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
-#else
-#define PRINT_ERROR(...) ((void)0)
-#endif
+
+//#ifdef ENABLE_DEBUG_MACRO
+//#define PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
+//#else
+//#define PRINT_ERROR(...) ((void)0)
+//#endif
 
 #define ERROR_WITH_CODE_ONLY(code, message)                                    \
     do {                                                                       \

@@ -29,13 +29,12 @@ HashStatus initStringHashSet(StringHashSet *set, size_t capacity);
 
 HashStatus insertStringHashSet(StringHashSet *set, const char *string);
 
-HashStatus insertStringWithDataHashSet(StringHashSet *set, const char *string,
-                                       HashElement *hashElement,
-                                       indexID *indexID);
+HashStatus insertStringAtHash(StringHashSet *set, const char *string,
+                              const HashElement *hashElement, indexID *indexID);
 
 bool containsStringHashSet(const StringHashSet *set, const char *string);
 bool containsStringWithDataHashSet(const StringHashSet *set, const char *string,
-                                   indexID *indexID);
+                                   HashElement *hashElement, indexID *indexID);
 const char *getStringFromHashSet(const StringHashSet *set,
                                  const HashElement *hashElement);
 

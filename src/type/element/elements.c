@@ -114,93 +114,6 @@ ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
     return ELEMENT_SUCCESS;
 }
 
-// ElementStatus createElement(ElementsContainer *container, const char
-// *element,
-//                             element_id *currentElementsLen,
-//                             const element_id offsetMask,
-//                             element_id *elementID) {
-//     if (*currentElementsLen >= POSSIBLE_ELEMENTS) {
-//         PRINT_ERROR("Max size of elements array is reached: %u\n",
-//                     POSSIBLE_ELEMENTS);
-//         PRINT_ERROR("Could not insert \"%s\".\n", element);
-//         return ELEMENT_ARRAY_FULL;
-//     }
-//
-//     DataPageStatus dataPageStatus =
-//         insertIntoPage(element, strlen(element) + 1, TOTAL_PAGES,
-//                        offsetMask | (*currentElementsLen), container);
-//     if (dataPageStatus != DATA_PAGE_SUCCESS) {
-//         ERROR_WITH_CODE_FORMAT(dataPageStatusToString(dataPageStatus),
-//                                "Could not find or create element \"%s\"",
-//                                element);
-//         return ELEMENT_NOT_FOUND_OR_CREATED;
-//     }
-//
-//     *elementID = (offsetMask | (*currentElementsLen));
-//     (*currentElementsLen)++;
-//
-//     return ELEMENT_SUCCESS;
-// }
-
-// ElementStatus findElement(const ElementsContainer *container,
-//                           const element_id *currentElementLen,
-//                           const char *elementName, element_id offsetMask,
-//                           element_id *elementID) {
-//     for (element_id i = offsetMask + LEN_START_VALUE;
-//          i < (offsetMask | *currentElementLen); ++i) {
-//         if (strcmp(container->elements[i], elementName) == 0) {
-//             *elementID = i;
-//             return ELEMENT_SUCCESS;
-//         }
-//     }
-//
-//     return ELEMENT_NOT_FOUND_OR_CREATED;
-// }
-//
-// ElementStatus findOrCreateElement(ElementsContainer *container,
-//                                   const char *elementName,
-//                                   element_id *currentElementLen,
-//                                   const element_id offsetMask,
-//                                   element_id *elementID) {
-//     if (findElement(container, currentElementLen, elementName, offsetMask,
-//                     elementID) == ELEMENT_SUCCESS) {
-//         return ELEMENT_SUCCESS;
-//     }
-//
-//     return createElement(container, elementName, currentElementLen,
-//     offsetMask,
-//                          elementID);
-// }
-//
-// ElementStatus textElementToIndex(element_id *elementID) {
-//     *elementID = TEXT_OFFSET;
-//     return ELEMENT_SUCCESS;
-// }
-//
-// ElementStatus
-// elementToIndex(ElementsContainer *container, element_id *currentElementLen,
-//                const char *elementStart, const size_t elementLength,
-//                const unsigned char isPaired, const unsigned char
-//                searchElements, element_id *elementID) {
-//     char buffer[container->pageSize];
-//     const ElementStatus sizeCheck = elementSizeCheck(
-//         buffer, container->pageSize, elementStart, elementLength);
-//     if (sizeCheck != ELEMENT_SUCCESS) {
-//         return sizeCheck;
-//     }
-//
-//     memcpy(buffer, elementStart, elementLength);
-//     buffer[elementLength] = '\0';
-//
-//     if (searchElements) {
-//         return findOrCreateElement(container, buffer, currentElementLen,
-//                                    (isPaired ? 0 : SINGLES_OFFSET),
-//                                    elementID);
-//     }
-//     return createElement(container, buffer, currentElementLen,
-//                          (isPaired ? 0 : SINGLES_OFFSET), elementID);
-// }
-
 ElementStatus createNewElement(StringRegistry *newElements, const char *element,
                                HashElement *hashElement, indexID *indexID) {
     // insert element into the has table.
@@ -223,11 +136,8 @@ ElementStatus createNewElement(StringRegistry *newElements, const char *element,
  */
 // TODO(florian): remove seaarchElement parameter once text values completely
 // bypass the hash
-// TODO(florian): if not found, we insert, but we shouldn't need to recalculate
-// the hashhhh
 ElementStatus newElementToIndex(StringRegistry *newElements,
                                 const char *elementStart, size_t elementLength,
-                                const bool searchElements,
                                 HashElement *hashElement, indexID *indexID) {
     char buffer[newElements->container.pageSize];
     const ElementStatus sizeCheck = elementSizeCheck(
@@ -239,10 +149,10 @@ ElementStatus newElementToIndex(StringRegistry *newElements,
     memcpy(buffer, elementStart, elementLength);
     buffer[elementLength] = '\0';
 
-    if (searchElements) {
-        if (containsStringWithDataHashSet(&newElements->set, buffer, indexID)) {
-            return ELEMENT_FOUND;
-        }
+    if (containsStringWithDataHashSet(&newElements->set, buffer, hashElement,
+                                      indexID)) {
+        return ELEMENT_FOUND;
     }
+
     return createNewElement(newElements, buffer, hashElement, indexID);
 }

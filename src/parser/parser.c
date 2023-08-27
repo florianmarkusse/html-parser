@@ -78,7 +78,7 @@ DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
     indexID newTagID = 0;
     ElementStatus indexStatus =
         newElementToIndex(&dataContainer->tags, &htmlString[elementStartIndex],
-                          elementLen, true, &hashElement, &newTagID);
+                          elementLen, &hashElement, &newTagID);
 
     switch (indexStatus) {
     case ELEMENT_CREATED: {
@@ -178,9 +178,9 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             // Expected syntax: key=value (This is invalid html, but will still
             // support it) We can do some more interesting stuff but currently
             // not required.
-            elementStatus = newElementToIndex(
-                &dataContainer->propKeys, &htmlString[attrKeyStartIndex],
-                attrKeyLen, true, &hashKey, &attrKeyID);
+            elementStatus = newElementToIndex(&dataContainer->propKeys,
+                                              &htmlString[attrKeyStartIndex],
+                                              attrKeyLen, &hashKey, &attrKeyID);
             if (elementStatus != ELEMENT_FOUND &&
                 elementStatus != ELEMENT_CREATED) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -217,7 +217,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
 
             elementStatus = newElementToIndex(
                 &dataContainer->propValues, &htmlString[attrValueStartIndex],
-                attrValueLen, true, &hashValue, &attrValueID);
+                attrValueLen, &hashValue, &attrValueID);
             if (elementStatus != ELEMENT_FOUND &&
                 elementStatus != ELEMENT_CREATED) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -241,9 +241,9 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             // Move past '"'
             ch = htmlString[++(*currentPosition)];
         } else {
-            elementStatus = newElementToIndex(
-                &dataContainer->boolProps, &htmlString[attrKeyStartIndex],
-                attrKeyLen, true, &hashKey, &attrKeyID);
+            elementStatus = newElementToIndex(&dataContainer->boolProps,
+                                              &htmlString[attrKeyStartIndex],
+                                              attrKeyLen, &hashKey, &attrKeyID);
             if (elementStatus != ELEMENT_FOUND &&
                 elementStatus != ELEMENT_CREATED) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -444,7 +444,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
 
         HashElement hashKey;
         elementStatus = newElementToIndex(&dataContainer->text, buffer,
-                                          mergedLen, false, &hashKey, &textID);
+                                          mergedLen, &hashKey, &textID);
         if (elementStatus != ELEMENT_FOUND &&
             elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -473,7 +473,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
         HashElement hashKey;
         elementStatus = newElementToIndex(&dataContainer->text,
                                           &htmlString[elementStartIndex],
-                                          elementLen, false, &hashKey, &textID);
+                                          elementLen, &hashKey, &textID);
         if (elementStatus != ELEMENT_FOUND &&
             elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),

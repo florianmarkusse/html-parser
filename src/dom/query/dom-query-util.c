@@ -63,7 +63,9 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
 
 QueryStatus getTagID(const char *tag, indexID *tagID,
                      const DataContainer *dataContainer) {
-    if (containsStringWithDataHashSet(&dataContainer->tags.set, tag, tagID)) {
+    HashElement ignore;
+    if (containsStringWithDataHashSet(&dataContainer->tags.set, tag, &ignore,
+                                      tagID)) {
         return QUERY_SUCCESS;
     }
 
@@ -72,8 +74,9 @@ QueryStatus getTagID(const char *tag, indexID *tagID,
 
 QueryStatus getBoolPropID(const char *boolProp, element_id *propID,
                           const DataContainer *dataContainer) {
+    HashElement ignore;
     if (containsStringWithDataHashSet(&dataContainer->boolProps.set, boolProp,
-                                      propID)) {
+                                      &ignore, propID)) {
         return QUERY_SUCCESS;
     }
 
@@ -82,8 +85,9 @@ QueryStatus getBoolPropID(const char *boolProp, element_id *propID,
 
 QueryStatus getPropKeyID(const char *keyProp, element_id *keyID,
                          const DataContainer *dataContainer) {
+    HashElement ignore;
     if (containsStringWithDataHashSet(&dataContainer->propKeys.set, keyProp,
-                                      keyID)) {
+                                      &ignore, keyID)) {
         return QUERY_SUCCESS;
     }
 
@@ -92,8 +96,9 @@ QueryStatus getPropKeyID(const char *keyProp, element_id *keyID,
 
 QueryStatus getPropValueID(const char *valueProp, element_id *valueID,
                            const DataContainer *dataContainer) {
+    HashElement ignore;
     if (containsStringWithDataHashSet(&dataContainer->propValues.set, valueProp,
-                                      valueID)) {
+                                      &ignore, valueID)) {
         return QUERY_SUCCESS;
     }
 

@@ -49,6 +49,7 @@ HashStatus createPropsSet(const node_id nodeID, const Dom *dom,
              initStringHashSet(valueSet, MAX_PROPERTIES * 2) != HASH_SUCCESS)) {
         ERROR_WITH_CODE_ONLY(hashStatusToString(status),
                              "Failed to initialize hash value set");
+        destroyStringHashSet(keySet);
         return status;
     }
     // TODO(florian): make faster. (BTREE)
@@ -143,6 +144,11 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
         destroyStringHashSet(&valueSet2);
         return result;
     }
+
+    destroyStringHashSet(&keySet1);
+    destroyStringHashSet(&valueSet1);
+    destroyStringHashSet(&keySet2);
+    destroyStringHashSet(&valueSet2);
 
     return result;
 }

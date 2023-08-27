@@ -20,64 +20,75 @@ HashStatus initStringHashSet(StringHashSet *set, const size_t capacity) {
 
 // Sets the indexID that is used in the DOM, starting at 1 because then 0 can be
 // used as an error/init value.
-HashStatus insertStringWithDataHashSet(StringHashSet *set, const char *string,
-                                       HashElement *hashElement,
-                                       indexID *indexID) {
+HashStatus insertStringAtHash(StringHashSet *set, const char *string,
+                              const HashElement *hashElement,
+                              indexID *indexID) {
     if (set->entries >= set->arrayLen) {
         PRINT_ERROR("String hash set is at full capacity!\n");
         return HASH_FULL_CAPACITY;
     }
 
-    size_t hash = hashString(string) % set->arrayLen;
-    hashElement->hash = hash;
-
-    size_t probes = 0;
-    while (set->array[hash].string != NULL) {
-        if (strcmp(set->array[hash].string, string) == 0) {
-            break;
-        }
-        if (probes > MAX_PROBES) {
-            PRINT_ERROR("Reached maximum number of probes, %zu!\n", probes);
-            return HASH_MAX_PROBES;
-        }
-        probes++;
-        hash = (hash + 1) % set->arrayLen;
-    }
-    hashElement->offset = probes;
-
     set->entries++;
 
-    set->array[hash].string = string;
-    set->array[hash].indexID = set->entries;
+    const size_t arrayIndex =
+        (hashElement->hash + hashElement->offset) % set->arrayLen;
+    set->array[arrayIndex].string = string;
+    set->array[arrayIndex].indexID = set->entries;
     *indexID = set->entries;
 
     return HASH_SUCCESS;
 }
 
+// Sets the indexID that is used in the DOM, starting at 1 because then 0 can be
+// used as an error/init value.
 HashStatus insertStringHashSet(StringHashSet *set, const char *string) {
-    HashElement ignore;
-    indexID ignore2 = 0;
-    return insertStringWithDataHashSet(set, string, &ignore, &ignore2);
+    if (set->entries >= set->arrayLen) {
+        PRINT_ERROR("String hash set is at full capacity!\n");
+        PRINT_ERROR("Could not insert %s!\n", string);
+        return HASH_FULL_CAPACITY;
+    }
+
+    size_t hash = hashString(string) % set->arrayLen;
+
+    while (set->array[hash].string != NULL) {
+        if (strcmp(set->array[hash].string, string) == 0) {
+            return HASH_SUCCESS;
+        }
+        hash = (hash + 1) % set->arrayLen;
+    }
+
+    set->entries++;
+
+    set->array[hash].string = string;
+    set->array[hash].indexID = set->entries;
+
+    return HASH_SUCCESS;
 }
 
 bool containsStringHashSet(const StringHashSet *set, const char *string) {
-    indexID ignore = 0;
-    return containsStringWithDataHashSet(set, string, &ignore);
+    HashElement ignore;
+    indexID ignore2 = 0;
+    return containsStringWithDataHashSet(set, string, &ignore, &ignore2);
 }
 
 bool containsStringWithDataHashSet(const StringHashSet *set, const char *string,
-                                   indexID *indexID) {
+                                   HashElement *hashElement, indexID *indexID) {
     size_t index = hashString(string) % set->arrayLen;
+    hashElement->hash = index;
 
+    size_t probes = 0;
     while (set->array[index].string != NULL) {
         HashEntry entry = set->array[index];
         if (strcmp(entry.string, string) == 0) {
+            hashElement->offset = probes;
             *indexID = entry.indexID;
             return true;
         }
+        probes++;
         index = (index + 1) % set->arrayLen;
     }
 
+    hashElement->offset = probes;
     return false;
 }
 

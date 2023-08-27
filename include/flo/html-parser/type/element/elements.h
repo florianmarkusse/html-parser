@@ -28,25 +28,12 @@ typedef struct {
 ElementStatus createDataContainer(DataContainer *dataContainer);
 void destroyDataContainer(DataContainer *dataContainer);
 
-// ElementStatus findElement(const ElementsContainer *container,
-//                           const element_id *currentElementLen,
-//                           const char *elementName, element_id offsetMask,
-//                           element_id *elementID);
-// ElementStatus elementToIndex(ElementsContainer *container,
-//                              element_id *currentElementLen,
-//                              const char *elementStart, size_t elementLength,
-//                              unsigned char isPaired,
-//                              unsigned char searchElements,
-//                              element_id *elementID);
-//
-// ElementStatus textElementToIndex(element_id *elementID);
 ElementStatus createElement(ElementsContainer *container, const char *element,
                             element_id *currentElementsLen, element_id offset,
                             element_id *elementID);
 
 ElementStatus newElementToIndex(StringRegistry *newElements,
                                 const char *elementStart, size_t elementLength,
-                                bool searchElements, HashElement *hashElement,
-                                indexID *indexID);
+                                HashElement *hashElement, indexID *indexID);
 
 #endif
