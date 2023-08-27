@@ -15,7 +15,4 @@ DomStatus addPropKeyRegistration(indexID propKeyID,
 DomStatus addPropValueRegistration(indexID propValueID,
                                    const HashElement *hashElement, Dom *dom);
 
-DomStatus addTextRegistration(indexID textID, const HashElement *hashElement,
-                              Dom *dom);
-
 #endif

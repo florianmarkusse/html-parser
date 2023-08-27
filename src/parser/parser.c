@@ -92,8 +92,8 @@ DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
     HashElement hashElement;
     indexID newTagID = 0;
     ElementStatus indexStatus =
-        newElementToIndex(&dataContainer->tags, &htmlString[elementStartIndex],
-                          elementLen, &hashElement, &newTagID);
+        elementToIndex(&dataContainer->tags, &htmlString[elementStartIndex],
+                       elementLen, &hashElement, &newTagID);
 
     switch (indexStatus) {
     case ELEMENT_CREATED: {
@@ -105,8 +105,7 @@ DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
         // Intentional fall through!!!
     }
     case ELEMENT_FOUND: {
-        if ((domStatus = setNodeIndexID(nodeID, newTagID, dom)) !=
-            DOM_SUCCESS) {
+        if ((domStatus = setNodeTagID(nodeID, newTagID, dom)) != DOM_SUCCESS) {
             PRINT_ERROR("Failed to set tag ID for new dom node.\n");
             return domStatus;
         }
@@ -196,9 +195,9 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             // Expected syntax: key=value (This is invalid html, but will still
             // support it) We can do some more interesting stuff but currently
             // not required.
-            elementStatus = newElementToIndex(&dataContainer->propKeys,
-                                              &htmlString[attrKeyStartIndex],
-                                              attrKeyLen, &hashKey, &attrKeyID);
+            elementStatus = elementToIndex(&dataContainer->propKeys,
+                                           &htmlString[attrKeyStartIndex],
+                                           attrKeyLen, &hashKey, &attrKeyID);
             if (elementStatus != ELEMENT_FOUND &&
                 elementStatus != ELEMENT_CREATED) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -233,7 +232,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
             HashElement hashValue;
 
-            elementStatus = newElementToIndex(
+            elementStatus = elementToIndex(
                 &dataContainer->propValues, &htmlString[attrValueStartIndex],
                 attrValueLen, &hashValue, &attrValueID);
             if (elementStatus != ELEMENT_FOUND &&
@@ -259,9 +258,9 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             // Move past '"'
             ch = htmlString[++(*currentPosition)];
         } else {
-            elementStatus = newElementToIndex(&dataContainer->boolProps,
-                                              &htmlString[attrKeyStartIndex],
-                                              attrKeyLen, &hashKey, &attrKeyID);
+            elementStatus = elementToIndex(&dataContainer->boolProps,
+                                           &htmlString[attrKeyStartIndex],
+                                           attrKeyLen, &hashKey, &attrKeyID);
             if (elementStatus != ELEMENT_FOUND &&
                 elementStatus != ELEMENT_CREATED) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -445,12 +444,10 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     }
     }
 
-    element_id textID = 0;
-
     Node prevNode = dom->nodes[*currentNodeID];
     if (prevNode.nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
-        const char *prevText = getText(prevNode.indexID, dom, dataContainer);
+        const char *prevText = prevNode.text;
         const size_t mergedLen = strlen(prevText) + elementLen +
                                  2; // Adding a whitespace in between.
 
@@ -460,23 +457,15 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
         strncat(buffer, &htmlString[elementStartIndex], elementLen);
         buffer[mergedLen - 1] = '\0';
 
-        HashElement hashKey;
-        elementStatus = newElementToIndex(&dataContainer->text, buffer,
-                                          mergedLen, &hashKey, &textID);
-        if (elementStatus != ELEMENT_FOUND &&
-            elementStatus != ELEMENT_CREATED) {
+        char *dataLocation = NULL;
+        elementStatus = insertElement(&dataContainer->text, buffer, mergedLen,
+                                      &dataLocation);
+        if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                 "Failed to text ID");
+                                 "Failed to insert text");
             return DOM_NO_ELEMENT;
         }
-        if (elementStatus == ELEMENT_CREATED) {
-            if (addTextRegistration(textID, &hashKey, dom) != DOM_SUCCESS) {
-                PRINT_ERROR("Failed to add text registration.\n");
-                return DOM_NO_ELEMENT;
-            }
-        }
-
-        if ((documentStatus = setNodeIndexID(*currentNodeID, textID, dom)) !=
+        if ((documentStatus = setNodeText(*currentNodeID, dataLocation, dom)) !=
             DOM_SUCCESS) {
             PRINT_ERROR("Failed to replace the text node for a merge.\n");
             return documentStatus;
@@ -488,26 +477,19 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
             return documentStatus;
         }
 
-        HashElement hashKey;
-        elementStatus = newElementToIndex(&dataContainer->text,
-                                          &htmlString[elementStartIndex],
-                                          elementLen, &hashKey, &textID);
-        if (elementStatus != ELEMENT_FOUND &&
-            elementStatus != ELEMENT_CREATED) {
+        char *dataLocation = NULL;
+        elementStatus =
+            insertElement(&dataContainer->text, &htmlString[elementStartIndex],
+                          elementLen, &dataLocation);
+        if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                 "Failed to get text ID");
+                                 "Failed to get insert text");
             return DOM_NO_ELEMENT;
         }
-        if (elementStatus == ELEMENT_CREATED) {
-            if (addTextRegistration(textID, &hashKey, dom) != DOM_SUCCESS) {
-                PRINT_ERROR("Failed to add text registration.\n");
-                return DOM_NO_ELEMENT;
-            }
-        }
 
-        if ((documentStatus = setNodeIndexID(*currentNodeID, textID, dom)) !=
+        if ((documentStatus = setNodeText(*currentNodeID, dataLocation, dom)) !=
             DOM_SUCCESS) {
-            PRINT_ERROR("Failed to set tag ID to text id to domument.\n");
+            PRINT_ERROR("Failed to set text.\n");
             return documentStatus;
         }
     }

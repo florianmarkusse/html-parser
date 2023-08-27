@@ -33,4 +33,4 @@ Makefile
 *.DS_Store
 
 # callgrind
-callgrind*
+callgrind.out.*

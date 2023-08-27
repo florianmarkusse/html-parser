@@ -121,8 +121,8 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     if (result != COMPARISON_SUCCESS) {
         if (printDifferences) {
             PRINT_ERROR("Nodes contain different key props\n");
-            printAttributes(node1->indexID, &keySet1, dom1, dataContainer1,
-                            node2->indexID, &keySet2, dom2, dataContainer2);
+            printAttributes(node1->tagID, &keySet1, dom1, dataContainer1,
+                            node2->tagID, &keySet2, dom2, dataContainer2);
         }
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -135,8 +135,8 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     if (result != COMPARISON_SUCCESS) {
         if (printDifferences) {
             PRINT_ERROR("Nodes contain different value props\n");
-            printAttributes(node1->indexID, &valueSet1, dom1, dataContainer1,
-                            node2->indexID, &valueSet2, dom2, dataContainer2);
+            printAttributes(node1->tagID, &valueSet1, dom1, dataContainer1,
+                            node2->tagID, &valueSet2, dom2, dataContainer2);
         }
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -209,8 +209,8 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
 
     if (printDifferences && result != COMPARISON_SUCCESS) {
         PRINT_ERROR("Nodes contain different bool props\n");
-        printAttributes(node1->indexID, &set1, dom1, dataContainer1,
-                        node2->indexID, &set2, dom2, dataContainer2);
+        printAttributes(node1->tagID, &set1, dom1, dataContainer1, node2->tagID,
+                        &set2, dom2, dataContainer2);
     }
 
     destroyStringHashSet(&set1);
@@ -249,8 +249,8 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
 
     switch (node1->nodeType) {
     case NODE_TYPE_TEXT: {
-        const char *text1 = getText(node1->indexID, dom1, dataContainer1);
-        const char *text2 = getText(node2->indexID, dom2, dataContainer2);
+        const char *text1 = node1->text;
+        const char *text2 = node2->text;
 
         if (strcmp(text1, text2) == 0) {
             return COMPARISON_SUCCESS;
@@ -264,9 +264,9 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
     }
     case NODE_TYPE_DOCUMENT: {
         TagRegistration *tagRegistration1 = NULL;
-        getTagRegistration(node1->indexID, dom1, &tagRegistration1);
+        getTagRegistration(node1->tagID, dom1, &tagRegistration1);
         TagRegistration *tagRegistration2 = NULL;
-        getTagRegistration(node2->indexID, dom2, &tagRegistration2);
+        getTagRegistration(node2->tagID, dom2, &tagRegistration2);
 
         if (tagRegistration1->isPaired != tagRegistration2->isPaired) {
             if (printDifferences) {

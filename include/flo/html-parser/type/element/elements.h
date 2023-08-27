@@ -22,7 +22,7 @@ typedef struct {
     StringRegistry boolProps;
     StringRegistry propKeys;
     StringRegistry propValues;
-    StringRegistry text;
+    ElementsContainer text;
 } __attribute__((aligned(128))) DataContainer;
 
 ElementStatus createDataContainer(DataContainer *dataContainer);
@@ -32,8 +32,12 @@ ElementStatus createElement(ElementsContainer *container, const char *element,
                             element_id *currentElementsLen, element_id offset,
                             element_id *elementID);
 
-ElementStatus newElementToIndex(StringRegistry *newElements,
-                                const char *elementStart, size_t elementLength,
-                                HashElement *hashElement, indexID *indexID);
+ElementStatus insertElement(ElementsContainer *elementsContainer,
+                            const char *elementStart, size_t elementLength,
+                            char **dataLocation);
+
+ElementStatus elementToIndex(StringRegistry *stringRegistry,
+                             const char *elementStart, size_t elementLength,
+                             HashElement *hashElement, indexID *indexID);
 
 #endif

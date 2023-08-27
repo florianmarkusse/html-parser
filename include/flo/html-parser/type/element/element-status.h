@@ -1,6 +1,7 @@
 #ifndef FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENT_STATUS_H
 #define FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENT_STATUS_H
 
+// TODO(florian): remove element_success, is replaced by created/found
 typedef enum {
     ELEMENT_SUCCESS,
     ELEMENT_CREATED,

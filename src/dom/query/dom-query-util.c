@@ -14,7 +14,7 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
         FilterType filterType = filters[i];
         switch (filterType.attributeSelector) {
         case TAG: {
-            if (dom->nodes[nodeID].indexID != filterType.data.tagID) {
+            if (dom->nodes[nodeID].tagID != filterType.data.tagID) {
                 return false;
             }
             break;
@@ -127,7 +127,7 @@ QueryStatus filterByTagID(const element_id tagID, const Dom *dom,
                           node_id *results, size_t *len) {
     size_t nextFreeSpot = 0;
     for (size_t i = 0; i < *len; i++) {
-        if (dom->nodes[results[i]].indexID == tagID) {
+        if (dom->nodes[results[i]].tagID == tagID) {
             results[nextFreeSpot++] = results[i];
         }
     }

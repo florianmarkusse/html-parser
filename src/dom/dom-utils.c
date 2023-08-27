@@ -35,13 +35,6 @@ const char *getPropValue(const indexID propValueID, const Dom *dom,
                                 &registration.hashElement);
 }
 
-const char *getText(const indexID textID, const Dom *dom,
-                    const DataContainer *dataContainer) {
-    Registration registration = dom->textRegistry.registry[textID];
-    return getStringFromHashSet(&dataContainer->text.set,
-                                &registration.hashElement);
-}
-
 // TODO(florian): make faster.
 node_id getFirstChild(const node_id parentID, const Dom *dom) {
     for (node_id i = 0; i < dom->parentFirstChildLen; i++) {

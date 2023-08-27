@@ -39,14 +39,11 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
     }
 
     if (node.nodeType == NODE_TYPE_TEXT) {
-        const char *text = getText(node.indexID, dom, dataContainer);
-        if (text != NULL) {
-            fprintf(output, "%s", text);
-        }
+        fprintf(output, "%s", node.text);
         return;
     }
 
-    const char *tag = getTag(node.indexID, dom, dataContainer);
+    const char *tag = getTag(node.tagID, dom, dataContainer);
     fprintf(output, "<%s", tag);
 
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
@@ -69,7 +66,7 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
     }
 
     TagRegistration *tagRegistration = NULL;
-    getTagRegistration(node.indexID, dom, &tagRegistration);
+    getTagRegistration(node.tagID, dom, &tagRegistration);
     if (!tagRegistration->isPaired) {
         if (strcmp(tag, "!DOCTYPE") == 0) {
             fprintf(output, ">");
@@ -141,8 +138,13 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     for (size_t i = 0; i < dom->nodeLen; i++) {
         Node node = dom->nodes[i];
 
-        printf("node ID: %-5u node type: %-10s with tag ID: %-5u\n",
-               node.nodeID, nodeTypeToString(node.nodeType), node.indexID);
+        if (node.nodeType == NODE_TYPE_TEXT) {
+            printf("node ID: %-5u node type: %-10s containing text\n",
+                   node.nodeID, nodeTypeToString(node.nodeType));
+        } else {
+            printf("node ID: %-5u node type: %-10s with tag ID: %-5u\n",
+                   node.nodeID, nodeTypeToString(node.nodeType), node.tagID);
+        }
     }
     printf("\n");
 
@@ -166,7 +168,6 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
                        &dataContainer->propKeys.set);
     printBasicRegistry("value props", &dom->propValueRegistry,
                        &dataContainer->propValues.set);
-    printBasicRegistry("text", &dom->textRegistry, &dataContainer->text.set);
 
     printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);

@@ -29,7 +29,10 @@ __attribute__((unused)) static const char *nodeTypeToString(NodeType type) {
 typedef struct {
     node_id nodeID;
     NodeType nodeType;
-    indexID indexID;
-} __attribute__((aligned(8))) Node;
+    union {
+        indexID tagID;
+        const char *text;
+    };
+} __attribute__((aligned(16))) Node;
 
 #endif

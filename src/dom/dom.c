@@ -46,14 +46,12 @@ DomStatus createDom(const char *htmlString, Dom *dom,
     initBasicRegistry(&dom->propValueRegistry, &initRegistration,
                       PROP_VALUE_REGISTRY_PAGE_SIZE,
                       PROP_VALUE_REGISTRATIONS_PER_PAGE);
-    initBasicRegistry(&dom->textRegistry, &initRegistration,
-                      TEXT_REGISTRY_PAGE_SIZE, TEXT_REGISTRATIONS_PER_PAGE);
 
     dom->nodes = malloc(NODES_PAGE_SIZE);
     Node errorNode;
     errorNode.nodeID = 0;
     errorNode.nodeType = NODE_TYPE_ERROR;
-    errorNode.indexID = 0;
+    errorNode.tagID = 0;
     dom->nodes[0] = errorNode;
     dom->nodeLen = 1; // We start at 1 because 0 is used as error id, and
                       // otherwise we have to do [nodeID - 1] every time.
@@ -83,9 +81,9 @@ DomStatus createDom(const char *htmlString, Dom *dom,
         dom->boolPropRegistry.registry == NULL ||
         dom->propKeyRegistry.registry == NULL ||
         dom->propValueRegistry.registry == NULL ||
-        dom->textRegistry.registry == NULL || dom->parentFirstChilds == NULL ||
-        dom->parentChilds == NULL || dom->nextNodes == NULL ||
-        dom->boolProps == NULL || dom->props == NULL) {
+        dom->parentFirstChilds == NULL || dom->parentChilds == NULL ||
+        dom->nextNodes == NULL || dom->boolProps == NULL ||
+        dom->props == NULL) {
         PRINT_ERROR("Failed to allocate memory for nodes.\n");
         destroyDom(dom);
         return DOM_ERROR_MEMORY;
@@ -116,10 +114,17 @@ DomStatus createNode(node_id *nodeID, const NodeType nodeType, Dom *dom) {
     *nodeID = newNode->nodeID;
     return DOM_SUCCESS;
 }
-DomStatus setNodeIndexID(const node_id nodeID, const indexID indexID,
-                         Dom *dom) {
+
+DomStatus setNodeTagID(const node_id nodeID, const indexID tagID, Dom *dom) {
     Node *createdNode = &(dom->nodes[nodeID]);
-    createdNode->indexID = indexID;
+    createdNode->tagID = tagID;
+
+    return DOM_SUCCESS;
+}
+
+DomStatus setNodeText(const node_id nodeID, const char *text, Dom *dom) {
+    Node *createdNode = &(dom->nodes[nodeID]);
+    createdNode->text = text;
 
     return DOM_SUCCESS;
 }
@@ -208,7 +213,6 @@ void destroyDom(Dom *dom) {
     FREE_TO_NULL(dom->boolPropRegistry.registry);
     FREE_TO_NULL(dom->propKeyRegistry.registry);
     FREE_TO_NULL(dom->propValueRegistry.registry);
-    FREE_TO_NULL(dom->textRegistry.registry);
     FREE_TO_NULL(dom->parentFirstChilds);
     FREE_TO_NULL(dom->parentChilds);
     FREE_TO_NULL(dom->nextNodes);

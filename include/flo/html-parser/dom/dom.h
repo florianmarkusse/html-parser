@@ -73,7 +73,6 @@ typedef struct {
     BasicRegistry boolPropRegistry;
     BasicRegistry propKeyRegistry;
     BasicRegistry propValueRegistry;
-    BasicRegistry textRegistry;
 
     ParentFirstChild *parentFirstChilds;
     size_t parentFirstChildLen;
@@ -100,7 +99,8 @@ DomStatus createDom(const char *htmlString, Dom *dom,
                     DataContainer *dataContainer);
 
 DomStatus createNode(node_id *nodeID, NodeType nodeType, Dom *dom);
-DomStatus setNodeIndexID(node_id nodeID, indexID indexID, Dom *dom);
+DomStatus setNodeTagID(node_id nodeID, indexID tagID, Dom *dom);
+DomStatus setNodeText(node_id nodeID, const char *text, Dom *dom);
 
 DomStatus addParentFirstChild(node_id parentID, node_id childID, Dom *dom);
 

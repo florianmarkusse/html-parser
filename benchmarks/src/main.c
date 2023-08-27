@@ -19,6 +19,7 @@ unsigned char parseFile(const char *fileLocation) {
         destroyDataContainer(&dataContainer);
         return 0;
     }
+
     destroyDom(&dom1);
     destroyDataContainer(&dataContainer);
     return 1;

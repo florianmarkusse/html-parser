@@ -8,36 +8,39 @@
 #include "flo/html-parser/type/data/data-page.h"
 #include "flo/html-parser/utils/print/error.h"
 
-DataPage createDataPage(const size_t pageSize) {
-    DataPage dataPage;
-    dataPage.start = malloc(pageSize);
-    dataPage.freeSpace = dataPage.start;
-    dataPage.spaceLeft = pageSize;
+DataPageStatus createDataPage(DataPage *dataPage, const size_t pageSize) {
+    dataPage->start = malloc(pageSize);
+    if (dataPage->start == NULL) {
+        PRINT_ERROR("Failed to allocate memory for new tag page.\n");
+        return DATA_PAGE_ERROR_MEMORY;
+    }
+    dataPage->freeSpace = dataPage->start;
+    dataPage->spaceLeft = pageSize;
 
-    return dataPage;
+    return DATA_PAGE_SUCCESS;
 }
 
-DataPageStatus newInsertIntoPage(const void *data, const size_t byteLen,
-                                 const size_t totalPages,
-                                 StringRegistry *newElements,
-                                 HashElement *hashElement, indexID *indexID) {
-    ElementsContainer *container = &newElements->container;
-    page_id suitableIndex = container->pageLen;
+DataPageStatus insertInSuitablePage(const void *data, const size_t byteLen,
+                                    const size_t totalPages,
+                                    ElementsContainer *container,
+                                    char **dataLocation) {
+    DataPageStatus status = DATA_PAGE_SUCCESS;
+    page_id index = container->pageLen;
     for (page_id i = 0; i < container->pageLen; ++i) {
         if (container->pages[i].spaceLeft >= byteLen) {
-            suitableIndex = i;
+            index = i;
             break;
         }
     }
 
-    if (suitableIndex == container->pageLen) {
+    if (index == container->pageLen) {
         if (container->pageLen < totalPages) {
-            container->pages[suitableIndex] =
-                createDataPage(container->pageSize);
-            if (container->pages[suitableIndex].start == NULL) {
-                PRINT_ERROR("Failed to allocate memory for new tag page.\n");
-                return DATA_PAGE_ERROR_MEMORY;
+            DataPage dataPage;
+            if ((status = createDataPage(&dataPage, container->pageSize)) !=
+                DATA_PAGE_SUCCESS) {
+                return status;
             }
+            container->pages[index] = dataPage;
             container->pageLen++;
         } else {
             PRINT_ERROR("No more capacity to create new pages.\n");
@@ -47,12 +50,33 @@ DataPageStatus newInsertIntoPage(const void *data, const size_t byteLen,
         }
     }
 
-    memcpy(container->pages[suitableIndex].freeSpace, data, byteLen);
-    insertStringAtHash(&newElements->set,
-                       container->pages[suitableIndex].freeSpace, hashElement,
-                       indexID);
-    container->pages[suitableIndex].freeSpace += byteLen;
-    container->pages[suitableIndex].spaceLeft -= byteLen;
+    memcpy(container->pages[index].freeSpace, data, byteLen);
+    *dataLocation = container->pages[index].freeSpace;
+    container->pages[index].freeSpace += byteLen;
+    container->pages[index].spaceLeft -= byteLen;
 
-    return DATA_PAGE_SUCCESS;
+    return status;
+}
+
+DataPageStatus insertIntoPageWithhash(const void *data, const size_t byteLen,
+                                      const size_t totalPages,
+                                      StringRegistry *stringRegistry,
+                                      HashElement *hashElement,
+                                      indexID *indexID) {
+    DataPageStatus status = DATA_PAGE_SUCCESS;
+
+    ElementsContainer *container = &stringRegistry->container;
+    char *dataLocation = NULL;
+    if ((status = insertInSuitablePage(data, byteLen, totalPages, container,
+                                       &dataLocation)) != DATA_PAGE_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(dataPageStatusToString(status),
+                               "Failed to insert data in suitable page %s\n",
+                               (char *)data);
+        return status;
+    }
+
+    insertStringAtHash(&stringRegistry->set, dataLocation, hashElement,
+                       indexID);
+
+    return status;
 }

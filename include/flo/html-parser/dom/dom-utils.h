@@ -14,8 +14,6 @@ const char *getPropKey(indexID propKeyID, const Dom *dom,
                        const DataContainer *dataContainer);
 const char *getPropValue(indexID propValueID, const Dom *dom,
                          const DataContainer *dataContainer);
-const char *getText(indexID textID, const Dom *dom,
-                    const DataContainer *dataContainer);
 
 node_id getFirstChild(node_id parentID, const Dom *dom);
 node_id getNextNode(node_id currentNodeID, const Dom *dom);

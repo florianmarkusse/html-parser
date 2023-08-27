@@ -53,9 +53,3 @@ DomStatus addPropValueRegistration(indexID propValueID,
     return addRegistration(propValueID, hashElement, &dom->propValueRegistry,
                            PROP_VALUE_REGISTRATIONS_PER_PAGE);
 }
-
-DomStatus addTextRegistration(indexID textID, const HashElement *hashElement,
-                              Dom *dom) {
-    return addRegistration(textID, hashElement, &dom->textRegistry,
-                           TEXT_REGISTRATIONS_PER_PAGE);
-}

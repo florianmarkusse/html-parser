@@ -71,11 +71,11 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
         result = currentStatus;
     }
 
-    if ((currentStatus = initStringRegistry(&dataContainer->text,
-                                            TOTAL_ELEMENTS, TEXT_PAGE_SIZE)) !=
-        ELEMENT_SUCCESS) {
+    if ((currentStatus =
+             initElementsContainer(&dataContainer->text, TEXT_PAGE_SIZE) !=
+             ELEMENT_SUCCESS)) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(currentStatus),
-                             "Failed to initialize text string registry!\n");
+                             "Failed to initialize text elements container!\n");
         result = currentStatus;
     }
 
@@ -91,7 +91,7 @@ void destroyDataContainer(DataContainer *dataContainer) {
     destroyStringRegistry(&dataContainer->boolProps);
     destroyStringRegistry(&dataContainer->propKeys);
     destroyStringRegistry(&dataContainer->propValues);
-    destroyStringRegistry(&dataContainer->text);
+    destroyElementsContainer(&dataContainer->text);
 }
 
 ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
@@ -114,12 +114,13 @@ ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
     return ELEMENT_SUCCESS;
 }
 
-ElementStatus createNewElement(StringRegistry *newElements, const char *element,
-                               HashElement *hashElement, indexID *indexID) {
+ElementStatus createNewElement(StringRegistry *stringRegistry,
+                               const char *element, HashElement *hashElement,
+                               indexID *indexID) {
     // insert element into the has table.
     DataPageStatus insertStatus =
-        newInsertIntoPage(element, strlen(element) + 1, TOTAL_PAGES,
-                          newElements, hashElement, indexID);
+        insertIntoPageWithhash(element, strlen(element) + 1, TOTAL_PAGES,
+                               stringRegistry, hashElement, indexID);
     if (insertStatus != DATA_PAGE_SUCCESS) {
         ERROR_WITH_CODE_FORMAT(dataPageStatusToString(insertStatus),
                                "Could not find or create element \"%s\"",
@@ -131,17 +132,18 @@ ElementStatus createNewElement(StringRegistry *newElements, const char *element,
 }
 
 /**
- * If the element is found, then only indexID is set. Otherwise, if a new
- * element had to be created, hashElement is also filled.
+ * If the element is found, then  indexID is set.
+ * HashElement is always set.
  */
 // TODO(florian): remove seaarchElement parameter once text values completely
 // bypass the hash
-ElementStatus newElementToIndex(StringRegistry *newElements,
-                                const char *elementStart, size_t elementLength,
-                                HashElement *hashElement, indexID *indexID) {
-    char buffer[newElements->container.pageSize];
-    const ElementStatus sizeCheck = elementSizeCheck(
-        buffer, newElements->container.pageSize, elementStart, elementLength);
+ElementStatus elementToIndex(StringRegistry *stringRegistry,
+                             const char *elementStart, size_t elementLength,
+                             HashElement *hashElement, indexID *indexID) {
+    char buffer[stringRegistry->container.pageSize];
+    const ElementStatus sizeCheck =
+        elementSizeCheck(buffer, stringRegistry->container.pageSize,
+                         elementStart, elementLength);
     if (sizeCheck != ELEMENT_SUCCESS) {
         return sizeCheck;
     }
@@ -149,10 +151,35 @@ ElementStatus newElementToIndex(StringRegistry *newElements,
     memcpy(buffer, elementStart, elementLength);
     buffer[elementLength] = '\0';
 
-    if (containsStringWithDataHashSet(&newElements->set, buffer, hashElement,
+    if (containsStringWithDataHashSet(&stringRegistry->set, buffer, hashElement,
                                       indexID)) {
         return ELEMENT_FOUND;
     }
 
-    return createNewElement(newElements, buffer, hashElement, indexID);
+    return createNewElement(stringRegistry, buffer, hashElement, indexID);
+}
+
+ElementStatus insertElement(ElementsContainer *elementsContainer,
+                            const char *elementStart, size_t elementLength,
+                            char **dataLocation) {
+    char buffer[elementsContainer->pageSize];
+    const ElementStatus sizeCheck = elementSizeCheck(
+        buffer, elementsContainer->pageSize, elementStart, elementLength);
+    if (sizeCheck != ELEMENT_SUCCESS) {
+        return sizeCheck;
+    }
+
+    memcpy(buffer, elementStart, elementLength);
+    buffer[elementLength] = '\0';
+
+    const DataPageStatus dataPageStatus =
+        insertInSuitablePage(buffer, elementLength + 1, TOTAL_PAGES,
+                             elementsContainer, dataLocation);
+    if (dataPageStatus != DATA_PAGE_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(dataPageStatusToString(dataPageStatus),
+                             "Failed to insert element\n");
+        return ELEMENT_NOT_FOUND_OR_CREATED;
+    }
+
+    return ELEMENT_CREATED;
 }
