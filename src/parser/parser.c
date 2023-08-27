@@ -23,6 +23,21 @@ typedef enum {
     ROGUE_OPEN_TAG
 } TextParsing;
 
+const char *const voidElementTags[] = {
+    "area",  "base", "br",   "col",    "embed", "hr", "img",
+    "input", "link", "meta", "source", "track", "wbr"};
+
+bool isVoidElement(const char *str, size_t len) {
+    for (size_t i = 0; i < sizeof(voidElementTags) / sizeof(voidElementTags[0]);
+         i++) {
+        if (strncmp(str, voidElementTags[i], len) == 0 &&
+            strlen(voidElementTags[i]) == len) {
+            return true; // Match found
+        }
+    }
+    return false; // No match found
+}
+
 DomStatus getNewNodeID(node_id *currentNodeID, const NodeType nodeType,
                        node_id *prevNodeID, Dom *dom) {
     *prevNodeID = *currentNodeID;
@@ -134,8 +149,11 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
     *isSingle = exclamStart;
     if (ch == '>' && *currentPosition > 0 &&
         htmlString[*currentPosition - 1] == '/') {
-        *isSingle = 1;
+        *isSingle = true;
         elementLen--;
+    } else if (isVoidElement(&htmlString[elementStartIndex], elementLen)) {
+        // For the funny <br> tags...
+        *isSingle = true;
     }
 
     // Collect attributes here.
@@ -567,7 +585,7 @@ DomStatus parse(const char *htmlString, Dom *dom,
                 }
                 context = BASIC_CONTEXT;
             }
-            // Comments or <!domTYPE>.
+            // Comments or <!DOCTYPE>.
             else if (htmlString[currentPosition + 1] == '!') {
                 // Skip comments.
                 if (htmlString[currentPosition + 2] == '-' &&
@@ -586,7 +604,7 @@ DomStatus parse(const char *htmlString, Dom *dom,
 
                 }
                 // Any <! is treated as a standard single tag and during
-                // printing !domTYPE is special case.
+                // printing !DOCTYPE is special case.
                 else {
                     if ((documentStatus = parseExclamdomNode(
                              htmlString, &currentPosition, &prevNodeID,
@@ -616,6 +634,10 @@ DomStatus parse(const char *htmlString, Dom *dom,
                     return documentStatus;
                 }
                 if (!isSingle) {
+                    if (nodeStack.len >= MAX_NODE_DEPTH) {
+                        PRINT_ERROR("Reached max node depth, aborting\n");
+                        return DOM_TOO_DEEP;
+                    }
                     nodeStack.stack[nodeStack.len] = currentNodeID;
                     nodeStack.len++;
                 }
