@@ -8,12 +8,17 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 ### Options ###
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static libraries" OFF)
-option(CMAKE_BUILD_TYPE "Build type (Debug, Release)" "Release")
+option(CMAKE_BUILD_TYPE "Build type (Debug, Release, Profiling)" "Release")
 option(BUILD_TESTS "Build the test executable" OFF)
 option(BUILD_BENCHMARKS "Build the benchmark executable" OFF)
 
 ### Flags ###
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Profiling")
+    set(CMAKE_EXE_LINKER_FLAGS_PROFILE "-pg")
+    set(CMAKE_SHARED_LINKER_FLAGS_PROFILE "-pg")
+endif()
 
 set(LIBRARY_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
 
@@ -46,11 +51,13 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
 target_compile_options(${LIBRARY_NAME} PRIVATE
     $<$<CONFIG:Debug>:-O0 -g>
     $<$<CONFIG:Release>:-O3>
+    $<$<CONFIG:Profiling>:-O2 -pg>
 )
 
 target_compile_definitions(${LIBRARY_NAME} PRIVATE
     $<$<CONFIG:Debug>:ENABLE_DEBUG_MACRO>
     $<$<CONFIG:Release>:>
+    $<$<CONFIG:Profiling>:>
 )
 
 target_include_directories(${LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)

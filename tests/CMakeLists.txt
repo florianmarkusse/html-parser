@@ -11,11 +11,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/querying/querySelector.c"
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(EXECUTABLE_NAME "${PROJECT_NAME}-Debug")
-else()
-    set(EXECUTABLE_NAME "${PROJECT_NAME}-Release")
-endif()
+set(EXECUTABLE_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
 
 # Define the test executable target
 add_executable(${EXECUTABLE_NAME} ${TEST_SOURCE_FILES})
