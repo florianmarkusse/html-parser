@@ -32,3 +32,5 @@ Makefile
 *.log
 *.DS_Store
 
+# callgrind
+callgrind*
