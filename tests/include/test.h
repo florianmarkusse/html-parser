@@ -1,6 +1,7 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 void printTabs();
@@ -15,4 +16,6 @@ void printTestResultDifferenceString(size_t expected,
                                      const char *actualString);
 void printTestResultDifferenceNumber(size_t expectedNumber,
                                      size_t actualNumber);
+void printTestResultDifferenceBool(bool expectedBool, bool actualBool);
+
 #endif

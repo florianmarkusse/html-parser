@@ -9,6 +9,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/dom/querying/querying.c"
     "src/dom/querying/querySelectorAll.c"
     "src/dom/querying/querySelector.c"
+    "src/node/querying/querying.c"
 )
 
 set(EXECUTABLE_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")

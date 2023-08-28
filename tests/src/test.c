@@ -53,3 +53,9 @@ inline void printTestResultDifferenceNumber(const size_t expectedNumber,
     printf("%-20s: %zu\n", "Expected number", expectedNumber);
     printf("%-20s: %zu\n", "Actual number", actualNumber);
 }
+
+inline void printTestResultDifferenceBool(const bool expectedBool,
+                                          const bool actualBool) {
+    printf("%-20s: %d\n", "Expected bool", expectedBool);
+    printf("%-20s: %d\n", "Actual bool", actualBool);
+}

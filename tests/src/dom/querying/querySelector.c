@@ -76,13 +76,13 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
 static inline void testAndCount(const char *fileLocation, const char *cssQuery,
                                 const QueryStatus expectedStatus,
                                 const node_id expectedNode,
-                                const char *testName, size_t *localSuccsses,
+                                const char *testName, size_t *localSuccesses,
                                 size_t *localFailures) {
     printTestStart(testName);
 
     if (testQuery(fileLocation, cssQuery, expectedStatus, expectedNode) ==
         TEST_SUCCESS) {
-        (*localSuccsses)++;
+        (*localSuccesses)++;
     } else {
         (*localFailures)++;
     }

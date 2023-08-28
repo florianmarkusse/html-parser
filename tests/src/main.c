@@ -5,6 +5,7 @@
 #include "dom/comparing/comparing.h"
 #include "dom/parsing/parsing.h"
 #include "dom/querying/querying.h"
+#include "node/querying/querying.h"
 #include "pretty-print.h"
 #include "test.h"
 
@@ -21,6 +22,9 @@ int main() {
     printf("\n");
 
     testDomQueries(&successes, &failures);
+    printf("\n");
+
+    testNodeQueries(&successes, &failures);
     printf("\n");
 
     printTestScore(successes, failures);
