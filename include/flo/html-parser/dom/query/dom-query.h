@@ -10,7 +10,7 @@
 typedef enum { TAG, BOOLEAN_PROPERTY, PROPERTY } AttributeSelector;
 
 typedef enum {
-    NO_COMBINATOR,   // The first element is selected without a combinator
+    NO_COMBINATOR,   // The first part of a query is done without a combinator
     ADJACENT,        // '+'
     CHILD,           // '>'
     GENERAL_SIBLING, // '~'

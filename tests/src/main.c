@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "comparing/comparing.h"
-#include "parsing/parsing.h"
+#include "dom/comparing/comparing.h"
+#include "dom/parsing/parsing.h"
+#include "dom/querying/querying.h"
 #include "pretty-print.h"
-#include "querying/querying.h"
 #include "test.h"
 
 int main() {
@@ -14,13 +14,13 @@ int main() {
     size_t successes = 0;
     size_t failures = 0;
 
-    testParsings(&successes, &failures);
+    testDomParsings(&successes, &failures);
     printf("\n");
 
-    testComparisons(&successes, &failures);
+    testDomComparisons(&successes, &failures);
     printf("\n");
 
-    testQueries(&successes, &failures);
+    testDomQueries(&successes, &failures);
     printf("\n");
 
     printTestScore(successes, failures);

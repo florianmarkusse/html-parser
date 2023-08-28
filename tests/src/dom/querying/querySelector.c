@@ -7,11 +7,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "querying/querying.h"
+#include "dom/querying/querying.h"
 #include "test-status.h"
 #include "test.h"
 
-#define CURRENT_DIR "tests/src/querying/inputs/"
+#define CURRENT_DIR "tests/src/dom/querying/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 static const TestFile testFiles[] = {

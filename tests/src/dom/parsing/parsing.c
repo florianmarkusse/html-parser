@@ -6,11 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "parsing/parsing.h"
+#include "dom/parsing/parsing.h"
 #include "test-status.h"
 #include "test.h"
 
-#define INPUTS_DIR "tests/src/parsing/inputs/"
+#define INPUTS_DIR "tests/src/dom/parsing/inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
 unsigned char parseFile(const char *fileLocation) {
@@ -64,7 +64,7 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
     closedir(dir);
 }
 
-unsigned char testParsings(size_t *successes, size_t *failures) {
+unsigned char testDomParsings(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM parsings");
     size_t localSuccesses = 0;
     size_t localFailures = 0;

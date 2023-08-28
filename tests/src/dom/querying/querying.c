@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-#include "querying/querying.h"
+#include "dom/querying/querying.h"
 #include "test.h"
 
-unsigned char testQueries(size_t *successes, size_t *failures) {
+unsigned char testDomQueries(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM queries");
 
     size_t localSuccesses = 0;

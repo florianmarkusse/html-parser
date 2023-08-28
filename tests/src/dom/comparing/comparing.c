@@ -8,11 +8,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "comparing/comparing.h"
+#include "dom/comparing/comparing.h"
 #include "test-status.h"
 #include "test.h"
 
-#define CURRENT_DIR "tests/src/comparing/inputs/"
+#define CURRENT_DIR "tests/src/dom/comparing/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 #define TEST_FILE_2 CURRENT_DIR "test-2.html"
 #define TEST_FILE_3 CURRENT_DIR "test-3.html"
@@ -176,7 +176,7 @@ static inline void diffContainerParseAndCompare(
     }
 }
 
-unsigned char testComparisons(size_t *successes, size_t *failures) {
+unsigned char testDomComparisons(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM comparisons");
     size_t localSuccesses = 0;
     size_t localFailures = 0;

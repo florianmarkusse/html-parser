@@ -4,11 +4,11 @@ project(html-parser-tests)
 list(APPEND TEST_SOURCE_FILES
     "src/main.c"
     "src/test.c"
-    "src/parsing/parsing.c"
-    "src/comparing/comparing.c"
-    "src/querying/querying.c"
-    "src/querying/querySelectorAll.c"
-    "src/querying/querySelector.c"
+    "src/dom/parsing/parsing.c"
+    "src/dom/comparing/comparing.c"
+    "src/dom/querying/querying.c"
+    "src/dom/querying/querySelectorAll.c"
+    "src/dom/querying/querySelector.c"
 )
 
 set(EXECUTABLE_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
