@@ -13,6 +13,10 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
     for (size_t i = 0; i < filterslen; i++) {
         FilterType filterType = filters[i];
         switch (filterType.attributeSelector) {
+        case ALL_NODES: {
+            return true;
+            break;
+        }
         case TAG: {
             if (dom->nodes[nodeID].tagID != filterType.data.tagID) {
                 return false;

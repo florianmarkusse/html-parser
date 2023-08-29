@@ -7,7 +7,7 @@
 #define INITIAL_QUERY_CAP (1U << 6U)
 #define MAX_FILTERS_PER_ELEMENT (1U << 3U)
 
-typedef enum { TAG, BOOLEAN_PROPERTY, PROPERTY } AttributeSelector;
+typedef enum { TAG, ALL_NODES, BOOLEAN_PROPERTY, PROPERTY } AttributeSelector;
 
 typedef enum {
     NO_COMBINATOR,   // The first part of a query is done without a combinator

@@ -46,6 +46,9 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, "div[special-one].big", QUERY_SUCCESS, 1,
      "more difficult query with '.'"},
     {TEST_FILE_1, "#test", QUERY_SUCCESS, 1, "using '#' to select by id"},
+    {TEST_FILE_1, "div > div > span, p", QUERY_SUCCESS, 6,
+     "using ',' to perform multiple queries"},
+    {TEST_FILE_1, "body *[special-one]", QUERY_SUCCESS, 2, "using *"},
 };
 
 // Calculate the number of test files

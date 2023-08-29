@@ -36,17 +36,28 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
         }                                                                      \
     } while (0)
 
-bool isPropStartChar(char ch) { return isAlphaBetical(ch) || ch == '!'; }
+bool isPropStartChar(const char ch) { return isAlphaBetical(ch) || ch == '!'; }
 
-bool isElementStartChar(char ch) {
+bool isElementStartChar(const char ch) {
     return isPropStartChar(ch) || ch == '.' || ch == '#';
 }
 
-bool isSpecifiedCombinator(char ch) {
+bool isSpecifiedCombinator(const char ch) {
     return ch == '>' || ch == '+' || ch == '~';
 }
 
-bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
+bool isCombinator(const char ch) {
+    return ch == ' ' || isSpecifiedCombinator(ch);
+}
+
+bool endOfCurrentFilter(const char ch) {
+    return isCombinator(ch) || isSpecialSpace(ch) || ch == '[' || ch == '.' ||
+           ch == '#';
+}
+
+QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
+                            const DataContainer *dataContainer,
+                            node_id **results, size_t *resultsLen) {}
 
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                              const DataContainer *dataContainer,
@@ -82,7 +93,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
     char ch = cssQuery[currentPosition];
 
     // Skip ahead until an element is found.
-    while (!isElementStartChar(ch) && ch != '[' && ch != '\0') {
+    while (!isElementStartChar(ch) && ch != '[' && ch != '*' && ch != '\0') {
         ch = cssQuery[++currentPosition];
     }
 
@@ -91,8 +102,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
 
         if (isPropStartChar(ch)) {
             tokenStart = currentPosition;
-            while (!isCombinator(ch) && !isSpecialSpace(ch) && ch != '[' &&
-                   ch != '.' && ch != '#' && ch != '\0') {
+            while (!endOfCurrentFilter(ch) && ch != '\0') {
                 ch = cssQuery[++currentPosition];
             }
             tokenLength =
@@ -110,7 +120,15 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
 
             CHECK_FILTERS_LIMIT(filtersLen);
             filters[filtersLen].attributeSelector = TAG;
-            filters[filtersLen].data.propID = tokenID;
+            filters[filtersLen].data.tagID = tokenID;
+            filtersLen++;
+        } else if (ch == '*') {
+            while (!endOfCurrentFilter(ch) && ch != '\0') {
+                ch = cssQuery[++currentPosition];
+            }
+
+            CHECK_FILTERS_LIMIT(filtersLen);
+            filters[filtersLen].attributeSelector = ALL_NODES;
             filtersLen++;
         }
 
