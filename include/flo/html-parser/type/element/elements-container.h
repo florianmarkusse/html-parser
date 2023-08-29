@@ -8,7 +8,6 @@
 #include "flo/html-parser/type/data/data-page.h"
 
 typedef uint16_t element_id;
-#define ELEMENT_ID_UINT_16
 
 #define TOTAL_ELEMENTS_NUM_BITS (sizeof(element_id) * 8)
 

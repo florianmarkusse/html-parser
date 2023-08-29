@@ -20,8 +20,6 @@ static size_t hashString(const char *string) {
     return hash;
 }
 
-#ifdef ELEMENT_ID_UINT_16
-
 // https://github.com/skeeto/hash-prospector
 // 3-round xorshift-multiply (-Xn3)
 // bias = 0.0045976709018820602
@@ -35,6 +33,5 @@ static uint16_t hash16_xm3(uint16_t x) {
     x ^= x >> 10;
     return x;
 }
-#endif
 
 #endif

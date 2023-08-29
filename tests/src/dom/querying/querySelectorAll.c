@@ -110,42 +110,6 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     return result;
 }
 
-static void testBadInit(size_t *localSuccsses, size_t *localFailures) {
-    printTestStart("bad init");
-
-    DataContainer dataContainer;
-    Dom dom;
-    node_id *results = NULL;
-    size_t resultsLen = 1;
-    QueryStatus wrongLenStatus =
-        querySelectorAll("", &dom, &dataContainer, &results, &resultsLen);
-    resultsLen = 0;
-    node_id *withVals = malloc(sizeof(node_id));
-    QueryStatus wrongArrayStatus =
-        querySelectorAll("", &dom, &dataContainer, &withVals, &resultsLen);
-    FREE_TO_NULL(results);
-    FREE_TO_NULL(withVals);
-
-    if (wrongLenStatus == QUERY_INITIALIZATION_ERROR &&
-        wrongArrayStatus == QUERY_INITIALIZATION_ERROR) {
-        (*localSuccsses)++;
-        printTestSuccess();
-    } else {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceString(
-            QUERY_INITIALIZATION_ERROR,
-            queryingStatusToString(QUERY_INITIALIZATION_ERROR), wrongLenStatus,
-            queryingStatusToString(wrongLenStatus));
-        printTestResultDifferenceString(
-            QUERY_INITIALIZATION_ERROR,
-            queryingStatusToString(QUERY_INITIALIZATION_ERROR),
-            wrongArrayStatus, queryingStatusToString(wrongArrayStatus));
-        printTestDemarcation();
-        (*localFailures)++;
-    }
-}
-
 static inline void testAndCount(const char *fileLocation, const char *cssQuery,
                                 const QueryStatus expectedStatus,
                                 const size_t expectedNumberOfNodes,
@@ -165,8 +129,6 @@ unsigned char testQuerySelectorAll(size_t *successes, size_t *failures) {
     printTestTopicStart("querySelectorAll");
     size_t localSuccesses = 0;
     size_t localFailures = 0;
-
-    testBadInit(&localSuccesses, &localFailures);
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];

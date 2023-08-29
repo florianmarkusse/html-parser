@@ -112,15 +112,15 @@ QueryStatus getPropValueID(const char *valueProp, element_id *valueID,
 QueryStatus
 getNodesWithoutCombinator(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                           const size_t filtersLen, const Dom *dom,
-                          node_id **results, size_t *len, size_t *currentCap) {
+                          Uint16HashSet *set) {
     for (size_t i = 0; i < dom->nodeLen; i++) {
         if (filterNode(dom->nodes[i].nodeID, filters, filtersLen, dom)) {
-            if ((*(results) = resizeArray(*results, *len, currentCap,
-                                          sizeof(node_id), *currentCap)) ==
-                NULL) {
+            HashStatus status = insertUint16HashSet(set, dom->nodes[i].nodeID);
+            if (status != HASH_SUCCESS) {
+                ERROR_WITH_CODE_ONLY(hashStatusToString(status),
+                                     "inserting into hash set failed!\n");
                 return QUERY_MEMORY_ERROR;
             }
-            (*results)[(*len)++] = dom->nodes[i].nodeID;
         }
     }
 
@@ -156,36 +156,30 @@ unsigned char isPresentIn(const node_id nodeID, const node_id *array,
 QueryStatus
 getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                      const size_t filtersLen, const Dom *dom,
-                     const size_t numberOfSiblings, node_id **results,
-                     size_t *len, size_t *currentCap) {
-    size_t filteredAdjacentsCap = *len;
-    size_t filteredAdjacentsLen = 0;
-    node_id *filteredAdjacents = malloc(filteredAdjacentsCap * sizeof(node_id));
-    if (filteredAdjacents == NULL) {
+                     const size_t numberOfSiblings, Uint16HashSet *set) {
+    Uint16HashSet filteredAdjacents;
+    if (initUint16HashSet(&filteredAdjacents, set->arrayLen) != HASH_SUCCESS) {
         PRINT_ERROR(
-            "Could not allocate memory for the filtered adjacents array\n");
+            "Could not allocate memory for the filtered adjacents set\n");
         return QUERY_MEMORY_ERROR;
     }
 
-    for (size_t i = 0; i < *len; i++) {
-        node_id nextNodeID = getNextNode((*results)[i], dom);
+    Uint16HashSetIterator iterator;
+    initUint16HashSetIterator(&iterator, set);
+
+    while (hasNextUint16HashSetIterator(&iterator)) {
+        node_id nextNodeID =
+            getNextNode(nextUint16HashSetIterator(&iterator), dom);
         size_t siblingsNumberCopy = numberOfSiblings;
+
         while (siblingsNumberCopy && nextNodeID) {
             if (filterNode(nextNodeID, filters, filtersLen, dom)) {
-                if (!isPresentIn(nextNodeID, filteredAdjacents,
-                                 filteredAdjacentsLen)) {
-                    if ((filteredAdjacents = resizeArray(
-                             filteredAdjacents, filteredAdjacentsLen,
-                             &filteredAdjacentsCap, sizeof(node_id),
-                             filteredAdjacentsCap)) == NULL) {
-                        FREE_TO_NULL(filteredAdjacents);
-                        PRINT_ERROR(
-                            "Failed to allocate memory finding adjacent "
-                            "elements!\n");
-                        return QUERY_MEMORY_ERROR;
-                    }
-
-                    filteredAdjacents[filteredAdjacentsLen++] = nextNodeID;
+                HashStatus status = insertUint16HashSet(set, nextNodeID);
+                if (status != HASH_SUCCESS) {
+                    destroyUint16HashSet(&filteredAdjacents);
+                    ERROR_WITH_CODE_ONLY(hashStatusToString(status),
+                                         "inserting into hash set failed!\n");
+                    return QUERY_MEMORY_ERROR;
                 }
             }
 
@@ -194,10 +188,10 @@ getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
         }
     }
 
-    FREE_TO_NULL(*results);
-    *results = filteredAdjacents;
-    *len = filteredAdjacentsLen;
-    *currentCap = filteredAdjacentsCap;
+    destroyUint16HashSet(set);
+    set->arrayLen = filteredAdjacents.arrayLen;
+    set->array = filteredAdjacents.array;
+    set->entries = filteredAdjacents.entries;
 
     return QUERY_SUCCESS;
 }
@@ -205,74 +199,75 @@ getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
 QueryStatus
 getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                        const size_t filtersLen, const Dom *dom, size_t depth,
-                       node_id **results, size_t *len, size_t *currentCap) {
-    node_id *parents = malloc(*currentCap * sizeof(node_id));
-    size_t parentLen = *len;
-    size_t parentCap = *currentCap;
-    if (parents == NULL) {
-        PRINT_ERROR("Could not allocate memory for the parents array.\n");
+                       Uint16HashSet *set) {
+    Uint16HashSet firstDescendants;
+    if (copyUint16HashSet(set, &firstDescendants) != HASH_SUCCESS) {
+        PRINT_ERROR(
+            "Could not allocate & copy memory for the first descendants set\n");
         return QUERY_MEMORY_ERROR;
     }
 
-    node_id *foundNodes = malloc(*currentCap * sizeof(node_id));
-    size_t foundNodesLen = *len;
-    size_t foundNodesCap = *currentCap;
-    if (foundNodes == NULL) {
-        FREE_TO_NULL(parents);
-        PRINT_ERROR("Could not allocate memory for the parents array.\n");
+    resetUint16HashSet(set);
+
+    Uint16HashSet secondDescendants;
+    if (initUint16HashSet(&secondDescendants, firstDescendants.arrayLen) !=
+        HASH_SUCCESS) {
+        destroyUint16HashSet(&firstDescendants);
+        PRINT_ERROR(
+            "Could not allocate memory for the second descendants set\n");
         return QUERY_MEMORY_ERROR;
     }
-    memcpy(foundNodes, *results, *len * sizeof(node_id));
 
-    *len = 0;
-    while (depth > 0 && foundNodesLen > 0) {
-        if (foundNodesLen > parentCap) {
-            if ((parents = resizeArray(parents, foundNodesLen, &parentCap,
-                                       sizeof(node_id), parentCap)) == NULL) {
-                FREE_TO_NULL(parents);
-                FREE_TO_NULL(foundNodes);
-                return QUERY_MEMORY_ERROR;
-            }
-        }
-        memcpy(parents, foundNodes, foundNodesLen * sizeof(node_id));
-        parentLen = foundNodesLen;
-        foundNodesLen = 0;
-        // TODO(florian): can replace this with looping over the parents
-        // array instead once a performant lookup is available.
+    bool isFirstFilled = true;
+    Uint16HashSet *toBeFilledSet = &secondDescendants;
+    Uint16HashSet *filledSet = &firstDescendants;
+
+    while (depth > 0 && filledSet->entries > 0) {
         for (size_t i = 0; i < dom->parentChildLen; i++) {
             ParentChild parentChildNode = dom->parentChilds[i];
-            if ((dom->nodes[parentChildNode.childID].nodeType ==
-                 NODE_TYPE_DOCUMENT) &&
-                isPresentIn(parentChildNode.parentID, parents, parentLen)) {
-                if ((foundNodes =
-                         resizeArray(foundNodes, foundNodesLen, &foundNodesCap,
-                                     sizeof(node_id), foundNodesCap)) == NULL) {
-                    FREE_TO_NULL(parents);
-                    FREE_TO_NULL(foundNodes);
+            if (dom->nodes[parentChildNode.childID].nodeType ==
+                    NODE_TYPE_DOCUMENT &&
+                containsUint16HashSet(filledSet, parentChildNode.parentID)) {
+                HashStatus status =
+                    insertUint16HashSet(toBeFilledSet, parentChildNode.childID);
+                if (status != HASH_SUCCESS) {
+                    destroyUint16HashSet(&firstDescendants);
+                    destroyUint16HashSet(&secondDescendants);
+                    ERROR_WITH_CODE_ONLY(hashStatusToString(status),
+                                         "inserting into hash set failed!\n");
                     return QUERY_MEMORY_ERROR;
                 }
-                foundNodes[foundNodesLen++] = parentChildNode.childID;
-
                 if (filterNode(parentChildNode.childID, filters, filtersLen,
                                dom)) {
-                    if (!isPresentIn(parentChildNode.childID, *results, *len)) {
-                        if ((*(results) = resizeArray(
-                                 *results, *len, currentCap, sizeof(node_id),
-                                 *currentCap)) == NULL) {
-                            FREE_TO_NULL(parents);
-                            FREE_TO_NULL(foundNodes);
-                            return QUERY_MEMORY_ERROR;
-                        }
-                        (*results)[(*len)++] = parentChildNode.childID;
+                    status = insertUint16HashSet(set, parentChildNode.childID);
+                    if (status != HASH_SUCCESS) {
+                        destroyUint16HashSet(&firstDescendants);
+                        destroyUint16HashSet(&secondDescendants);
+                        ERROR_WITH_CODE_ONLY(
+                            hashStatusToString(status),
+                            "inserting into results set failed!\n");
+                        return QUERY_MEMORY_ERROR;
                     }
                 }
             }
         }
 
+        isFirstFilled = !isFirstFilled;
+
+        if (isFirstFilled) {
+            toBeFilledSet = &secondDescendants;
+            filledSet = &firstDescendants;
+        } else {
+            toBeFilledSet = &firstDescendants;
+            filledSet = &secondDescendants;
+        }
+
+        resetUint16HashSet(toBeFilledSet);
+
         depth--;
     }
 
-    FREE_TO_NULL(parents);
-    FREE_TO_NULL(foundNodes);
+    destroyUint16HashSet(&firstDescendants);
+    destroyUint16HashSet(&secondDescendants);
     return QUERY_SUCCESS;
 }

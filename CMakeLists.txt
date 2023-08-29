@@ -31,7 +31,7 @@ endif()
 add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/utils/file/read.c"
     "src/utils/file/path.c"
-    "src/hash/element-id-hash.c"
+    "src/hash/uint16-t-hash.c"
     "src/hash/string-hash.c"
     "src/type/element/elements.c"
     "src/type/element/elements-container.c"

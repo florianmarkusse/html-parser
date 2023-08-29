@@ -25,7 +25,7 @@ HashStatus insertStringAtHash(StringHashSet *set, const char *string,
                               indexID *indexID) {
     if (set->entries >= set->arrayLen) {
         PRINT_ERROR("String hash set is at full capacity!\n");
-        return HASH_FULL_CAPACITY;
+        return HASH_ERROR_CAPACITY;
     }
 
     set->entries++;
@@ -45,7 +45,7 @@ HashStatus insertStringHashSet(StringHashSet *set, const char *string) {
     if (set->entries >= set->arrayLen) {
         PRINT_ERROR("String hash set is at full capacity!\n");
         PRINT_ERROR("Could not insert %s!\n", string);
-        return HASH_FULL_CAPACITY;
+        return HASH_ERROR_CAPACITY;
     }
 
     size_t hash = hashString(string) % set->arrayLen;

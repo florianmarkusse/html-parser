@@ -6,6 +6,7 @@
 #include "dom-query-status.h"
 #include "dom-query.h"
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/hash/uint16-t-hash.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
 
@@ -27,15 +28,15 @@ QueryStatus filterByTagID(element_id tagID, const Dom *dom, node_id *results,
                           size_t *len);
 QueryStatus
 getNodesWithoutCombinator(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
-                          size_t filtersLen, const Dom *dom, node_id **results,
-                          size_t *len, size_t *currentCap);
+                          size_t filtersLen, const Dom *dom,
+                          Uint16HashSet *set);
 
 QueryStatus
 getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                      size_t filtersLen, const Dom *dom, size_t numberOfSiblings,
-                     node_id **results, size_t *len, size_t *currentCap);
+                     Uint16HashSet *set);
 QueryStatus
 getFilteredDescendants(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
                        size_t filtersLen, const Dom *dom, size_t depth,
-                       node_id **results, size_t *len, size_t *currentCap);
+                       Uint16HashSet *set);
 #endif

@@ -2,10 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/comparison/dom-comparison.h"
 #include "flo/html-parser/dom/dom-utils.h"
-#include "flo/html-parser/dom/dom-writing.h"
-#include "flo/html-parser/hash/element-id-hash.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/print/error.h"
 

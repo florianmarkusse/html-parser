@@ -7,6 +7,7 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/dom-query-util.h"
 #include "flo/html-parser/dom/query/dom-query.h"
+#include "flo/html-parser/hash/uint16-t-hash.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/utils/memory/memory.h"
@@ -57,27 +58,8 @@ bool endOfCurrentFilter(const char ch) {
 
 QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                             const DataContainer *dataContainer,
-                            node_id **results, size_t *resultsLen) {}
-
-QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
-                             const DataContainer *dataContainer,
-                             node_id **results, size_t *resultsLen) {
-    if (*results == NULL && *resultsLen == 0) {
-        *results = malloc(sizeof(node_id) * INITIAL_QUERY_CAP);
-        if (*results == NULL) {
-            PRINT_ERROR(
-                "Failed to allocate memory initializating querySelectorAll\n");
-            return QUERY_MEMORY_ERROR;
-        }
-    } else {
-        PRINT_ERROR("The **results parameter must be pointing to NULL and its "
-                    "corresponding *resultsLen pointing to 0\n");
-        return QUERY_INITIALIZATION_ERROR;
-    }
-
+                            Uint16HashSet *set) {
     QueryStatus result = QUERY_SUCCESS;
-
-    size_t currentCap = INITIAL_QUERY_CAP;
 
     FilterType filters[MAX_FILTERS_PER_ELEMENT];
     size_t filtersLen = 0;
@@ -272,41 +254,39 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
         // Do filtering :)
         switch (currentCombinator) {
         case NO_COMBINATOR: {
-            if ((result = getNodesWithoutCombinator(
-                     filters, filtersLen, dom, results, resultsLen,
-                     &currentCap)) != QUERY_SUCCESS) {
+            if ((result = getNodesWithoutCombinator(filters, filtersLen, dom,
+                                                    set)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case ADJACENT: {
             if ((result = getFilteredAdjacents(filters, filtersLen, dom, 1,
-                                               results, resultsLen,
-                                               &currentCap)) != QUERY_SUCCESS) {
+
+                                               set)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case CHILD: {
-            if ((result = getFilteredDescendants(
-                     filters, filtersLen, dom, 1, results, resultsLen,
-                     &currentCap)) != QUERY_SUCCESS) {
+            if ((result = getFilteredDescendants(filters, filtersLen, dom, 1,
+                                                 set)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case GENERAL_SIBLING: {
             if ((result = getFilteredAdjacents(filters, filtersLen, dom,
-                                               SIZE_MAX, results, resultsLen,
-                                               &currentCap)) != QUERY_SUCCESS) {
+                                               SIZE_MAX, set)) !=
+                QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case DESCENDANT: {
-            if ((result = getFilteredDescendants(
-                     filters, filtersLen, dom, SIZE_MAX, results, resultsLen,
-                     &currentCap)) != QUERY_SUCCESS) {
+            if ((result = getFilteredDescendants(filters, filtersLen, dom,
+                                                 SIZE_MAX, set)) !=
+                QUERY_SUCCESS) {
                 return result;
             }
             break;
@@ -351,6 +331,48 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
             return QUERY_INVALID_COMBINATOR;
         }
         }
+    }
+
+    return result;
+}
+
+QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
+                             const DataContainer *dataContainer,
+                             node_id **results, size_t *resultsLen) {
+    Uint16HashSet set;
+    if (initUint16HashSet(&set, INITIAL_QUERY_CAP) != HASH_SUCCESS) {
+        PRINT_ERROR(
+            "Failed to allocate memory initializating querySelectorAll\n");
+    }
+
+    QueryStatus result = QUERY_SUCCESS;
+    // Split up queries by ','
+    size_t queryStart = 0;
+    size_t queryLength = 0;
+    char ch = cssQuery[queryLength];
+    while (ch != '\0') {
+        if (ch == ',') {
+            // Need to do it here too.
+            queryStart += queryLength;
+        }
+        queryLength++;
+        ch = cssQuery[queryLength];
+    }
+
+    char buffer[queryLength + 1];
+    strncpy(buffer, &cssQuery[queryStart], queryLength);
+    buffer[queryLength] = '\0';
+
+    printf("sending %s to function\n", buffer);
+    if ((result = getQueryResults(buffer, dom, dataContainer, &set) !=
+                  QUERY_SUCCESS)) {
+        return result;
+    }
+
+    if ((result = uint16HashSetToArray(&set, results, resultsLen) !=
+                  QUERY_SUCCESS)) {
+        PRINT_ERROR("Failed to convert set to array!\n");
+        return result;
     }
 
     return result;
