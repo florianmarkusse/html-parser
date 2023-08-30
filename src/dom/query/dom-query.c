@@ -15,7 +15,6 @@
 
 /**
  * Css queries are built up of 2 parts:
- * TODO: implemenet the universal selector.;
  * - elements: For example, "body", ".special-class", "#my-id", "!DOCTYPE", '*',
  * or an attribute selector such as: [required] or [type=text]. These can also
  * be strung together like body[required]. There can be at most 1 tag selector
@@ -339,42 +338,90 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                              const DataContainer *dataContainer,
                              node_id **results, size_t *resultsLen) {
-    Uint16HashSet set;
-    if (initUint16HashSet(&set, INITIAL_QUERY_CAP) != HASH_SUCCESS) {
+    Uint16HashSet resultsSet;
+    if (initUint16HashSet(&resultsSet, INITIAL_QUERY_CAP) != HASH_SUCCESS) {
         PRINT_ERROR(
             "Failed to allocate memory initializating querySelectorAll\n");
+        return QUERY_MEMORY_ERROR;
     }
 
     QueryStatus result = QUERY_SUCCESS;
-    // Split up queries by ','
-    size_t queryStart = 0;
-    size_t queryLength = 0;
-    char ch = cssQuery[queryLength];
-    while (ch != '\0') {
-        if (ch == ',') {
-            // Need to do it here too.
-            queryStart += queryLength;
+
+    char *comma = strchr(cssQuery, ',');
+
+    if (comma != NULL) {
+        char *queryCopy = strdup(cssQuery);
+        if (queryCopy == NULL) {
+            PRINT_ERROR("Failed to copy query for tokenizing\n");
+            destroyUint16HashSet(&resultsSet);
+            return QUERY_MEMORY_ERROR;
         }
-        queryLength++;
-        ch = cssQuery[queryLength];
+
+        Uint16HashSet set;
+        if (initUint16HashSet(&set, INITIAL_QUERY_CAP) != HASH_SUCCESS) {
+            FREE_TO_NULL(queryCopy);
+            PRINT_ERROR(
+                "Failed to allocate memory initializating querySelectorAll\n");
+            return QUERY_MEMORY_ERROR;
+        }
+
+        char *toFree = queryCopy;
+        char *rest = NULL;
+        char *token = NULL;
+        while (token = strtok_r(queryCopy, ",", &rest)) {
+            if ((result = getQueryResults(token, dom, dataContainer, &set)) !=
+                QUERY_SUCCESS) {
+                destroyUint16HashSet(&resultsSet);
+                destroyUint16HashSet(&set);
+                FREE_TO_NULL(toFree);
+                ERROR_WITH_CODE_ONLY(queryingStatusToString(result),
+                                     "Unable get query results!\n");
+                return result;
+            }
+
+            Uint16HashSetIterator iterator;
+            initUint16HashSetIterator(&iterator, &set);
+            while (hasNextUint16HashSetIterator(&iterator)) {
+                HashStatus insertStatus = insertUint16HashSet(
+                    &resultsSet, nextUint16HashSetIterator(&iterator));
+                if (insertStatus != HASH_SUCCESS) {
+                    destroyUint16HashSet(&resultsSet);
+                    destroyUint16HashSet(&set);
+                    FREE_TO_NULL(toFree);
+                    ERROR_WITH_CODE_ONLY(
+                        hashStatusToString(insertStatus),
+                        "Failed to save intermediate results!\n");
+
+                    return QUERY_MEMORY_ERROR;
+                }
+            }
+
+            resetUint16HashSet(&set);
+            queryCopy = rest;
+        }
+
+        FREE_TO_NULL(toFree);
+        destroyUint16HashSet(&set);
+    } else {
+        if ((result = getQueryResults(cssQuery, dom, dataContainer,
+                                      &resultsSet)) != QUERY_SUCCESS) {
+            destroyUint16HashSet(&resultsSet);
+            ERROR_WITH_CODE_ONLY(queryingStatusToString(result),
+                                 "Unable get query results!\n");
+            return result;
+        }
     }
 
-    char buffer[queryLength + 1];
-    strncpy(buffer, &cssQuery[queryStart], queryLength);
-    buffer[queryLength] = '\0';
-
-    printf("sending %s to function\n", buffer);
-    if ((result = getQueryResults(buffer, dom, dataContainer, &set) !=
-                  QUERY_SUCCESS)) {
-        return result;
+    HashStatus conversionResult =
+        uint16HashSetToArray(&resultsSet, results, resultsLen);
+    if (conversionResult != HASH_SUCCESS) {
+        ERROR_WITH_CODE_ONLY(hashStatusToString(conversionResult),
+                             "Failed to convert set to array!\n");
+        destroyUint16HashSet(&resultsSet);
+        return QUERY_MEMORY_ERROR;
     }
 
-    if ((result = uint16HashSetToArray(&set, results, resultsLen) !=
-                  QUERY_SUCCESS)) {
-        PRINT_ERROR("Failed to convert set to array!\n");
-        return result;
-    }
-
+    destroyUint16HashSet(&resultsSet);
     return result;
 }
 

@@ -6,30 +6,6 @@
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/path.h"
 
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-
-void printBits(const element_id tagID) {
-    unsigned char numBits = sizeof(element_id) * 8;
-    for (unsigned char i = 0; i < numBits; i++) {
-        unsigned char bit = (tagID >> (numBits - 1 - i)) & 1;
-        printf("%hhu", bit);
-    }
-}
-
-void getBits(const element_id tagID, char *bits, const size_t size) {
-    unsigned char numBits = sizeof(element_id) * 8;
-    if (size < numBits + 1) {
-        fprintf(stderr, "Insufficient buffer size in getBits\n");
-        return;
-    }
-
-    for (unsigned char i = 0; i < numBits; i++) {
-        unsigned char bit = (tagID >> (numBits - 1 - i)) & 1;
-        bits[i] = '0' + bit;
-    }
-    bits[numBits] = '\0';
-}
-
 void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
                const DataContainer *dataContainer, FILE *output) {
     Node node = dom->nodes[nodeID];

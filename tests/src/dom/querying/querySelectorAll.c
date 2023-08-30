@@ -46,7 +46,7 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, "div[special-one].big", QUERY_SUCCESS, 1,
      "more difficult query with '.'"},
     {TEST_FILE_1, "#test", QUERY_SUCCESS, 1, "using '#' to select by id"},
-    {TEST_FILE_1, "div > div > span, p", QUERY_SUCCESS, 6,
+    {TEST_FILE_1, "div > div > span,    \t   \tp, title", QUERY_SUCCESS, 7,
      "using ',' to perform multiple queries"},
     {TEST_FILE_1, "body *[special-one]", QUERY_SUCCESS, 2, "using *"},
 };
@@ -54,7 +54,7 @@ static const TestFile testFiles[] = {
 // Calculate the number of test files
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
+static TestStatus testQuery(const char *fileLocation, char *cssQuery,
                             const QueryStatus expectedStatus,
                             const size_t expectedNumberOfNodes) {
     DataContainer dataContainer;
@@ -110,7 +110,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation, const char *cssQuery,
+static inline void testAndCount(const char *fileLocation, char *cssQuery,
                                 const QueryStatus expectedStatus,
                                 const size_t expectedNumberOfNodes,
                                 const char *testName, size_t *localSuccsses,

@@ -135,8 +135,6 @@ ElementStatus createNewElement(StringRegistry *stringRegistry,
  * If the element is found, then  indexID is set.
  * HashElement is always set.
  */
-// TODO(florian): remove seaarchElement parameter once text values completely
-// bypass the hash
 ElementStatus elementToIndex(StringRegistry *stringRegistry,
                              const char *elementStart, size_t elementLength,
                              HashElement *hashElement, indexID *indexID) {

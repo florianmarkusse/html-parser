@@ -168,13 +168,14 @@ getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
     initUint16HashSetIterator(&iterator, set);
 
     while (hasNextUint16HashSetIterator(&iterator)) {
-        node_id nextNodeID =
-            getNextNode(nextUint16HashSetIterator(&iterator), dom);
+        node_id inSet = nextUint16HashSetIterator(&iterator);
+        node_id nextNodeID = getNextNode(inSet, dom);
         size_t siblingsNumberCopy = numberOfSiblings;
 
-        while (siblingsNumberCopy && nextNodeID) {
+        while (siblingsNumberCopy > 0 && nextNodeID > 0) {
             if (filterNode(nextNodeID, filters, filtersLen, dom)) {
-                HashStatus status = insertUint16HashSet(set, nextNodeID);
+                HashStatus status =
+                    insertUint16HashSet(&filteredAdjacents, nextNodeID);
                 if (status != HASH_SUCCESS) {
                     destroyUint16HashSet(&filteredAdjacents);
                     ERROR_WITH_CODE_ONLY(hashStatusToString(status),

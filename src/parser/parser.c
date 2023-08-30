@@ -97,10 +97,10 @@ DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
 
     switch (indexStatus) {
     case ELEMENT_CREATED: {
-        if (addTagRegistration(newTagID, isPaired, &hashElement, dom) !=
-            DOM_SUCCESS) {
+        if ((domStatus = addTagRegistration(newTagID, isPaired, &hashElement,
+                                            dom)) != DOM_SUCCESS) {
             PRINT_ERROR("Failed to add tag registration.\n");
-            return DOM_NO_ELEMENT;
+            return domStatus;
         }
         // Intentional fall through!!!
     }
@@ -205,10 +205,10 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
                 return DOM_NO_ELEMENT;
             }
             if (elementStatus == ELEMENT_CREATED) {
-                if (addPropKeyRegistration(attrKeyID, &hashKey, dom) !=
-                    DOM_SUCCESS) {
+                if ((documentStatus = addPropKeyRegistration(
+                         attrKeyID, &hashKey, dom)) != DOM_SUCCESS) {
                     PRINT_ERROR("Failed to add prop key registration.\n");
-                    return DOM_NO_ELEMENT;
+                    return documentStatus;
                 }
             }
             ch = htmlString[++(*currentPosition)];
@@ -242,17 +242,17 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
                 return DOM_NO_ELEMENT;
             }
             if (elementStatus == ELEMENT_CREATED) {
-                if (addPropValueRegistration(attrValueID, &hashValue, dom) !=
-                    DOM_SUCCESS) {
+                if ((documentStatus = addPropValueRegistration(
+                         attrValueID, &hashValue, dom)) != DOM_SUCCESS) {
                     PRINT_ERROR("Failed to add prop value registration.\n");
-                    return DOM_NO_ELEMENT;
+                    return documentStatus;
                 }
             }
 
             if ((documentStatus = addProperty(
                      *newNodeID, attrKeyID, attrValueID, dom)) != DOM_SUCCESS) {
                 PRINT_ERROR("Failed to add key-value property.\n");
-                return DOM_NO_ELEMENT;
+                return documentStatus;
             }
 
             // Move past '"'
@@ -268,10 +268,10 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
                 return DOM_NO_ELEMENT;
             }
             if (elementStatus == ELEMENT_CREATED) {
-                if (addBoolPropRegistration(attrKeyID, &hashKey, dom) !=
-                    DOM_SUCCESS) {
+                if ((documentStatus = addBoolPropRegistration(
+                         attrKeyID, &hashKey, dom)) != DOM_SUCCESS) {
                     PRINT_ERROR("Failed to add bool prop registration.\n");
-                    return DOM_NO_ELEMENT;
+                    return documentStatus;
                 }
             }
             if ((documentStatus = addBooleanProperty(*newNodeID, attrKeyID,

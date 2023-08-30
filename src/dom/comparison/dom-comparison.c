@@ -177,8 +177,6 @@ HashStatus createBoolPropsSet(const node_id nodeID, const Dom *dom,
     return status;
 }
 
-// TODO(florian): actually replace with set solution for shallow and deep
-// compare
 ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
                                   const DataContainer *dataContainer1,
                                   const Node *node2, const Dom *dom2,
