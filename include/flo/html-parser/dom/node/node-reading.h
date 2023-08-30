@@ -16,5 +16,7 @@ bool hasPropValue(node_id nodeID, const char *propValue, const Dom *dom,
                   const DataContainer *dataContainer);
 bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
                  const Dom *dom, const DataContainer *dataContainer);
+const char *getValue(node_id nodeID, const char *propKey, const Dom *dom,
+                     const DataContainer *dataContainer);
 
 #endif

@@ -5,5 +5,7 @@
 #include <stdlib.h>
 
 bool testNodeQueries(size_t *successes, size_t *failures);
+bool testBoolNodeQueries(size_t *successes, size_t *failures);
+bool testCharNodeQueries(size_t *successes, size_t *failures);
 
 #endif

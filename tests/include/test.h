@@ -11,11 +11,14 @@ void printTestStart(const char *testName);
 void printTestSuccess();
 void printTestFailure();
 void printTestDemarcation();
-void printTestResultDifferenceString(size_t expected,
-                                     const char *expectedString, size_t actual,
+void printTestResultDifferenceErrorCode(size_t expected,
+                                        const char *expectedString,
+                                        size_t actual,
+                                        const char *actualString);
+void printTestResultDifferenceString(const char *expectedString,
                                      const char *actualString);
+void printTestResultDifferenceBool(bool expectedBool, bool actualBool);
 void printTestResultDifferenceNumber(size_t expectedNumber,
                                      size_t actualNumber);
-void printTestResultDifferenceBool(bool expectedBool, bool actualBool);
 
 #endif

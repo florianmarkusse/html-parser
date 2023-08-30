@@ -89,7 +89,7 @@ static TestStatus testQuery(const char *fileLocation, char *cssQuery,
         printTestFailure();
         printTestDemarcation();
         if (actual != expectedStatus) {
-            printTestResultDifferenceString(
+            printTestResultDifferenceErrorCode(
                 expectedStatus, queryingStatusToString(expectedStatus), actual,
                 queryingStatusToString(actual));
         } else {

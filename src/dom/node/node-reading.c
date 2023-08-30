@@ -1,6 +1,7 @@
 
 
 #include "flo/html-parser/dom/node/node-reading.h"
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/query/dom-query-util.h"
 
 Node getNode(const node_id nodeID, const Dom *dom) {
@@ -82,4 +83,20 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
         }
     }
     return false;
+}
+
+const char *getValue(const node_id nodeID, const char *propKey, const Dom *dom,
+                     const DataContainer *dataContainer) {
+    element_id propKeyID = 0;
+    if (getPropKeyID(propKey, &propKeyID, dataContainer) != QUERY_SUCCESS) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < dom->propsLen; i++) {
+        Property *property = &dom->props[i];
+        if (property->nodeID == nodeID && property->keyID == propKeyID) {
+            return getPropValue(property->valueID, dom, dataContainer);
+        }
+    }
+    return NULL;
 }
