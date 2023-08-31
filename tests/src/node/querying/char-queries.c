@@ -12,7 +12,11 @@
 #include "test-status.h"
 #include "test.h"
 
-typedef enum { GET_VALUE, NUM_CHAR_FUNCTION_TYPES } CharFunctionType;
+typedef enum {
+    GET_VALUE,
+    TEXT_CONTENT,
+    NUM_CHAR_FUNCTION_TYPES
+} CharFunctionType;
 
 #define CURRENT_DIR "tests/src/node/querying/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
@@ -31,6 +35,8 @@ static const TestFile testFiles[] = {
      "getValue when having key"},
     {TEST_FILE_1, "html", "langg", NULL, GET_VALUE,
      "getValue when not having key"},
+    {TEST_FILE_1, "#text-content-test", NULL, "BLABLA", TEXT_CONTENT,
+     "text content"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -70,6 +76,10 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         switch (functionType) {
         case GET_VALUE: {
             actualResult = getValue(foundNode, input, &dom, &dataContainer);
+            break;
+        }
+        case TEXT_CONTENT: {
+            actualResult = getTextContent(foundNode, &dom);
             break;
         }
         default: {

@@ -19,5 +19,7 @@ node_id getFirstChild(node_id parentID, const Dom *dom);
 node_id getNextNode(node_id currentNodeID, const Dom *dom);
 node_id getParentNode(node_id currentNodeID, const Dom *dom);
 node_id traverseDom(node_id currentNodeID, const Dom *dom);
+node_id traverseNode(node_id currentNodeID, node_id toTraverseNodeID,
+                     const Dom *dom);
 
 #endif

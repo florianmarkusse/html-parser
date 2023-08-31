@@ -18,5 +18,6 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
                  const Dom *dom, const DataContainer *dataContainer);
 const char *getValue(node_id nodeID, const char *propKey, const Dom *dom,
                      const DataContainer *dataContainer);
+const char *getTextContent(node_id nodeID, const Dom *dom);
 
 #endif

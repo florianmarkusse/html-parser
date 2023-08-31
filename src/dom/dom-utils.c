@@ -67,6 +67,32 @@ node_id getParentNode(node_id currentNodeID, const Dom *dom) {
     return 0;
 }
 
+node_id traverseNode(node_id currentNodeID, const node_id toTraverseNodeID,
+                     const Dom *dom) {
+    node_id firstChild = getFirstChild(currentNodeID, dom);
+    if (firstChild) {
+        return firstChild;
+    }
+
+    node_id nextNode = getNextNode(currentNodeID, dom);
+    if (nextNode > 0 && nextNode != toTraverseNodeID) {
+        return nextNode;
+    }
+
+    if (currentNodeID != toTraverseNodeID) {
+        node_id parentNodeID = getParentNode(currentNodeID, dom);
+        while (parentNodeID > 0 && parentNodeID != toTraverseNodeID) {
+            node_id parentsNextNode = getNextNode(parentNodeID, dom);
+            if (parentsNextNode) {
+                return parentsNextNode;
+            }
+            parentNodeID = getParentNode(parentNodeID, dom);
+        }
+    }
+
+    return 0;
+}
+
 node_id traverseDom(node_id currentNodeID, const Dom *dom) {
     node_id firstChild = getFirstChild(currentNodeID, dom);
     if (firstChild) {

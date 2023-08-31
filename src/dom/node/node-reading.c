@@ -1,7 +1,8 @@
+#include <stdio.h>
+#include <string.h>
 
-
-#include "flo/html-parser/dom/node/node-reading.h"
 #include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/node/node-reading.h"
 #include "flo/html-parser/dom/query/dom-query-util.h"
 
 Node getNode(const node_id nodeID, const Dom *dom) {
@@ -83,6 +84,35 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
         }
     }
     return false;
+}
+
+const char *getTextContent(const node_id nodeID, const Dom *dom) {
+    node_id currentNodeID = nodeID;
+    char *result = NULL;
+    bool firstNode = true;
+    while ((currentNodeID = traverseNode(currentNodeID, nodeID, dom)) != 0) {
+        Node node = dom->nodes[currentNodeID];
+
+        if (node.nodeType == NODE_TYPE_TEXT) {
+            printf("%s\n", node.text);
+            size_t newSize = (result == NULL) ? 0 : strlen(result);
+            newSize += strlen(node.text);
+            if (!firstNode) {
+                newSize++; // +1 for the newline character
+            }
+            result = (char *)realloc(result,
+                                     newSize + 1); // +1 for the null terminator
+
+            if (!firstNode) {
+                strcat(result, "\n");
+            }
+            strcat(result, node.text);
+            printf("result is %s\n", result);
+            firstNode = false;
+        }
+    }
+
+    return result;
 }
 
 const char *getValue(const node_id nodeID, const char *propKey, const Dom *dom,
