@@ -11,6 +11,7 @@ bool testNodeQueries(size_t *successes, size_t *failures) {
 
     testBoolNodeQueries(&localSuccesses, &localFailures);
     testCharNodeQueries(&localSuccesses, &localFailures);
+    testArrayNodeQueries(&localSuccesses, &localFailures);
 
     printTestScore(localSuccesses, localFailures);
 

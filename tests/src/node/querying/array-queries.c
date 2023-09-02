@@ -12,7 +12,7 @@
 #include "test-status.h"
 #include "test.h"
 
-typedef enum { GET_VALUE, NUM_CHAR_FUNCTION_TYPES } CharFunctionType;
+typedef enum { TEXT_CONTENT, NUM_CHAR_FUNCTION_TYPES } ArrayFunctionType;
 
 #define CURRENT_DIR "tests/src/node/querying/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
@@ -20,25 +20,24 @@ typedef enum { GET_VALUE, NUM_CHAR_FUNCTION_TYPES } CharFunctionType;
 typedef struct {
     const char *fileLocation;
     const char *cssQuery;
-    const char *input;
-    const char *expectedResult;
-    const CharFunctionType functionType;
+    const size_t expectedResult;
+    const ArrayFunctionType functionType;
     const char *testName;
 } __attribute__((aligned(64))) TestFile;
 
 static const TestFile testFiles[] = {
-    {TEST_FILE_1, "body", "style", "class", GET_VALUE,
-     "getValue when having key"},
-    {TEST_FILE_1, "html", "langg", NULL, GET_VALUE,
-     "getValue when not having key"},
+    {TEST_FILE_1, "#my-first-div", 1, TEXT_CONTENT, "nested text node"},
+    {TEST_FILE_1, "title", 1, TEXT_CONTENT, "simple text node"},
+    {TEST_FILE_1, "span > p", 0, TEXT_CONTENT, "no text nodes"},
+    {TEST_FILE_1, "#text-content-test", 5, TEXT_CONTENT, "multiple text nodes"},
+    {TEST_FILE_1, "body", 7, TEXT_CONTENT, "multiple text nodes"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
-                            const char *input,
-                            const CharFunctionType functionType,
-                            const char *expectedResult) {
+                            const ArrayFunctionType functionType,
+                            const size_t expectedResult) {
     DataContainer dataContainer;
     ElementStatus initStatus = createDataContainer(&dataContainer);
     if (initStatus != ELEMENT_SUCCESS) {
@@ -66,10 +65,12 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
             queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
-        const char *actualResult = NULL;
+        size_t actualResult = 0;
         switch (functionType) {
-        case GET_VALUE: {
-            actualResult = getValue(foundNode, input, &dom, &dataContainer);
+        case TEXT_CONTENT: {
+            const char **results = NULL;
+            queryStatus =
+                getTextContent(foundNode, &dom, &results, &actualResult);
             break;
         }
         default: {
@@ -81,15 +82,18 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         }
         }
 
-        if ((expectedResult == NULL && actualResult == NULL) ||
-            (expectedResult != NULL &&
-             strcmp(actualResult, expectedResult) == 0)) {
+        if (queryStatus == QUERY_SUCCESS && expectedResult == actualResult) {
             printTestSuccess();
             result = TEST_SUCCESS;
         } else {
             printTestFailure();
             printTestDemarcation();
-            printTestResultDifferenceString(expectedResult, actualResult);
+            if (queryStatus != QUERY_SUCCESS) {
+                printTestResultDifferenceErrorCode(
+                    QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS),
+                    queryStatus, queryingStatusToString(queryStatus));
+            }
+            printTestResultDifferenceNumber(expectedResult, actualResult);
             printTestDemarcation();
         }
     }
@@ -102,28 +106,28 @@ freeMemory:
 }
 
 static inline void testAndCount(const char *fileLocation, const char *cssQuery,
-                                const char *input, const char *expectedResult,
-                                const CharFunctionType functionType,
+                                const size_t expectedResult,
+                                const ArrayFunctionType functionType,
                                 const char *testName, size_t *localSuccesses,
                                 size_t *localFailures) {
     printTestStart(testName);
 
-    if (testQuery(fileLocation, cssQuery, input, functionType,
-                  expectedResult) == TEST_SUCCESS) {
+    if (testQuery(fileLocation, cssQuery, functionType, expectedResult) ==
+        TEST_SUCCESS) {
         (*localSuccesses)++;
     } else {
         (*localFailures)++;
     }
 }
 
-bool testCharNodeQueries(size_t *successes, size_t *failures) {
-    printTestTopicStart("char queries");
+bool testArrayNodeQueries(size_t *successes, size_t *failures) {
+    printTestTopicStart("array queries");
     size_t localSuccesses = 0;
     size_t localFailures = 0;
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation, testFile.cssQuery, testFile.input,
+        testAndCount(testFile.fileLocation, testFile.cssQuery,
                      testFile.expectedResult, testFile.functionType,
                      testFile.testName, &localSuccesses, &localFailures);
     }

@@ -3,7 +3,9 @@
 
 #include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/node/node-reading.h"
+#include "flo/html-parser/dom/query/dom-query-status.h"
 #include "flo/html-parser/dom/query/dom-query-util.h"
+#include "flo/html-parser/utils/memory/memory.h"
 
 Node getNode(const node_id nodeID, const Dom *dom) {
     return dom->nodes[nodeID];
@@ -86,33 +88,26 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
     return false;
 }
 
-const char *getTextContent(const node_id nodeID, const Dom *dom) {
+QueryStatus getTextContent(const node_id nodeID, const Dom *dom,
+                           const char ***results, size_t *reusultsLen) {
     node_id currentNodeID = nodeID;
-    char *result = NULL;
-    bool firstNode = true;
+    size_t currentCap = 0;
     while ((currentNodeID = traverseNode(currentNodeID, nodeID, dom)) != 0) {
         Node node = dom->nodes[currentNodeID];
 
         if (node.nodeType == NODE_TYPE_TEXT) {
-            printf("%s\n", node.text);
-            size_t newSize = (result == NULL) ? 0 : strlen(result);
-            newSize += strlen(node.text);
-            if (!firstNode) {
-                newSize++; // +1 for the newline character
+            if ((*results = resizeArray(*results, *reusultsLen, &currentCap,
+                                        sizeof(const char *), 64)) == NULL) {
+                PRINT_ERROR("Failed to allocate memory for results array!\n");
+                return QUERY_MEMORY_ERROR;
             }
-            result = (char *)realloc(result,
-                                     newSize + 1); // +1 for the null terminator
 
-            if (!firstNode) {
-                strcat(result, "\n");
-            }
-            strcat(result, node.text);
-            printf("result is %s\n", result);
-            firstNode = false;
+            (*results)[(*reusultsLen)] = node.text;
+            (*reusultsLen)++;
         }
     }
 
-    return result;
+    return QUERY_SUCCESS;
 }
 
 const char *getValue(const node_id nodeID, const char *propKey, const Dom *dom,

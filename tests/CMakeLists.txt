@@ -12,6 +12,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/node/querying/querying.c"
     "src/node/querying/bool-queries.c"
     "src/node/querying/char-queries.c"
+    "src/node/querying/array-queries.c"
 )
 
 set(EXECUTABLE_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")

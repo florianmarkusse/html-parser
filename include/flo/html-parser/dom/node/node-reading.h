@@ -2,6 +2,7 @@
 #define FLO_HTML_PARSER_DOM_NODE_NODE_READING_H
 
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/dom/query/dom-query-status.h"
 #include "flo/html-parser/type/node/node.h"
 
 Node getNode(node_id nodeID, const Dom *dom);
@@ -18,6 +19,7 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
                  const Dom *dom, const DataContainer *dataContainer);
 const char *getValue(node_id nodeID, const char *propKey, const Dom *dom,
                      const DataContainer *dataContainer);
-const char *getTextContent(node_id nodeID, const Dom *dom);
+QueryStatus getTextContent(node_id nodeID, const Dom *dom,
+                           const char ***results, size_t *reusultsLen);
 
 #endif
