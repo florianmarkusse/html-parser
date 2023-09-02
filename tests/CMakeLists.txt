@@ -11,6 +11,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/dom/querying/querySelectorAll.c"
     "src/dom/querying/querySelector.c"
     "src/node/querying/querying.c"
+    "src/node/modifying/modifying.c"
     "src/node/querying/bool-queries.c"
     "src/node/querying/char-queries.c"
     "src/node/querying/array-queries.c"

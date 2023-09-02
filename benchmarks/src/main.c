@@ -5,8 +5,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "flo/html-parser/dom/dom-user.h"
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/dom/user.h"
 
 #define INPUTS_DIR "benchmarks/inputs/"
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"

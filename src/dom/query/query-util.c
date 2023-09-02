@@ -63,48 +63,38 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
     return true;
 }
 
-QueryStatus getTagID(const char *tag, indexID *tagID,
-                     const DataContainer *dataContainer) {
+indexID getTagID(const char *tag, const DataContainer *dataContainer) {
     HashElement ignore;
-    if (containsStringWithDataHashSet(&dataContainer->tags.set, tag, &ignore,
-                                      tagID)) {
-        return QUERY_SUCCESS;
-    }
-
-    return QUERY_NOT_SEEN_BEFORE;
+    indexID tagID = 0;
+    containsStringWithDataHashSet(&dataContainer->tags.set, tag, &ignore,
+                                  &tagID);
+    return tagID;
 }
 
-QueryStatus getBoolPropID(const char *boolProp, element_id *propID,
-                          const DataContainer *dataContainer) {
+indexID getBoolPropID(const char *boolProp,
+                      const DataContainer *dataContainer) {
     HashElement ignore;
-    if (containsStringWithDataHashSet(&dataContainer->boolProps.set, boolProp,
-                                      &ignore, propID)) {
-        return QUERY_SUCCESS;
-    }
-
-    return QUERY_NOT_SEEN_BEFORE;
+    indexID propID = 0;
+    containsStringWithDataHashSet(&dataContainer->boolProps.set, boolProp,
+                                  &ignore, &propID);
+    return propID;
 }
 
-QueryStatus getPropKeyID(const char *keyProp, element_id *keyID,
-                         const DataContainer *dataContainer) {
+indexID getPropKeyID(const char *keyProp, const DataContainer *dataContainer) {
     HashElement ignore;
-    if (containsStringWithDataHashSet(&dataContainer->propKeys.set, keyProp,
-                                      &ignore, keyID)) {
-        return QUERY_SUCCESS;
-    }
-
-    return QUERY_NOT_SEEN_BEFORE;
+    indexID keyID = 0;
+    containsStringWithDataHashSet(&dataContainer->propKeys.set, keyProp,
+                                  &ignore, &keyID);
+    return keyID;
 }
 
-QueryStatus getPropValueID(const char *valueProp, element_id *valueID,
-                           const DataContainer *dataContainer) {
+indexID getPropValueID(const char *valueProp,
+                       const DataContainer *dataContainer) {
     HashElement ignore;
-    if (containsStringWithDataHashSet(&dataContainer->propValues.set, valueProp,
-                                      &ignore, valueID)) {
-        return QUERY_SUCCESS;
-    }
-
-    return QUERY_NOT_SEEN_BEFORE;
+    indexID valueID = 0;
+    containsStringWithDataHashSet(&dataContainer->propValues.set, valueProp,
+                                  &ignore, &valueID);
+    return valueID;
 }
 
 QueryStatus

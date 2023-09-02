@@ -19,21 +19,9 @@
 #define TAG_REGISTRATIONS_PER_PAGE                                             \
     (TAG_REGISTRY_PAGE_SIZE / sizeof(TagRegistration))
 
-#define BOOL_PROP_REGISTRY_PAGE_SIZE (1U << 8U)
-#define BOOL_PROP_REGISTRATIONS_PER_PAGE                                       \
-    (BOOL_PROP_REGISTRY_PAGE_SIZE / sizeof(Registration))
-
-#define PROP_KEY_REGISTRY_PAGE_SIZE (1U << 8U)
-#define PROP_KEY_REGISTRATIONS_PER_PAGE                                        \
-    (PROP_KEY_REGISTRY_PAGE_SIZE / sizeof(Registration))
-
-#define PROP_VALUE_REGISTRY_PAGE_SIZE (1U << 8U)
-#define PROP_VALUE_REGISTRATIONS_PER_PAGE                                      \
-    (PROP_VALUE_REGISTRY_PAGE_SIZE / sizeof(Registration))
-
-#define TEXT_REGISTRY_PAGE_SIZE (1U << 8U)
-#define TEXT_REGISTRATIONS_PER_PAGE                                            \
-    (TEXT_REGISTRY_PAGE_SIZE / sizeof(Registration))
+#define PROP_REGISTRY_PAGE_SIZE (1U << 8U)
+#define PROP_REGISTRATIONS_PER_PAGE                                            \
+    (PROP_REGISTRY_PAGE_SIZE / sizeof(Registration))
 
 #define PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
 #define PARENT_FIRST_CHILDS_PER_PAGE                                           \

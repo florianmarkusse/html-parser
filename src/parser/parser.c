@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/parser/parser.h"
@@ -185,32 +186,12 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             attrKeyLen--;
         }
 
-        element_id attrKeyID = 0;
-        HashElement hashKey;
         if (ch == '=') {
-            element_id attrValueID = 0;
-
             // Expected syntax: key="value" OR
             // Expected syntax: key='value' OR
             // Expected syntax: key=value (This is invalid html, but will still
             // support it) We can do some more interesting stuff but currently
             // not required.
-            elementStatus = elementToIndex(&dataContainer->propKeys,
-                                           &htmlString[attrKeyStartIndex],
-                                           attrKeyLen, &hashKey, &attrKeyID);
-            if (elementStatus != ELEMENT_FOUND &&
-                elementStatus != ELEMENT_CREATED) {
-                ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                     "Failed to get keyID");
-                return DOM_NO_ELEMENT;
-            }
-            if (elementStatus == ELEMENT_CREATED) {
-                if ((documentStatus = addPropKeyRegistration(
-                         attrKeyID, &hashKey, dom)) != DOM_SUCCESS) {
-                    PRINT_ERROR("Failed to add prop key registration.\n");
-                    return documentStatus;
-                }
-            }
             ch = htmlString[++(*currentPosition)];
 
             size_t attrValueStartIndex = *currentPosition;
@@ -230,54 +211,28 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             }
 
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
-            HashElement hashValue;
 
-            elementStatus = elementToIndex(
-                &dataContainer->propValues, &htmlString[attrValueStartIndex],
-                attrValueLen, &hashValue, &attrValueID);
-            if (elementStatus != ELEMENT_FOUND &&
-                elementStatus != ELEMENT_CREATED) {
+            elementStatus = addPropertyToNodeStringsWithLength(
+                *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen,
+                &htmlString[attrValueStartIndex], attrValueLen, dom,
+                dataContainer);
+            if (elementStatus != ELEMENT_SUCCESS) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                     "Failed to get value ID");
+                                     "Failed to add key-value property!\n");
                 return DOM_NO_ELEMENT;
-            }
-            if (elementStatus == ELEMENT_CREATED) {
-                if ((documentStatus = addPropValueRegistration(
-                         attrValueID, &hashValue, dom)) != DOM_SUCCESS) {
-                    PRINT_ERROR("Failed to add prop value registration.\n");
-                    return documentStatus;
-                }
-            }
-
-            if ((documentStatus = addProperty(
-                     *newNodeID, attrKeyID, attrValueID, dom)) != DOM_SUCCESS) {
-                PRINT_ERROR("Failed to add key-value property.\n");
-                return documentStatus;
             }
 
             // Move past '"'
             ch = htmlString[++(*currentPosition)];
         } else {
-            elementStatus = elementToIndex(&dataContainer->boolProps,
-                                           &htmlString[attrKeyStartIndex],
-                                           attrKeyLen, &hashKey, &attrKeyID);
-            if (elementStatus != ELEMENT_FOUND &&
-                elementStatus != ELEMENT_CREATED) {
+            elementStatus = addBooleanPropertyToNodeStringWithLength(
+                *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen, dom,
+                dataContainer);
+
+            if (elementStatus != ELEMENT_SUCCESS) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                     "Failed to get keyID");
+                                     "Failed to add boolean property!\n");
                 return DOM_NO_ELEMENT;
-            }
-            if (elementStatus == ELEMENT_CREATED) {
-                if ((documentStatus = addBoolPropRegistration(
-                         attrKeyID, &hashKey, dom)) != DOM_SUCCESS) {
-                    PRINT_ERROR("Failed to add bool prop registration.\n");
-                    return documentStatus;
-                }
-            }
-            if ((documentStatus = addBooleanProperty(*newNodeID, attrKeyID,
-                                                     dom)) != DOM_SUCCESS) {
-                PRINT_ERROR("Failed to add boolean property.\n");
-                return documentStatus;
             }
         }
     }

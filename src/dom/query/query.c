@@ -89,10 +89,9 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
             strncpy(buffer, &cssQuery[tokenStart], tokenLength);
             buffer[tokenLength - 1] = '\0';
 
-            tokenID = 0;
-            if ((result = getTagID(buffer, &tokenID, dataContainer)) !=
-                QUERY_SUCCESS) {
-                return result;
+            tokenID = getTagID(buffer, dataContainer);
+            if (tokenID == 0) {
+                return QUERY_NOT_SEEN_BEFORE;
             }
 
             CHECK_FILTERS_LIMIT(filtersLen);
@@ -153,10 +152,9 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
             if (currentSelector == CLASS || currentSelector == ID) {
                 const char *keyBuffer =
                     currentSelector == CLASS ? "class" : "id";
-                tokenID = 0;
-                if ((result = getPropKeyID(keyBuffer, &tokenID,
-                                           dataContainer)) != QUERY_SUCCESS) {
-                    return result;
+                tokenID = getPropKeyID(keyBuffer, dataContainer);
+                if (tokenID == 0) {
+                    return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 CHECK_FILTERS_LIMIT(filtersLen);
@@ -167,10 +165,9 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
                 valueBuffer[tokenLength - 1] = '\0';
 
-                tokenID = 0;
-                if ((result = getPropValueID(valueBuffer, &tokenID,
-                                             dataContainer)) != QUERY_SUCCESS) {
-                    return result;
+                tokenID = getPropValueID(valueBuffer, dataContainer);
+                if (tokenID == 0) {
+                    return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 filters[filtersLen].data.keyValuePair.valueID = tokenID;
@@ -180,10 +177,9 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(boolBuffer, &cssQuery[tokenStart], tokenLength);
                 boolBuffer[tokenLength - 1] = '\0';
 
-                tokenID = 0;
-                if ((result = getBoolPropID(boolBuffer, &tokenID,
-                                            dataContainer)) != QUERY_SUCCESS) {
-                    return result;
+                tokenID = getBoolPropID(boolBuffer, dataContainer);
+                if (tokenID == 0) {
+                    return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 CHECK_FILTERS_LIMIT(filtersLen);
@@ -195,10 +191,9 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(keyBuffer, &cssQuery[tokenStart], tokenLength);
                 keyBuffer[tokenLength - 1] = '\0';
 
-                tokenID = 0;
-                if ((result = getPropKeyID(keyBuffer, &tokenID,
-                                           dataContainer)) != QUERY_SUCCESS) {
-                    return result;
+                tokenID = getPropKeyID(keyBuffer, dataContainer);
+                if (tokenID == 0) {
+                    return QUERY_NOT_SEEN_BEFORE;
                 }
                 // Adding to filter already because I want to reuse tokenID
                 // :)
@@ -227,10 +222,9 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
                 valueBuffer[tokenLength - 1] = '\0';
 
-                tokenID = 0;
-                if ((result = getPropValueID(valueBuffer, &tokenID,
-                                             dataContainer)) != QUERY_SUCCESS) {
-                    return result;
+                tokenID = getPropValueID(valueBuffer, dataContainer);
+                if (tokenID == 0) {
+                    return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 filters[filtersLen].data.keyValuePair.valueID = tokenID;

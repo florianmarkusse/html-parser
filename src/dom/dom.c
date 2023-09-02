@@ -7,13 +7,12 @@
 #include "flo/html-parser/utils/print/error.h"
 
 void initBasicRegistry(BasicRegistry *basicRegistry,
-                       const Registration *initRegistration,
-                       const size_t pageSize, const size_t elementsPerPage) {
-    basicRegistry->registry = malloc(pageSize);
+                       const Registration *initRegistration) {
+    basicRegistry->registry = malloc(PROP_REGISTRY_PAGE_SIZE);
     basicRegistry->registry[0] = *initRegistration;
     basicRegistry->len =
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
-    basicRegistry->cap = elementsPerPage;
+    basicRegistry->cap = PROP_REGISTRATIONS_PER_PAGE;
 }
 
 DomStatus createDom(const char *htmlString, Dom *dom,
@@ -37,15 +36,9 @@ DomStatus createDom(const char *htmlString, Dom *dom,
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
     dom->tagRegistryCap = TAG_REGISTRATIONS_PER_PAGE;
 
-    initBasicRegistry(&dom->boolPropRegistry, &initRegistration,
-                      BOOL_PROP_REGISTRY_PAGE_SIZE,
-                      BOOL_PROP_REGISTRATIONS_PER_PAGE);
-    initBasicRegistry(&dom->propKeyRegistry, &initRegistration,
-                      PROP_KEY_REGISTRY_PAGE_SIZE,
-                      PROP_KEY_REGISTRATIONS_PER_PAGE);
-    initBasicRegistry(&dom->propValueRegistry, &initRegistration,
-                      PROP_VALUE_REGISTRY_PAGE_SIZE,
-                      PROP_VALUE_REGISTRATIONS_PER_PAGE);
+    initBasicRegistry(&dom->boolPropRegistry, &initRegistration);
+    initBasicRegistry(&dom->propKeyRegistry, &initRegistration);
+    initBasicRegistry(&dom->propValueRegistry, &initRegistration);
 
     dom->nodes = malloc(NODES_PAGE_SIZE);
     Node errorNode;

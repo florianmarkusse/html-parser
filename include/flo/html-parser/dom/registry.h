@@ -3,6 +3,8 @@
 
 #include "dom.h"
 
+DomStatus addRegistration(indexID indexID, const HashElement *hashElement,
+                          BasicRegistry *basicRegistry);
 DomStatus addTagRegistration(indexID tagID, bool isPaired,
                              const HashElement *hashElement, Dom *dom);
 

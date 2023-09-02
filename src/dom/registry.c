@@ -20,11 +20,10 @@ DomStatus addTagRegistration(const indexID tagID, const bool isPaired,
 }
 
 DomStatus addRegistration(const indexID indexID, const HashElement *hashElement,
-                          BasicRegistry *basicRegistry,
-                          const size_t elementsPerPage) {
+                          BasicRegistry *basicRegistry) {
     if ((basicRegistry->registry = resizeArray(
              basicRegistry->registry, basicRegistry->len, &basicRegistry->cap,
-             sizeof(Registration), elementsPerPage)) == NULL) {
+             sizeof(Registration), PROP_REGISTRATIONS_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 
@@ -38,18 +37,15 @@ DomStatus addRegistration(const indexID indexID, const HashElement *hashElement,
 
 DomStatus addBoolPropRegistration(const indexID boolPropID,
                                   const HashElement *hashElement, Dom *dom) {
-    return addRegistration(boolPropID, hashElement, &dom->boolPropRegistry,
-                           BOOL_PROP_REGISTRATIONS_PER_PAGE);
+    return addRegistration(boolPropID, hashElement, &dom->boolPropRegistry);
 }
 
 DomStatus addPropKeyRegistration(indexID propKeyID,
                                  const HashElement *hashElement, Dom *dom) {
-    return addRegistration(propKeyID, hashElement, &dom->propKeyRegistry,
-                           PROP_KEY_REGISTRATIONS_PER_PAGE);
+    return addRegistration(propKeyID, hashElement, &dom->propKeyRegistry);
 }
 
 DomStatus addPropValueRegistration(indexID propValueID,
                                    const HashElement *hashElement, Dom *dom) {
-    return addRegistration(propValueID, hashElement, &dom->propValueRegistry,
-                           PROP_VALUE_REGISTRATIONS_PER_PAGE);
+    return addRegistration(propValueID, hashElement, &dom->propValueRegistry);
 }

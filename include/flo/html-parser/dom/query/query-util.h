@@ -5,6 +5,7 @@
 
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/hash/uint16-t-hash.h"
+#include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "query-status.h"
@@ -12,17 +13,11 @@
 
 bool filterNode(node_id nodeID, const FilterType *filters, size_t filterslen,
                 const Dom *dom);
-QueryStatus getTagID(const char *tag, indexID *tagID,
-                     const DataContainer *dataContainer);
-QueryStatus getBoolPropID(const char *boolProp, element_id *boolPropID,
-                          const DataContainer *dataContainer);
-QueryStatus getPropKeyID(const char *keyProp, element_id *keyID,
-                         const DataContainer *dataContainer);
-QueryStatus getPropValueID(const char *valueProp, element_id *valueID,
-                           const DataContainer *dataContainer);
-QueryStatus getNodesWithTagID(element_id tagID, const Dom *dom,
-                              node_id **results, size_t *len,
-                              size_t *currentCap);
+indexID getTagID(const char *tag, const DataContainer *dataContainer);
+indexID getBoolPropID(const char *boolProp, const DataContainer *dataContainer);
+indexID getPropKeyID(const char *keyProp, const DataContainer *dataContainer);
+indexID getPropValueID(const char *valueProp,
+                       const DataContainer *dataContainer);
 
 QueryStatus filterByTagID(element_id tagID, const Dom *dom, node_id *results,
                           size_t *len);
