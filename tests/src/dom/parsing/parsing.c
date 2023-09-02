@@ -1,7 +1,7 @@
 #include <dirent.h>
-#include <flo/html-parser/dom/dom-user.h>
-#include <flo/html-parser/dom/dom-writing.h>
 #include <flo/html-parser/dom/dom.h>
+#include <flo/html-parser/dom/user.h>
+#include <flo/html-parser/dom/writing.h>
 #include <flo/html-parser/utils/print/error.h>
 #include <stdio.h>
 #include <string.h>

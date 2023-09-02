@@ -1,7 +1,7 @@
-#ifndef FLO_HTML_PARSER_DOM_COMPARISON_DOM_COMPARISON_H
-#define FLO_HTML_PARSER_DOM_COMPARISON_DOM_COMPARISON_H
+#ifndef FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_H
+#define FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_H
 
-#include "flo/html-parser/comparison/comparison-status.h"
+#include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/dom/dom.h"
 
 ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,

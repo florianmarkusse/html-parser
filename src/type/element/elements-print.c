@@ -63,7 +63,7 @@ void printBoolPropStatus(DataContainer *dataContainer) {
 
 void printTextStatus(DataContainer *dataContainer) {
     printf("printing text status...\n\n");
-    printStringRegistryStatus(&dataContainer->text);
+    printElementPages(&dataContainer->text);
 }
 
 void printTagStatus(DataContainer *dataContainer) {

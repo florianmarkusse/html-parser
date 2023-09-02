@@ -1,7 +1,7 @@
 
 #include <stdlib.h>
 
-#include "flo/html-parser/dom/dom-user.h"
+#include "flo/html-parser/dom/user.h"
 #include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/print/error.h"

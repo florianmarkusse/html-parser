@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "dom/comparing/comparing.h"
+#include "dom/deleting/deleting.h"
 #include "dom/parsing/parsing.h"
 #include "dom/querying/querying.h"
 #include "node/querying/querying.h"
@@ -25,6 +26,9 @@ int main() {
     printf("\n");
 
     testNodeQueries(&successes, &failures);
+    printf("\n");
+
+    testDomDeletions(&successes, &failures);
     printf("\n");
 
     printTestScore(successes, failures);

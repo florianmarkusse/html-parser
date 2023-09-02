@@ -3,13 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/dom/query/dom-query-util.h"
-#include "flo/html-parser/dom/query/dom-query.h"
-#include "flo/html-parser/hash/uint16-t-hash.h"
-#include "flo/html-parser/type/element/element-status.h"
-#include "flo/html-parser/type/element/elements.h"
+#include "flo/html-parser/dom/query/query-util.h"
+#include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/text/text.h"
 

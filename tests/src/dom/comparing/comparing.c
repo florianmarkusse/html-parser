@@ -1,9 +1,5 @@
-#include <flo/html-parser/dom/comparison/dom-comparison.h>
-#include <flo/html-parser/dom/dom-user.h>
-#include <flo/html-parser/dom/dom-writing.h>
-#include <flo/html-parser/dom/dom.h>
-#include <flo/html-parser/type/element/element-status.h>
-#include <flo/html-parser/type/element/elements-print.h>
+#include <flo/html-parser/dom/comparison/comparison.h>
+#include <flo/html-parser/dom/user.h>
 #include <flo/html-parser/utils/print/error.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -176,7 +172,7 @@ static inline void diffContainerParseAndCompare(
     }
 }
 
-unsigned char testDomComparisons(size_t *successes, size_t *failures) {
+bool testDomComparisons(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM comparisons");
     size_t localSuccesses = 0;
     size_t localFailures = 0;

@@ -2,10 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/dom-utils.h"
-#include "flo/html-parser/dom/query/dom-query-util.h"
-#include "flo/html-parser/type/node/next-node.h"
-#include "flo/html-parser/utils/memory/memory.h"
+#include "flo/html-parser/dom/query/query-util.h"
+#include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/utils/print/error.h"
 
 bool filterNode(const node_id nodeID, const FilterType *filters,
@@ -169,7 +167,7 @@ getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
 
     while (hasNextUint16HashSetIterator(&iterator)) {
         node_id inSet = nextUint16HashSetIterator(&iterator);
-        node_id nextNodeID = getNextNode(inSet, dom);
+        node_id nextNodeID = getNext(inSet, dom);
         size_t siblingsNumberCopy = numberOfSiblings;
 
         while (siblingsNumberCopy > 0 && nextNodeID > 0) {
@@ -185,7 +183,7 @@ getFilteredAdjacents(const FilterType filters[MAX_FILTERS_PER_ELEMENT],
             }
 
             siblingsNumberCopy--;
-            nextNodeID = getNextNode(nextNodeID, dom);
+            nextNodeID = getNext(nextNodeID, dom);
         }
     }
 

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "flo/html-parser/comparison/comparison-status.h"
+#include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "hash-element.h"

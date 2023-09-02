@@ -1,8 +1,8 @@
-#ifndef FLO_HTML_PARSER_DOM_NODE_NODE_READING_H
-#define FLO_HTML_PARSER_DOM_NODE_NODE_READING_H
+#ifndef FLO_HTML_PARSER_DOM_READING_READING_H
+#define FLO_HTML_PARSER_DOM_READING_READING_H
 
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/dom/query/dom-query-status.h"
+#include "flo/html-parser/dom/query/query-status.h"
 #include "flo/html-parser/type/node/node.h"
 
 Node getNode(node_id nodeID, const Dom *dom);

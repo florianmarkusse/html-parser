@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/dom/traversal.h"
+#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/path.h"
 
@@ -55,7 +56,7 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
     node_id childNode = getFirstChild(nodeID, dom);
     while (childNode) {
         printNode(childNode, indentation + 1, dom, dataContainer, output);
-        childNode = getNextNode(childNode, dom);
+        childNode = getNext(childNode, dom);
     }
     fprintf(output, "</%s>", tag);
 }
@@ -65,7 +66,7 @@ void printHTML(const Dom *dom, const DataContainer *dataContainer) {
     node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, dom, dataContainer, stdout);
-        currentNodeID = getNextNode(currentNodeID, dom);
+        currentNodeID = getNext(currentNodeID, dom);
     }
     printf("\n\n");
 }
@@ -82,7 +83,7 @@ FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
     node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, dom, dataContainer, file);
-        currentNodeID = getNextNode(currentNodeID, dom);
+        currentNodeID = getNext(currentNodeID, dom);
     }
 
     fclose(file);

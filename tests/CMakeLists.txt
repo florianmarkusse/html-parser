@@ -7,6 +7,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/dom/parsing/parsing.c"
     "src/dom/comparing/comparing.c"
     "src/dom/querying/querying.c"
+    "src/dom/deleting/deleting.c"
     "src/dom/querying/querySelectorAll.c"
     "src/dom/querying/querySelector.c"
     "src/node/querying/querying.c"

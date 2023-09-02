@@ -1,9 +1,6 @@
-#include <flo/html-parser/dom/dom-user.h>
-#include <flo/html-parser/dom/dom-writing.h>
-#include <flo/html-parser/dom/dom.h>
-#include <flo/html-parser/dom/node/node-reading.h>
-#include <flo/html-parser/dom/query/dom-query.h>
-#include <flo/html-parser/type/element/elements.h>
+#include <flo/html-parser/dom/query/query.h>
+#include <flo/html-parser/dom/reading/reading.h>
+#include <flo/html-parser/dom/user.h>
 #include <flo/html-parser/utils/print/error.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,8 +26,9 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, "#my-first-div", 1, TEXT_CONTENT, "nested text node"},
     {TEST_FILE_1, "title", 1, TEXT_CONTENT, "simple text node"},
     {TEST_FILE_1, "span > p", 0, TEXT_CONTENT, "no text nodes"},
-    {TEST_FILE_1, "#text-content-test", 5, TEXT_CONTENT, "multiple text nodes"},
-    {TEST_FILE_1, "body", 7, TEXT_CONTENT, "multiple text nodes"},
+    {TEST_FILE_1, "#text-content-test", 5, TEXT_CONTENT,
+     "multiple text nodes 1"},
+    {TEST_FILE_1, "body", 7, TEXT_CONTENT, "multiple text nodes 2"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);

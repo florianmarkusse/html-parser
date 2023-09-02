@@ -1,7 +1,7 @@
 #ifndef DOM_QUERYING_QUERYING_H
 #define DOM_QUERYING_QUERYING_H
 
-#include <flo/html-parser/dom/query/dom-query-status.h>
+#include <flo/html-parser/dom/query/query-status.h>
 #include <stddef.h>
 
 typedef struct {

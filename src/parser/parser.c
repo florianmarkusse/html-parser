@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/dom-registry.h"
-#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/dom/registry.h"
+#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements-print.h"

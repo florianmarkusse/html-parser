@@ -133,12 +133,12 @@ DomStatus addParentFirstChild(const node_id parentID, const node_id childID,
                               Dom *dom) {
     if ((dom->parentFirstChilds =
              resizeArray(dom->parentFirstChilds, dom->parentFirstChildLen,
-                         &dom->parentFirstChildCap, sizeof(ParentFirstChild),
+                         &dom->parentFirstChildCap, sizeof(ParentChild),
                          PARENT_FIRST_CHILDS_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 
-    ParentFirstChild *newParentFirstChild =
+    ParentChild *newParentFirstChild =
         &(dom->parentFirstChilds[dom->parentFirstChildLen]);
     newParentFirstChild->parentID = parentID;
     newParentFirstChild->childID = childID;

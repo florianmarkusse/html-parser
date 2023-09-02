@@ -1,10 +1,6 @@
-#include <flo/html-parser/dom/dom-user.h>
-#include <flo/html-parser/dom/dom-writing.h>
-#include <flo/html-parser/dom/dom.h>
-#include <flo/html-parser/dom/query/dom-query.h>
-#include <flo/html-parser/type/element/elements.h>
+#include <flo/html-parser/dom/query/query.h>
+#include <flo/html-parser/dom/user.h>
 #include <flo/html-parser/utils/memory/memory.h>
-#include <flo/html-parser/utils/print/error.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -54,7 +50,7 @@ static const TestFile testFiles[] = {
 // Calculate the number of test files
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const char *fileLocation, char *cssQuery,
+static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                             const QueryStatus expectedStatus,
                             const size_t expectedNumberOfNodes) {
     DataContainer dataContainer;
@@ -110,7 +106,7 @@ static TestStatus testQuery(const char *fileLocation, char *cssQuery,
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation, char *cssQuery,
+static inline void testAndCount(const char *fileLocation, const char *cssQuery,
                                 const QueryStatus expectedStatus,
                                 const size_t expectedNumberOfNodes,
                                 const char *testName, size_t *localSuccsses,
@@ -143,4 +139,3 @@ unsigned char testQuerySelectorAll(size_t *successes, size_t *failures) {
 
     return localFailures > 0;
 };
-;

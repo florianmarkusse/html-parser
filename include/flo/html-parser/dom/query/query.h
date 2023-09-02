@@ -1,8 +1,8 @@
-#ifndef FLO_HTML_PARSER_DOM_QUERY_DOM_QUERY_H
-#define FLO_HTML_PARSER_DOM_QUERY_DOM_QUERY_H
+#ifndef FLO_HTML_PARSER_DOM_QUERY_QUERY_H
+#define FLO_HTML_PARSER_DOM_QUERY_QUERY_H
 
-#include "dom-query-status.h"
 #include "flo/html-parser/dom/dom.h"
+#include "query-status.h"
 
 #define INITIAL_QUERY_CAP (1U << 6U)
 #define MAX_FILTERS_PER_ELEMENT (1U << 3U)

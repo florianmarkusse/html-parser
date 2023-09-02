@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/traversal.h"
+#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/print/error.h"
 
@@ -347,8 +348,8 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
             return comp;
         }
 
-        *currNodeID1 = getNextNode(*currNodeID1, dom1);
-        *currNodeID2 = getNextNode(*currNodeID2, dom2);
+        *currNodeID1 = getNext(*currNodeID1, dom1);
+        *currNodeID2 = getNext(*currNodeID2, dom2);
     }
 
     if (*currNodeID1 ^ *currNodeID2) {
@@ -361,6 +362,7 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
+// TODO(florian): make version without need to pass currNodeID1 and currNodeID2
 ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,
                         const DataContainer *dataContainer1,
                         node_id *currNodeID2, const Dom *dom2,
@@ -374,8 +376,8 @@ ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,
             return comp;
         }
 
-        *currNodeID1 = getNextNode(*currNodeID1, dom1);
-        *currNodeID2 = getNextNode(*currNodeID2, dom2);
+        *currNodeID1 = getNext(*currNodeID1, dom1);
+        *currNodeID2 = getNext(*currNodeID2, dom2);
     }
 
     if (*currNodeID1 ^ *currNodeID2) {

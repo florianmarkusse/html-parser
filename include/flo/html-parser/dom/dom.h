@@ -6,7 +6,6 @@
 #include "flo/html-parser/type/node/next-node.h"
 #include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/type/node/parent-child.h"
-#include "flo/html-parser/type/node/parent-first-child.h"
 #include "flo/html-parser/type/node/property.h"
 #include "flo/html-parser/type/node/registration.h"
 #include "flo/html-parser/type/node/tag-registration.h"
@@ -38,7 +37,7 @@
 
 #define PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
 #define PARENT_FIRST_CHILDS_PER_PAGE                                           \
-    (PARENT_FIRST_CHILDS_PAGE_SIZE / sizeof(ParentFirstChild))
+    (PARENT_FIRST_CHILDS_PAGE_SIZE / sizeof(ParentChild))
 
 #define PARENT_CHILDS_PAGE_SIZE (1U << 8U)
 #define PARENT_CHILDS_PER_PAGE (PARENT_CHILDS_PAGE_SIZE / sizeof(ParentChild))
@@ -74,7 +73,7 @@ typedef struct {
     BasicRegistry propKeyRegistry;
     BasicRegistry propValueRegistry;
 
-    ParentFirstChild *parentFirstChilds;
+    ParentChild *parentFirstChilds;
     size_t parentFirstChildLen;
     size_t parentFirstChildCap;
 

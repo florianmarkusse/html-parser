@@ -1,14 +1,14 @@
-#ifndef FLO_HTML_PARSER_DOM_QUERY_DOM_QUERY_UTIL_H
-#define FLO_HTML_PARSER_DOM_QUERY_DOM_QUERY_UTIL_H
+#ifndef FLO_HTML_PARSER_DOM_QUERY_QUERY_UTIL_H
+#define FLO_HTML_PARSER_DOM_QUERY_QUERY_UTIL_H
 
 #include <stdbool.h>
 
-#include "dom-query-status.h"
-#include "dom-query.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/hash/uint16-t-hash.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
+#include "query-status.h"
+#include "query.h"
 
 bool filterNode(node_id nodeID, const FilterType *filters, size_t filterslen,
                 const Dom *dom);

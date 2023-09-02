@@ -1,5 +1,5 @@
 
-#include "flo/html-parser/dom/dom-registry.h"
+#include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/utils/memory/memory.h"
 
 DomStatus addTagRegistration(const indexID tagID, const bool isPaired,
