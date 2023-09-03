@@ -3,7 +3,10 @@
 
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/type/element/elements-container.h"
+#include "flo/html-parser/type/node/boolean-property.h"
 #include "flo/html-parser/type/node/property.h"
 
 Property *getProperty(node_id nodeID, element_id propKeyID, const Dom *dom);
+BooleanProperty *getBooleanProperty(node_id nodeID, element_id boolPropID,
+                                    const Dom *dom);
 #endif

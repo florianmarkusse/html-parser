@@ -2,6 +2,7 @@
 #define FLO_HTML_PARSER_DOM_MODIFICATION_MODIFICATION_H
 
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/type/node/node.h"
 

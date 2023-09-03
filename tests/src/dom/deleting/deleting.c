@@ -127,7 +127,7 @@ free_memory:
     destroyDataContainer(&dataContainer1);
     destroyDom(&dom1);
     destroyDataContainer(&dataContainer2);
-    destroyDom(&dom1);
+    destroyDom(&dom2);
 
     return result;
 }

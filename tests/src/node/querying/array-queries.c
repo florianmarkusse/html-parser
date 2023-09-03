@@ -69,6 +69,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
             const char **results = NULL;
             queryStatus =
                 getTextContent(foundNode, &dom, &results, &actualResult);
+            free(results);
             break;
         }
         default: {

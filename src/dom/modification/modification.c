@@ -146,3 +146,11 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
 
     return ELEMENT_SUCCESS;
 }
+
+ElementStatus setTextContent() {
+    //
+    ////
+    ///
+    ////
+    ////
+}

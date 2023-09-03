@@ -5,4 +5,8 @@
 
 void removeNode(node_id nodeID, Dom *dom);
 
+void removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
+                           const DataContainer *dataContainer);
+void removeProperty(node_id nodeID, const char *keyProp, Dom *dom,
+                    const DataContainer *dataContainer);
 #endif

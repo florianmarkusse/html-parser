@@ -6,6 +6,7 @@
 #include "dom/deleting/deleting.h"
 #include "dom/parsing/parsing.h"
 #include "dom/querying/querying.h"
+#include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
 #include "node/querying/querying.h"
 #include "pretty-print.h"
@@ -33,6 +34,9 @@ int main() {
     printf("\n");
 
     testNodeModifications(&successes, &failures);
+    printf("\n");
+
+    testNodeDeletions(&successes, &failures);
     printf("\n");
 
     printTestScore(successes, failures);

@@ -23,7 +23,7 @@ void printAttributes(const indexID tagID1, const StringHashSet *set1,
     }
 
     const char *tag2 = getTag(tagID2, dom2, dataContainer2);
-    PRINT_ERROR("Printing bool props of node 2 with tag %s:\n", tag2);
+    PRINT_ERROR("Printing certain attributes of node 2 with tag %s:\n", tag2);
 
     initStringHashSetIterator(&iterator, set2);
 
