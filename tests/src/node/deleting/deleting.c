@@ -17,7 +17,7 @@
 typedef enum {
     DELETE_BOOLEAN_PROPERTY,
     DELETE_PROPERTY,
-    NUM_FUNCTION_TYPES
+    NUM_DELETION_TYPES,
 } DeletionType;
 
 #define CURRENT_DIR "tests/src/node/deleting/inputs/"

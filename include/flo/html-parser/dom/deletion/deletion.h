@@ -4,6 +4,7 @@
 #include "flo/html-parser/dom/dom.h"
 
 void removeNode(node_id nodeID, Dom *dom);
+void removeChildren(node_id nodeID, Dom *dom);
 
 void removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
                            const DataContainer *dataContainer);

@@ -2,6 +2,7 @@
 #include <flo/html-parser/dom/deletion/deletion.h>
 #include <flo/html-parser/dom/query/query.h>
 #include <flo/html-parser/dom/user.h>
+#include <flo/html-parser/dom/writing.h>
 #include <flo/html-parser/utils/print/error.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -28,39 +29,58 @@
 #define TEST_FILE_7_AFTER CURRENT_DIR "test-7-after.html"
 #define TEST_FILE_8_BEFORE CURRENT_DIR "test-8-before.html"
 #define TEST_FILE_8_AFTER CURRENT_DIR "test-8-after.html"
+#define TEST_FILE_9_BEFORE CURRENT_DIR "test-9-before.html"
+#define TEST_FILE_9_AFTER CURRENT_DIR "test-9-after.html"
+#define TEST_FILE_10_BEFORE CURRENT_DIR "test-10-before.html"
+#define TEST_FILE_10_AFTER CURRENT_DIR "test-10-after.html"
+#define TEST_FILE_11_BEFORE CURRENT_DIR "test-11-before.html"
+#define TEST_FILE_11_AFTER CURRENT_DIR "test-11-after.html"
+
+typedef enum {
+    DELETE_NODE,
+    DELETE_CHILDREN,
+    NUM_DELETION_TYPES,
+} DeletionType;
 
 typedef struct {
     const char *fileLocation1;
     const char *fileLocation2;
     const char *cssQuery;
+    const DeletionType deletionType;
     const char *testName;
-} __attribute__((aligned(32))) TestFile;
+} __attribute__((aligned(64))) TestFile;
 
 // TODO(florian): also try deleting the only node that exists
 static const TestFile testFiles[] = {
-    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "span[required] > p",
+    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "span[required] > p", DELETE_NODE,
      "node without children and only child removal"},
-    {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "!DOCTYPE",
+    {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "!DOCTYPE", DELETE_NODE,
      "only document node removal"},
-    {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "!DOCTYPE",
+    {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "!DOCTYPE", DELETE_NODE,
      "first document node removal"},
-    {TEST_FILE_4_BEFORE, TEST_FILE_4_AFTER, "#text-content-test",
+    {TEST_FILE_4_BEFORE, TEST_FILE_4_AFTER, "#text-content-test", DELETE_NODE,
      "node with children and middle child"},
-    {TEST_FILE_5_BEFORE, TEST_FILE_5_AFTER, "input[text=free]",
+    {TEST_FILE_5_BEFORE, TEST_FILE_5_AFTER, "input[text=free]", DELETE_NODE,
      "node without children and last child"},
-    {TEST_FILE_6_BEFORE, TEST_FILE_6_AFTER, "#my-first-div",
+    {TEST_FILE_6_BEFORE, TEST_FILE_6_AFTER, "#my-first-div", DELETE_NODE,
      "node with children and first child"},
-    {TEST_FILE_7_BEFORE, TEST_FILE_7_AFTER, "html",
+    {TEST_FILE_7_BEFORE, TEST_FILE_7_AFTER, "html", DELETE_NODE,
      "last document node removal"},
-    {TEST_FILE_8_BEFORE, TEST_FILE_8_AFTER, "html",
+    {TEST_FILE_8_BEFORE, TEST_FILE_8_AFTER, "html", DELETE_NODE,
      "middle document node removal"},
+    {TEST_FILE_9_BEFORE, TEST_FILE_9_AFTER, "head", DELETE_CHILDREN,
+     "remove document node with text node"},
+    {TEST_FILE_10_BEFORE, TEST_FILE_10_AFTER, "head > title", DELETE_CHILDREN,
+     "remove text node"},
+    {TEST_FILE_11_BEFORE, TEST_FILE_11_AFTER, "body", DELETE_CHILDREN,
+     "remove body's children"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testDeletions(const char *fileLocation1,
-                                const char *fileLocation2,
-                                const char *cssQuery) {
+                                const char *fileLocation2, const char *cssQuery,
+                                const DeletionType deletionType) {
     TestStatus result = TEST_FAILURE;
 
     ComparisonTest comparisonTest;
@@ -75,7 +95,21 @@ static TestStatus testDeletions(const char *fileLocation1,
         return result;
     }
 
-    removeNode(foundNode, &comparisonTest.startDom);
+    switch (deletionType) {
+    case DELETE_NODE: {
+        removeNode(foundNode, &comparisonTest.startDom);
+        break;
+    }
+    case DELETE_CHILDREN: {
+        removeChildren(foundNode, &comparisonTest.startDom);
+        break;
+    }
+    default: {
+        return failWithMessage("No suitable DeletionType was supplied!\n",
+                               &comparisonTest);
+    }
+    }
+
     return compareAndEndTest(&comparisonTest);
 }
 
@@ -91,7 +125,8 @@ bool testDomDeletions(size_t *successes, size_t *failures) {
         printTestStart(testFile.testName);
 
         if (testDeletions(testFile.fileLocation1, testFile.fileLocation2,
-                          testFile.cssQuery) != TEST_SUCCESS) {
+                          testFile.cssQuery,
+                          testFile.deletionType) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;
