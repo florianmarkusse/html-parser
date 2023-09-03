@@ -67,9 +67,6 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         return TEST_ERROR_INITIALIZATION;
     }
 
-    //    printDomStatus(&dom, &dataContainer);
-    //    printAttributeStatus(&dataContainer);
-
     node_id *results = NULL;
     size_t resultsLen = 0;
     QueryStatus actual =
@@ -106,21 +103,6 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation, const char *cssQuery,
-                                const QueryStatus expectedStatus,
-                                const size_t expectedNumberOfNodes,
-                                const char *testName, size_t *localSuccsses,
-                                size_t *localFailures) {
-    printTestStart(testName);
-
-    if (testQuery(fileLocation, cssQuery, expectedStatus,
-                  expectedNumberOfNodes) == TEST_SUCCESS) {
-        (*localSuccsses)++;
-    } else {
-        (*localFailures)++;
-    }
-}
-
 unsigned char testQuerySelectorAll(size_t *successes, size_t *failures) {
     printTestTopicStart("querySelectorAll");
     size_t localSuccesses = 0;
@@ -128,9 +110,16 @@ unsigned char testQuerySelectorAll(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation, testFile.cssQuery,
-                     testFile.expectedStatus, testFile.expectedResult,
-                     testFile.testName, &localSuccesses, &localFailures);
+
+        printTestStart(testFile.testName);
+
+        if (testQuery(testFile.fileLocation, testFile.cssQuery,
+                      testFile.expectedStatus,
+                      testFile.expectedResult) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);

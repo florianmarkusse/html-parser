@@ -169,22 +169,6 @@ freeMemory:
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation, const char *cssQuery,
-                                const StringUnion stringUnion,
-                                const bool expectedAnswer,
-                                const BoolFunctionType boolFunctionType,
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
-    printTestStart(testName);
-
-    if (testQuery(fileLocation, cssQuery, stringUnion, boolFunctionType,
-                  expectedAnswer) == TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
-}
-
 bool testBoolNodeQueries(size_t *successes, size_t *failures) {
     printTestTopicStart("bool queries");
     size_t localSuccesses = 0;
@@ -192,10 +176,16 @@ bool testBoolNodeQueries(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation, testFile.cssQuery,
-                     testFile.stringUnion, testFile.expectedResult,
-                     testFile.boolFunctionType, testFile.testName,
-                     &localSuccesses, &localFailures);
+
+        printTestStart(testFile.testName);
+
+        if (testQuery(testFile.fileLocation, testFile.cssQuery,
+                      testFile.stringUnion, testFile.boolFunctionType,
+                      testFile.expectedResult) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);

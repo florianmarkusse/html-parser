@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "comparison-test.h"
 #include "dom/comparing/comparing.h"
 #include "test-status.h"
 #include "test.h"
@@ -77,99 +78,17 @@ static const TestFile testFiles[] = {
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-TestStatus compareFiles(const char *fileLocation1,
-                        DataContainer *dataContainer1,
-                        const char *fileLocation2,
-                        DataContainer *dataContainer2,
+TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
                         const ComparisonStatus expectedResult) {
-    Dom dom1;
-    if (createFromFile(fileLocation1, &dom1, dataContainer1) != DOM_SUCCESS) {
-        destroyDataContainer(dataContainer1);
-        destroyDataContainer(dataContainer2);
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    Dom dom2;
-    if (createFromFile(fileLocation2, &dom2, dataContainer2) != DOM_SUCCESS) {
-        destroyDataContainer(dataContainer1);
-        destroyDataContainer(dataContainer2);
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    //    printDomStatus(&dom1, dataContainer1);
-    //    printDomStatus(&dom2, dataContainer2);
-
-    node_id nodeID1 = dom1.firstNodeID;
-    node_id nodeID2 = dom2.firstNodeID;
-    ComparisonStatus comp = equals(&nodeID1, &dom1, dataContainer1, &nodeID2,
-                                   &dom2, dataContainer2);
-
     TestStatus result = TEST_FAILURE;
 
-    // printTagNamesStatus(dataContainer1);
-    // printAttributeStatus(dataContainer1);
-    // printDomStatus(&dom1, dataContainer1);
-
-    if (comp == expectedResult) {
-        printTestSuccess();
-        result = TEST_SUCCESS;
-    } else {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            expectedResult, comparisonStatusToString(expectedResult), comp,
-            comparisonStatusToString(comp));
-        printFirstDifference(nodeID1, &dom1, dataContainer1, nodeID2, &dom2,
-                             dataContainer2);
-        printTestDemarcation();
+    ComparisonTest comparisonTest;
+    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
+    if (result != TEST_SUCCESS) {
+        return result;
     }
 
-    destroyDom(&dom1);
-    destroyDom(&dom2);
-
-    destroyDataContainer(dataContainer1);
-    destroyDataContainer(dataContainer2);
-
-    return result;
-}
-
-TestStatus
-compareFilesDiffDataContainer(const char *fileLocation1,
-                              const char *fileLocation2,
-                              const ComparisonStatus expectedResult) {
-    DataContainer dataContainer1;
-    ElementStatus status1 = createDataContainer(&dataContainer1);
-    DataContainer dataContainer2;
-    ElementStatus status2 = createDataContainer(&dataContainer2);
-
-    if (status1 != ELEMENT_SUCCESS || status2 != ELEMENT_SUCCESS) {
-        if (status1 != ELEMENT_SUCCESS) {
-            ERROR_WITH_CODE_ONLY(elementStatusToString(status1),
-                                 "Failed to initialize data container 1");
-        }
-        if (status2 != ELEMENT_SUCCESS) {
-            ERROR_WITH_CODE_ONLY(elementStatusToString(status2),
-                                 "Failed to initialize data container 2");
-        }
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    return compareFiles(fileLocation1, &dataContainer1, fileLocation2,
-                        &dataContainer2, expectedResult);
-}
-
-static inline void diffContainerParseAndCompare(
-    const char *fileLocation1, const char *fileLocation2,
-    const ComparisonStatus expectedResult, const char *testName,
-    size_t *localSuccesses, size_t *localFailures) {
-    printTestStart(testName);
-
-    if (compareFilesDiffDataContainer(fileLocation1, fileLocation2,
-                                      expectedResult) == TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
+    return compareWithCodeAndEndTest(&comparisonTest, expectedResult);
 }
 
 bool testDomComparisons(size_t *successes, size_t *failures) {
@@ -179,10 +98,15 @@ bool testDomComparisons(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        diffContainerParseAndCompare(testFile.fileLocation1,
-                                     testFile.fileLocation2,
-                                     testFile.expectedStatus, testFile.testName,
-                                     &localSuccesses, &localFailures);
+
+        printTestStart(testFile.testName);
+
+        if (compareFiles(testFile.fileLocation1, testFile.fileLocation2,
+                         testFile.expectedStatus) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);

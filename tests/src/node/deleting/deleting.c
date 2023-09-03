@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "comparison-test.h"
 #include "node/modifying/modifying.h"
 #include "test-status.h"
 #include "test.h"
@@ -26,16 +27,6 @@ typedef enum {
 #define TEST_FILE_2_AFTER CURRENT_DIR "test-2-after.html"
 #define TEST_FILE_3_BEFORE CURRENT_DIR "test-3-before.html"
 #define TEST_FILE_3_AFTER CURRENT_DIR "test-3-after.html"
-#define TEST_FILE_4_BEFORE CURRENT_DIR "test-4-before.html"
-#define TEST_FILE_4_AFTER CURRENT_DIR "test-4-after.html"
-#define TEST_FILE_5_BEFORE CURRENT_DIR "test-5-before.html"
-#define TEST_FILE_5_AFTER CURRENT_DIR "test-5-after.html"
-#define TEST_FILE_6_BEFORE CURRENT_DIR "test-6-before.html"
-#define TEST_FILE_6_AFTER CURRENT_DIR "test-6-after.html"
-#define TEST_FILE_7_BEFORE CURRENT_DIR "test-7-before.html"
-#define TEST_FILE_7_AFTER CURRENT_DIR "test-7-after.html"
-#define TEST_FILE_8_BEFORE CURRENT_DIR "test-8-before.html"
-#define TEST_FILE_8_AFTER CURRENT_DIR "test-8-after.html"
 
 typedef struct {
     const char *fileLocation1;
@@ -60,110 +51,38 @@ static TestStatus testDeletion(const char *fileLocation1,
                                const char *fileLocation2, const char *cssQuery,
                                const char *propToDelete,
                                const DeletionType deletionType) {
-    Dom dom1;
-    DataContainer dataContainer1;
-    ElementStatus initStatus = createDataContainer(&dataContainer1);
-    if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
-                             "Failed to initialize data container");
-        return TEST_ERROR_INITIALIZATION;
-    }
-    if (createFromFile(fileLocation1, &dom1, &dataContainer1) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer1);
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    Dom dom2;
-    DataContainer dataContainer2;
-    initStatus = createDataContainer(&dataContainer2);
-    if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
-                             "Failed to initialize data container");
-        return TEST_ERROR_INITIALIZATION;
-    }
-    if (createFromFile(fileLocation2, &dom2, &dataContainer2) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer1);
-        destroyDataContainer(&dataContainer2);
-        return TEST_ERROR_INITIALIZATION;
-    }
-
     TestStatus result = TEST_FAILURE;
+
+    ComparisonTest comparisonTest;
+    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
+    if (result != TEST_SUCCESS) {
+        return result;
+    }
+
     node_id foundNode = 0;
-    QueryStatus queryStatus =
-        querySelector(cssQuery, &dom1, &dataContainer1, &foundNode);
-
-    if (queryStatus != QUERY_SUCCESS) {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), queryStatus,
-            queryingStatusToString(queryStatus));
-        printTestDemarcation();
-        goto free_memory;
-    } else {
-        switch (deletionType) {
-        case DELETE_BOOLEAN_PROPERTY: {
-            removeBooleanProperty(foundNode, propToDelete, &dom1,
-                                  &dataContainer1);
-            break;
-        }
-        case DELETE_PROPERTY: {
-            removeProperty(foundNode, propToDelete, &dom1, &dataContainer1);
-            break;
-        }
-        default: {
-            printTestFailure();
-            printTestDemarcation();
-            printf("No suitable enum was supplied!\n");
-            printTestDemarcation();
-            goto free_memory;
-        }
-        }
+    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
+    if (result != TEST_SUCCESS) {
+        return result;
     }
 
-    node_id nodeID1 = dom1.firstNodeID;
-    node_id nodeID2 = dom2.firstNodeID;
-
-    ComparisonStatus comp = equals(&nodeID1, &dom1, &dataContainer1, &nodeID2,
-                                   &dom2, &dataContainer2);
-
-    if (comp == COMPARISON_SUCCESS) {
-        printTestSuccess();
-        result = TEST_SUCCESS;
-    } else {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            COMPARISON_SUCCESS, comparisonStatusToString(COMPARISON_SUCCESS),
-            comp, comparisonStatusToString(comp));
-        printFirstDifference(nodeID1, &dom1, &dataContainer1, nodeID2, &dom2,
-                             &dataContainer2);
-        printTestDemarcation();
+    switch (deletionType) {
+    case DELETE_BOOLEAN_PROPERTY: {
+        removeBooleanProperty(foundNode, propToDelete, &comparisonTest.startDom,
+                              &comparisonTest.startDataContainer);
+        break;
+    }
+    case DELETE_PROPERTY: {
+        removeProperty(foundNode, propToDelete, &comparisonTest.startDom,
+                       &comparisonTest.startDataContainer);
+        break;
+    }
+    default: {
+        return failWithMessage("No suitable DeletionType was supplied!\n",
+                               &comparisonTest);
+    }
     }
 
-free_memory:
-    destroyDataContainer(&dataContainer1);
-    destroyDom(&dom1);
-    destroyDataContainer(&dataContainer2);
-    destroyDom(&dom2);
-
-    return result;
-}
-
-static inline void testAndCount(const char *fileLocation1,
-                                const char *fileLocation2, const char *cssQuery,
-                                const char *propToDelete,
-                                const DeletionType deletionType,
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
-    printTestStart(testName);
-
-    if (testDeletion(fileLocation1, fileLocation2, cssQuery, propToDelete,
-                     deletionType) == TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
+    return compareAndEndTest(&comparisonTest);
 }
 
 bool testNodeDeletions(size_t *successes, size_t *failures) {
@@ -174,10 +93,15 @@ bool testNodeDeletions(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation1, testFile.fileLocation2,
-                     testFile.cssQuery, testFile.propToDelete,
-                     testFile.deletionType, testFile.testName, &localSuccesses,
-                     &localFailures);
+        printTestStart(testFile.testName);
+
+        if (testDeletion(testFile.fileLocation1, testFile.fileLocation2,
+                         testFile.cssQuery, testFile.propToDelete,
+                         testFile.deletionType) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);

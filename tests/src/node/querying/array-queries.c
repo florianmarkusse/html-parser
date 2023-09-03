@@ -1,6 +1,7 @@
 #include <flo/html-parser/dom/query/query.h>
 #include <flo/html-parser/dom/reading/reading.h>
 #include <flo/html-parser/dom/user.h>
+#include <flo/html-parser/utils/memory/memory.h>
 #include <flo/html-parser/utils/print/error.h>
 #include <stdio.h>
 #include <string.h>
@@ -69,7 +70,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
             const char **results = NULL;
             queryStatus =
                 getTextContent(foundNode, &dom, &results, &actualResult);
-            free(results);
+            FREE_TO_NULL(results);
             break;
         }
         default: {
@@ -104,21 +105,6 @@ freeMemory:
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation, const char *cssQuery,
-                                const size_t expectedResult,
-                                const ArrayFunctionType functionType,
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
-    printTestStart(testName);
-
-    if (testQuery(fileLocation, cssQuery, functionType, expectedResult) ==
-        TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
-}
-
 bool testArrayNodeQueries(size_t *successes, size_t *failures) {
     printTestTopicStart("array queries");
     size_t localSuccesses = 0;
@@ -126,9 +112,16 @@ bool testArrayNodeQueries(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation, testFile.cssQuery,
-                     testFile.expectedResult, testFile.functionType,
-                     testFile.testName, &localSuccesses, &localFailures);
+
+        printTestStart(testFile.testName);
+
+        if (testQuery(testFile.fileLocation, testFile.cssQuery,
+                      testFile.functionType,
+                      testFile.expectedResult) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);

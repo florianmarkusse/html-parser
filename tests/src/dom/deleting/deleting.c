@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "comparison-test.h"
 #include "dom/deleting/deleting.h"
 #include "test-status.h"
 #include "test.h"
@@ -60,89 +61,22 @@ static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 static TestStatus testDeletions(const char *fileLocation1,
                                 const char *fileLocation2,
                                 const char *cssQuery) {
-    Dom dom1;
-    DataContainer dataContainer1;
-    ElementStatus initStatus = createDataContainer(&dataContainer1);
-    if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
-                             "Failed to initialize data container");
-        return TEST_ERROR_INITIALIZATION;
-    }
-    if (createFromFile(fileLocation1, &dom1, &dataContainer1) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer1);
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    Dom dom2;
-    DataContainer dataContainer2;
-    initStatus = createDataContainer(&dataContainer2);
-    if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
-                             "Failed to initialize data container");
-        return TEST_ERROR_INITIALIZATION;
-    }
-    if (createFromFile(fileLocation2, &dom2, &dataContainer2) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer1);
-        destroyDataContainer(&dataContainer2);
-        return TEST_ERROR_INITIALIZATION;
-    }
-
     TestStatus result = TEST_FAILURE;
+
+    ComparisonTest comparisonTest;
+    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
+    if (result != TEST_SUCCESS) {
+        return result;
+    }
+
     node_id foundNode = 0;
-    QueryStatus queryStatus =
-        querySelector(cssQuery, &dom1, &dataContainer1, &foundNode);
-
-    if (queryStatus != QUERY_SUCCESS) {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), queryStatus,
-            queryingStatusToString(queryStatus));
-        printTestDemarcation();
-        goto free_memory;
+    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
+    if (result != TEST_SUCCESS) {
+        return result;
     }
 
-    removeNode(foundNode, &dom1);
-
-    node_id nodeID1 = dom1.firstNodeID;
-    node_id nodeID2 = dom2.firstNodeID;
-    ComparisonStatus comp = equals(&nodeID1, &dom1, &dataContainer1, &nodeID2,
-                                   &dom2, &dataContainer2);
-
-    if (comp == COMPARISON_SUCCESS) {
-        printTestSuccess();
-        result = TEST_SUCCESS;
-    } else {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            COMPARISON_SUCCESS, comparisonStatusToString(COMPARISON_SUCCESS),
-            comp, comparisonStatusToString(comp));
-        printFirstDifference(nodeID1, &dom1, &dataContainer1, nodeID2, &dom2,
-                             &dataContainer2);
-        printTestDemarcation();
-    }
-
-free_memory:
-    destroyDataContainer(&dataContainer1);
-    destroyDom(&dom1);
-    destroyDataContainer(&dataContainer2);
-    destroyDom(&dom2);
-
-    return result;
-}
-
-static inline void testAndCount(const char *fileLocation1,
-                                const char *fileLocation2, const char *cssQuery,
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
-    printTestStart(testName);
-
-    if (testDeletions(fileLocation1, fileLocation2, cssQuery) == TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
+    removeNode(foundNode, &comparisonTest.startDom);
+    return compareAndEndTest(&comparisonTest);
 }
 
 bool testDomDeletions(size_t *successes, size_t *failures) {
@@ -153,9 +87,15 @@ bool testDomDeletions(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation1, testFile.fileLocation2,
-                     testFile.cssQuery, testFile.testName, &localSuccesses,
-                     &localFailures);
+
+        printTestStart(testFile.testName);
+
+        if (testDeletions(testFile.fileLocation1, testFile.fileLocation2,
+                          testFile.cssQuery) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);

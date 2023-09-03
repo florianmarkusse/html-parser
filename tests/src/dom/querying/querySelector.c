@@ -23,7 +23,6 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, "body head", QUERY_SUCCESS, 0, "no nodes found"},
 };
 
-// Calculate the number of test files
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
@@ -73,21 +72,6 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation, const char *cssQuery,
-                                const QueryStatus expectedStatus,
-                                const node_id expectedNode,
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
-    printTestStart(testName);
-
-    if (testQuery(fileLocation, cssQuery, expectedStatus, expectedNode) ==
-        TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
-}
-
 unsigned char testQuerySelector(size_t *successes, size_t *failures) {
     printTestTopicStart("querySelector");
     size_t localSuccesses = 0;
@@ -95,9 +79,16 @@ unsigned char testQuerySelector(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation, testFile.cssQuery,
-                     testFile.expectedStatus, testFile.expectedResult,
-                     testFile.testName, &localSuccesses, &localFailures);
+
+        printTestStart(testFile.testName);
+
+        if (testQuery(testFile.fileLocation, testFile.cssQuery,
+                      testFile.expectedStatus,
+                      testFile.expectedResult) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);

@@ -98,21 +98,6 @@ freeMemory:
     return result;
 }
 
-static inline void testAndCount(const char *fileLocation, const char *cssQuery,
-                                const char *input, const char *expectedResult,
-                                const CharFunctionType functionType,
-                                const char *testName, size_t *localSuccesses,
-                                size_t *localFailures) {
-    printTestStart(testName);
-
-    if (testQuery(fileLocation, cssQuery, input, functionType,
-                  expectedResult) == TEST_SUCCESS) {
-        (*localSuccesses)++;
-    } else {
-        (*localFailures)++;
-    }
-}
-
 bool testCharNodeQueries(size_t *successes, size_t *failures) {
     printTestTopicStart("char queries");
     size_t localSuccesses = 0;
@@ -120,9 +105,16 @@ bool testCharNodeQueries(size_t *successes, size_t *failures) {
 
     for (size_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
-        testAndCount(testFile.fileLocation, testFile.cssQuery, testFile.input,
-                     testFile.expectedResult, testFile.functionType,
-                     testFile.testName, &localSuccesses, &localFailures);
+
+        printTestStart(testFile.testName);
+
+        if (testQuery(testFile.fileLocation, testFile.cssQuery, testFile.input,
+                      testFile.functionType,
+                      testFile.expectedResult) != TEST_SUCCESS) {
+            localFailures++;
+        } else {
+            localSuccesses++;
+        }
     }
 
     printTestScore(localSuccesses, localFailures);
