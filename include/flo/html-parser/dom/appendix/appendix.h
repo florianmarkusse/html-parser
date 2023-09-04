@@ -28,5 +28,7 @@ DomStatus appendDocumentNode(node_id parentID,
                              DataContainer *dataContainer);
 DomStatus appendTextNode(node_id parentID, const char *text, Dom *dom,
                          DataContainer *dataContainer);
+DomStatus appendNodesFromString(node_id parentID, const char *htmlString,
+                                Dom *dom, DataContainer *dataContainer);
 
 #endif

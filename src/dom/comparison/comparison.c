@@ -235,8 +235,8 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
         if (printDifferences) {
             const char *nodeType1 = nodeTypeToString(node1->nodeType);
             const char *nodeType2 = nodeTypeToString(node2->nodeType);
-            PRINT_ERROR("Uncomparable nodes:"
-                        "node 1 type: %s"
+            PRINT_ERROR("Uncomparable nodes:\n"
+                        "node 1 type: %s\n"
                         "node 2 type: %s\n",
                         nodeType1, nodeType2);
         }

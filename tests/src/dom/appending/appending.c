@@ -28,10 +28,17 @@
 #define TEST_FILE_5_AFTER CURRENT_DIR "test-5-after.html"
 #define TEST_FILE_6_BEFORE CURRENT_DIR "test-6-before.html"
 #define TEST_FILE_6_AFTER CURRENT_DIR "test-6-after.html"
+#define TEST_FILE_7_BEFORE CURRENT_DIR "test-7-before.html"
+#define TEST_FILE_7_AFTER CURRENT_DIR "test-7-after.html"
+#define TEST_FILE_8_BEFORE CURRENT_DIR "test-8-before.html"
+#define TEST_FILE_8_AFTER CURRENT_DIR "test-8-after.html"
+#define TEST_FILE_9_BEFORE CURRENT_DIR "test-9-before.html"
+#define TEST_FILE_9_AFTER CURRENT_DIR "test-9-after.html"
 
 typedef enum {
     APPEND_DOCUMENT_NODE,
     APPEND_TEXT_NODE,
+    APPEND_FROM_STRING,
     NUM_APPEND_NODES
 } AppendType;
 
@@ -92,6 +99,51 @@ static const TestFile testFiles[] = {
      "text node to element with no children",
      APPEND_TEXT_NODE,
      {{"my special text plan"}}},
+    {TEST_FILE_7_BEFORE,
+     TEST_FILE_7_AFTER,
+     "body",
+     "string to element with multiple children",
+     APPEND_FROM_STRING,
+     {{"<body style=\"newstyle\">"
+       "  <div id=\"my-first-div\">"
+       "    <p class=\"big\">Test text</p>"
+       "  </div>"
+       "  <section a b c d e f g h i>"
+       "    <div special-one>"
+       "      <span required></span>"
+       "    </div>"
+       "  </section>"
+       "  <div class=\"big\" special-one></div>"
+       "  <div class=\"big\"><p></p></div>"
+       "  <div id=\"test\"></div>"
+       "  <div class=\"big\"></div>"
+       "  <section id=\"text-content-test\">"
+       "    Hi ther"
+       "    <div>"
+       "      <span> Span this </span>"
+       "      middle is mid"
+       "    </div>"
+       "    TEST"
+       "    <p>my p big</p>"
+       "  </section>"
+       "  bazinga"
+       "  <x></x>"
+       "  <div></div>"
+       "  <p html></p>"
+       "  <input required text=\"free\" />"
+       "</body>"}}},
+    {TEST_FILE_8_BEFORE,
+     TEST_FILE_8_AFTER,
+     "div[special-one]",
+     "string to element with 1 child",
+     APPEND_FROM_STRING,
+     {{"<whoop></whoop>"}}},
+    {TEST_FILE_9_BEFORE,
+     TEST_FILE_9_AFTER,
+     "x",
+     "string to element with no children",
+     APPEND_FROM_STRING,
+     {{"text only gang"}}},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
@@ -125,6 +177,12 @@ static TestStatus testAppendix(const char *fileLocation1,
         domStatus = appendTextNode(foundNode, appendInput->text,
                                    &comparisonTest.startDom,
                                    &comparisonTest.startDataContainer);
+        break;
+    }
+    case APPEND_FROM_STRING: {
+        domStatus = appendNodesFromString(foundNode, appendInput->text,
+                                          &comparisonTest.startDom,
+                                          &comparisonTest.startDataContainer);
         break;
     }
     default: {

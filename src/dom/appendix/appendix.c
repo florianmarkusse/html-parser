@@ -6,6 +6,7 @@
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
+#include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/node/parent-child.h"
 #include "flo/html-parser/utils/print/error.h"
 
@@ -61,14 +62,14 @@ static DomStatus updateReferences(const node_id parentID,
         return domStatus;
     }
 
-    node_id nextNode = firstChild->childID;
-    node_id nextNextNode = getNext(nextNode, dom);
-    while (nextNextNode > 0) {
-        nextNode = nextNextNode;
-        nextNextNode = getNext(nextNode, dom);
+    node_id next = firstChild->childID;
+    NextNode *nextNode = getNextNode(next, dom);
+    while (nextNode != NULL) {
+        next = nextNode->nextNodeID;
+        nextNode = getNextNode(next, dom);
     }
 
-    domStatus = addNextNode(nextNode, newNodeID, dom);
+    domStatus = addNextNode(next, newNodeID, dom);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add new node ID in next nodes!\n");
         return domStatus;
@@ -145,4 +146,25 @@ DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
     setNodeText(newNodeID, dataLocation, dom);
 
     return updateReferences(parentID, newNodeID, dom);
+}
+
+DomStatus appendNodesFromString(const node_id parentID, const char *htmlString,
+                                Dom *dom, DataContainer *dataContainer) {
+    node_id prevNodeID = parentID;
+    ParentChild *firstChild = getFirstChildNode(parentID, dom);
+    if (firstChild != NULL) {
+        node_id next = firstChild->childID;
+        NextNode *nextNode = getNextNode(next, dom);
+        while (nextNode != NULL) {
+            next = nextNode->nextNodeID;
+            nextNode = getNextNode(next, dom);
+        }
+        prevNodeID = next;
+    }
+
+    NodeDepth nodeStack;
+    nodeStack.stack[0] = parentID;
+    nodeStack.len = 1;
+
+    return parse(htmlString, dom, dataContainer, &nodeStack, prevNodeID);
 }
