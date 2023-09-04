@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "dom/appending/appending.h"
 #include "dom/comparing/comparing.h"
 #include "dom/deleting/deleting.h"
 #include "dom/parsing/parsing.h"
@@ -37,6 +38,9 @@ int main() {
     printf("\n");
 
     testNodeDeletions(&successes, &failures);
+    printf("\n");
+
+    testDomAppendices(&successes, &failures);
     printf("\n");
 
     printTestScore(successes, failures);

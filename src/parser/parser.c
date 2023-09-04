@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "flo/html-parser/dom/appendix/appendix.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/registry.h"
@@ -50,9 +51,9 @@ typedef struct {
     size_t len;
 } __attribute__((aligned(128))) NodeDepth;
 
-DomStatus updateReferences(const node_id newNodeID,
-                           const node_id previousNodeID,
-                           const NodeDepth *depthStack, Dom *dom) {
+static DomStatus updateReferences(const node_id newNodeID,
+                                  const node_id previousNodeID,
+                                  const NodeDepth *depthStack, Dom *dom) {
     DomStatus documentStatus = DOM_SUCCESS;
 
     if (newNodeID > 0 && previousNodeID > 0) {
@@ -83,43 +84,6 @@ DomStatus updateReferences(const node_id newNodeID,
     }
 
     return documentStatus;
-}
-
-DomStatus addTagToNodeID(const char *htmlString, const size_t elementStartIndex,
-                         const size_t elementLen, const node_id nodeID,
-                         const bool isPaired, Dom *dom,
-                         DataContainer *dataContainer) {
-    DomStatus domStatus = DOM_SUCCESS;
-    HashElement hashElement;
-    indexID newTagID = 0;
-    ElementStatus indexStatus =
-        elementToIndex(&dataContainer->tags, &htmlString[elementStartIndex],
-                       elementLen, &hashElement, &newTagID);
-
-    switch (indexStatus) {
-    case ELEMENT_CREATED: {
-        if ((domStatus = addTagRegistration(newTagID, isPaired, &hashElement,
-                                            dom)) != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to add tag registration.\n");
-            return domStatus;
-        }
-        // Intentional fall through!!!
-    }
-    case ELEMENT_FOUND: {
-        if ((domStatus = setNodeTagID(nodeID, newTagID, dom)) != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to set tag ID for new dom node.\n");
-            return domStatus;
-        }
-        break;
-    }
-    default: {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(indexStatus),
-                             "Failed to insert into new tag names!\n");
-        return DOM_NO_ELEMENT;
-    }
-    }
-
-    return domStatus;
 }
 
 DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
@@ -252,7 +216,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
         *context = STYLE_CONTEXT;
     }
 
-    if ((documentStatus = addTagToNodeID(htmlString, elementStartIndex,
+    if ((documentStatus = addTagToNodeID(&htmlString[elementStartIndex],
                                          elementLen, *newNodeID, !(*isSingle),
                                          dom, dataContainer)) != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add tag to node ID.\n");
@@ -420,11 +384,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                                  "Failed to insert text");
             return DOM_NO_ELEMENT;
         }
-        if ((documentStatus = setNodeText(*currentNodeID, dataLocation, dom)) !=
-            DOM_SUCCESS) {
-            PRINT_ERROR("Failed to replace the text node for a merge.\n");
-            return documentStatus;
-        }
+        setNodeText(*currentNodeID, dataLocation, dom);
     } else {
         if ((documentStatus = getNewNodeID(currentNodeID, NODE_TYPE_TEXT,
                                            prevNodeID, dom)) != DOM_SUCCESS) {
@@ -438,15 +398,11 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                           elementLen, &dataLocation);
         if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                 "Failed to get insert text");
+                                 "Failed to index text!\n");
             return DOM_NO_ELEMENT;
         }
 
-        if ((documentStatus = setNodeText(*currentNodeID, dataLocation, dom)) !=
-            DOM_SUCCESS) {
-            PRINT_ERROR("Failed to set text.\n");
-            return documentStatus;
-        }
+        setNodeText(*currentNodeID, dataLocation, dom);
     }
 
     return documentStatus;

@@ -108,18 +108,14 @@ DomStatus createNode(node_id *nodeID, const NodeType nodeType, Dom *dom) {
     return DOM_SUCCESS;
 }
 
-DomStatus setNodeTagID(const node_id nodeID, const indexID tagID, Dom *dom) {
+void setNodeTagID(const node_id nodeID, const indexID tagID, Dom *dom) {
     Node *createdNode = &(dom->nodes[nodeID]);
     createdNode->tagID = tagID;
-
-    return DOM_SUCCESS;
 }
 
-DomStatus setNodeText(const node_id nodeID, const char *text, Dom *dom) {
+void setNodeText(const node_id nodeID, const char *text, Dom *dom) {
     Node *createdNode = &(dom->nodes[nodeID]);
     createdNode->text = text;
-
-    return DOM_SUCCESS;
 }
 
 DomStatus addParentFirstChild(const node_id parentID, const node_id childID,

@@ -86,8 +86,8 @@ DomStatus createDom(const char *htmlString, Dom *dom,
                     DataContainer *dataContainer);
 
 DomStatus createNode(node_id *nodeID, NodeType nodeType, Dom *dom);
-DomStatus setNodeTagID(node_id nodeID, indexID tagID, Dom *dom);
-DomStatus setNodeText(node_id nodeID, const char *text, Dom *dom);
+void setNodeTagID(node_id nodeID, indexID tagID, Dom *dom);
+void setNodeText(node_id nodeID, const char *text, Dom *dom);
 
 DomStatus addParentFirstChild(node_id parentID, node_id childID, Dom *dom);
 

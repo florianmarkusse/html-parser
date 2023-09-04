@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 #include "comparison-test.h"
-#include "node/modifying/modifying.h"
+#include "node/deleting/deleting.h"
 #include "test-status.h"
 #include "test.h"
 
