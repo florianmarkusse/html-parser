@@ -6,6 +6,7 @@
 #include "dom/comparing/comparing.h"
 #include "dom/deleting/deleting.h"
 #include "dom/parsing/parsing.h"
+#include "dom/prepending/prepending.h"
 #include "dom/querying/querying.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
@@ -41,6 +42,9 @@ int main() {
     printf("\n");
 
     testDomAppendices(&successes, &failures);
+    printf("\n");
+
+    testDomPrependices(&successes, &failures);
     printf("\n");
 
     printTestScore(successes, failures);

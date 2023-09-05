@@ -82,7 +82,7 @@ DomStatus createDom(const char *htmlString, Dom *dom,
         return DOM_ERROR_MEMORY;
     }
 
-    DomStatus domumentStatus = parseFromRoot(htmlString, dom, dataContainer);
+    DomStatus domumentStatus = parse(htmlString, dom, dataContainer);
     if (domumentStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse domument.\n");
     }

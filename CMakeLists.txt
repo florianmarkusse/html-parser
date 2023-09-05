@@ -49,6 +49,7 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/parser/parser.c" 
     "src/dom/comparison/comparison.c"
     "src/dom/appendix/appendix.c"
+    "src/dom/prependix/prependix.c"
     "src/dom/deletion/deletion.c"
     "src/dom/query/query.c"
     "src/dom/query/query-util.c"

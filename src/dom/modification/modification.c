@@ -146,3 +146,35 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
 
     return ELEMENT_SUCCESS;
 }
+
+DomStatus setTagOnDocumentNode(const char *tagStart, const size_t elementStart,
+                               const node_id nodeID, const bool isPaired,
+                               Dom *dom, DataContainer *dataContainer) {
+    DomStatus domStatus = DOM_SUCCESS;
+    HashElement hashElement;
+    indexID newTagID = 0;
+    ElementStatus indexStatus = elementToIndex(
+        &dataContainer->tags, tagStart, elementStart, &hashElement, &newTagID);
+
+    switch (indexStatus) {
+    case ELEMENT_CREATED: {
+        if ((domStatus = addTagRegistration(newTagID, isPaired, &hashElement,
+                                            dom)) != DOM_SUCCESS) {
+            PRINT_ERROR("Failed to add tag registration.\n");
+            return domStatus;
+        }
+        // Intentional fall through!!!
+    }
+    case ELEMENT_FOUND: {
+        setNodeTagID(nodeID, newTagID, dom);
+        break;
+    }
+    default: {
+        ERROR_WITH_CODE_ONLY(elementStatusToString(indexStatus),
+                             "Failed to insert into new tag names!\n");
+        return DOM_NO_ELEMENT;
+    }
+    }
+
+    return domStatus;
+}

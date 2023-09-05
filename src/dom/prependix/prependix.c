@@ -1,9 +1,8 @@
-
 #include <string.h>
 
-#include "flo/html-parser/dom/appendix/appendix.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
+#include "flo/html-parser/dom/prependix/prependix.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/parser/parser.h"
@@ -14,13 +13,14 @@ static DomStatus updateReferences(const node_id parentID,
                                   const node_id newNodeID, Dom *dom) {
     DomStatus domStatus = DOM_SUCCESS;
     if (parentID == 0) {
-        node_id lastNextNode = getLastNextNode(dom->firstNodeID, dom);
-
-        domStatus = addNextNode(lastNextNode, newNodeID, dom);
+        domStatus = addNextNode(newNodeID, dom->firstNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
             PRINT_ERROR("Failed to add new node ID in next nodes!\n");
             return domStatus;
         }
+        dom->firstNodeID = newNodeID;
+
+        return domStatus;
     }
 
     ParentChild *firstChild = getFirstChildNode(parentID, dom);
@@ -40,9 +40,10 @@ static DomStatus updateReferences(const node_id parentID,
         return domStatus;
     }
 
-    node_id lastNextNode = getLastNextNode(firstChild->childID, dom);
+    node_id previousFirstChild = firstChild->childID;
+    firstChild->childID = newNodeID;
 
-    domStatus = addNextNode(lastNextNode, newNodeID, dom);
+    domStatus = addNextNode(newNodeID, previousFirstChild, dom);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add new node ID in next nodes!\n");
         return domStatus;
@@ -57,9 +58,9 @@ static DomStatus updateReferences(const node_id parentID,
     return domStatus;
 }
 
-DomStatus appendDocumentNode(const node_id parentID,
-                             const DocumentNode *docNode, Dom *dom,
-                             DataContainer *dataContainer) {
+DomStatus prependDocumentNode(const node_id parentID,
+                              const DocumentNode *docNode, Dom *dom,
+                              DataContainer *dataContainer) {
     node_id newNodeID = 0;
     DomStatus domStatus =
         parseDocumentElement(docNode, dom, dataContainer, &newNodeID);
@@ -70,8 +71,8 @@ DomStatus appendDocumentNode(const node_id parentID,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
-                         DataContainer *dataContainer) {
+DomStatus prependTextNode(const node_id parentID, const char *text, Dom *dom,
+                          DataContainer *dataContainer) {
     node_id newNodeID = 0;
     DomStatus domStatus =
         parseTextElement(text, dom, dataContainer, &newNodeID);
@@ -83,8 +84,8 @@ DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus appendNodesFromString(const node_id parentID, const char *htmlString,
-                                Dom *dom, DataContainer *dataContainer) {
+DomStatus prependNodesFromString(const node_id parentID, const char *htmlString,
+                                 Dom *dom, DataContainer *dataContainer) {
     node_id firstNewAddedNode = dom->nodeLen;
     DomStatus domStatus = parse(htmlString, dom, dataContainer);
     if (domStatus != DOM_SUCCESS) {
