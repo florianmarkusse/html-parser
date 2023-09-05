@@ -6,32 +6,43 @@
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/parser/parser.h"
+#include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/type/node/parent-child.h"
 #include "flo/html-parser/utils/print/error.h"
 
 static DomStatus updateReferences(const node_id parentID,
-                                  const node_id newNodeID, Dom *dom) {
+                                  const node_id firstNewNodeID, Dom *dom) {
     DomStatus domStatus = DOM_SUCCESS;
     if (parentID == 0) {
-        domStatus = addNextNode(newNodeID, dom->firstNodeID, dom);
+        node_id previousFirstNodeID = dom->firstNodeID;
+        domStatus = addNextNode(firstNewNodeID, dom->firstNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
             PRINT_ERROR("Failed to add new node ID in next nodes!\n");
             return domStatus;
         }
-        dom->firstNodeID = newNodeID;
+        dom->firstNodeID = firstNewNodeID;
+
+        node_id lastNextNode = getLastNext(dom->firstNodeID, dom);
+        if (lastNextNode > firstNewNodeID) {
+            domStatus = addNextNode(lastNextNode, previousFirstNodeID, dom);
+            if (domStatus != DOM_SUCCESS) {
+                PRINT_ERROR("Failed to add new node ID in next nodes!\n");
+                return domStatus;
+            }
+        }
 
         return domStatus;
     }
 
     ParentChild *firstChild = getFirstChildNode(parentID, dom);
     if (firstChild == NULL) {
-        domStatus = addParentFirstChild(parentID, newNodeID, dom);
+        domStatus = addParentFirstChild(parentID, firstNewNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
             PRINT_ERROR("Failed to add new node ID as first child!\n");
             return domStatus;
         }
 
-        domStatus = addParentChild(parentID, newNodeID, dom);
+        domStatus = addParentChild(parentID, firstNewNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
             PRINT_ERROR("Failed to add new node ID as child!\n");
             return domStatus;
@@ -41,15 +52,15 @@ static DomStatus updateReferences(const node_id parentID,
     }
 
     node_id previousFirstChild = firstChild->childID;
-    firstChild->childID = newNodeID;
+    firstChild->childID = firstNewNodeID;
 
-    domStatus = addNextNode(newNodeID, previousFirstChild, dom);
+    domStatus = addNextNode(firstNewNodeID, previousFirstChild, dom);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add new node ID in next nodes!\n");
         return domStatus;
     }
 
-    domStatus = addParentChild(parentID, newNodeID, dom);
+    domStatus = addParentChild(parentID, firstNewNodeID, dom);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add new node ID as child!\n");
         return domStatus;

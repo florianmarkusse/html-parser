@@ -9,6 +9,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/dom/comparing/comparing.c"
     "src/dom/appending/appending.c"
     "src/dom/prepending/prepending.c"
+    "src/dom/replacing/replacing.c"
     "src/dom/querying/querying.c"
     "src/dom/deleting/deleting.c"
     "src/dom/querying/querySelectorAll.c"

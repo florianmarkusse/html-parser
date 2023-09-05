@@ -17,6 +17,6 @@ ParentChild *getParentNode(node_id currentNodeID, const Dom *dom);
 node_id traverseDom(node_id currentNodeID, const Dom *dom);
 node_id traverseNode(node_id currentNodeID, node_id toTraverseNodeID,
                      const Dom *dom);
-node_id getLastNextNode(node_id startNodeID, const Dom *dom);
+node_id getLastNext(node_id startNodeID, const Dom *dom);
 
 #endif

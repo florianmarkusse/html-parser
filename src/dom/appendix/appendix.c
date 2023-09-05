@@ -14,7 +14,7 @@ static DomStatus updateReferences(const node_id parentID,
                                   const node_id newNodeID, Dom *dom) {
     DomStatus domStatus = DOM_SUCCESS;
     if (parentID == 0) {
-        node_id lastNextNode = getLastNextNode(dom->firstNodeID, dom);
+        node_id lastNextNode = getLastNext(dom->firstNodeID, dom);
 
         domStatus = addNextNode(lastNextNode, newNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
@@ -40,7 +40,7 @@ static DomStatus updateReferences(const node_id parentID,
         return domStatus;
     }
 
-    node_id lastNextNode = getLastNextNode(firstChild->childID, dom);
+    node_id lastNextNode = getLastNext(firstChild->childID, dom);
 
     domStatus = addNextNode(lastNextNode, newNodeID, dom);
     if (domStatus != DOM_SUCCESS) {

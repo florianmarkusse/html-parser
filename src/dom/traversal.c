@@ -144,7 +144,7 @@ node_id traverseDom(const node_id currentNodeID, const Dom *dom) {
     return 0;
 }
 
-node_id getLastNextNode(const node_id startNodeID, const Dom *dom) {
+node_id getLastNext(const node_id startNodeID, const Dom *dom) {
     node_id lastNext = startNodeID;
     NextNode *nextNode = getNextNode(lastNext, dom);
     while (nextNode != NULL) {

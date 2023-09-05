@@ -1,8 +1,9 @@
+
 #include <flo/html-parser/dom/comparison/comparison.h>
 #include <flo/html-parser/dom/deletion/deletion.h>
 #include <flo/html-parser/dom/modification/modification.h>
-#include <flo/html-parser/dom/prependix/prependix.h>
 #include <flo/html-parser/dom/query/query.h>
+#include <flo/html-parser/dom/replacement/replacement.h>
 #include <flo/html-parser/dom/user.h>
 #include <flo/html-parser/dom/writing.h>
 #include <flo/html-parser/utils/print/error.h>
@@ -10,11 +11,11 @@
 #include <stdio.h>
 
 #include "comparison-test.h"
-#include "dom/prepending/prepending.h"
+#include "dom/replacing/replacing.h"
 #include "test-status.h"
 #include "test.h"
 
-#define CURRENT_DIR "tests/src/dom/prepending/inputs/"
+#define CURRENT_DIR "tests/src/dom/replacing/inputs/"
 #define TEST_FILE_1_BEFORE CURRENT_DIR "test-1-before.html"
 #define TEST_FILE_1_AFTER CURRENT_DIR "test-1-after.html"
 #define TEST_FILE_2_BEFORE CURRENT_DIR "test-2-before.html"
@@ -37,32 +38,32 @@
 #define TEST_FILE_10_AFTER CURRENT_DIR "test-10-after.html"
 
 typedef enum {
-    PREPEND_DOCUMENT_NODE,
-    PREPEND_TEXT_NODE,
-    PREPEND_FROM_STRING,
-    NUM_PREPEND_TYPES
-} PrependType;
+    REPLACEMENT_DOCUMENT_NODE,
+    REPLACEMENT_TEXT_NODE,
+    REPLACEMENT_FROM_STRING,
+    NUM_REPLACEMENT_TYPES
+} ReplacementType;
 
 typedef union {
     const DocumentNode documentNode;
     const char *text;
-} PrependInput;
+} ReplacementInput;
 
 typedef struct {
     const char *fileLocation1;
     const char *fileLocation2;
     const char *cssQuery;
     const char *testName;
-    const PrependType prependType;
-    const PrependInput prependInput;
+    const ReplacementType replacementType;
+    const ReplacementInput replacementInput;
 } __attribute__((aligned(128))) TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,
      TEST_FILE_1_AFTER,
      "body",
-     "document node to element with multiple children",
-     PREPEND_DOCUMENT_NODE,
+     "document node with element with multiple children",
+     REPLACEMENT_DOCUMENT_NODE,
      {{"example-tag",
        true,
        {"prop1", "prop2"},
@@ -73,38 +74,38 @@ static const TestFile testFiles[] = {
     {TEST_FILE_2_BEFORE,
      TEST_FILE_2_AFTER,
      "div[special-one]",
-     "document node to element with 1 child",
-     PREPEND_DOCUMENT_NODE,
+     "document node with element with 1 child",
+     REPLACEMENT_DOCUMENT_NODE,
      {{"example-tag", false, {}, 0, {"bla-bla"}, {"bla-bla"}, 1}}},
     {TEST_FILE_3_BEFORE,
      TEST_FILE_3_AFTER,
      "x",
-     "document node to element with no children",
-     PREPEND_DOCUMENT_NODE,
+     "document node with element with no children",
+     REPLACEMENT_DOCUMENT_NODE,
      {{"example-tag", true, {"required", "help-me"}, 2, {}, {}, 0}}},
     {TEST_FILE_4_BEFORE,
      TEST_FILE_4_AFTER,
      "body",
-     "text node to element with multiple children",
-     PREPEND_TEXT_NODE,
+     "text node with element with multiple children",
+     REPLACEMENT_TEXT_NODE,
      {{"zoinks"}}},
     {TEST_FILE_5_BEFORE,
      TEST_FILE_5_AFTER,
      "div[special-one]",
-     "text node to element with 1 child",
-     PREPEND_TEXT_NODE,
+     "text node with element with 1 child",
+     REPLACEMENT_TEXT_NODE,
      {{"mama ce mama ca"}}},
     {TEST_FILE_6_BEFORE,
      TEST_FILE_6_AFTER,
      "x",
-     "text node to element with no children",
-     PREPEND_TEXT_NODE,
+     "text node with element with no children",
+     REPLACEMENT_TEXT_NODE,
      {{"my special text plan"}}},
     {TEST_FILE_7_BEFORE,
      TEST_FILE_7_AFTER,
      "body",
-     "string to element with multiple children",
-     PREPEND_FROM_STRING,
+     "string with element with multiple children",
+     REPLACEMENT_FROM_STRING,
      {{"<body style=\"newstyle\">"
        "  <div id=\"my-first-div\">"
        "    <p class=\"big\">Test text</p>"
@@ -136,28 +137,23 @@ static const TestFile testFiles[] = {
     {TEST_FILE_8_BEFORE,
      TEST_FILE_8_AFTER,
      "div[special-one]",
-     "string to element with 1 child",
-     PREPEND_FROM_STRING,
+     "string with element with 1 child",
+     REPLACEMENT_FROM_STRING,
      {{"<whoop></whoop>"}}},
     {TEST_FILE_9_BEFORE,
      TEST_FILE_9_AFTER,
      "x",
-     "string to element with no children",
-     PREPEND_FROM_STRING,
+     "string with element with no children",
+     REPLACEMENT_FROM_STRING,
      {{"text only gang"}}},
-    {TEST_FILE_10_BEFORE,
-     TEST_FILE_10_AFTER,
-     NULL,
-     "string to root",
-     PREPEND_FROM_STRING,
-     {{"<h1></h1><h2></h2>"}}},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testPrependix(const char *fileLocation1,
-                                const char *fileLocation2, const char *cssQuery,
-                                const PrependType prependType,
-                                const PrependInput *prependInput) {
+static TestStatus testReplacements(const char *fileLocation1,
+                                   const char *fileLocation2,
+                                   const char *cssQuery,
+                                   const ReplacementType replacementType,
+                                   const ReplacementInput *replacementInput) {
     TestStatus result = TEST_FAILURE;
 
     ComparisonTest comparisonTest;
@@ -176,41 +172,40 @@ static TestStatus testPrependix(const char *fileLocation1,
     }
 
     DomStatus domStatus = DOM_SUCCESS;
-    switch (prependType) {
-    case PREPEND_DOCUMENT_NODE: {
-        domStatus = prependDocumentNode(foundNode, &prependInput->documentNode,
+    switch (replacementType) {
+    case REPLACEMENT_DOCUMENT_NODE: {
+        domStatus = replaceWithDocumentNode(
+            foundNode, &replacementInput->documentNode,
+            &comparisonTest.startDom, &comparisonTest.startDataContainer);
+        break;
+    }
+    case REPLACEMENT_TEXT_NODE: {
+        domStatus = replaceWithTextNode(foundNode, replacementInput->text,
                                         &comparisonTest.startDom,
                                         &comparisonTest.startDataContainer);
         break;
     }
-    case PREPEND_TEXT_NODE: {
-        domStatus = prependTextNode(foundNode, prependInput->text,
-                                    &comparisonTest.startDom,
-                                    &comparisonTest.startDataContainer);
-        break;
-    }
-    case PREPEND_FROM_STRING: {
-        domStatus = prependNodesFromString(foundNode, prependInput->text,
-                                           &comparisonTest.startDom,
-                                           &comparisonTest.startDataContainer);
+    case REPLACEMENT_FROM_STRING: {
+        domStatus = replaceWithNodesFromString(
+            foundNode, replacementInput->text, &comparisonTest.startDom,
+            &comparisonTest.startDataContainer);
         break;
     }
     default: {
-        return failWithMessage("No suitable prependix type was supplied!\n",
+        return failWithMessage("No suitable replacement type was supplied!\n",
                                &comparisonTest);
     }
     }
 
     if (domStatus != DOM_SUCCESS) {
-        return failWithMessage("Failed to prepend document to node!\n",
-                               &comparisonTest);
+        return failWithMessage("Failed to replace node!\n", &comparisonTest);
     }
 
     return compareAndEndTest(&comparisonTest);
 }
 
-bool testDomPrependices(size_t *successes, size_t *failures) {
-    printTestTopicStart("DOM prependices");
+bool testDomReplacements(size_t *successes, size_t *failures) {
+    printTestTopicStart("DOM replacements");
 
     size_t localSuccesses = 0;
     size_t localFailures = 0;
@@ -219,9 +214,9 @@ bool testDomPrependices(size_t *successes, size_t *failures) {
         TestFile testFile = testFiles[i];
         printTestStart(testFile.testName);
 
-        if (testPrependix(testFile.fileLocation1, testFile.fileLocation2,
-                          testFile.cssQuery, testFile.prependType,
-                          &testFile.prependInput) != TEST_SUCCESS) {
+        if (testReplacements(testFile.fileLocation1, testFile.fileLocation2,
+                             testFile.cssQuery, testFile.replacementType,
+                             &testFile.replacementInput) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;
