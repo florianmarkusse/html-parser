@@ -9,11 +9,13 @@
 #include "flo/html-parser/type/node/document-node.h"
 #include "flo/html-parser/type/node/node.h"
 
-DomStatus replaceWithDocumentNode(node_id parentID, const DocumentNode *docNode,
-                                  Dom *dom, DataContainer *dataContainer);
-DomStatus replaceWithTextNode(node_id parentID, const char *text, Dom *dom,
-                              DataContainer *dataContainer);
-DomStatus replaceWithNodesFromString(node_id parentID, const char *htmlString,
-                                     Dom *dom, DataContainer *dataContainer);
+DomStatus replaceWithDocumentNode(node_id toReplaceNodeID,
+                                  const DocumentNode *docNode, Dom *dom,
+                                  DataContainer *dataContainer);
+DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
+                              Dom *dom, DataContainer *dataContainer);
+DomStatus replaceWithNodesFromString(node_id toReplaceNodeID,
+                                     const char *htmlString, Dom *dom,
+                                     DataContainer *dataContainer);
 
 #endif

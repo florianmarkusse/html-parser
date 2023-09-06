@@ -1,6 +1,10 @@
 
+#include <string.h>
+
+#include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/type/node/tag-registration.h"
+#include "flo/html-parser/utils/print/error.h"
 
 const char *getTag(const indexID tagID, const Dom *dom,
                    const DataContainer *dataContainer) {
@@ -33,4 +37,19 @@ const char *getPropValue(const indexID propValueID, const Dom *dom,
     Registration registration = dom->propValueRegistry.registry[propValueID];
     return getStringFromHashSet(&dataContainer->propValues.set,
                                 &registration.hashElement);
+}
+
+MergeResult tryMerge(Node *possibleMergeNode, Node *replacingNode, Dom *dom,
+                     DataContainer *dataContainer) {
+    if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
+        ElementStatus elementStatus = appendTextToTextNode(
+            possibleMergeNode, replacingNode->text, strlen(replacingNode->text),
+            dom, dataContainer);
+        if (elementStatus != ELEMENT_CREATED) {
+            PRINT_ERROR("Failed to merge new text node with up node!\n");
+            return FAILED_MERGE;
+        }
+        return COMPLETED_MERGE;
+    }
+    return NO_MERGE;
 }

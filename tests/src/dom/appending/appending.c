@@ -36,6 +36,12 @@
 #define TEST_FILE_9_AFTER CURRENT_DIR "test-9-after.html"
 #define TEST_FILE_10_BEFORE CURRENT_DIR "test-10-before.html"
 #define TEST_FILE_10_AFTER CURRENT_DIR "test-10-after.html"
+#define TEST_FILE_11_BEFORE CURRENT_DIR "test-11-before.html"
+#define TEST_FILE_11_AFTER CURRENT_DIR "test-11-after.html"
+#define TEST_FILE_12_BEFORE CURRENT_DIR "test-12-before.html"
+#define TEST_FILE_12_AFTER CURRENT_DIR "test-12-after.html"
+#define TEST_FILE_13_BEFORE CURRENT_DIR "test-13-before.html"
+#define TEST_FILE_13_AFTER CURRENT_DIR "test-13-after.html"
 
 typedef enum {
     APPEND_DOCUMENT_NODE,
@@ -152,6 +158,24 @@ static const TestFile testFiles[] = {
      "string to root",
      APPEND_FROM_STRING,
      {{"<h1></h1><h2></h2>"}}},
+    {TEST_FILE_11_BEFORE,
+     TEST_FILE_11_AFTER,
+     "body",
+     "string merge with last child",
+     APPEND_FROM_STRING,
+     {{"is what I added <h1></h1>Hi there<p></p>"}}},
+    {TEST_FILE_12_BEFORE,
+     TEST_FILE_12_AFTER,
+     "body",
+     "string merge with last root",
+     APPEND_FROM_STRING,
+     {{"at the end <h1>With an h1</h1><p></p>with more ending text"}}},
+    {TEST_FILE_13_BEFORE,
+     TEST_FILE_13_AFTER,
+     "body",
+     "text node merge to last child",
+     APPEND_TEXT_NODE,
+     {{"is all I do"}}},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 

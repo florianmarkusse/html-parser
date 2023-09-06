@@ -35,6 +35,12 @@
 #define TEST_FILE_9_AFTER CURRENT_DIR "test-9-after.html"
 #define TEST_FILE_10_BEFORE CURRENT_DIR "test-10-before.html"
 #define TEST_FILE_10_AFTER CURRENT_DIR "test-10-after.html"
+#define TEST_FILE_11_BEFORE CURRENT_DIR "test-11-before.html"
+#define TEST_FILE_11_AFTER CURRENT_DIR "test-11-after.html"
+#define TEST_FILE_12_BEFORE CURRENT_DIR "test-12-before.html"
+#define TEST_FILE_12_AFTER CURRENT_DIR "test-12-after.html"
+#define TEST_FILE_13_BEFORE CURRENT_DIR "test-13-before.html"
+#define TEST_FILE_13_AFTER CURRENT_DIR "test-13-after.html"
 
 typedef enum {
     PREPEND_DOCUMENT_NODE,
@@ -151,6 +157,24 @@ static const TestFile testFiles[] = {
      "string to root",
      PREPEND_FROM_STRING,
      {{"<h1></h1><h2></h2>"}}},
+    {TEST_FILE_11_BEFORE,
+     TEST_FILE_11_AFTER,
+     "body",
+     "string merge with first child",
+     PREPEND_FROM_STRING,
+     {{"new text here<h1></h1><p><p>I got prepended"}}},
+    {TEST_FILE_12_BEFORE,
+     TEST_FILE_12_AFTER,
+     "body",
+     "string merge with first root element",
+     PREPEND_FROM_STRING,
+     {{"<html></html><wtf></wtf>bottom text      "}}},
+    {TEST_FILE_13_BEFORE,
+     TEST_FILE_13_AFTER,
+     NULL,
+     "text node merge with first root element",
+     PREPEND_TEXT_NODE,
+     {{"     even more      "}}},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 

@@ -358,28 +358,17 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     }
     }
 
-    Node prevNode = dom->nodes[*lastParsedNodeID];
-    if (prevNode.nodeType == NODE_TYPE_TEXT) {
+    Node *prevNode = &dom->nodes[*lastParsedNodeID];
+    if (prevNode->nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
-        const char *prevText = prevNode.text;
-        const size_t mergedLen = strlen(prevText) + elementLen +
-                                 2; // Adding a whitespace in between.
-
-        char buffer[mergedLen];
-        strcpy(buffer, prevText);
-        strcat(buffer, " ");
-        strncat(buffer, &htmlString[elementStartIndex], elementLen);
-        buffer[mergedLen - 1] = '\0';
-
-        char *dataLocation = NULL;
-        elementStatus = insertElement(&dataContainer->text, buffer, mergedLen,
-                                      &dataLocation);
+        elementStatus =
+            appendTextToTextNode(prevNode, &htmlString[elementStartIndex],
+                                 elementLen, dom, dataContainer);
         if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
                                  "Failed to insert text");
             return DOM_NO_ELEMENT;
         }
-        setNodeText(*lastParsedNodeID, dataLocation, dom);
     } else {
         if ((documentStatus = getNewNodeID(lastParsedNodeID, NODE_TYPE_TEXT,
                                            prevNodeID, dom)) != DOM_SUCCESS) {

@@ -4,6 +4,7 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/dom/registry.h"
+#include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/utils/print/error.h"
 #include <string.h>
@@ -145,6 +146,32 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
     prop->valueID = newValueID;
 
     return ELEMENT_SUCCESS;
+}
+
+ElementStatus appendTextToTextNode(Node *node, const char *textStart,
+                                   const size_t textLen, Dom *dom,
+                                   DataContainer *dataContainer) {
+    const char *prevText = node->text;
+    const size_t mergedLen =
+        strlen(prevText) + textLen + 2; // Adding a whitespace in between.
+
+    char buffer[mergedLen];
+    strcpy(buffer, prevText);
+    strcat(buffer, " ");
+    strncat(buffer, textStart, textLen);
+    buffer[mergedLen - 1] = '\0';
+
+    char *dataLocation = NULL;
+    ElementStatus elementStatus =
+        insertElement(&dataContainer->text, buffer, mergedLen, &dataLocation);
+    if (elementStatus != ELEMENT_CREATED) {
+        ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+                             "Failed to insert text");
+        return elementStatus;
+    }
+    setNodeText(node->nodeID, dataLocation, dom);
+
+    return elementStatus;
 }
 
 DomStatus setTagOnDocumentNode(const char *tagStart, const size_t elementStart,

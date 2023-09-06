@@ -36,6 +36,10 @@
 #define TEST_FILE_9_AFTER CURRENT_DIR "test-9-after.html"
 #define TEST_FILE_10_BEFORE CURRENT_DIR "test-10-before.html"
 #define TEST_FILE_10_AFTER CURRENT_DIR "test-10-after.html"
+#define TEST_FILE_11_BEFORE CURRENT_DIR "test-11-before.html"
+#define TEST_FILE_11_AFTER CURRENT_DIR "test-11-after.html"
+#define TEST_FILE_12_BEFORE CURRENT_DIR "test-12-before.html"
+#define TEST_FILE_12_AFTER CURRENT_DIR "test-12-after.html"
 
 typedef enum {
     REPLACEMENT_DOCUMENT_NODE,
@@ -146,6 +150,24 @@ static const TestFile testFiles[] = {
      "string with element with no children",
      REPLACEMENT_FROM_STRING,
      {{"text only gang"}}},
+    {TEST_FILE_10_BEFORE,
+     TEST_FILE_10_AFTER,
+     "x",
+     "string double text merge in child element",
+     REPLACEMENT_FROM_STRING,
+     {{"at the start<h1></h1><h2></h2>at the end"}}},
+    {TEST_FILE_11_BEFORE,
+     TEST_FILE_11_AFTER,
+     "x",
+     "string double text merge in root element",
+     REPLACEMENT_FROM_STRING,
+     {{"at the start<h1></h1><h2></h2>at the end"}}},
+    {TEST_FILE_12_BEFORE,
+     TEST_FILE_12_AFTER,
+     "x",
+     "string single top merge in root element",
+     REPLACEMENT_FROM_STRING,
+     {{"at the start<h1></h1><h2></h2>at the end"}}},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 

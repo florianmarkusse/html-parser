@@ -59,32 +59,12 @@ node_id getParent(const node_id currentNodeID, const Dom *dom) {
 }
 
 NextNode *getPreviousNode(const node_id currentNodeID, const Dom *dom) {
-    const node_id parentNodeID = getParent(currentNodeID, dom);
-    if (parentNodeID > 0) {
-        ParentChild *parentFirstChildNode =
-            getFirstChildNode(parentNodeID, dom);
-        if (parentFirstChildNode->childID == currentNodeID) {
-            return NULL;
+    for (node_id i = 0; i < dom->nextNodeLen; i++) {
+        if (dom->nextNodes[i].nextNodeID == currentNodeID) {
+            return &dom->nextNodes[i];
         }
-
-        NextNode *nextNode = getNextNode(parentFirstChildNode->childID, dom);
-        while (nextNode->nextNodeID != currentNodeID) {
-            nextNode = getNextNode(nextNode->nextNodeID, dom);
-        }
-
-        return nextNode;
     }
-
-    if (dom->firstNodeID == currentNodeID) {
-        return NULL;
-    }
-
-    NextNode *nextNode = getNextNode(dom->firstNodeID, dom);
-    while (nextNode->nextNodeID != currentNodeID) {
-        nextNode = getNextNode(nextNode->nextNodeID, dom);
-    }
-
-    return nextNode;
+    return NULL;
 }
 
 node_id getPrevious(const node_id currentNodeID, const Dom *dom) {
@@ -153,4 +133,20 @@ node_id getLastNext(const node_id startNodeID, const Dom *dom) {
     }
 
     return lastNext;
+}
+
+NextNode *getLastNextNode(const node_id startNodeID, const Dom *dom) {
+    NextNode *nextNode = getNextNode(startNodeID, dom);
+    if (nextNode == NULL) {
+        return NULL;
+    }
+
+    ;
+    NextNode *pastNextNode = getNextNode(nextNode->nextNodeID, dom);
+    while (pastNextNode != NULL) {
+        nextNode = pastNextNode;
+        pastNextNode = getNextNode(pastNextNode->nextNodeID, dom);
+    }
+
+    return nextNode;
 }
