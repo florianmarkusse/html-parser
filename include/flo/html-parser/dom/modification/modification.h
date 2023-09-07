@@ -35,9 +35,9 @@ ElementStatus setPropertyValue(node_id nodeID, const char *key,
                                const char *newValue, Dom *dom,
                                DataContainer *dataContainer);
 
-ElementStatus appendTextToTextNode(Node *node, const char *textStart,
-                                   size_t textLen, Dom *dom,
-                                   DataContainer *dataContainer);
+ElementStatus addTextToTextNode(Node *node, const char *textStart,
+                                size_t textLen, Dom *dom,
+                                DataContainer *dataContainer, bool isAppend);
 
 DomStatus setTagOnDocumentNode(const char *tagStart, size_t elementStart,
                                node_id nodeID, bool isPaired, Dom *dom,

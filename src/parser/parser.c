@@ -362,8 +362,8 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     if (prevNode->nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
         elementStatus =
-            appendTextToTextNode(prevNode, &htmlString[elementStartIndex],
-                                 elementLen, dom, dataContainer);
+            addTextToTextNode(prevNode, &htmlString[elementStartIndex],
+                              elementLen, dom, dataContainer, true);
         if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
                                  "Failed to insert text");

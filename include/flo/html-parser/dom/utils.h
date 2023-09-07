@@ -18,6 +18,6 @@ const char *getPropValue(indexID propValueID, const Dom *dom,
 typedef enum { COMPLETED_MERGE, NO_MERGE, FAILED_MERGE } MergeResult;
 
 MergeResult tryMerge(Node *possibleMergeNode, Node *replacingNode, Dom *dom,
-                     DataContainer *dataContainer);
+                     DataContainer *dataContainer, bool isAppend);
 
 #endif

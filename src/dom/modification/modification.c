@@ -7,6 +7,7 @@
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/utils/print/error.h"
+#include <stdbool.h>
 #include <string.h>
 
 ElementStatus getCreatedPropIDFromString(const PropertyType propertyType,
@@ -148,19 +149,26 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
     return ELEMENT_SUCCESS;
 }
 
-ElementStatus appendTextToTextNode(Node *node, const char *textStart,
-                                   const size_t textLen, Dom *dom,
-                                   DataContainer *dataContainer) {
+ElementStatus addTextToTextNode(Node *node, const char *textStart,
+                                const size_t textLen, Dom *dom,
+                                DataContainer *dataContainer, bool isAppend) {
     const char *prevText = node->text;
     const size_t mergedLen =
         strlen(prevText) + textLen + 2; // Adding a whitespace in between.
 
     char buffer[mergedLen];
-    strcpy(buffer, prevText);
-    strcat(buffer, " ");
-    strncat(buffer, textStart, textLen);
-    buffer[mergedLen - 1] = '\0';
+    if (isAppend) {
+        strcpy(buffer, prevText);
+        strcat(buffer, " ");
+        strncat(buffer, textStart, textLen);
+    } else {
+        strncpy(buffer, textStart, textLen);
+        buffer[textLen] = '\0';
+        strcat(buffer, " ");
+        strcat(buffer, prevText);
+    }
 
+    buffer[mergedLen - 1] = '\0';
     char *dataLocation = NULL;
     ElementStatus elementStatus =
         insertElement(&dataContainer->text, buffer, mergedLen, &dataLocation);

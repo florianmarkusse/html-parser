@@ -1,4 +1,5 @@
 
+#include <stdbool.h>
 #include <string.h>
 
 #include "flo/html-parser/dom/modification/modification.h"
@@ -40,11 +41,11 @@ const char *getPropValue(const indexID propValueID, const Dom *dom,
 }
 
 MergeResult tryMerge(Node *possibleMergeNode, Node *replacingNode, Dom *dom,
-                     DataContainer *dataContainer) {
+                     DataContainer *dataContainer, bool isAppend) {
     if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
-        ElementStatus elementStatus = appendTextToTextNode(
+        ElementStatus elementStatus = addTextToTextNode(
             possibleMergeNode, replacingNode->text, strlen(replacingNode->text),
-            dom, dataContainer);
+            dom, dataContainer, isAppend);
         if (elementStatus != ELEMENT_CREATED) {
             PRINT_ERROR("Failed to merge new text node with up node!\n");
             return FAILED_MERGE;

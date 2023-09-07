@@ -89,7 +89,7 @@ MergeResult tryMergeBothSides(const node_id toReplaceNodeID,
         if (previousNode != NULL) {
             MergeResult mergeTry =
                 tryMerge(&dom->nodes[previousNode->currentNodeID],
-                         replacingNode, dom, dataContainer);
+                         replacingNode, dom, dataContainer, true);
             if (mergeTry == FAILED_MERGE || mergeTry == COMPLETED_MERGE) {
                 return mergeTry;
             }
@@ -97,8 +97,9 @@ MergeResult tryMergeBothSides(const node_id toReplaceNodeID,
 
         NextNode *nextNode = getNextNode(toReplaceNodeID, dom);
         if (nextNode != NULL) {
-            MergeResult mergeTry = tryMerge(&dom->nodes[nextNode->nextNodeID],
-                                            replacingNode, dom, dataContainer);
+            MergeResult mergeTry =
+                tryMerge(&dom->nodes[nextNode->nextNodeID], replacingNode, dom,
+                         dataContainer, false);
             return mergeTry;
         }
     }
@@ -150,7 +151,7 @@ DomStatus replaceWithNodesFromString(node_id toReplaceNodeID,
             if (previousNode != NULL) {
                 MergeResult mergeResult =
                     tryMerge(&dom->nodes[previousNode->currentNodeID],
-                             firstAddedNode, dom, dataContainer);
+                             firstAddedNode, dom, dataContainer, true);
                 if (mergeResult == COMPLETED_MERGE) {
                     size_t secondNewAddedNode = getNext(firstNewAddedNode, dom);
                     removeNode(firstNewAddedNode, dom);
@@ -167,9 +168,9 @@ DomStatus replaceWithNodesFromString(node_id toReplaceNodeID,
         if (lastAddedNode->nodeType == NODE_TYPE_TEXT) {
             NextNode *nextNode = getNextNode(toReplaceNodeID, dom);
             if (nextNode != NULL) {
-                MergeResult mergeResult =
-                    tryMerge(&dom->nodes[nextNode->nextNodeID],
-                             &dom->nodes[lastNextNode], dom, dataContainer);
+                MergeResult mergeResult = tryMerge(
+                    &dom->nodes[nextNode->nextNodeID],
+                    &dom->nodes[lastNextNode], dom, dataContainer, false);
 
                 if (mergeResult == COMPLETED_MERGE) {
                     removeNode(lastNextNode, dom);
@@ -195,5 +196,6 @@ DomStatus replaceWithNodesFromString(node_id toReplaceNodeID,
     }
 
     updateReferences(toReplaceNodeID, firstNewAddedNode, dom);
+
     return domStatus;
 }
