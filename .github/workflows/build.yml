@@ -14,9 +14,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: build
-      run: ./build-run.sh
+      run: ./build.sh
     - name: test
-      run: ./build-run.sh -t
+      run: ./run-executable.sh build html-parser-tests-Release
     - name: benchmark
-      run: ./build-run.sh -b
+      run: ./run-executable.sh build html-parser-benchmark-Release
 
