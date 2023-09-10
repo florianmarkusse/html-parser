@@ -14,5 +14,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: build
-      run: ./build-run.sh -t -b
+      run: ./build-run.sh
+    - name: test
+      run: ./build-run.sh -t
+    - name: benchmark
+      run: ./build-run.sh -b
 
