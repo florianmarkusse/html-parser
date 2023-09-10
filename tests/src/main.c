@@ -9,6 +9,7 @@
 #include "dom/prepending/prepending.h"
 #include "dom/querying/querying.h"
 #include "dom/replacing/replacing.h"
+#include "integration-test.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
 #include "node/querying/querying.h"
@@ -49,6 +50,9 @@ int main() {
     printf("\n");
 
     testDomReplacements(&successes, &failures);
+    printf("\n");
+
+    testIntegrations(&successes, &failures);
     printf("\n");
 
     printTestScore(successes, failures);

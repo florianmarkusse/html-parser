@@ -5,6 +5,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/main.c"
     "src/test.c"
     "src/comparison-test.c"
+    "src/integration-test.c"
     "src/dom/parsing/parsing.c"
     "src/dom/comparing/comparing.c"
     "src/dom/appending/appending.c"

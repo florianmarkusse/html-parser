@@ -18,6 +18,8 @@
 #define TEST_FILE_1_AFTER CURRENT_DIR "test-1-after.html"
 #define TEST_FILE_2_BEFORE CURRENT_DIR "test-2-before.html"
 #define TEST_FILE_2_AFTER CURRENT_DIR "test-2-after.html"
+#define TEST_FILE_3_BEFORE CURRENT_DIR "test-3-before.html"
+#define TEST_FILE_3_AFTER CURRENT_DIR "test-3-after.html"
 
 typedef struct {
     const char *fileLocation1;
@@ -33,6 +35,8 @@ static const TestFile testFiles[] = {
      "change property value"},
     {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "#text-content-test", "id",
      "id-changed", "change id value"},
+    {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "#text-content-test",
+     "I am the new text content, bow for me!", NULL, "setting text content"},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
@@ -54,12 +58,22 @@ static TestStatus testModification(const char *fileLocation1,
         return result;
     }
 
-    ElementStatus elementStatus = setPropertyValue(
-        foundNode, propKey, newPropValue, &comparisonTest.startDom,
-        &comparisonTest.startDataContainer);
-    if (elementStatus != ELEMENT_SUCCESS) {
-        return failWithMessage("Failed to set property value!\n",
-                               &comparisonTest);
+    if (newPropValue == NULL) {
+        DomStatus domStatus =
+            setTextContent(foundNode, propKey, &comparisonTest.startDom,
+                           &comparisonTest.startDataContainer);
+        if (domStatus != DOM_SUCCESS) {
+            return failWithMessage("Failed to set text content!\n",
+                                   &comparisonTest);
+        }
+    } else {
+        ElementStatus elementStatus = setPropertyValue(
+            foundNode, propKey, newPropValue, &comparisonTest.startDom,
+            &comparisonTest.startDataContainer);
+        if (elementStatus != ELEMENT_SUCCESS) {
+            return failWithMessage("Failed to set property value!\n",
+                                   &comparisonTest);
+        }
     }
     return compareAndEndTest(&comparisonTest);
 }

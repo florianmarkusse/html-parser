@@ -136,10 +136,6 @@ DomStatus prependNodesFromString(const node_id parentID, const char *htmlString,
         return domStatus;
     }
 
-    printDomStatus(dom, dataContainer);
-
-    printHTML(dom, dataContainer);
-
     node_id firstChild = getFirstChild(parentID, dom);
     if (firstChild > 0) {
         node_id lastNextNode = getLastNext(firstNewAddedNode, dom);
@@ -175,9 +171,5 @@ DomStatus prependNodesFromString(const node_id parentID, const char *htmlString,
         }
     }
 
-    updateReferences(parentID, firstNewAddedNode, dom);
-    printHTML(dom, dataContainer);
-    printDomStatus(dom, dataContainer);
-    return DOM_SUCCESS;
-    // return updateReferences(parentID, firstNewAddedNode, dom);
+    return updateReferences(parentID, firstNewAddedNode, dom);
 }

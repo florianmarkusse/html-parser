@@ -35,6 +35,9 @@ ElementStatus setPropertyValue(node_id nodeID, const char *key,
                                const char *newValue, Dom *dom,
                                DataContainer *dataContainer);
 
+DomStatus setTextContent(node_id nodeID, const char *text, Dom *dom,
+                         DataContainer *dataContainer);
+
 ElementStatus addTextToTextNode(Node *node, const char *textStart,
                                 size_t textLen, Dom *dom,
                                 DataContainer *dataContainer, bool isAppend);

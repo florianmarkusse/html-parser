@@ -19,6 +19,7 @@ void removeNode(const node_id nodeID, Dom *dom) {
             nextNode->nextNodeID = 0;
             nextNode->currentNodeID = 0;
         }
+        node->nodeID = 0;
         node->nodeType = NODE_TYPE_REMOVED;
         return;
     }
@@ -57,6 +58,7 @@ void removeNode(const node_id nodeID, Dom *dom) {
         nextNode->nextNodeID = 0;
         nextNode->currentNodeID = 0;
     }
+    node->tagID = 0;
     node->nodeType = NODE_TYPE_REMOVED;
 }
 

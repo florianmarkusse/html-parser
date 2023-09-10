@@ -1,9 +1,11 @@
 #include "flo/html-parser/dom/modification/modification.h"
+#include "flo/html-parser/dom/deletion/deletion.h"
 #include "flo/html-parser/dom/dom-status.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/dom/registry.h"
+#include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/utils/print/error.h"
@@ -147,6 +149,21 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
     prop->valueID = newValueID;
 
     return ELEMENT_SUCCESS;
+}
+
+DomStatus setTextContent(const node_id nodeID, const char *text, Dom *dom,
+                         DataContainer *dataContainer) {
+    removeChildren(nodeID, dom);
+
+    node_id newNodeID = 0;
+    DomStatus domStatus =
+        parseTextElement(text, dom, dataContainer, &newNodeID);
+    if (domStatus != DOM_SUCCESS) {
+        PRINT_ERROR("Failed to parse text element!\n");
+        return domStatus;
+    }
+
+    return addParentFirstChild(nodeID, newNodeID, dom);
 }
 
 ElementStatus addTextToTextNode(Node *node, const char *textStart,
