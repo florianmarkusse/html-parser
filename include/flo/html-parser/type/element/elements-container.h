@@ -24,7 +24,7 @@ typedef uint16_t element_id;
 #define TOTAL_ELEMENTS (1U << EXPONENT)
 #define POSSIBLE_ELEMENTS (1U << SINGLES_MASK)
 
-#define TOTAL_PAGES (1U << 8U)
+#define TOTAL_PAGES (1U << 9U)
 
 // TODO(florian): THIS IS VERY BIG TO START WITH
 // The size of each page of each global.
@@ -38,7 +38,7 @@ typedef uint16_t element_id;
 // having fixed pagesize?
 typedef struct {
     DataPage *pages;
-    page_id pageLen;
+    size_t pageLen;
     size_t pageSize;
 } __attribute__((aligned(32))) ElementsContainer;
 

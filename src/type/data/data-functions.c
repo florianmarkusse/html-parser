@@ -25,8 +25,8 @@ DataPageStatus insertInSuitablePage(const void *data, const size_t byteLen,
                                     ElementsContainer *container,
                                     char **dataLocation) {
     DataPageStatus status = DATA_PAGE_SUCCESS;
-    page_id index = container->pageLen;
-    for (page_id i = 0; i < container->pageLen; ++i) {
+    size_t index = container->pageLen;
+    for (size_t i = 0; i < container->pageLen; ++i) {
         if (container->pages[i].spaceLeft >= byteLen) {
             index = i;
             break;
