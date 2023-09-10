@@ -1,25 +1,21 @@
 #!/bin/bash
 set -e
 
-# Text formatting variables
 YELLOW='\033[33m'
 RED='\033[31m'
 BOLD='\033[1m'
 NO_COLOR='\033[0m'
 
-# Build modes
 BUILD_MODES=("Debug" "Release" "Profiling")
 
-# Default values
 BUILD_MODE="Release"
 BUILD_SHARED_LIBS=false
 RUN_TESTS=false
 RUN_BENCHMARKS=false
-EXECUTABLE=""
 
 # Function to display usage
 function display_usage() {
-	echo -e "${RED}${BOLD}Usage: $0 <${YELLOW}EXECUTABLE${RED}> [${YELLOW}OPTIONS${RED}]${NO_COLOR}"
+	echo -e "${RED}${BOLD}Usage: $0 [${YELLOW}OPTIONS${RED}]${NO_COLOR}"
 	echo -e "${BOLD}Options:${NO_COLOR}"
 	echo -e "  -m, --build-mode <TYPE>    Set the build mode (${YELLOW}${BUILD_MODES[*]}${NO_COLOR}). Default is ${YELLOW}Release${NO_COLOR}."
 	echo -e "  -t, --run-tests            Run tests after building."
@@ -42,7 +38,6 @@ function is_valid_build_mode() {
 # Function to display configuration
 function display_configuration() {
 	echo -e "${BOLD}${YELLOW}Configuration...${NO_COLOR}"
-	echo -e "${BOLD}${YELLOW}EXECUTABLE${NO_COLOR}: ${YELLOW}${EXECUTABLE}${NO_COLOR}"
 	echo -e "${BOLD}${YELLOW}BUILD_MODE${NO_COLOR}: ${YELLOW}${BUILD_MODE}${NO_COLOR}"
 	echo -e "${BOLD}${YELLOW}SHARED LIBS:${NO_COLOR}: ${YELLOW}${BUILD_SHARED_LIBS}${NO_COLOR}"
 	if [ "$RUN_TESTS" = true ]; then
@@ -84,18 +79,8 @@ while [[ "$#" -gt 0 ]]; do
 		BUILD_SHARED_LIBS="ON"
 		shift
 		;;
-	*)
-		EXECUTABLE="$1"
-		shift
-		;;
 	esac
 done
-
-# Check if EXECUTABLE is provided
-if [[ -z "$EXECUTABLE" ]]; then
-	echo -e "${RED}${BOLD}Error: ${YELLOW}EXECUTABLE${RED} not specified.${NO_COLOR}"
-	display_usage
-fi
 
 # Display the configuration
 display_configuration
@@ -104,6 +89,7 @@ display_configuration
 cmake -S . -B build/ -D CMAKE_BUILD_TYPE="$BUILD_MODE" -D BUILD_SHARED_LIBS="$BUILD_SHARED_LIBS" -D BUILD_TESTS="$RUN_TESTS" -D BUILD_BENCHMARKS="$RUN_BENCHMARKS"
 cmake --build build/
 
+EXECUTABLE="html-parser"
 if [ "$RUN_TESTS" = true ]; then
 	./run-executable.sh build "$EXECUTABLE"-tests-"$BUILD_MODE"
 fi
