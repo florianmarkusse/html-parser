@@ -14,8 +14,8 @@
 #include "flo/html-parser/type/node/parent-child.h"
 #include "flo/html-parser/utils/print/error.h"
 
-static void updateReferences(const node_id toReplaceNodeID,
-                             const node_id newNodeID, Dom *dom) {
+static DomStatus updateReferences(const node_id toReplaceNodeID,
+                                  const node_id newNodeID, Dom *dom) {
     Node *nodeToReplace = &dom->nodes[toReplaceNodeID];
     const node_id lastNextOfNew = getLastNext(newNodeID, dom);
 
@@ -27,7 +27,7 @@ static void updateReferences(const node_id toReplaceNodeID,
 
         dom->firstNodeID = newNodeID;
         nodeToReplace->nodeType = NODE_TYPE_REMOVED;
-        return;
+        return DOM_SUCCESS;
     }
 
     ParentChild *parentChildNode = getParentNode(toReplaceNodeID, dom);
@@ -54,7 +54,12 @@ static void updateReferences(const node_id toReplaceNodeID,
         parentChildNode->childID = newNodeID;
         node_id otherNewNodeID = getNext(newNodeID, dom);
         while (otherNewNodeID > 0) {
-            addParentChild(parentFirstChildNode->parentID, otherNewNodeID, dom);
+            DomStatus domStatus = addParentChild(parentFirstChildNode->parentID,
+                                                 otherNewNodeID, dom);
+            if (domStatus != DOM_SUCCESS) {
+                PRINT_ERROR("Failed to add new node ID as child!\n");
+                return domStatus;
+            }
             otherNewNodeID = getNext(otherNewNodeID, dom);
         }
     }
@@ -64,6 +69,8 @@ static void updateReferences(const node_id toReplaceNodeID,
     }
 
     nodeToReplace->nodeType = NODE_TYPE_REMOVED;
+
+    return DOM_SUCCESS;
 }
 
 DomStatus replaceWithDocumentNode(node_id toReplaceNodeID,
@@ -76,8 +83,7 @@ DomStatus replaceWithDocumentNode(node_id toReplaceNodeID,
         PRINT_ERROR("Failed to parse document element!\n");
         return domStatus;
     }
-    updateReferences(toReplaceNodeID, newNodeID, dom);
-    return domStatus;
+    return updateReferences(toReplaceNodeID, newNodeID, dom);
 }
 
 MergeResult tryMergeBothSides(const node_id toReplaceNodeID,
@@ -129,8 +135,7 @@ DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
         return DOM_NO_ADD;
     }
 
-    updateReferences(toReplaceNodeID, newNodeID, dom);
-    return domStatus;
+    return updateReferences(toReplaceNodeID, newNodeID, dom);
 }
 
 DomStatus replaceWithNodesFromString(node_id toReplaceNodeID,
@@ -195,7 +200,5 @@ DomStatus replaceWithNodesFromString(node_id toReplaceNodeID,
         }
     }
 
-    updateReferences(toReplaceNodeID, firstNewAddedNode, dom);
-
-    return domStatus;
+    return updateReferences(toReplaceNodeID, firstNewAddedNode, dom);
 }

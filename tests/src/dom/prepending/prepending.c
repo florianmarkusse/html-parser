@@ -162,19 +162,19 @@ static const TestFile testFiles[] = {
      "body",
      "string merge with first child",
      PREPEND_FROM_STRING,
-     {{"new text here<h1></h1><p><p>I got prepended"}}},
+     {{"new text here<h1></h1><p></p>I got prepended to"}}},
     {TEST_FILE_12_BEFORE,
      TEST_FILE_12_AFTER,
-     "body",
+     NULL,
      "string merge with first root element",
      PREPEND_FROM_STRING,
-     {{"<html></html><wtf></wtf>bottom text      "}}},
+     {{"<html></html><wtf></wtf>bottom text"}}},
     {TEST_FILE_13_BEFORE,
      TEST_FILE_13_AFTER,
      NULL,
      "text node merge with first root element",
      PREPEND_TEXT_NODE,
-     {{"     even more      "}}},
+     {{"even more"}}},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 

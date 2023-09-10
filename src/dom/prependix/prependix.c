@@ -1,10 +1,13 @@
 #include <string.h>
 
+#include "flo/html-parser/dom/deletion/deletion.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/prependix/prependix.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
+#include "flo/html-parser/dom/utils.h"
+#include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/type/node/parent-child.h"
@@ -48,13 +51,20 @@ static DomStatus updateReferences(const node_id parentID,
             return domStatus;
         }
 
+        domStatus = connectOtherNodesToParent(parentID, firstNewNodeID, dom);
+        if (domStatus != DOM_SUCCESS) {
+            PRINT_ERROR("Failed to add remaning node IDs as child!\n");
+            return domStatus;
+        }
+
         return domStatus;
     }
 
     node_id previousFirstChild = firstChild->childID;
     firstChild->childID = firstNewNodeID;
 
-    domStatus = addNextNode(firstNewNodeID, previousFirstChild, dom);
+    node_id lastNextOfNew = getLastNext(firstNewNodeID, dom);
+    domStatus = addNextNode(lastNextOfNew, previousFirstChild, dom);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add new node ID in next nodes!\n");
         return domStatus;
@@ -63,6 +73,12 @@ static DomStatus updateReferences(const node_id parentID,
     domStatus = addParentChild(parentID, firstNewNodeID, dom);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add new node ID as child!\n");
+        return domStatus;
+    }
+
+    domStatus = connectOtherNodesToParent(parentID, firstNewNodeID, dom);
+    if (domStatus != DOM_SUCCESS) {
+        PRINT_ERROR("Failed to add remaning node IDs as child!\n");
         return domStatus;
     }
 
@@ -92,6 +108,22 @@ DomStatus prependTextNode(const node_id parentID, const char *text, Dom *dom,
         return domStatus;
     }
 
+    node_id child = getFirstChild(parentID, dom);
+    if (child > 0) {
+        MergeResult mergeTry =
+            tryMerge(&dom->nodes[child], &dom->nodes[newNodeID], dom,
+                     dataContainer, false);
+
+        if (mergeTry == COMPLETED_MERGE) {
+            removeNode(newNodeID, dom);
+            return domStatus;
+        }
+
+        if (mergeTry == FAILED_MERGE) {
+            return DOM_NO_ADD;
+        }
+    }
+
     return updateReferences(parentID, newNodeID, dom);
 }
 
@@ -104,5 +136,48 @@ DomStatus prependNodesFromString(const node_id parentID, const char *htmlString,
         return domStatus;
     }
 
-    return updateReferences(parentID, firstNewAddedNode, dom);
+    printDomStatus(dom, dataContainer);
+
+    printHTML(dom, dataContainer);
+
+    node_id firstChild = getFirstChild(parentID, dom);
+    if (firstChild > 0) {
+        node_id lastNextNode = getLastNext(firstNewAddedNode, dom);
+        if (lastNextNode > firstNewAddedNode) {
+            Node *lastAddedNode = &dom->nodes[lastNextNode];
+            if (lastAddedNode->nodeType == NODE_TYPE_TEXT) {
+                MergeResult mergeResult =
+                    tryMerge(&dom->nodes[firstChild], lastAddedNode, dom,
+                             dataContainer, false);
+                if (mergeResult == COMPLETED_MERGE) {
+                    removeNode(lastNextNode, dom);
+                }
+
+                if (mergeResult == FAILED_MERGE) {
+                    return DOM_NO_ADD;
+                }
+            }
+        } else {
+            Node *firstAddedNode = &dom->nodes[firstNewAddedNode];
+            if (firstAddedNode->nodeType == NODE_TYPE_TEXT) {
+                MergeResult mergeResult =
+                    tryMerge(&dom->nodes[firstChild], firstAddedNode, dom,
+                             dataContainer, false);
+                if (mergeResult == COMPLETED_MERGE) {
+                    removeNode(firstNewAddedNode, dom);
+                    return domStatus;
+                }
+
+                if (mergeResult == FAILED_MERGE) {
+                    return DOM_NO_ADD;
+                }
+            }
+        }
+    }
+
+    updateReferences(parentID, firstNewAddedNode, dom);
+    printHTML(dom, dataContainer);
+    printDomStatus(dom, dataContainer);
+    return DOM_SUCCESS;
+    // return updateReferences(parentID, firstNewAddedNode, dom);
 }

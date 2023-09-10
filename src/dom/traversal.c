@@ -12,6 +12,9 @@ ParentChild *getFirstChildNode(const node_id currentNodeID, const Dom *dom) {
 }
 
 node_id getFirstChild(const node_id currentNodeID, const Dom *dom) {
+    if (currentNodeID == 0) {
+        return dom->firstNodeID;
+    }
     ParentChild *firstChild = getFirstChildNode(currentNodeID, dom);
     if (firstChild == NULL) {
         return 0;

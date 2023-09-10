@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "flo/html-parser/dom/modification/modification.h"
+#include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/type/node/tag-registration.h"
 #include "flo/html-parser/utils/print/error.h"
@@ -53,4 +54,19 @@ MergeResult tryMerge(Node *possibleMergeNode, Node *replacingNode, Dom *dom,
         return COMPLETED_MERGE;
     }
     return NO_MERGE;
+}
+
+DomStatus connectOtherNodesToParent(const node_id parentID,
+                                    const node_id lastAddedChild, Dom *dom) {
+    node_id otherNewNodeID = getNext(lastAddedChild, dom);
+    while (otherNewNodeID > 0) {
+        DomStatus domStatus = addParentChild(parentID, otherNewNodeID, dom);
+        if (domStatus != DOM_SUCCESS) {
+            PRINT_ERROR("Failed to add new node ID as child!\n");
+            return domStatus;
+        }
+        otherNewNodeID = getNext(otherNewNodeID, dom);
+    }
+
+    return DOM_SUCCESS;
 }

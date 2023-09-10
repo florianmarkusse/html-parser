@@ -260,12 +260,10 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     DomStatus documentStatus = DOM_SUCCESS;
     size_t elementStartIndex = *currentPosition;
     char ch = htmlString[*currentPosition];
-    // Always consume at least a single character
     size_t elementLen = 0;
 
     // Continue until we encounter extra space or the end of the text
     // node.
-
     switch (*context) {
     case BASIC_CONTEXT: {
         while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
