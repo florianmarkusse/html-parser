@@ -76,7 +76,6 @@ static TestStatus parseQueryModify() {
             QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), actual,
             queryingStatusToString(actual));
         printTestDemarcation();
-        FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 

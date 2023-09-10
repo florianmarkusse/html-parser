@@ -5,12 +5,64 @@
 #include "flo/html-parser/dom/deletion/deletion.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
+#include "flo/html-parser/dom/query/query-status.h"
+#include "flo/html-parser/dom/query/query.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/node/parent-child.h"
+#include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/print/error.h"
+
+#define APPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, dataContainer,     \
+                                   appendFunction)                             \
+    do {                                                                       \
+        node_id parentNodeID = 0;                                              \
+        QueryStatus queryResult =                                              \
+            querySelector(cssQuery, dom, dataContainer, &parentNodeID);        \
+        if (queryResult != QUERY_SUCCESS) {                                    \
+            PRINT_ERROR("Could not find element using query selector: %s\n",   \
+                        cssQuery);                                             \
+            return DOM_NO_ELEMENT;                                             \
+        }                                                                      \
+        return appendFunction(parentNodeID, nodeData, dom, dataContainer);     \
+    } while (0)
+
+DomStatus appendDocumentNodeWithQuery(const char *cssQuery,
+                                      const DocumentNode *docNode, Dom *dom,
+                                      DataContainer *dataContainer) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, dataContainer,
+                               appendDocumentNode);
+}
+
+DomStatus appendTextNodeWithQuery(const char *cssQuery, const char *text,
+                                  Dom *dom, DataContainer *dataContainer) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, dataContainer,
+                               appendTextNode);
+}
+
+DomStatus appendNodeFromStringWithQuery(const char *cssQuery,
+                                        const char *htmlString, Dom *dom,
+                                        DataContainer *dataContainer) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, dataContainer,
+                               appendNodesFromString);
+}
+
+DomStatus appendNodeFromFileWithQuery(const char *cssQuery,
+                                      const char *fileLocation, Dom *dom,
+                                      DataContainer *dataContainer) {
+    char *buffer = NULL;
+    FileStatus fileStatus = readFile(fileLocation, &buffer);
+    if (fileStatus != FILE_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(fileStatusToString(fileStatus),
+                               "Failed to read file: \"%s\"", fileLocation);
+        return DOM_ERROR_MEMORY;
+    }
+
+    APPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, dataContainer,
+                               appendNodesFromString);
+}
 
 static DomStatus updateReferences(const node_id parentID,
                                   const node_id newNodeID, Dom *dom) {
