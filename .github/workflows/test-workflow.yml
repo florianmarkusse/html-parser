@@ -1,0 +1,26 @@
+name: Test Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+    - uses: actions/checkout@v4
+
+    - name: Build
+      run: ./build.sh -t -b
+
+    - name: Test
+      run: build/tests/html-parser-tests-Release
+
+    - name: Benchmark
+      run: build/benchmarks/html-parser-benchmarks-Release
+
