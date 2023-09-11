@@ -1,8 +1,5 @@
 
-#include <flo/html-parser/dom/comparison/comparison.h>
-#include <flo/html-parser/dom/query/query.h>
-#include <flo/html-parser/dom/user.h>
-#include <flo/html-parser/utils/print/error.h>
+#include <flo/html-parser.h>
 
 #include "comparison-test.h"
 #include "flo/html-parser/dom/query/query-status.h"
@@ -18,8 +15,8 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
             "Failed to initialize start data container!\n",
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
-    if (createFromFile(startFileLocation, &comparisonTest->startDom,
-                       &comparisonTest->startDataContainer) != DOM_SUCCESS) {
+    if (createDomFromFile(startFileLocation, &comparisonTest->startDom,
+                          &comparisonTest->startDataContainer) != DOM_SUCCESS) {
         return failWithMessageAndCode("Failed to create start DOM from file!\n",
                                       TEST_ERROR_INITIALIZATION,
                                       comparisonTest);
@@ -31,8 +28,9 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
             "Failed to initialize expected data container!\n",
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
-    if (createFromFile(expectedFileLocation, &comparisonTest->expectedDom,
-                       &comparisonTest->expectedDataContainer) != DOM_SUCCESS) {
+    if (createDomFromFile(expectedFileLocation, &comparisonTest->expectedDom,
+                          &comparisonTest->expectedDataContainer) !=
+        DOM_SUCCESS) {
         return failWithMessageAndCode(
             "Failed to create expected DOM from file!\n",
             TEST_ERROR_INITIALIZATION, comparisonTest);
@@ -90,13 +88,12 @@ TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
                                      const ComparisonStatus expectedStatus) {
     TestStatus result = TEST_FAILURE;
 
-    node_id nodeID1 = comparisonTest->startDom.firstNodeID;
-    node_id nodeID2 = comparisonTest->expectedDom.firstNodeID;
-
-    ComparisonStatus comp = equals(&nodeID1, &comparisonTest->startDom,
-                                   &comparisonTest->startDataContainer,
-                                   &nodeID2, &comparisonTest->expectedDom,
-                                   &comparisonTest->expectedDataContainer);
+    node_id nodeID1 = 0;
+    node_id nodeID2 = 0;
+    ComparisonStatus comp = equalsWithNode(
+        &nodeID1, &comparisonTest->startDom,
+        &comparisonTest->startDataContainer, &nodeID2,
+        &comparisonTest->expectedDom, &comparisonTest->expectedDataContainer);
 
     if (comp == expectedStatus) {
         printTestSuccess();

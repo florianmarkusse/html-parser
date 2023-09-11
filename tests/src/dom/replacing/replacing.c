@@ -1,12 +1,4 @@
-
-#include <flo/html-parser/dom/comparison/comparison.h>
-#include <flo/html-parser/dom/deletion/deletion.h>
-#include <flo/html-parser/dom/modification/modification.h>
-#include <flo/html-parser/dom/query/query.h>
-#include <flo/html-parser/dom/replacement/replacement.h>
-#include <flo/html-parser/dom/user.h>
-#include <flo/html-parser/dom/writing.h>
-#include <flo/html-parser/utils/print/error.h>
+#include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -208,7 +200,7 @@ static TestStatus testReplacements(const char *fileLocation1,
         break;
     }
     case REPLACEMENT_FROM_STRING: {
-        domStatus = replaceWithNodesFromString(
+        domStatus = replaceWithHTMLFromString(
             foundNode, replacementInput->text, &comparisonTest.startDom,
             &comparisonTest.startDataContainer);
         break;

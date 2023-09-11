@@ -1,10 +1,7 @@
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/parser/parser.h"
+#include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/memory/memory.h"
-#include "flo/html-parser/utils/print/error.h"
 
 void initBasicRegistry(BasicRegistry *basicRegistry,
                        const Registration *initRegistration) {
@@ -13,6 +10,29 @@ void initBasicRegistry(BasicRegistry *basicRegistry,
     basicRegistry->len =
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
     basicRegistry->cap = PROP_REGISTRATIONS_PER_PAGE;
+}
+
+DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
+                            DataContainer *dataContainer) {
+    char *buffer = NULL;
+    FileStatus fileStatus = readFile(fileLocation, &buffer);
+    if (fileStatus != FILE_SUCCESS) {
+        ERROR_WITH_CODE_FORMAT(fileStatusToString(fileStatus),
+                               "Failed to read file: \"%s\"", fileLocation);
+        return DOM_ERROR_MEMORY;
+    }
+
+    DomStatus documentStatus = createDom(buffer, dom, dataContainer);
+    if (documentStatus != DOM_SUCCESS) {
+        FREE_TO_NULL(buffer);
+        ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),
+                               "Failed to create document from file \"%s\"",
+                               fileLocation);
+        return documentStatus;
+    }
+    FREE_TO_NULL(buffer);
+
+    return DOM_SUCCESS;
 }
 
 DomStatus createDom(const char *htmlString, Dom *dom,
@@ -87,113 +107,6 @@ DomStatus createDom(const char *htmlString, Dom *dom,
         PRINT_ERROR("Failed to parse domument.\n");
     }
     return domumentStatus;
-}
-
-DomStatus createNode(node_id *nodeID, const NodeType nodeType, Dom *dom) {
-    if ((dom->nodes = resizeArray(dom->nodes, dom->nodeLen, &dom->nodeCap,
-                                  sizeof(Node), NODES_PER_PAGE)) == NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    Node *newNode = &(dom->nodes[dom->nodeLen]);
-    newNode->nodeType = nodeType;
-    newNode->nodeID = dom->nodeLen;
-    dom->nodeLen++;
-
-    if (dom->firstNodeID == 0) {
-        dom->firstNodeID = newNode->nodeID;
-    }
-
-    *nodeID = newNode->nodeID;
-    return DOM_SUCCESS;
-}
-
-void setNodeTagID(const node_id nodeID, const indexID tagID, Dom *dom) {
-    Node *createdNode = &(dom->nodes[nodeID]);
-    createdNode->tagID = tagID;
-}
-
-void setNodeText(const node_id nodeID, const char *text, Dom *dom) {
-    Node *createdNode = &(dom->nodes[nodeID]);
-    createdNode->text = text;
-}
-
-DomStatus addParentFirstChild(const node_id parentID, const node_id childID,
-                              Dom *dom) {
-    if ((dom->parentFirstChilds =
-             resizeArray(dom->parentFirstChilds, dom->parentFirstChildLen,
-                         &dom->parentFirstChildCap, sizeof(ParentChild),
-                         PARENT_FIRST_CHILDS_PER_PAGE)) == NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    ParentChild *newParentFirstChild =
-        &(dom->parentFirstChilds[dom->parentFirstChildLen]);
-    newParentFirstChild->parentID = parentID;
-    newParentFirstChild->childID = childID;
-    dom->parentFirstChildLen++;
-    return DOM_SUCCESS;
-}
-
-DomStatus addParentChild(const node_id parentID, const node_id childID,
-                         Dom *dom) {
-    if ((dom->parentChilds = resizeArray(
-             dom->parentChilds, dom->parentChildLen, &dom->parentChildCap,
-             sizeof(ParentChild), PARENT_CHILDS_PER_PAGE)) == NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    ParentChild *newParentChild = &(dom->parentChilds[dom->parentChildLen]);
-    newParentChild->parentID = parentID;
-    newParentChild->childID = childID;
-    dom->parentChildLen++;
-    return DOM_SUCCESS;
-}
-
-DomStatus addNextNode(const node_id currentNodeID, const node_id nextNodeID,
-                      Dom *dom) {
-    if ((dom->nextNodes =
-             resizeArray(dom->nextNodes, dom->nextNodeLen, &dom->nextNodeCap,
-                         sizeof(NextNode), NEXT_NODES_PER_PAGE)) == NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    NextNode *newNextNode = &(dom->nextNodes[dom->nextNodeLen]);
-    newNextNode->currentNodeID = currentNodeID;
-    newNextNode->nextNodeID = nextNodeID;
-    dom->nextNodeLen++;
-    return DOM_SUCCESS;
-}
-
-DomStatus addBooleanProperty(const node_id nodeID, const element_id propID,
-                             Dom *dom) {
-    if ((dom->boolProps = resizeArray(
-             dom->boolProps, dom->boolPropsLen, &dom->boolPropsCap,
-             sizeof(BooleanProperty), BOOLEAN_PROPERTIES_PER_PAGE)) == NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    BooleanProperty *newBooleanProperty = &(dom->boolProps[dom->boolPropsLen]);
-    newBooleanProperty->nodeID = nodeID;
-    newBooleanProperty->propID = propID;
-    dom->boolPropsLen++;
-    return DOM_SUCCESS;
-}
-
-DomStatus addProperty(const node_id nodeID, const element_id keyID,
-                      const element_id valueID, Dom *dom) {
-    if ((dom->props = resizeArray(dom->props, dom->propsLen, &dom->propsCap,
-                                  sizeof(Property), PROPERTIES_PER_PAGE)) ==
-        NULL) {
-        return DOM_ERROR_MEMORY;
-    }
-
-    Property *newProperty = &(dom->props[dom->propsLen]);
-    newProperty->nodeID = nodeID;
-    newProperty->keyID = keyID;
-    newProperty->valueID = valueID;
-    dom->propsLen++;
-    return DOM_SUCCESS;
 }
 
 void destroyDom(Dom *dom) {

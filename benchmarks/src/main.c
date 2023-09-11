@@ -1,12 +1,10 @@
 
 #include <dirent.h>
+#include <flo/html-parser.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-
-#include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/dom/user.h"
 
 #define INPUTS_DIR "benchmarks/inputs/"
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"
@@ -15,7 +13,7 @@ unsigned char parseFile(const char *fileLocation) {
     DataContainer dataContainer;
     createDataContainer(&dataContainer);
     Dom dom1;
-    if (createFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
+    if (createDomFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
         destroyDataContainer(&dataContainer);
         return 0;
     }

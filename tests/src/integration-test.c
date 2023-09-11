@@ -1,12 +1,5 @@
 
-#include <flo/html-parser/dom/deletion/deletion.h>
-#include <flo/html-parser/dom/dom.h>
-#include <flo/html-parser/dom/modification/modification.h>
-#include <flo/html-parser/dom/prependix/prependix.h>
-#include <flo/html-parser/dom/query/query-status.h>
-#include <flo/html-parser/dom/query/query.h>
-#include <flo/html-parser/dom/writing.h>
-#include <flo/html-parser/utils/memory/memory.h>
+#include <flo/html-parser.h>
 
 #include "comparison-test.h"
 #include "integration-test.h"
@@ -79,7 +72,7 @@ static TestStatus parseQueryModify() {
         return TEST_FAILURE;
     }
 
-    prependNodesFromString(currentNodeID,
+    prependHTMLFromString(currentNodeID,
                            "<title "
                            "id=\"first-title-tag\"></title><title>FIRST</"
                            "title><title>SECOND</title><title>THIRD</title>",

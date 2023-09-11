@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "flo/html-parser/dom/deletion/deletion.h"
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/prependix/prependix.h"
@@ -8,7 +9,6 @@
 #include "flo/html-parser/dom/query/query.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/node/node.h"
@@ -43,14 +43,14 @@ DomStatus prependTextNodeWithQuery(const char *cssQuery, const char *text,
                                 prependTextNode);
 }
 
-DomStatus prependNodeFromStringWithQuery(const char *cssQuery,
+DomStatus prependHTMLFromStringWithQuery(const char *cssQuery,
                                          const char *htmlString, Dom *dom,
                                          DataContainer *dataContainer) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, dataContainer,
-                                prependNodesFromString);
+                                prependHTMLFromString);
 }
 
-DomStatus prependNodeFromFileWithQuery(const char *cssQuery,
+DomStatus prependHTMLFromFileWithQuery(const char *cssQuery,
                                        const char *fileLocation, Dom *dom,
                                        DataContainer *dataContainer) {
     char *buffer = NULL;
@@ -62,7 +62,7 @@ DomStatus prependNodeFromFileWithQuery(const char *cssQuery,
     }
 
     PREPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, dataContainer,
-                                prependNodesFromString);
+                                prependHTMLFromString);
 }
 
 static DomStatus updateReferences(const node_id parentID,
@@ -179,7 +179,7 @@ DomStatus prependTextNode(const node_id parentID, const char *text, Dom *dom,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus prependNodesFromString(const node_id parentID, const char *htmlString,
+DomStatus prependHTMLFromString(const node_id parentID, const char *htmlString,
                                  Dom *dom, DataContainer *dataContainer) {
     node_id firstNewAddedNode = dom->nodeLen;
     DomStatus domStatus = parse(htmlString, dom, dataContainer);

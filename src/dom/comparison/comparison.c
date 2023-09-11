@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/print/error.h"
 
@@ -362,11 +362,10 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-// TODO(florian): make version without need to pass currNodeID1 and currNodeID2
-ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,
-                        const DataContainer *dataContainer1,
-                        node_id *currNodeID2, const Dom *dom2,
-                        const DataContainer *dataContainer2) {
+ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
+                                const DataContainer *dataContainer1,
+                                node_id *currNodeID2, const Dom *dom2,
+                                const DataContainer *dataContainer2) {
     *currNodeID1 = dom1->firstNodeID;
     *currNodeID2 = dom2->firstNodeID;
     while (*currNodeID1 && *currNodeID2) {
@@ -385,6 +384,14 @@ ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,
     }
 
     return COMPARISON_SUCCESS;
+}
+
+ComparisonStatus equals(const Dom *dom1, const DataContainer *dataContainer1,
+                        const Dom *dom2, const DataContainer *dataContainer2) {
+    node_id nodeID1 = 0;
+    node_id nodeID2 = 0;
+    return equalsWithNode(&nodeID1, dom1, dataContainer1, &nodeID2, dom2,
+                          dataContainer2);
 }
 
 void printFirstDifference(const node_id nodeID1, const Dom *dom1,

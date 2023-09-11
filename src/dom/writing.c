@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/path.h"
 

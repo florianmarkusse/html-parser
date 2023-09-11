@@ -28,7 +28,7 @@ int main() {
 
     // Parse the document
     Document doc1;
-    if (createFromFile("my-file.html", &doc1, &dataContainer) !=
+    if (createDomFromFile("my-file.html", &doc1, &dataContainer) !=
         DOCUMENT_SUCCESS) {
         destroyDataContainer(&dataContainer);
         return 0;
@@ -55,7 +55,7 @@ int main() {
 
 ### Explanation
 - **Create the dataContainer**: This structure holds the content of one or more parsed documents, necessary for parsing operations.
-- **Parse the document**: The example demonstrates how to parse an HTML document using `createFromFile()`. It's essential to check the success of parsing operations.
+- **Parse the document**: The example demonstrates how to parse an HTML document using `createDomFromFile()`. It's essential to check the success of parsing operations.
 - **Query the document**: The code shows how to use `querySelectorAll()` to select specific nodes in the document based on a CSS selector.
 - **Modify the document**: If the query is successful, you can modify the selected nodes as needed.
 - **Free allocated memory**: Properly freeing allocated memory is crucial to prevent memory leaks in your program. 

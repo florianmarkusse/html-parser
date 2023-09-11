@@ -3,13 +3,13 @@
 
 #include "flo/html-parser/dom/appendix/appendix.h"
 #include "flo/html-parser/dom/deletion/deletion.h"
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/query/query-status.h"
 #include "flo/html-parser/dom/query/query.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/node/parent-child.h"
 #include "flo/html-parser/utils/file/read.h"
@@ -42,14 +42,14 @@ DomStatus appendTextNodeWithQuery(const char *cssQuery, const char *text,
                                appendTextNode);
 }
 
-DomStatus appendNodeFromStringWithQuery(const char *cssQuery,
+DomStatus appendHTMLFromStringWithQuery(const char *cssQuery,
                                         const char *htmlString, Dom *dom,
                                         DataContainer *dataContainer) {
     APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, dataContainer,
-                               appendNodesFromString);
+                               appendHTMLFromString);
 }
 
-DomStatus appendNodeFromFileWithQuery(const char *cssQuery,
+DomStatus appendHTMLFromFileWithQuery(const char *cssQuery,
                                       const char *fileLocation, Dom *dom,
                                       DataContainer *dataContainer) {
     char *buffer = NULL;
@@ -61,7 +61,7 @@ DomStatus appendNodeFromFileWithQuery(const char *cssQuery,
     }
 
     APPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, dataContainer,
-                               appendNodesFromString);
+                               appendHTMLFromString);
 }
 
 static DomStatus updateReferences(const node_id parentID,
@@ -167,7 +167,7 @@ DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus appendNodesFromString(const node_id parentID, const char *htmlString,
+DomStatus appendHTMLFromString(const node_id parentID, const char *htmlString,
                                 Dom *dom, DataContainer *dataContainer) {
     node_id firstNewAddedNode = dom->nodeLen;
     DomStatus domStatus = parse(htmlString, dom, dataContainer);

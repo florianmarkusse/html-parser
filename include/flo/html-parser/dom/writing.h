@@ -3,8 +3,47 @@
 
 #include "dom.h"
 
+/**
+ * @brief Print the status of a DOM structure.
+ *
+ * This function prints the status of the provided `dom` structure, including
+ * information about node counts, registrations, and other relevant details. It
+ * can be useful for debugging and understanding the structure of the parsed
+ * DOM.
+ *
+ * @param[in]   dom             The DOM structure to print status for.
+ * @param[in]   dataContainer   The data container associated with the DOM.
+ */
 void printDomStatus(const Dom *dom, const DataContainer *dataContainer);
+
+/**
+ * @brief Print the minified HTML representation of a DOM structure.
+ *
+ * This function prints the minified HTML representation of the provided `dom`
+ * structure, including all the elements, tags, and text content. It is useful
+ * for inspecting the parsed HTML document.
+ *
+ * @param[in]   dom             The DOM structure to print as minified HTML.
+ * @param[in]   dataContainer   The data container associated with the DOM.
+ */
 void printHTML(const Dom *dom, const DataContainer *dataContainer);
+
+/**
+ * @brief Write the minified HTML representation of a DOM structure to a file.
+ *
+ * This function writes the minified HTML representation of the provided `dom`
+ * structure to the specified `filePath`. It can be used to save the parsed HTML
+ * document to a file.
+ *
+ * @param[in]   dom             The DOM structure to write as minified HTML.
+ * @param[in]   dataContainer   The data container associated with the DOM.
+ * @param[in]   filePath        The file path where the HTML content will be
+ *                              saved.
+ *
+ * @return  The status of the file writing operation (FILE_SUCCESS if
+ *          completed, an error code otherwise). See @ref
+ *          "flo/html-parser/utils/file/file-status.h#FileStatus".
+ */
 FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
                            const char *filePath);
 

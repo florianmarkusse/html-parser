@@ -1,9 +1,4 @@
-#include <flo/html-parser/dom/dom.h>
-#include <flo/html-parser/dom/query/query.h>
-#include <flo/html-parser/dom/user.h>
-#include <flo/html-parser/dom/writing.h>
-#include <flo/html-parser/type/element/elements.h>
-#include <flo/html-parser/utils/print/error.h>
+#include <flo/html-parser.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,7 +32,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
     Dom dom;
-    if (createFromFile(fileLocation, &dom, &dataContainer) != DOM_SUCCESS) {
+    if (createDomFromFile(fileLocation, &dom, &dataContainer) != DOM_SUCCESS) {
         destroyDataContainer(&dataContainer);
         return TEST_ERROR_INITIALIZATION;
     }

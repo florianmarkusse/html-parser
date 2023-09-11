@@ -1,8 +1,5 @@
 #include <dirent.h>
-#include <flo/html-parser/dom/dom.h>
-#include <flo/html-parser/dom/user.h>
-#include <flo/html-parser/dom/writing.h>
-#include <flo/html-parser/utils/print/error.h>
+#include <flo/html-parser.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -23,7 +20,7 @@ unsigned char parseFile(const char *fileLocation) {
     }
 
     Dom dom1;
-    if (createFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
+    if (createDomFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
         destroyDataContainer(&dataContainer);
         return 0;
     }

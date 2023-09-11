@@ -11,6 +11,32 @@
 #include "query-status.h"
 #include "query.h"
 
+#define INITIAL_QUERY_CAP (1U << 6U)
+#define MAX_FILTERS_PER_ELEMENT (1U << 3U)
+
+typedef enum { TAG, ALL_NODES, BOOLEAN_PROPERTY, PROPERTY } AttributeSelector;
+
+typedef enum {
+    NO_COMBINATOR,   // The first part of a query is done without a combinator
+    ADJACENT,        // '+'
+    CHILD,           // '>'
+    GENERAL_SIBLING, // '~'
+    DESCENDANT,      // ' ', Default combinator
+    NUM_COMBINATORS,
+} Combinator;
+
+typedef struct {
+    AttributeSelector attributeSelector;
+    union {
+        element_id tagID;
+        element_id propID;
+        struct {
+            element_id keyID;
+            element_id valueID;
+        } __attribute__((aligned(4))) keyValuePair;
+    } data;
+} __attribute__((aligned(8))) FilterType;
+
 bool filterNode(node_id nodeID, const FilterType *filters, size_t filterslen,
                 const Dom *dom);
 indexID getTagID(const char *tag, const DataContainer *dataContainer);

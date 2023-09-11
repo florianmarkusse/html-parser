@@ -1,6 +1,4 @@
-#include <flo/html-parser/dom/comparison/comparison.h>
-#include <flo/html-parser/dom/user.h>
-#include <flo/html-parser/utils/print/error.h>
+#include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stdio.h>
 

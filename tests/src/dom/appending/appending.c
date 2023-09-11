@@ -1,12 +1,5 @@
 
-#include <flo/html-parser/dom/appendix/appendix.h>
-#include <flo/html-parser/dom/comparison/comparison.h>
-#include <flo/html-parser/dom/deletion/deletion.h>
-#include <flo/html-parser/dom/modification/modification.h>
-#include <flo/html-parser/dom/query/query.h>
-#include <flo/html-parser/dom/user.h>
-#include <flo/html-parser/dom/writing.h>
-#include <flo/html-parser/utils/print/error.h>
+#include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -215,7 +208,7 @@ static TestStatus testAppendix(const char *fileLocation1,
         break;
     }
     case APPEND_FROM_STRING: {
-        domStatus = appendNodesFromString(foundNode, appendInput->text,
+        domStatus = appendHTMLFromString(foundNode, appendInput->text,
                                           &comparisonTest.startDom,
                                           &comparisonTest.startDataContainer);
         break;

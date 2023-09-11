@@ -1,11 +1,4 @@
-#include <flo/html-parser/dom/comparison/comparison.h>
-#include <flo/html-parser/dom/deletion/deletion.h>
-#include <flo/html-parser/dom/modification/modification.h>
-#include <flo/html-parser/dom/prependix/prependix.h>
-#include <flo/html-parser/dom/query/query.h>
-#include <flo/html-parser/dom/user.h>
-#include <flo/html-parser/dom/writing.h>
-#include <flo/html-parser/utils/print/error.h>
+#include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -214,7 +207,7 @@ static TestStatus testPrependix(const char *fileLocation1,
         break;
     }
     case PREPEND_FROM_STRING: {
-        domStatus = prependNodesFromString(foundNode, prependInput->text,
+        domStatus = prependHTMLFromString(foundNode, prependInput->text,
                                            &comparisonTest.startDom,
                                            &comparisonTest.startDataContainer);
         break;

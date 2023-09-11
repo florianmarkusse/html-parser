@@ -82,24 +82,51 @@ typedef struct {
     size_t propsCap;
 } __attribute__((aligned(128))) Dom;
 
+/**
+ * @brief Create a DOM structure from an HTML string.
+ *
+ * This function parses the provided `htmlString` and builds the `dom`
+ * structure with the parsed DOM representation and populates the
+ * `dataContainer` with all the text values.
+ *
+ * @param[in]   htmlString      The HTML string to parse.
+ * @param[out]  dom             The DOM structure to build.
+ * @param[in]   dataContainer   The data container to populate.
+ * values
+ *
+ * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
+ *          an error code otherwise). See @ref
+ *          "flo/html-parser/dom/dom-status.h#DomStatus".
+ */
 DomStatus createDom(const char *htmlString, Dom *dom,
                     DataContainer *dataContainer);
 
-DomStatus createNode(node_id *nodeID, NodeType nodeType, Dom *dom);
-void setNodeTagID(node_id nodeID, indexID tagID, Dom *dom);
-void setNodeText(node_id nodeID, const char *text, Dom *dom);
+/**
+ * @brief Create a DOM structure from an HTML file.
+ *
+ * This function reads the HTML content from the specified `fileLocation`,
+ * parses it, and and builds the `dom` structure with the parsed DOM
+ * representation and populates the `dataContainer` with all the text values.
+ *
+ * @param[in]   fileLocation    The file location of the HTML content to parse.
+ * @param[out]  dom             The DOM structure to build.
+ * @param[in]   dataContainer   The data container to populate.
+ *
+ * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
+ *          an error code otherwise). See @ref
+ *          "flo/html-parser/dom/dom-status.h#DomStatus".
+ */
+DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
+                            DataContainer *dataContainer);
 
-DomStatus addParentFirstChild(node_id parentID, node_id childID, Dom *dom);
-
-DomStatus addParentChild(node_id parentID, node_id childID, Dom *dom);
-
-DomStatus addNextNode(node_id currentNodeID, node_id nextNodeID, Dom *dom);
-
-DomStatus addBooleanProperty(node_id nodeID, element_id propID, Dom *dom);
-
-DomStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
-                      Dom *dom);
-
+/**
+ * @brief Destroy a DOM structure and release associated memory.
+ *
+ * This function releases the memory associated with the provided `dom`
+ * structure.
+ *
+ * @param[in]   dom     The DOM structure to destroy.
+ */
 void destroyDom(Dom *dom);
 
 #endif

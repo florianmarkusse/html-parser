@@ -1,6 +1,7 @@
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/deletion/deletion.h"
 #include "flo/html-parser/dom/dom-status.h"
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
@@ -11,6 +12,13 @@
 #include "flo/html-parser/utils/print/error.h"
 #include <stdbool.h>
 #include <string.h>
+
+typedef enum {
+    PROPERTY_TYPE_BOOL,
+    PROPERTY_TYPE_KEY,
+    PROPERTY_TYPE_VALUE,
+    NUM_PROPERTY_TYPES
+} PropertyType;
 
 ElementStatus getCreatedPropIDFromString(const PropertyType propertyType,
                                          const char *buffer,
@@ -199,14 +207,14 @@ ElementStatus addTextToTextNode(Node *node, const char *textStart,
     return elementStatus;
 }
 
-DomStatus setTagOnDocumentNode(const char *tagStart, const size_t elementStart,
+DomStatus setTagOnDocumentNode(const char *tagStart, const size_t tagLen,
                                const node_id nodeID, const bool isPaired,
                                Dom *dom, DataContainer *dataContainer) {
     DomStatus domStatus = DOM_SUCCESS;
     HashElement hashElement;
     indexID newTagID = 0;
-    ElementStatus indexStatus = elementToIndex(
-        &dataContainer->tags, tagStart, elementStart, &hashElement, &newTagID);
+    ElementStatus indexStatus = elementToIndex(&dataContainer->tags, tagStart,
+                                               tagLen, &hashElement, &newTagID);
 
     switch (indexStatus) {
     case ELEMENT_CREATED: {

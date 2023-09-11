@@ -4,10 +4,63 @@
 #include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/dom/dom.h"
 
-ComparisonStatus equals(node_id *currNodeID1, const Dom *dom1,
-                        const DataContainer *dataContainer1,
-                        node_id *currNodeID2, const Dom *dom2,
-                        const DataContainer *dataContainer2);
+/**
+ * @brief Compare two DOM structures and get the first unequal nodes.
+ *
+ * This function compares two DOM structures specified by `dom1` and `dom2`. It
+ * also requires the respective `DataContainer` instances for each DOM. The
+ * comparison checks if the two DOM structures are equal. If the DOM structures
+ * are not equal, the first unequal node IDs from each DOM structure is
+ * returned.
+ *
+ * @param[out]  currNodeID1     The unequal node ID from the first DOM.
+ * @param[in]   dom1            The first DOM structure to compare.
+ * @param[in]   dataContainer1  The data container for the first DOM.
+ * @param[out]  currNodeID2     The unequal node ID from the second DOM.
+ * @param[in]   dom2            The second DOM structure to compare.
+ * @param[in]   dataContainer2  The data container for the second DOM.
+ *
+ * @return  The comparison status (COMPARISON_SUCCESS if equal, different
+ *          otherwise). See @ref
+ *          "flo/html-parser/comparison-status.h#ComparisonStatus".
+ */
+ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
+                                const DataContainer *dataContainer1,
+                                node_id *currNodeID2, const Dom *dom2,
+                                const DataContainer *dataContainer2);
+
+/**
+ * @brief Compare two DOM structures.
+ *
+ * This function compares two DOM structures specified by `dom1` and `dom2`. It
+ * also requires the respective `DataContainer` instances for each DOM. The
+ * comparison checks if the two DOM structures are equal.
+ *
+ * @param[in]   dom1                The first DOM structure to compare.
+ * @param[in]   dataContainer1      The data container for the first DOM.
+ * @param[in]   dom2                The second DOM structure to compare.
+ * @param[in]   dataContainer2      The data container for the second DOM.
+ *
+ * @return  The comparison status (COMPARISON_SUCCESS if equal, different
+ *          otherwise). See @ref
+ *          "flo/html-parser/comparison-status.h#ComparisonStatus".
+ */
+ComparisonStatus equals(const Dom *dom1, const DataContainer *dataContainer1,
+                        const Dom *dom2, const DataContainer *dataContainer2);
+
+/**
+ * @brief Print the first difference between two nodes.
+ *
+ * This function compares two nodes specified by `nodeID1` and `nodeID2`. The
+ * function prints the first difference found in the two two nodes.
+ *
+ * @param[in]   nodeID1             The node ID in the first DOM.
+ * @param[in]   dom1                The first DOM structure to compare.
+ * @param[in]   dataContainer1      The data container for the first DOM.
+ * @param[in]   nodeID2             The node ID in the second DOM.
+ * @param[in]   dom2                The second DOM structure to compare.
+ * @param[in]   dataContainer2      The data container for the second DOM.
+ */
 void printFirstDifference(node_id nodeID1, const Dom *dom1,
                           const DataContainer *dataContainer1, node_id nodeID2,
                           const Dom *dom2, const DataContainer *dataContainer2);

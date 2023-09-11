@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "flo/html-parser/dom/deletion/deletion.h"
+#include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/query/query-status.h"
@@ -9,7 +10,6 @@
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/replacement/replacement.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/dom/utils.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/node/node.h"
@@ -46,14 +46,14 @@ DomStatus replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
                                 replaceWithTextNode);
 }
 
-DomStatus replaceWithNodeFromStringWithQuery(const char *cssQuery,
+DomStatus replaceWithHTMLFromStringWithQuery(const char *cssQuery,
                                              const char *htmlString, Dom *dom,
                                              DataContainer *dataContainer) {
     REPLACE_USING_QUERYSELECTOR(cssQuery, htmlString, dom, dataContainer,
-                                replaceWithNodesFromString);
+                                replaceWithHTMLFromString);
 }
 
-DomStatus replaceWithNodeFromFileWithQuery(const char *cssQuery,
+DomStatus replaceWithHTMLFromFileWithQuery(const char *cssQuery,
                                            const char *fileLocation, Dom *dom,
                                            DataContainer *dataContainer) {
     char *buffer = NULL;
@@ -65,7 +65,7 @@ DomStatus replaceWithNodeFromFileWithQuery(const char *cssQuery,
     }
 
     REPLACE_USING_QUERYSELECTOR(cssQuery, buffer, dom, dataContainer,
-                                replaceWithNodesFromString);
+                                replaceWithHTMLFromString);
 }
 
 static DomStatus updateReferences(const node_id toReplaceNodeID,
@@ -192,7 +192,7 @@ DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
     return updateReferences(toReplaceNodeID, newNodeID, dom);
 }
 
-DomStatus replaceWithNodesFromString(node_id toReplaceNodeID,
+DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
                                      const char *htmlString, Dom *dom,
                                      DataContainer *dataContainer) {
     node_id firstNewAddedNode = dom->nodeLen;
