@@ -13,8 +13,8 @@ NodeType getNodeType(const node_id nodeID, const Dom *dom) {
 }
 
 bool hasBoolProp(const node_id nodeID, const char *boolProp, const Dom *dom,
-                 const DataContainer *dataContainer) {
-    element_id boolPropID = getBoolPropID(boolProp, dataContainer);
+                 const TextStore *textStore) {
+    element_id boolPropID = getBoolPropID(boolProp, textStore);
     if (boolPropID == 0) {
         return false;
     }
@@ -30,8 +30,8 @@ bool hasBoolProp(const node_id nodeID, const char *boolProp, const Dom *dom,
 }
 
 bool hasPropKey(const node_id nodeID, const char *propKey, const Dom *dom,
-                const DataContainer *dataContainer) {
-    element_id propKeyID = getPropKeyID(propKey, dataContainer);
+                const TextStore *textStore) {
+    element_id propKeyID = getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return false;
     }
@@ -46,8 +46,8 @@ bool hasPropKey(const node_id nodeID, const char *propKey, const Dom *dom,
 }
 
 bool hasPropValue(const node_id nodeID, const char *propValue, const Dom *dom,
-                  const DataContainer *dataContainer) {
-    element_id propValueID = getPropValueID(propValue, dataContainer);
+                  const TextStore *textStore) {
+    element_id propValueID = getPropValueID(propValue, textStore);
     if (propValueID == 0) {
         return false;
     }
@@ -62,13 +62,13 @@ bool hasPropValue(const node_id nodeID, const char *propValue, const Dom *dom,
 }
 
 bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
-                 const Dom *dom, const DataContainer *dataContainer) {
-    element_id propKeyID = getPropKeyID(propKey, dataContainer);
+                 const Dom *dom, const TextStore *textStore) {
+    element_id propKeyID = getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return false;
     }
 
-    element_id propValueID = getPropValueID(propValue, dataContainer);
+    element_id propValueID = getPropValueID(propValue, textStore);
     if (propKeyID == 0) {
         return false;
     }
@@ -106,8 +106,8 @@ QueryStatus getTextContent(const node_id nodeID, const Dom *dom,
 }
 
 const char *getValue(const node_id nodeID, const char *propKey, const Dom *dom,
-                     const DataContainer *dataContainer) {
-    element_id propKeyID = getPropKeyID(propKey, dataContainer);
+                     const TextStore *textStore) {
+    element_id propKeyID = getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return NULL;
     }
@@ -115,7 +115,7 @@ const char *getValue(const node_id nodeID, const char *propKey, const Dom *dom,
     for (size_t i = 0; i < dom->propsLen; i++) {
         Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
-            return getPropValue(property->valueID, dom, dataContainer);
+            return getPropValue(property->valueID, dom, textStore);
         }
     }
     return NULL;

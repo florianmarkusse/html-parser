@@ -10,16 +10,18 @@
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"
 
 unsigned char parseFile(const char *fileLocation) {
-    DataContainer dataContainer;
-    createDataContainer(&dataContainer);
+    TextStore textStore;
+    if (createTextStore(&textStore) != ELEMENT_SUCCESS) {
+        return 0;
+    }
     Dom dom1;
-    if (createDomFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer);
+    if (createDomFromFile(fileLocation, &dom1, &textStore) != DOM_SUCCESS) {
+        destroyTextStore(&textStore);
         return 0;
     }
 
     destroyDom(&dom1);
-    destroyDataContainer(&dataContainer);
+    destroyTextStore(&textStore);
     return 1;
 }
 

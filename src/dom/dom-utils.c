@@ -117,9 +117,9 @@ DomStatus addProperty(const node_id nodeID, const element_id keyID,
 }
 
 const char *getTag(const indexID tagID, const Dom *dom,
-                   const DataContainer *dataContainer) {
+                   const TextStore *textStore) {
     TagRegistration *tagRegistration = &dom->tagRegistry[tagID];
-    return getStringFromHashSet(&dataContainer->tags.set,
+    return getStringFromHashSet(&textStore->tags.set,
                                 &tagRegistration->hashElement);
 }
 
@@ -129,32 +129,32 @@ void getTagRegistration(indexID tagID, const Dom *dom,
 }
 
 const char *getBoolProp(const indexID boolPropID, const Dom *dom,
-                        const DataContainer *dataContainer) {
+                        const TextStore *textStore) {
     Registration registration = dom->boolPropRegistry.registry[boolPropID];
-    return getStringFromHashSet(&dataContainer->boolProps.set,
+    return getStringFromHashSet(&textStore->boolProps.set,
                                 &registration.hashElement);
 }
 
 const char *getPropKey(const indexID propKeyID, const Dom *dom,
-                       const DataContainer *dataContainer) {
+                       const TextStore *textStore) {
     Registration registration = dom->propKeyRegistry.registry[propKeyID];
-    return getStringFromHashSet(&dataContainer->propKeys.set,
+    return getStringFromHashSet(&textStore->propKeys.set,
                                 &registration.hashElement);
 }
 
 const char *getPropValue(const indexID propValueID, const Dom *dom,
-                         const DataContainer *dataContainer) {
+                         const TextStore *textStore) {
     Registration registration = dom->propValueRegistry.registry[propValueID];
-    return getStringFromHashSet(&dataContainer->propValues.set,
+    return getStringFromHashSet(&textStore->propValues.set,
                                 &registration.hashElement);
 }
 
 MergeResult tryMerge(Node *possibleMergeNode, Node *replacingNode, Dom *dom,
-                     DataContainer *dataContainer, bool isAppend) {
+                     TextStore *textStore, bool isAppend) {
     if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
         ElementStatus elementStatus = addTextToTextNode(
             possibleMergeNode, replacingNode->text, strlen(replacingNode->text),
-            dom, dataContainer, isAppend);
+            dom, textStore, isAppend);
         if (elementStatus != ELEMENT_CREATED) {
             PRINT_ERROR("Failed to merge new text node with up node!\n");
             return FAILED_MERGE;

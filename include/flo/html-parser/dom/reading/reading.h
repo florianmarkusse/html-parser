@@ -28,12 +28,12 @@ NodeType getNodeType(node_id nodeID, const Dom *dom);
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   boolProp        The name of the boolean property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  True if the property exists and is true, otherwise false.
  */
 bool hasBoolProp(node_id nodeID, const char *boolProp, const Dom *dom,
-                 const DataContainer *dataContainer);
+                 const TextStore *textStore);
 
 /**
  * @brief Check if a DOM node has a property with a given key.
@@ -44,12 +44,12 @@ bool hasBoolProp(node_id nodeID, const char *boolProp, const Dom *dom,
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   propKey         The key of the property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  True if a property with the key exists, otherwise false.
  */
 bool hasPropKey(node_id nodeID, const char *propKey, const Dom *dom,
-                const DataContainer *dataContainer);
+                const TextStore *textStore);
 
 /**
  * @brief Check if a DOM node has a property with a given value.
@@ -60,12 +60,12 @@ bool hasPropKey(node_id nodeID, const char *propKey, const Dom *dom,
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   propValue       The value of the property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  True if a property with the value exists, otherwise false.
  */
 bool hasPropValue(node_id nodeID, const char *propValue, const Dom *dom,
-                  const DataContainer *dataContainer);
+                  const TextStore *textStore);
 
 /**
  * @brief Check if a DOM node has a property with a specific key and value.
@@ -77,13 +77,13 @@ bool hasPropValue(node_id nodeID, const char *propValue, const Dom *dom,
  * @param[in]   propKey         The key of the property to check.
  * @param[in]   propValue       The value of the property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  True if a property with the specified key and value exists,
  *          otherwise false.
  */
 bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
-                 const Dom *dom, const DataContainer *dataContainer);
+                 const Dom *dom, const TextStore *textStore);
 
 /**
  * @brief Get the value of a property associated with a DOM node.
@@ -94,12 +94,12 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   propKey         The key of the property to retrieve.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The value of the property if it exists, or NULL if not found.
  */
 const char *getValue(node_id nodeID, const char *propKey, const Dom *dom,
-                     const DataContainer *dataContainer);
+                     const TextStore *textStore);
 
 /**
  * @brief Get the text content of a DOM node.

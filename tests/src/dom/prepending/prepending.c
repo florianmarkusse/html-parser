@@ -197,19 +197,19 @@ static TestStatus testPrependix(const char *fileLocation1,
     case PREPEND_DOCUMENT_NODE: {
         domStatus = prependDocumentNode(foundNode, &prependInput->documentNode,
                                         &comparisonTest.startDom,
-                                        &comparisonTest.startDataContainer);
+                                        &comparisonTest.startTextStore);
         break;
     }
     case PREPEND_TEXT_NODE: {
         domStatus = prependTextNode(foundNode, prependInput->text,
                                     &comparisonTest.startDom,
-                                    &comparisonTest.startDataContainer);
+                                    &comparisonTest.startTextStore);
         break;
     }
     case PREPEND_FROM_STRING: {
         domStatus = prependHTMLFromString(foundNode, prependInput->text,
                                            &comparisonTest.startDom,
-                                           &comparisonTest.startDataContainer);
+                                           &comparisonTest.startTextStore);
         break;
     }
     default: {

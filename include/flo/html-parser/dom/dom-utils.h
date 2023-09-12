@@ -19,21 +19,21 @@ DomStatus addProperty(node_id nodeID, element_id keyID, element_id valueID,
                       Dom *dom);
 
 const char *getTag(indexID tagID, const Dom *dom,
-                   const DataContainer *dataContainer);
+                   const TextStore *textStore);
 void getTagRegistration(indexID tagID, const Dom *dom,
                         TagRegistration **tagRegistration);
 
 const char *getBoolProp(indexID boolPropID, const Dom *dom,
-                        const DataContainer *dataContainer);
+                        const TextStore *textStore);
 const char *getPropKey(indexID propKeyID, const Dom *dom,
-                       const DataContainer *dataContainer);
+                       const TextStore *textStore);
 const char *getPropValue(indexID propValueID, const Dom *dom,
-                         const DataContainer *dataContainer);
+                         const TextStore *textStore);
 
 typedef enum { COMPLETED_MERGE, NO_MERGE, FAILED_MERGE } MergeResult;
 
 MergeResult tryMerge(Node *possibleMergeNode, Node *replacingNode, Dom *dom,
-                     DataContainer *dataContainer, bool isAppend);
+                     TextStore *textStore, bool isAppend);
 
 DomStatus connectOtherNodesToParent(node_id parentID, node_id lastAddedChild,
                                     Dom *dom);

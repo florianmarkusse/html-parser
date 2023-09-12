@@ -63,36 +63,36 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
     return true;
 }
 
-indexID getTagID(const char *tag, const DataContainer *dataContainer) {
+indexID getTagID(const char *tag, const TextStore *textStore) {
     HashElement ignore;
     indexID tagID = 0;
-    containsStringWithDataHashSet(&dataContainer->tags.set, tag, &ignore,
+    containsStringWithDataHashSet(&textStore->tags.set, tag, &ignore,
                                   &tagID);
     return tagID;
 }
 
 indexID getBoolPropID(const char *boolProp,
-                      const DataContainer *dataContainer) {
+                      const TextStore *textStore) {
     HashElement ignore;
     indexID propID = 0;
-    containsStringWithDataHashSet(&dataContainer->boolProps.set, boolProp,
+    containsStringWithDataHashSet(&textStore->boolProps.set, boolProp,
                                   &ignore, &propID);
     return propID;
 }
 
-indexID getPropKeyID(const char *keyProp, const DataContainer *dataContainer) {
+indexID getPropKeyID(const char *keyProp, const TextStore *textStore) {
     HashElement ignore;
     indexID keyID = 0;
-    containsStringWithDataHashSet(&dataContainer->propKeys.set, keyProp,
+    containsStringWithDataHashSet(&textStore->propKeys.set, keyProp,
                                   &ignore, &keyID);
     return keyID;
 }
 
 indexID getPropValueID(const char *valueProp,
-                       const DataContainer *dataContainer) {
+                       const TextStore *textStore) {
     HashElement ignore;
     indexID valueID = 0;
-    containsStringWithDataHashSet(&dataContainer->propValues.set, valueProp,
+    containsStringWithDataHashSet(&textStore->propValues.set, valueProp,
                                   &ignore, &valueID);
     return valueID;
 }

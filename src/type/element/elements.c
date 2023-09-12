@@ -32,11 +32,11 @@ void destroyStringRegistry(StringRegistry *stringRegistry) {
 }
 
 // TODO(florian): USE MORE SENSIBLE VALUES THAN TOTAL_ELEMENTS
-ElementStatus createDataContainer(DataContainer *dataContainer) {
+ElementStatus createTextStore(TextStore *textStore) {
     ElementStatus result = ELEMENT_SUCCESS;
     ElementStatus currentStatus = ELEMENT_SUCCESS;
 
-    if ((currentStatus = initStringRegistry(&dataContainer->tags,
+    if ((currentStatus = initStringRegistry(&textStore->tags,
                                             TOTAL_ELEMENTS, TAGS_PAGE_SIZE)) !=
         ELEMENT_SUCCESS) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(currentStatus),
@@ -45,7 +45,7 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
     }
 
     if ((currentStatus =
-             initStringRegistry(&dataContainer->boolProps, TOTAL_ELEMENTS,
+             initStringRegistry(&textStore->boolProps, TOTAL_ELEMENTS,
                                 BOOL_PROPS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
         ERROR_WITH_CODE_ONLY(
             elementStatusToString(currentStatus),
@@ -54,7 +54,7 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
     }
 
     if ((currentStatus =
-             initStringRegistry(&dataContainer->propKeys, TOTAL_ELEMENTS,
+             initStringRegistry(&textStore->propKeys, TOTAL_ELEMENTS,
                                 PROP_KEYS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
         ERROR_WITH_CODE_ONLY(
             elementStatusToString(currentStatus),
@@ -63,7 +63,7 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
     }
 
     if ((currentStatus =
-             initStringRegistry(&dataContainer->propValues, TOTAL_ELEMENTS,
+             initStringRegistry(&textStore->propValues, TOTAL_ELEMENTS,
                                 PROP_VALUES_PAGE_SIZE)) != ELEMENT_SUCCESS) {
         ERROR_WITH_CODE_ONLY(
             elementStatusToString(currentStatus),
@@ -72,7 +72,7 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
     }
 
     if ((currentStatus =
-             initElementsContainer(&dataContainer->text, TEXT_PAGE_SIZE) !=
+             initElementsContainer(&textStore->text, TEXT_PAGE_SIZE) !=
              ELEMENT_SUCCESS)) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(currentStatus),
                              "Failed to initialize text elements container!\n");
@@ -80,18 +80,18 @@ ElementStatus createDataContainer(DataContainer *dataContainer) {
     }
 
     if (result != ELEMENT_SUCCESS) {
-        destroyDataContainer(dataContainer);
+        destroyTextStore(textStore);
     }
 
     return result;
 }
 
-void destroyDataContainer(DataContainer *dataContainer) {
-    destroyStringRegistry(&dataContainer->tags);
-    destroyStringRegistry(&dataContainer->boolProps);
-    destroyStringRegistry(&dataContainer->propKeys);
-    destroyStringRegistry(&dataContainer->propValues);
-    destroyElementsContainer(&dataContainer->text);
+void destroyTextStore(TextStore *textStore) {
+    destroyStringRegistry(&textStore->tags);
+    destroyStringRegistry(&textStore->boolProps);
+    destroyStringRegistry(&textStore->propKeys);
+    destroyStringRegistry(&textStore->propValues);
+    destroyElementsContainer(&textStore->text);
 }
 
 ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,

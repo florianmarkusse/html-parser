@@ -14,7 +14,7 @@
  *
  * @param[in]   cssQuery        The CSS selector query to match elements.
  * @param[in]   dom             The DOM structure to query.
- * @param[in]   dataContainer   The data container for the DOM.
+ * @param[in]   textStore   The text store for the DOM.
  * @param[out]  results         An array of node IDs representing matching
  *                              elements.
  * @param[out]  resultsLen      The number of matching elements found.
@@ -27,7 +27,7 @@
  *          'results' when no longer needed.
  */
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
-                             const DataContainer *dataContainer,
+                             const TextStore *textStore,
                              node_id **results, size_t *resultsLen);
 
 /**
@@ -40,7 +40,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
  *
  * @param[in]   class           The CSS class name to match elements.
  * @param[in]   dom             The DOM structure to query.
- * @param[in]   dataContainer   The data container for the DOM.
+ * @param[in]   textStore   The text store for the DOM.
  * @param[out]  results         An array of node IDs representing matching
  *                              elements.
  * @param[out]  resultsLen      The number of matching elements found.
@@ -53,7 +53,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
  *          'results' when no longer needed.
  */
 QueryStatus getElementsByClassName(const char *class, const Dom *dom,
-                                   const DataContainer *dataContainer,
+                                   const TextStore *textStore,
                                    node_id **results, size_t *resultsLen);
 
 /**
@@ -66,7 +66,7 @@ QueryStatus getElementsByClassName(const char *class, const Dom *dom,
  *
  * @param[in]   tag             The HTML tag name to match elements.
  * @param[in]   dom             The DOM structure to query.
- * @param[in]   dataContainer   The data container for the DOM.
+ * @param[in]   textStore   The text store for the DOM.
  * @param[out]  results         An array of node IDs representing matching
  *                              elements.
  * @param[out]  resultsLen      The number of matching elements found.
@@ -79,7 +79,7 @@ QueryStatus getElementsByClassName(const char *class, const Dom *dom,
  *          'results' when no longer needed.
  */
 QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
-                                 const DataContainer *dataContainer,
+                                 const TextStore *textStore,
                                  node_id **results, size_t *resultsLen);
 
 /**
@@ -91,7 +91,7 @@ QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
  *
  * @param[in]   cssQuery        The CSS selector query to match the element.
  * @param[in]   dom             The DOM structure to query.
- * @param[in]   dataContainer   The data container for the DOM.
+ * @param[in]   textStore   The text store for the DOM.
  * @param[out]  result          The node ID of the first matching element.
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
@@ -99,7 +99,7 @@ QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
  *          "flo/html-parser/dom/query/query-status.h#QueryStatus".
  */
 QueryStatus querySelector(const char *cssQuery, const Dom *dom,
-                          const DataContainer *dataContainer, node_id *result);
+                          const TextStore *textStore, node_id *result);
 
 /**
  * @brief Get an element by its ID attribute in the DOM.
@@ -110,7 +110,7 @@ QueryStatus querySelector(const char *cssQuery, const Dom *dom,
  *
  * @param[in]   id              The HTML `id` attribute value to match.
  * @param[in]   dom             The DOM structure to query.
- * @param[in]   dataContainer   The data container for the DOM.
+ * @param[in]   textStore   The text store for the DOM.
  * @param[out]  result          The node ID of the matching element.
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
@@ -118,6 +118,6 @@ QueryStatus querySelector(const char *cssQuery, const Dom *dom,
  *          "flo/html-parser/dom/query/query-status.h#QueryStatus".
  */
 QueryStatus getElementByID(const char *id, const Dom *dom,
-                           const DataContainer *dataContainer, node_id *result);
+                           const TextStore *textStore, node_id *result);
 
 #endif

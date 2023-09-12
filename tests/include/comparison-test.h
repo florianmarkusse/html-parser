@@ -9,9 +9,9 @@
 
 typedef struct {
     Dom startDom;
-    DataContainer startDataContainer;
+    TextStore startTextStore;
     Dom expectedDom;
-    DataContainer expectedDataContainer;
+    TextStore expectedTextStore;
 } ComparisonTest;
 
 TestStatus initComparisonTest(ComparisonTest *comparisonTest,

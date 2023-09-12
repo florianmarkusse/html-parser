@@ -35,10 +35,10 @@ void removeChildren(node_id nodeID, Dom *dom);
  *                              property.
  * @param[in]   boolProp        The name of the boolean property to remove.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  */
 void removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
-                           const DataContainer *dataContainer);
+                           const TextStore *textStore);
 
 /**
  * @brief Remove a property with a given key from a node in the DOM.
@@ -50,9 +50,9 @@ void removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
  *                              property.
  * @param[in]   keyProp         The key of the property to remove.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  */
 void removeProperty(node_id nodeID, const char *keyProp, Dom *dom,
-                    const DataContainer *dataContainer);
+                    const TextStore *textStore);
 
 #endif

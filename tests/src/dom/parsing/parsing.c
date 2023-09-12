@@ -12,21 +12,21 @@
 #define TEST_1 CURRENT_DIR "test-1.html"
 
 unsigned char parseFile(const char *fileLocation) {
-    DataContainer dataContainer;
-    ElementStatus initStatus = createDataContainer(&dataContainer);
+    TextStore textStore;
+    ElementStatus initStatus = createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
-                             "Failed to initialize data container");
+                             "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 
     Dom dom1;
-    if (createDomFromFile(fileLocation, &dom1, &dataContainer) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer);
+    if (createDomFromFile(fileLocation, &dom1, &textStore) != DOM_SUCCESS) {
+        destroyTextStore(&textStore);
         return 0;
     }
     destroyDom(&dom1);
-    destroyDataContainer(&dataContainer);
+    destroyTextStore(&textStore);
     return 1;
 }
 

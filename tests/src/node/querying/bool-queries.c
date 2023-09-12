@@ -91,24 +91,24 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                             const StringUnion stringUnion,
                             const BoolFunctionType boolFunctionType,
                             const bool expectedResult) {
-    DataContainer dataContainer;
-    ElementStatus initStatus = createDataContainer(&dataContainer);
+    TextStore textStore;
+    ElementStatus initStatus = createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
-                             "Failed to initialize data container");
+                             "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 
     Dom dom;
-    if (createDomFromFile(fileLocation, &dom, &dataContainer) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer);
+    if (createDomFromFile(fileLocation, &dom, &textStore) != DOM_SUCCESS) {
+        destroyTextStore(&textStore);
         return TEST_ERROR_INITIALIZATION;
     }
 
     TestStatus result = TEST_FAILURE;
     node_id foundNode = 0;
     QueryStatus queryStatus =
-        querySelector(cssQuery, &dom, &dataContainer, &foundNode);
+        querySelector(cssQuery, &dom, &textStore, &foundNode);
 
     if (queryStatus != QUERY_SUCCESS) {
         printTestFailure();
@@ -122,22 +122,22 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         switch (boolFunctionType) {
         case HAS_BOOL_PROP: {
             actualResult = hasBoolProp(foundNode, stringUnion.attribute, &dom,
-                                       &dataContainer);
+                                       &textStore);
             break;
         }
         case HAS_PROP_KEY: {
             actualResult = hasPropKey(foundNode, stringUnion.attribute, &dom,
-                                      &dataContainer);
+                                      &textStore);
             break;
         }
         case HAS_PROP_VALUE: {
             actualResult = hasPropValue(foundNode, stringUnion.attribute, &dom,
-                                        &dataContainer);
+                                        &textStore);
             break;
         }
         case HAS_PROPERTY: {
             actualResult = hasProperty(foundNode, stringUnion.key,
-                                       stringUnion.value, &dom, &dataContainer);
+                                       stringUnion.value, &dom, &textStore);
             break;
         }
         default: {
@@ -162,7 +162,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
 
 freeMemory:
     destroyDom(&dom);
-    destroyDataContainer(&dataContainer);
+    destroyTextStore(&textStore);
 
     return result;
 }

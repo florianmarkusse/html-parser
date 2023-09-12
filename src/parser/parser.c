@@ -85,7 +85,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
                        node_id *prevNodeID, node_id *newNodeID,
                        unsigned char *isSingle, TextParsing *context,
                        unsigned char exclamStart, Dom *dom,
-                       DataContainer *dataContainer) {
+                       TextStore *textStore) {
     ElementStatus elementStatus = ELEMENT_SUCCESS;
     DomStatus documentStatus = DOM_SUCCESS;
     char ch = htmlString[++(*currentPosition)];
@@ -174,7 +174,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             elementStatus = addPropertyToNodeStringsWithLength(
                 *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen,
                 &htmlString[attrValueStartIndex], attrValueLen, dom,
-                dataContainer);
+                textStore);
             if (elementStatus != ELEMENT_SUCCESS) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
                                      "Failed to add key-value property!\n");
@@ -186,7 +186,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
         } else {
             elementStatus = addBooleanPropertyToNodeStringWithLength(
                 *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen, dom,
-                dataContainer);
+                textStore);
 
             if (elementStatus != ELEMENT_SUCCESS) {
                 ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -213,7 +213,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
 
     if ((documentStatus = setTagOnDocumentNode(
              &htmlString[elementStartIndex], elementLen, *newNodeID,
-             !(*isSingle), dom, dataContainer)) != DOM_SUCCESS) {
+             !(*isSingle), dom, textStore)) != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add tag to node ID.\n");
         return documentStatus;
     }
@@ -231,18 +231,18 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
 DomStatus parseBasicdomNode(const char *htmlString, size_t *currentPosition,
                             node_id *prevNodeID, node_id *newNodeID,
                             unsigned char *isSingle, TextParsing *context,
-                            Dom *dom, DataContainer *dataContainer) {
+                            Dom *dom, TextStore *textStore) {
     return parseDomNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        isSingle, context, 0, dom, dataContainer);
+                        isSingle, context, 0, dom, textStore);
 }
 
 DomStatus parseExclamdomNode(const char *htmlString, size_t *currentPosition,
                              node_id *prevNodeID, node_id *newNodeID, Dom *dom,
-                             DataContainer *dataContainer) {
+                             TextStore *textStore) {
     unsigned char ignore = 0;
     TextParsing ignore2 = BASIC_CONTEXT;
     return parseDomNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        &ignore, &ignore2, 1, dom, dataContainer);
+                        &ignore, &ignore2, 1, dom, textStore);
 }
 
 unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
@@ -255,7 +255,7 @@ unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
 DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
                         node_id *prevNodeID, node_id *lastParsedNodeID,
                         TextParsing *context, unsigned char *isMerge, Dom *dom,
-                        DataContainer *dataContainer) {
+                        TextStore *textStore) {
     ElementStatus elementStatus = ELEMENT_SUCCESS;
     DomStatus documentStatus = DOM_SUCCESS;
     size_t elementStartIndex = *currentPosition;
@@ -361,7 +361,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
         *isMerge = 1;
         elementStatus =
             addTextToTextNode(prevNode, &htmlString[elementStartIndex],
-                              elementLen, dom, dataContainer, true);
+                              elementLen, dom, textStore, true);
         if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
                                  "Failed to insert text");
@@ -376,7 +376,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
 
         char *dataLocation = NULL;
         elementStatus =
-            insertElement(&dataContainer->text, &htmlString[elementStartIndex],
+            insertElement(&textStore->text, &htmlString[elementStartIndex],
                           elementLen, &dataLocation);
         if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -391,7 +391,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
 }
 
 DomStatus parse(const char *htmlString, Dom *dom,
-                DataContainer *dataContainer) {
+                TextStore *textStore) {
     DomStatus documentStatus = DOM_SUCCESS;
 
     size_t currentPosition = 0;
@@ -428,7 +428,7 @@ DomStatus parse(const char *htmlString, Dom *dom,
             if ((documentStatus =
                      parseTextNode(htmlString, &currentPosition, &prevNodeID,
                                    &lastParsedNodeID, &context, &isMerge, dom,
-                                   dataContainer)) != DOM_SUCCESS) {
+                                   textStore)) != DOM_SUCCESS) {
                 return documentStatus;
             }
 
@@ -484,7 +484,7 @@ DomStatus parse(const char *htmlString, Dom *dom,
                 else {
                     if ((documentStatus = parseExclamdomNode(
                              htmlString, &currentPosition, &prevNodeID,
-                             &lastParsedNodeID, dom, dataContainer)) !=
+                             &lastParsedNodeID, dom, textStore)) !=
                         DOM_SUCCESS) {
                         return documentStatus;
                     }
@@ -501,7 +501,7 @@ DomStatus parse(const char *htmlString, Dom *dom,
                 if ((documentStatus = parseBasicdomNode(
                          htmlString, &currentPosition, &prevNodeID,
                          &lastParsedNodeID, &isSingle, &context, dom,
-                         dataContainer)) != DOM_SUCCESS) {
+                         textStore)) != DOM_SUCCESS) {
                     return documentStatus;
                 }
                 if ((documentStatus =
@@ -525,7 +525,7 @@ DomStatus parse(const char *htmlString, Dom *dom,
 }
 
 DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
-                               DataContainer *dataContainer,
+                               TextStore *textStore,
                                node_id *newNodeID) {
     DomStatus domStatus = createNode(newNodeID, NODE_TYPE_DOCUMENT, dom);
     if (domStatus != DOM_SUCCESS) {
@@ -535,7 +535,7 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
 
     domStatus = setTagOnDocumentNode(
         documentNode->tag, strlen(documentNode->tag), *newNodeID,
-        documentNode->isPaired, dom, dataContainer);
+        documentNode->isPaired, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add tag to new node ID!\n");
         return domStatus;
@@ -544,7 +544,7 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
     for (size_t i = 0; i < documentNode->boolPropsLen; i++) {
         const char *boolProp = documentNode->boolProps[i];
         ElementStatus elementStatus = addBooleanPropertyToNodeString(
-            *newNodeID, boolProp, dom, dataContainer);
+            *newNodeID, boolProp, dom, textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             PRINT_ERROR("Failed to boolean property to new node ID!\n");
             return DOM_NO_ELEMENT;
@@ -555,7 +555,7 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
         const char *keyProp = documentNode->keyProps[i];
         const char *valueProp = documentNode->valueProps[i];
         ElementStatus elementStatus = addPropertyToNodeStrings(
-            *newNodeID, keyProp, valueProp, dom, dataContainer);
+            *newNodeID, keyProp, valueProp, dom, textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             PRINT_ERROR("Failed to property to new node ID!\n");
             return DOM_NO_ELEMENT;
@@ -566,7 +566,7 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
 }
 
 DomStatus parseTextElement(const char *text, Dom *dom,
-                           DataContainer *dataContainer, node_id *newNodeID) {
+                           TextStore *textStore, node_id *newNodeID) {
     DomStatus domStatus = createNode(newNodeID, NODE_TYPE_TEXT, dom);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to retrieve a new node ID!\n");
@@ -575,7 +575,7 @@ DomStatus parseTextElement(const char *text, Dom *dom,
 
     char *dataLocation = NULL;
     ElementStatus elementStatus =
-        insertElement(&dataContainer->text, text, strlen(text), &dataLocation);
+        insertElement(&textStore->text, text, strlen(text), &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
                              "Failed to index text!\n");

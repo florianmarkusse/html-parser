@@ -8,7 +8,7 @@
 #include "flo/html-parser/utils/file/path.h"
 
 void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
-               const DataContainer *dataContainer, FILE *output) {
+               const TextStore *textStore, FILE *output) {
     Node node = dom->nodes[nodeID];
 
     if (node.nodeType == NODE_TYPE_ERROR) {
@@ -20,14 +20,14 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
         return;
     }
 
-    const char *tag = getTag(node.tagID, dom, dataContainer);
+    const char *tag = getTag(node.tagID, dom, textStore);
     fprintf(output, "<%s", tag);
 
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
         BooleanProperty boolProp = dom->boolProps[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            const char *prop = getBoolProp(boolProp.propID, dom, dataContainer);
+            const char *prop = getBoolProp(boolProp.propID, dom, textStore);
             fprintf(output, " %s", prop);
         }
     }
@@ -36,8 +36,8 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
         Property prop = dom->props[i];
 
         if (prop.nodeID == node.nodeID) {
-            const char *key = getPropKey(prop.keyID, dom, dataContainer);
-            const char *value = getPropValue(prop.valueID, dom, dataContainer);
+            const char *key = getPropKey(prop.keyID, dom, textStore);
+            const char *value = getPropValue(prop.valueID, dom, textStore);
             fprintf(output, " %s=\"%s\"", key, value);
         }
     }
@@ -55,23 +55,23 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
     fprintf(output, ">");
     node_id childNode = getFirstChild(nodeID, dom);
     while (childNode) {
-        printNode(childNode, indentation + 1, dom, dataContainer, output);
+        printNode(childNode, indentation + 1, dom, textStore, output);
         childNode = getNext(childNode, dom);
     }
     fprintf(output, "</%s>", tag);
 }
 
-void printHTML(const Dom *dom, const DataContainer *dataContainer) {
+void printHTML(const Dom *dom, const TextStore *textStore) {
     printf("printing HTML...\n\n");
     node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, dom, dataContainer, stdout);
+        printNode(currentNodeID, 0, dom, textStore, stdout);
         currentNodeID = getNext(currentNodeID, dom);
     }
     printf("\n\n");
 }
 
-FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
+FileStatus writeHTMLToFile(const Dom *dom, const TextStore *textStore,
                            const char *filePath) {
     createPath(filePath);
     FILE *file = fopen(filePath, "wbe");
@@ -82,7 +82,7 @@ FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
 
     node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, dom, dataContainer, file);
+        printNode(currentNodeID, 0, dom, textStore, file);
         currentNodeID = getNext(currentNodeID, dom);
     }
 
@@ -107,7 +107,7 @@ void printBasicRegistry(const char *registryName,
     printf("\n");
 }
 
-void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
+void printDomStatus(const Dom *dom, const TextStore *textStore) {
     printf("printing DOM status...\n\n");
 
     printf("nodes inside DOM...\n");
@@ -130,7 +130,7 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
            dom->tagRegistryLen);
     for (size_t i = 0; i < dom->tagRegistryLen; i++) {
         TagRegistration tagRegistration = dom->tagRegistry[i];
-        const char *tag = getStringFromHashSet(&dataContainer->tags.set,
+        const char *tag = getStringFromHashSet(&textStore->tags.set,
                                                &tagRegistration.hashElement);
         printf("tag ID: %-5u tag: %-20s isPaired: %d hash: %zu offset: %u\n",
                tagRegistration.tagID, tag, tagRegistration.isPaired,
@@ -140,11 +140,11 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer) {
     printf("\n");
 
     printBasicRegistry("bool props", &dom->boolPropRegistry,
-                       &dataContainer->boolProps.set);
+                       &textStore->boolProps.set);
     printBasicRegistry("key props", &dom->propKeyRegistry,
-                       &dataContainer->propKeys.set);
+                       &textStore->propKeys.set);
     printBasicRegistry("value props", &dom->propValueRegistry,
-                       &dataContainer->propValues.set);
+                       &textStore->propValues.set);
 
     printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);

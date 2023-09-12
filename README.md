@@ -1,74 +1,150 @@
 # HTML-PARSER
 
-This project contains an (in-progress) implementation of a lenient HTML-parser.
-
-**Currently, this project is only good for minfying HTML and querying the document. Modifications are not yet supported. Please come back later or [contribute](#contributing) to speed up the process of this project.**
+This project contains an implementation of a lenient HTML-parser.
 
 ## Quick Example
-In this section, you'll find a quick example to help you get started with the html-parser library. The example demonstrates the basic structure and usage of the library's key features.
+
+In this section, you'll find a quick example to help you get started with the `html-parser` library. The example provides a clear overview of the library's essential features and how to use them.
 
 ### Installation
-Before you begin. make sure you have the *html-parser* installed. You can install it by using *xxx* by running the following command:
 
-```shell
-xxx install xxx
-```
+Before you begin, ensure that you have the `html-parser` library installed. Follow these straightforward steps for installation:
+
+1. **Install CMake:**
+   Make sure you have CMake installed on your system. You can find installation instructions [here](https://cmake.org/install/).
+
+2. **Build the Project:**
+   Use the following commands to build the project based on your platform:
+
+   - **For All Operating Systems:**
+     ```shell
+     cmake -S . -B build/ -D CMAKE_BUILD_TYPE="Release" -D BUILD_SHARED_LIBS="false" -D BUILD_TESTS="false" -D BUILD_BENCHMARKS="false"
+     cmake --build build/
+     ```
+
+   - **For Linux or macOS:**
+     If you are on Linux or macOS, you can use the provided `build.sh` script. Run the script with the `-h` flag to view all available build options:
+     ```shell
+     ./build.sh
+     ```
+
 
 ### Usage
 Here's a comprehensive example showcasing how to use the html-parser library to parse and manipulate an HTML document using C:
 
 ```C
-// Import the library.
-// Do imports correctly...
+#include <flo/html-parser.h>
+#include <stdio.h>
 
 int main() {
-    // Create the dataContainer
-    DataContainer dataContainer;
-    createDataContainer(&dataContainer);
-
-    // Parse the document
-    Document doc1;
-    if (createDomFromFile("my-file.html", &doc1, &dataContainer) !=
-        DOCUMENT_SUCCESS) {
-        destroyDataContainer(&dataContainer);
-        return 0;
+    // Initialize a text store to manage memory
+    TextStore textStore;
+    if (createTextStore(&textStore) != ELEMENT_SUCCESS) {
+        fprintf(stderr, "Failed to create text store!\n");
+        return 1;
     }
 
-    // Query the document
-    node_id *results = NULL;
-    size_t resultsLen = 0;
-    QueryingStatus queryStatus =
-        querySelectorAll("body > section div[label=green]", &doc, &dataContainer, &results, &resultsLen);
-
-    // Modify the document
-    if (queryStatus == QUERYING_SUCCESS) {
-        // Insert operations to perform with the result...
+    // Initialize a DOM structure
+    Dom dom;
+    if (createDomFromFile("test-file.html", &dom, &textStore) != DOM_SUCCESS) {
+        destroyTextStore(&textStore);
+        fprintf(stderr, "Failed to parse DOM from file!\n");
+        return 1;
     }
 
-    // Free allocated memory
-    free(results);
-    destroyDocument(&doc1);
-    destroyDataContainer(&dataContainer);
+    // Find the ID of the <body> element
+    node_id bodyNodeID = 0;
+    if (querySelector("body", &dom, &textStore, &bodyNodeID) != QUERY_SUCCESS) {
+        destroyDom(&dom);
+        destroyTextStore(&textStore);
+        fprintf(stderr, "Failed to query DOM!\n");
+        return 1;
+    }
+
+    // Check if the body element has a specific boolean property
+    // In other words: "<body add-extra-p-element> ... </body>"
+    if (hasBoolProp(bodyNodeID, "add-extra-p-element", &dom, &textStore)) {
+        // Append HTML content to the <body> element
+        if (appendHTMLFromStringWithQuery("body", "<p>I am appended</p>", &dom,
+                                          &textStore) != DOM_SUCCESS) {
+            destroyDom(&dom);
+            destroyTextStore(&textStore);
+            fprintf(stderr, "Failed to append to DOM!\n");
+            return 1;
+        }
+    }
+
+    // Print the modified HTML
+    printHTML(&dom, &textStore);
+
+    // Cleanup: Free memory and resources
+    destroyDom(&dom);
+    destroyTextStore(&textStore);
+
+    return 0;
 }
-
 ```
 
 ### Explanation
-- **Create the dataContainer**: This structure holds the content of one or more parsed documents, necessary for parsing operations.
-- **Parse the document**: The example demonstrates how to parse an HTML document using `createDomFromFile()`. It's essential to check the success of parsing operations.
-- **Query the document**: The code shows how to use `querySelectorAll()` to select specific nodes in the document based on a CSS selector.
-- **Modify the document**: If the query is successful, you can modify the selected nodes as needed.
-- **Free allocated memory**: Properly freeing allocated memory is crucial to prevent memory leaks in your program. 
 
-### Further Customization
-Feel free to adapt the provided example to suit your specific use case. Explore the library's documentation for additional features and options. You can extend the example by incorporating more advanced querying, manipulating different parts of the HTML, or combining the html-parser library with other libraries for enhanced functionality. Experiment and build upon this foundation to achieve your desired results.
+This example demonstrates how to use the `html-parser` library to parse and manipulate an HTML document using C. Let's break down the code step by step:
 
-If you have any questions or need assistance, don't hesitate to reach out to the community or the library's maintainers through [GitHub issues](https://github.com/florianmarkusse/html-parser/issues) or other communication channels.
+- **Text Store Initialization:**
+  We initialize a `TextStore` to manage the text content of the HTML file.
+
+- **DOM Initialization:**
+  We create a `Dom` structure and parse an HTML file named "test-file.html" using `createDomFromFile`. The parsed DOM is stored in the `dom` structure.
+
+- **Querying for the `<body>` Element:**
+  We use `querySelector` to find the `<body>` element in the parsed DOM and retrieve its node ID.
+
+- **Checking a Boolean Property:**
+  With `hasBoolProp`, we check if the `<body>` element has a specific boolean property called "add-extra-p-element."
+
+- **Appending HTML:**
+  If the boolean property exists, we append an HTML string `<p>I am appended</p>` to the `<body>` element using `appendHTMLFromStringWithQuery`.
+
+- **Printing the Modified HTML:**
+  We print the modified HTML, showing the changes made to the document.
+
+- **Cleanup:**
+  To prevent memory leaks, we destroy the `dom` structure and the `TextStore` to free up resources.
+
+This example provides a practical demonstration of the `html-parser` library's capabilities for parsing and manipulating HTML documents in a C program.
 
 ## Functionalities
-- Reading an HTML file or string into a `Document`.
-- Querying over the document with CSS queries.
-- Writing out a `Document` to a file in minified HTML.
+
+### 1. Parsing HTML
+- **Reading an HTML file or string into a `Dom`:** The `html-parser` library provides a straightforward way to parse HTML content, whether it's stored in a file or a string. This feature allows you to create a structured representation of the HTML document.
+
+### 2. Querying and Traversing
+- **Querying over the document with CSS queries:** One of the key features of the library is its ability to query and traverse the parsed DOM using CSS queries. This means you can select specific elements or groups of elements within the HTML document based on their attributes, classes, or tags.
+
+### 3. Content Extraction and Modification
+- **Reading properties and text content of nodes:** You can extract information from nodes, such as attributes and text content. This is invaluable when you need to retrieve specific data from an HTML document.
+
+- **Modifying nodes:** The library allows you to modify the properties and content of individual nodes, giving you the ability to update the HTML dynamically. For example, you can change the attributes, text, or even add new elements to the document.
+
+### 4. Manipulating the DOM Structure
+- **Modifying the DOM structure:** Beyond modifying individual nodes, you can also manipulate the entire DOM structure. This includes adding, removing, and replacing nodes to reshape the document as needed.
+
+### 5. Output Generation
+- **Writing out a `Document` to a file in minified HTML:** Once you've made your desired changes to the DOM, the library enables you to generate a new HTML file with the updated content. You can choose to format the output as minified HTML for production use.
+
+These functionalities make the `html-parser` library a versatile tool for working with HTML documents programmatically. Whether you need to scrape data, automate web-related tasks, or transform HTML content, this library provides the tools you need to accomplish your goals efficiently.
+
+## Extending and Building Upon
+The provided example is just the tip of the iceberg. You can extend the functionality of your applications by combining the `html-parser` library with other libraries and tools. Here are some ideas:
+
+- **Data Extraction:** Use the library to extract specific data from web pages, such as prices, product details, or news articles.
+
+- **Web Automation:** Combine `html-parser` with web automation frameworks like Selenium to create intelligent web scraping bots.
+
+- **Content Generation:** Dynamically generate HTML content for websites or email templates by programmatically building and modifying the DOM structure.
+
+- **Integration with Other Languages:** Explore ways to use the library in conjunction with other programming languages through interop mechanisms.
+
+Feel free to experiment and innovate with the library to tailor it to your unique use cases. If you have questions or need assistance, you can engage with the community or reach out to the library's maintainers through [GitHub issues](https://github.com/florianmarkusse/html-parser/issues) or other communication channels. Your creativity is the limit when it comes to leveraging the `html-parser` library for web-related tasks.
 
 ## Feedback & Assistance
 If you encounter any challenges or have suggestions related to the functionalities provided by this library, please do not hesitate to:
@@ -77,89 +153,149 @@ If you encounter any challenges or have suggestions related to the functionaliti
 
 We value your input and are committed to improving the project based on your feedback. Moreover, I would be absolutely delighted to see someone using my library :).
 
-## Planned functionalities
-- Modifying the `Document`.
-- Cross-platform installation.
-
-## Compiling
-The shell scripts used to install dependencies and build the project are written for linux only. The program itself is cross-platform, however.
-1. Clone the repository to your favorite folder.
-2. Run ```./install-dependencies.sh``` to install all dependencies (*linux* only currently).
-2. Run ```./build-run.sh html-parser``` to build the library and run the tests (*linux* only currently).
-
-
 ## Under the Hood
 
-This section describes how the parser works under the hood to give the reader a better overview.
+In this section, we'll delve into how the parser works under the hood to give you a better overview.
 
-### HTML parsing
+### Parsing
 
-The parsing of a possible HTML string is done by a state machine that loops over the tokens one by one. Unlike a strict parser, this parsing is done in a lenient manner. I.e., the parser does not care whether or not you comply to the strict [HTML specification](https://html.spec.whatwg.org/), and instead tries its best to make the most out of what was provided.
+First, the HTML string has to be parsed before it can be manipulated. This is accomplished by a state machine that processes tokens one by one. Unlike a strict parser, this process is lenient, meaning it doesn't strictly adhere to the [HTML specification](https://html.spec.whatwg.org/). Instead, it does its best to interpret the input and make sense of it.
 
-#### Types
+#### Node Types
 
-The parser differentiates between 2 node types:
-- *Document node*, this node is further divided into 2 subtypes:
-    - *Single node*, for example: ```<input />```.
-    - *Paired node*, for example: ```<div></div>```.
-- *Text node*, for example: ```I AM THE TEXT NODE```. The text node simply contains text, and is often found inside paired nodes, for example: ```<p>example</p>```. 
+The parser distinguishes between two main node types:
 
-#### Document
+- **Document Node:** Document nodes can further be categorized into two subtypes:
+  - **Single Node:** For example: ```<input />```.
+  - **Paired Node:** For example: ```<div></div>```.
 
-The HTML string is parsed into a `Document`. Unlike a tree of nodes, the layout of the `Document` follows a data-oriented pattern. The following tables make up the `Document`:
+- **Text Node:** Text nodes simply contain text content, such as: `This is a sentence.`. Text nodes are commonly found within paired nodes, as in ```<p>my paragraph</p>```.
 
----
-##### node
-```nodeID``` | ```tagID``` 
----|---
----
+#### (Boolean) Properties
+The parser differentiates between two types of properties:
+- `Boolean Property`: This is a value on a tag that is either present or not. For example: ```<input required />``` . In this example, `required` is a boolean property on the `input` document node.
 
-##### parent-first-child
-```parentID``` | ```childID```
----|---
----
+- `Property`: This is a key-value pair on a tag. For example: ```<p id="a special id"></p>```. In this example, `id="a special id"` is a property on the `p` document node.
 
-##### next-node
-```currentNodeID``` | ```nextNodeID```  
----|---
----
+#### Document Structure
 
-##### boolean-property
-```nodeID``` | ```propID```  
----|---
----
+The HTML string is parsed into a `Dom`. Instead of a traditional tree structure of nodes, the `Dom` follows a data-oriented pattern. The `Dom` comprises several tables, each serving a specific purpose:
 
-##### property
-```nodeID``` | ```keyID``` | ```valueID```  
----|---|---
----
+##### Node Table (`node`)
+- `nodeID` | `nodeType` | `tagID/text` 
+  - *Notes:* Whether the third column contains a tagID or text is based on the nodeType of the node. If it is a document node, it contains a tagID. If it is a text node, it contains the pointer to the text.
 
-##### text-node
-```nodeID``` | ```textID``` 
----|---
----
+##### Parent-First-Child Relationship Table (`parent-first-child`)
+- `parentID` | `childID`
+  - *Notes:* Represents parent-child relationships.
 
-As you can see, there is no actual text stored inside the `Document` and merely refers to IDs. Each ID is a reference to arrays that hold the actual text and can be found by indexing this array. 
+##### Parent-Child Relationship Table (`parent-child`)
+- `parentID` | `childID`
+  - *Notes:* Represents parent-child relationships (alternative table).
 
-For example, imagine we have an entry in the *node* table, ```{ 4, 5 }```, and we want to find the text representation of this text. This can be done by ```dataContainer.tags.container.elements[5] -> "div"'```.
+##### Next Node Sequence Table (`next-node`)
+- `currentNodeID` | `nextNodeID`  
+  - *Notes:* Tracks the sequence of nodes.
 
-All data the IDs are pointing to are stored inside a `DataContainer`:
-```C
-typedef struct {
-    CombinedElements tags; // Holds all the values of the tags.
-    CombinedElements propKeys; // Holds all the keys of properties. A boolean property is treated as a property with only a key.
-    Elements propValues; // Holds all the values of properties.
-    Elements text; // Holds all the values of the text nodes.
-} DataContainer;
-```
+##### Boolean Property Table (`boolean-property`)
+- `nodeID` | `propID`  
+  - *Notes:* Records boolean properties of nodes.
 
-Why was this decision made instead of storing all this data inside the `Document` itself?
-- It allows sharing of tags when parsing multiple documents, e.g., a ```<p>``` in multiple documents has the same ```tagID```.
-- It allows for faster filtering of nodes.
-- [the maintainer](https://github.com/florianmarkusse) wanted to experiment with data-oriented programming and this seemed like a fun way to practise it.
+##### Tag Registry Table (`tag-registry`)
+- `tagID` | `hashElement` | `isPaired`  
+  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+
+##### Boolean Property Registry Table (`boolean-property-registry`)
+- `indexID` | `hashElement`
+  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+
+##### Property Key Registry Table (`property-key-registry`)
+- `indexID` | `hashElement`
+  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+
+##### Property Value Registry Table (`property-value-registry`)
+- `indexID` | `hashElement`
+  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+
+#### Explanation
+
+As you can observe, the `Dom` does not directly store text content but rather references `IDs` and `HashElements`. To retrieve textual content, you use the `ID` to look up the corresponding `HashElement`, which, in turn, is used to locate the text in a hash table. The `TextStore` struct holds all textual content from the parsed HTML.
+
+For instance, if we have a *node* table entry: `{ 4, NODE_TYPE_DOCUMENT, 5 }`, and we want to find the text representation, we first look up the `HashElement` of 5 (the `tagID`) in the `tag-registry` table. This yields `{ 194893, 0 }` as the `HashElement`. To find the actual text, we perform a lookup in the tag hash table: `(hash + offset) % hash table length`, which in this case is `(194893 + 0 % tagHash.len)`.
+
+Why was this decision made instead of storing all data directly in the `Dom`?
+- It allows nodes with the same tag, boolean property, or property to share the same `ID`.
+- It facilitates faster node filtering.
+- The library's maintainer, [Florian Markusse](https://github.com/florianmarkusse), wanted to experiment with data-oriented programming and found this approach both challenging and educational.
+
+This design choice enhances performance, reduces memory overhead, and optimizes node filtering. It also provides an opportunity for developers to explore data-oriented programming concepts.
 
 ### Querying
-Querying the `Document` is possible or planned through all convenience methods also present in querying a DOM on the web, such as `querySelectorAll`, `getElementsByTagName`, and `getElementByID`. Similar to the HTML parsing, the parsing is done in the most lenient way possible using a state machine that loops over the css query.
+After parsing, we can query the `Dom` for information that we are looking for. This section is split up into two sections: querying the `Dom` and querying the contents of an individual node.
+Together, these functions empower you to query the `Dom` and individual nodes allowing the user to query the `Dom` effectively.
+
+#### Dom
+
+Querying the `Dom` is possible with convenience methods similar to querying a web DOM. These methods include:
+
+- `querySelector`: Retrieves the first element in the `Dom` that matches a specified CSS selector. It returns a single `node_id`.
+
+- `querySelectorAll`: Retrieves all elements in the `Dom` that match a specified CSS selector. It returns an array of `node_id`s. In the latter case, please remember to `free` this array.
+
+- `getElementsByTagName`: Retrieves all elements in the `Dom` that have a specified tag name. It returns an array of `node_id`s. Don't forget to `free` this array when appropriate.
+
+- `getElementById`: Retrieves an element in the `Dom` by its unique ID. It returns a single `node_id`.
+
+- `getElementsByClassName`: Retrieves all elements in the `Dom` that have a specified class name. It returns an array of `node_id`s. Remember to `free` this array as needed.
+
+#### Node
+
+The `html-parser` library provides a set of convenient functions to query and retrieve properties and content from individual nodes within the `Dom`. These functions allow you to inspect and work with specific attributes and text content of nodes. Here's a brief overview of the available functions:
+
+- `getNodeType`: Retrieves the type of a given node, such as whether it's a document node or a text node.
+
+- `hasBoolProp`: Checks if a node has a specified boolean property and returns `true` if the property exists and is true.
+
+- `hasPropKey`: Checks if a node has a property with a specific key.
+
+- `hasPropValue`: Checks if a node has a property with a specific value.
+
+- `hasProperty`: Checks if a node has a property with both a specific key and value.
+
+- `getValue`: Retrieves the value of a property associated with a node.
+
+- `getTextContent`: Retrieves the text content of a node, storing results in an array of strings. Remember to `free` this array as needed.
+
+
+### Modifying
+
+Now that we have some `node_id`s after querying the `Dom`, we can modify the `Dom` to our heart's content. Again, these functions are split up into two levels: "dom-based" and "node-based". All operations modify the `Dom` in place.
+
+#### Dom
+
+Below, all the **append** functions provided. They append a new child to the provided parent node. This library also provides the same functionality to **prepend** and **replaceWith**. Prepending a node adds a new child as the first child node of the provided parent node. Lastly, Replacing a node completely, thus also all its children, does exactly that.
+
+- `appendDocumentNodeWithQuery`: Append a `DocumentNode` to the DOM using a CSS query. This function appends a `DocumentNode` specified by `docNode` to the DOM using the provided CSS query `cssQuery`.
+
+- `appendTextNodeWithQuery`: Append a text node to the DOM using a CSS query. This function appends a text node with the specified `text` to the DOM using the provided CSS query `cssQuery`.
+
+- `appendHTMLFromStringWithQuery`: Append HTML content from a string to the DOM using a CSS query. This function appends HTML content specified by `htmlString` to the DOM using the provided CSS query `cssQuery`.
+
+- `appendHTMLFromFileWithQuery`: Append HTML content from a file to the DOM using a CSS query. This function appends HTML content from the specified `fileLocation` to the DOM using the provided CSS query `cssQuery`.
+
+- `appendDocumentNode`: Append a `DocumentNode` to the DOM. This function appends a `DocumentNode` specified by `docNode` to the DOM.
+
+- `appendTextNode`: Append a text node to the DOM. This function appends a text node with the specified `text` to the DOM.
+
+- `appendHTMLFromString`: Append HTML content from a string to the DOM. This function appends HTML content specified by `htmlString` to the DOM.
+
+For the sake of brevity, the `prepend...` and `replaceWith...` functions are left out but **are** present in the library. Simply replace `append` with your desired operation.
+
+#### Node
+
+### Printing
+After having modified the `Dom`, we often want to write out the resulting HTML. Below are a few functions that we provide:
+
 
 ## Contributing
 It would be amazing if you are willing to contribute to the project. Please look at any issues if they are present or reach out to [the maintainer](https://github.com/florianmarkusse) to collaborate!

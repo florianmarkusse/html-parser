@@ -13,7 +13,7 @@ void initBasicRegistry(BasicRegistry *basicRegistry,
 }
 
 DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
-                            DataContainer *dataContainer) {
+                            TextStore *textStore) {
     char *buffer = NULL;
     FileStatus fileStatus = readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
@@ -22,7 +22,7 @@ DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
         return DOM_ERROR_MEMORY;
     }
 
-    DomStatus documentStatus = createDom(buffer, dom, dataContainer);
+    DomStatus documentStatus = createDom(buffer, dom, textStore);
     if (documentStatus != DOM_SUCCESS) {
         FREE_TO_NULL(buffer);
         ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),
@@ -36,7 +36,7 @@ DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
 }
 
 DomStatus createDom(const char *htmlString, Dom *dom,
-                    DataContainer *dataContainer) {
+                    TextStore *textStore) {
     dom->firstNodeID = 0;
 
     TagRegistration initTag;
@@ -102,7 +102,7 @@ DomStatus createDom(const char *htmlString, Dom *dom,
         return DOM_ERROR_MEMORY;
     }
 
-    DomStatus domumentStatus = parse(htmlString, dom, dataContainer);
+    DomStatus domumentStatus = parse(htmlString, dom, textStore);
     if (domumentStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse domument.\n");
     }

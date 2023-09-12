@@ -52,24 +52,24 @@ static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                             const QueryStatus expectedStatus,
                             const size_t expectedNumberOfNodes) {
-    DataContainer dataContainer;
-    ElementStatus initStatus = createDataContainer(&dataContainer);
+    TextStore textStore;
+    ElementStatus initStatus = createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
-                             "Failed to initialize data container");
+                             "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 
     Dom dom;
-    if (createDomFromFile(fileLocation, &dom, &dataContainer) != DOM_SUCCESS) {
-        destroyDataContainer(&dataContainer);
+    if (createDomFromFile(fileLocation, &dom, &textStore) != DOM_SUCCESS) {
+        destroyTextStore(&textStore);
         return TEST_ERROR_INITIALIZATION;
     }
 
     node_id *results = NULL;
     size_t resultsLen = 0;
     QueryStatus actual =
-        querySelectorAll(cssQuery, &dom, &dataContainer, &results, &resultsLen);
+        querySelectorAll(cssQuery, &dom, &textStore, &results, &resultsLen);
 
     TestStatus result = TEST_FAILURE;
 
@@ -97,7 +97,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
 
     FREE_TO_NULL(results);
     destroyDom(&dom);
-    destroyDataContainer(&dataContainer);
+    destroyTextStore(&textStore);
 
     return result;
 }

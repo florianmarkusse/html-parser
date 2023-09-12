@@ -74,8 +74,8 @@ void removeChildren(const node_id nodeID, Dom *dom) {
 }
 
 void removeBooleanProperty(const node_id nodeID, const char *boolProp, Dom *dom,
-                           const DataContainer *dataContainer) {
-    indexID boolPropID = getBoolPropID(boolProp, dataContainer);
+                           const TextStore *textStore) {
+    indexID boolPropID = getBoolPropID(boolProp, textStore);
     if (boolPropID > 0) {
         BooleanProperty *prop = getBooleanProperty(nodeID, boolPropID, dom);
         if (prop != NULL) {
@@ -86,8 +86,8 @@ void removeBooleanProperty(const node_id nodeID, const char *boolProp, Dom *dom,
 }
 
 void removeProperty(const node_id nodeID, const char *keyProp, Dom *dom,
-                    const DataContainer *dataContainer) {
-    indexID keyPropID = getPropKeyID(keyProp, dataContainer);
+                    const TextStore *textStore) {
+    indexID keyPropID = getPropKeyID(keyProp, textStore);
     if (keyPropID > 0) {
         Property *prop = getProperty(nodeID, keyPropID, dom);
         if (prop != NULL) {

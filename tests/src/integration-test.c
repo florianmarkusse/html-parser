@@ -25,7 +25,7 @@ static TestStatus parseQueryModify() {
     node_id *results = NULL;
     size_t resultsLen = 0;
     QueryStatus actual = querySelectorAll("title", &comparisonTest.startDom,
-                                          &comparisonTest.startDataContainer,
+                                          &comparisonTest.startTextStore,
                                           &results, &resultsLen);
 
     if (actual != QUERY_SUCCESS) {
@@ -51,18 +51,18 @@ static TestStatus parseQueryModify() {
         return TEST_FAILURE;
     }
     setTextContent(results[0], "FOURTH", &comparisonTest.startDom,
-                   &comparisonTest.startDataContainer);
+                   &comparisonTest.startTextStore);
     addBooleanPropertyToNodeString(results[0], "the-fourth",
                                    &comparisonTest.startDom,
-                                   &comparisonTest.startDataContainer);
+                                   &comparisonTest.startTextStore);
     addPropertyToNodeStrings(results[0], "the-property", "my value",
                              &comparisonTest.startDom,
-                             &comparisonTest.startDataContainer);
+                             &comparisonTest.startTextStore);
     FREE_TO_NULL(results);
 
     node_id currentNodeID = 0;
     actual = querySelector("head", &comparisonTest.startDom,
-                           &comparisonTest.startDataContainer, &currentNodeID);
+                           &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
@@ -78,10 +78,10 @@ static TestStatus parseQueryModify() {
                           "id=\"first-title-tag\"></title><title>FIRST</"
                           "title><title>SECOND</title><title>THIRD</title>",
                           &comparisonTest.startDom,
-                          &comparisonTest.startDataContainer);
+                          &comparisonTest.startTextStore);
 
     actual = querySelectorAll("title", &comparisonTest.startDom,
-                              &comparisonTest.startDataContainer, &results,
+                              &comparisonTest.startTextStore, &results,
                               &resultsLen);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
@@ -110,7 +110,7 @@ static TestStatus parseQueryModify() {
     FREE_TO_NULL(results);
 
     actual = querySelector("#first-title-tag", &comparisonTest.startDom,
-                           &comparisonTest.startDataContainer, &currentNodeID);
+                           &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
@@ -125,7 +125,7 @@ static TestStatus parseQueryModify() {
     removeNode(currentNodeID, &comparisonTest.startDom);
 
     actual = querySelectorAll("title", &comparisonTest.startDom,
-                              &comparisonTest.startDataContainer, &results,
+                              &comparisonTest.startTextStore, &results,
                               &resultsLen);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();

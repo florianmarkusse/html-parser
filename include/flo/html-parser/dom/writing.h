@@ -12,9 +12,9 @@
  * DOM.
  *
  * @param[in]   dom             The DOM structure to print status for.
- * @param[in]   dataContainer   The data container associated with the DOM.
+ * @param[in]   textStore   The text store associated with the DOM.
  */
-void printDomStatus(const Dom *dom, const DataContainer *dataContainer);
+void printDomStatus(const Dom *dom, const TextStore *textStore);
 
 /**
  * @brief Print the minified HTML representation of a DOM structure.
@@ -24,9 +24,9 @@ void printDomStatus(const Dom *dom, const DataContainer *dataContainer);
  * for inspecting the parsed HTML document.
  *
  * @param[in]   dom             The DOM structure to print as minified HTML.
- * @param[in]   dataContainer   The data container associated with the DOM.
+ * @param[in]   textStore   The text store associated with the DOM.
  */
-void printHTML(const Dom *dom, const DataContainer *dataContainer);
+void printHTML(const Dom *dom, const TextStore *textStore);
 
 /**
  * @brief Write the minified HTML representation of a DOM structure to a file.
@@ -36,7 +36,7 @@ void printHTML(const Dom *dom, const DataContainer *dataContainer);
  * document to a file.
  *
  * @param[in]   dom             The DOM structure to write as minified HTML.
- * @param[in]   dataContainer   The data container associated with the DOM.
+ * @param[in]   textStore   The text store associated with the DOM.
  * @param[in]   filePath        The file path where the HTML content will be
  *                              saved.
  *
@@ -44,7 +44,7 @@ void printHTML(const Dom *dom, const DataContainer *dataContainer);
  *          completed, an error code otherwise). See @ref
  *          "flo/html-parser/utils/file/file-status.h#FileStatus".
  */
-FileStatus writeHTMLToFile(const Dom *dom, const DataContainer *dataContainer,
+FileStatus writeHTMLToFile(const Dom *dom, const TextStore *textStore,
                            const char *filePath);
 
 #endif

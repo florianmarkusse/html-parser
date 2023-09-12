@@ -53,14 +53,6 @@ typedef struct {
     size_t nodeLen;
     size_t nodeCap;
 
-    TagRegistration *tagRegistry;
-    size_t tagRegistryLen;
-    size_t tagRegistryCap;
-
-    BasicRegistry boolPropRegistry;
-    BasicRegistry propKeyRegistry;
-    BasicRegistry propValueRegistry;
-
     ParentChild *parentFirstChilds;
     size_t parentFirstChildLen;
     size_t parentFirstChildCap;
@@ -80,6 +72,14 @@ typedef struct {
     Property *props;
     size_t propsLen;
     size_t propsCap;
+
+    TagRegistration *tagRegistry;
+    size_t tagRegistryLen;
+    size_t tagRegistryCap;
+
+    BasicRegistry boolPropRegistry;
+    BasicRegistry propKeyRegistry;
+    BasicRegistry propValueRegistry;
 } __attribute__((aligned(128))) Dom;
 
 /**
@@ -87,37 +87,36 @@ typedef struct {
  *
  * This function parses the provided `htmlString` and builds the `dom`
  * structure with the parsed DOM representation and populates the
- * `dataContainer` with all the text values.
+ * `textStore` with all the text values.
  *
  * @param[in]   htmlString      The HTML string to parse.
  * @param[out]  dom             The DOM structure to build.
- * @param[in]   dataContainer   The data container to populate.
+ * @param[in]   textStore   The text store to populate.
  * values
  *
  * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#DomStatus".
  */
-DomStatus createDom(const char *htmlString, Dom *dom,
-                    DataContainer *dataContainer);
+DomStatus createDom(const char *htmlString, Dom *dom, TextStore *textStore);
 
 /**
  * @brief Create a DOM structure from an HTML file.
  *
  * This function reads the HTML content from the specified `fileLocation`,
  * parses it, and and builds the `dom` structure with the parsed DOM
- * representation and populates the `dataContainer` with all the text values.
+ * representation and populates the `textStore` with all the text values.
  *
  * @param[in]   fileLocation    The file location of the HTML content to parse.
  * @param[out]  dom             The DOM structure to build.
- * @param[in]   dataContainer   The data container to populate.
+ * @param[in]   textStore   The text store to populate.
  *
  * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#DomStatus".
  */
 DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
-                            DataContainer *dataContainer);
+                            TextStore *textStore);
 
 /**
  * @brief Destroy a DOM structure and release associated memory.

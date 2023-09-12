@@ -19,14 +19,14 @@
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   docNode         The `DocumentNode` to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus appendDocumentNodeWithQuery(const char *cssQuery,
                                       const DocumentNode *docNode, Dom *dom,
-                                      DataContainer *dataContainer);
+                                      TextStore *textStore);
 
 /**
  * @brief Append a text node to the DOM using a CSS query.
@@ -38,13 +38,13 @@ DomStatus appendDocumentNodeWithQuery(const char *cssQuery,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   text            The text content to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus appendTextNodeWithQuery(const char *cssQuery, const char *text,
-                                  Dom *dom, DataContainer *dataContainer);
+                                  Dom *dom, TextStore *textStore);
 
 /**
  * @brief Append HTML content from a string to the DOM using a CSS query.
@@ -56,14 +56,14 @@ DomStatus appendTextNodeWithQuery(const char *cssQuery, const char *text,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   htmlString      The HTML content as a string to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus appendHTMLFromStringWithQuery(const char *cssQuery,
                                         const char *htmlString, Dom *dom,
-                                        DataContainer *dataContainer);
+                                        TextStore *textStore);
 
 /**
  * @brief Append HTML content from a file to the DOM using a CSS query.
@@ -75,14 +75,14 @@ DomStatus appendHTMLFromStringWithQuery(const char *cssQuery,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   fileLocation    The file location of the HTML content to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus appendHTMLFromFileWithQuery(const char *cssQuery,
                                       const char *fileLocation, Dom *dom,
-                                      DataContainer *dataContainer);
+                                      TextStore *textStore);
 
 /**
  * @brief Append a DocumentNode to the DOM.
@@ -94,13 +94,13 @@ DomStatus appendHTMLFromFileWithQuery(const char *cssQuery,
  *                              `DocumentNode` will be appended.
  * @param[in]   docNode         The `DocumentNode` to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus appendDocumentNode(node_id parentID, const DocumentNode *docNode,
-                             Dom *dom, DataContainer *dataContainer);
+                             Dom *dom, TextStore *textStore);
 
 /**
  * @brief Append a text node to the DOM.
@@ -112,13 +112,13 @@ DomStatus appendDocumentNode(node_id parentID, const DocumentNode *docNode,
  *                              will be appended.
  * @param[in]   text            The text content to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus appendTextNode(node_id parentID, const char *text, Dom *dom,
-                         DataContainer *dataContainer);
+                         TextStore *textStore);
 
 /**
  * @brief Append HTML content from a string to the DOM.
@@ -130,12 +130,12 @@ DomStatus appendTextNode(node_id parentID, const char *text, Dom *dom,
  *                              will be appended.
  * @param[in]   htmlString      The HTML content as a string to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus appendHTMLFromString(node_id parentID, const char *htmlString,
-                               Dom *dom, DataContainer *dataContainer);
+                               Dom *dom, TextStore *textStore);
 
 #endif

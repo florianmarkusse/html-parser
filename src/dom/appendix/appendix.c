@@ -15,43 +15,43 @@
 #include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/print/error.h"
 
-#define APPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, dataContainer,     \
+#define APPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,     \
                                    appendFunction)                             \
     do {                                                                       \
         node_id parentNodeID = 0;                                              \
         QueryStatus queryResult =                                              \
-            querySelector(cssQuery, dom, dataContainer, &parentNodeID);        \
+            querySelector(cssQuery, dom, textStore, &parentNodeID);        \
         if (queryResult != QUERY_SUCCESS) {                                    \
             PRINT_ERROR("Could not find element using query selector: %s\n",   \
                         cssQuery);                                             \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
-        return appendFunction(parentNodeID, nodeData, dom, dataContainer);     \
+        return appendFunction(parentNodeID, nodeData, dom, textStore);     \
     } while (0)
 
 DomStatus appendDocumentNodeWithQuery(const char *cssQuery,
                                       const DocumentNode *docNode, Dom *dom,
-                                      DataContainer *dataContainer) {
-    APPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, dataContainer,
+                                      TextStore *textStore) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
                                appendDocumentNode);
 }
 
 DomStatus appendTextNodeWithQuery(const char *cssQuery, const char *text,
-                                  Dom *dom, DataContainer *dataContainer) {
-    APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, dataContainer,
+                                  Dom *dom, TextStore *textStore) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
                                appendTextNode);
 }
 
 DomStatus appendHTMLFromStringWithQuery(const char *cssQuery,
                                         const char *htmlString, Dom *dom,
-                                        DataContainer *dataContainer) {
-    APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, dataContainer,
+                                        TextStore *textStore) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
                                appendHTMLFromString);
 }
 
 DomStatus appendHTMLFromFileWithQuery(const char *cssQuery,
                                       const char *fileLocation, Dom *dom,
-                                      DataContainer *dataContainer) {
+                                      TextStore *textStore) {
     char *buffer = NULL;
     FileStatus fileStatus = readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
@@ -60,7 +60,7 @@ DomStatus appendHTMLFromFileWithQuery(const char *cssQuery,
         return DOM_ERROR_MEMORY;
     }
 
-    APPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, dataContainer,
+    APPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, textStore,
                                appendHTMLFromString);
 }
 
@@ -125,10 +125,10 @@ static DomStatus updateReferences(const node_id parentID,
 
 DomStatus appendDocumentNode(const node_id parentID,
                              const DocumentNode *docNode, Dom *dom,
-                             DataContainer *dataContainer) {
+                             TextStore *textStore) {
     node_id newNodeID = 0;
     DomStatus domStatus =
-        parseDocumentElement(docNode, dom, dataContainer, &newNodeID);
+        parseDocumentElement(docNode, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse document element!\n");
         return domStatus;
@@ -137,10 +137,10 @@ DomStatus appendDocumentNode(const node_id parentID,
 }
 
 DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
-                         DataContainer *dataContainer) {
+                         TextStore *textStore) {
     node_id newNodeID = 0;
     DomStatus domStatus =
-        parseTextElement(text, dom, dataContainer, &newNodeID);
+        parseTextElement(text, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse text element!\n");
         return domStatus;
@@ -152,7 +152,7 @@ DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
 
         MergeResult mergeTry =
             tryMerge(&dom->nodes[child], &dom->nodes[newNodeID], dom,
-                     dataContainer, true);
+                     textStore, true);
 
         if (mergeTry == COMPLETED_MERGE) {
             removeNode(newNodeID, dom);
@@ -168,9 +168,9 @@ DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
 }
 
 DomStatus appendHTMLFromString(const node_id parentID, const char *htmlString,
-                                Dom *dom, DataContainer *dataContainer) {
+                                Dom *dom, TextStore *textStore) {
     node_id firstNewAddedNode = dom->nodeLen;
-    DomStatus domStatus = parse(htmlString, dom, dataContainer);
+    DomStatus domStatus = parse(htmlString, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse string!\n");
         return domStatus;
@@ -185,7 +185,7 @@ DomStatus appendHTMLFromString(const node_id parentID, const char *htmlString,
                 node_id lastNext = getLastNext(firstChild, dom);
                 MergeResult mergeResult =
                     tryMerge(&dom->nodes[lastNext], firstAddedNode, dom,
-                             dataContainer, true);
+                             textStore, true);
                 if (mergeResult == COMPLETED_MERGE) {
                     size_t secondNewAddedNode = getNext(firstNewAddedNode, dom);
                     removeNode(firstNewAddedNode, dom);
@@ -202,7 +202,7 @@ DomStatus appendHTMLFromString(const node_id parentID, const char *htmlString,
                 node_id lastNext = getLastNext(firstChild, dom);
                 MergeResult mergeResult =
                     tryMerge(&dom->nodes[lastNext], firstAddedNode, dom,
-                             dataContainer, true);
+                             textStore, true);
                 if (mergeResult == COMPLETED_MERGE) {
                     removeNode(firstNewAddedNode, dom);
                     return domStatus;

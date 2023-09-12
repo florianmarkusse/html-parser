@@ -52,7 +52,7 @@ bool endOfCurrentFilter(const char ch) {
 }
 
 QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
-                            const DataContainer *dataContainer,
+                            const TextStore *textStore,
                             Uint16HashSet *set) {
     QueryStatus result = QUERY_SUCCESS;
 
@@ -89,7 +89,7 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
             strncpy(buffer, &cssQuery[tokenStart], tokenLength);
             buffer[tokenLength - 1] = '\0';
 
-            tokenID = getTagID(buffer, dataContainer);
+            tokenID = getTagID(buffer, textStore);
             if (tokenID == 0) {
                 return QUERY_NOT_SEEN_BEFORE;
             }
@@ -152,7 +152,7 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
             if (currentSelector == CLASS || currentSelector == ID) {
                 const char *keyBuffer =
                     currentSelector == CLASS ? "class" : "id";
-                tokenID = getPropKeyID(keyBuffer, dataContainer);
+                tokenID = getPropKeyID(keyBuffer, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -165,7 +165,7 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
                 valueBuffer[tokenLength - 1] = '\0';
 
-                tokenID = getPropValueID(valueBuffer, dataContainer);
+                tokenID = getPropValueID(valueBuffer, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -177,7 +177,7 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(boolBuffer, &cssQuery[tokenStart], tokenLength);
                 boolBuffer[tokenLength - 1] = '\0';
 
-                tokenID = getBoolPropID(boolBuffer, dataContainer);
+                tokenID = getBoolPropID(boolBuffer, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -191,7 +191,7 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(keyBuffer, &cssQuery[tokenStart], tokenLength);
                 keyBuffer[tokenLength - 1] = '\0';
 
-                tokenID = getPropKeyID(keyBuffer, dataContainer);
+                tokenID = getPropKeyID(keyBuffer, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -222,7 +222,7 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
                 strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
                 valueBuffer[tokenLength - 1] = '\0';
 
-                tokenID = getPropValueID(valueBuffer, dataContainer);
+                tokenID = getPropValueID(valueBuffer, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -326,7 +326,7 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
 }
 
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
-                             const DataContainer *dataContainer,
+                             const TextStore *textStore,
                              node_id **results, size_t *resultsLen) {
     Uint16HashSet resultsSet;
     if (initUint16HashSet(&resultsSet, INITIAL_QUERY_CAP) != HASH_SUCCESS) {
@@ -359,7 +359,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
         char *rest = NULL;
         char *token = NULL;
         while (token = strtok_r(queryCopy, ",", &rest)) {
-            if ((result = getQueryResults(token, dom, dataContainer, &set)) !=
+            if ((result = getQueryResults(token, dom, textStore, &set)) !=
                 QUERY_SUCCESS) {
                 destroyUint16HashSet(&resultsSet);
                 destroyUint16HashSet(&set);
@@ -393,7 +393,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
         FREE_TO_NULL(toFree);
         destroyUint16HashSet(&set);
     } else {
-        if ((result = getQueryResults(cssQuery, dom, dataContainer,
+        if ((result = getQueryResults(cssQuery, dom, textStore,
                                       &resultsSet)) != QUERY_SUCCESS) {
             destroyUint16HashSet(&resultsSet);
             ERROR_WITH_CODE_ONLY(queryingStatusToString(result),
@@ -416,28 +416,28 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
 }
 
 QueryStatus getElementsByClassName(const char *class, const Dom *dom,
-                                   const DataContainer *dataContainer,
+                                   const TextStore *textStore,
                                    node_id **results, size_t *resultsLen) {
     size_t cssQueryLen = strlen(class) + 2;
     char cssQuery[cssQueryLen];
     snprintf(cssQuery, cssQueryLen, ".%s", class);
 
-    return querySelectorAll(cssQuery, dom, dataContainer, results, resultsLen);
+    return querySelectorAll(cssQuery, dom, textStore, results, resultsLen);
 }
 
 QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
-                                 const DataContainer *dataContainer,
+                                 const TextStore *textStore,
                                  node_id **results, size_t *resultsLen) {
-    return querySelectorAll(tag, dom, dataContainer, results, resultsLen);
+    return querySelectorAll(tag, dom, textStore, results, resultsLen);
 }
 
 QueryStatus querySelector(const char *cssQuery, const Dom *dom,
-                          const DataContainer *dataContainer, node_id *result) {
+                          const TextStore *textStore, node_id *result) {
     node_id *results = NULL;
     size_t resultsLen = 0;
 
     QueryStatus status =
-        querySelectorAll(cssQuery, dom, dataContainer, &results, &resultsLen);
+        querySelectorAll(cssQuery, dom, textStore, &results, &resultsLen);
     if (status != QUERY_SUCCESS) {
         FREE_TO_NULL(results);
         return status;
@@ -465,11 +465,11 @@ QueryStatus querySelector(const char *cssQuery, const Dom *dom,
 }
 
 QueryStatus getElementByID(const char *id, const Dom *dom,
-                           const DataContainer *dataContainer,
+                           const TextStore *textStore,
                            node_id *result) {
     size_t cssQueryLen = strlen(id) + 2;
     char cssQuery[cssQueryLen];
     snprintf(cssQuery, cssQueryLen, "#%s", id);
 
-    return querySelector(cssQuery, dom, dataContainer, result);
+    return querySelector(cssQuery, dom, textStore, result);
 }

@@ -198,19 +198,19 @@ static TestStatus testAppendix(const char *fileLocation1,
     case APPEND_DOCUMENT_NODE: {
         domStatus = appendDocumentNode(foundNode, &appendInput->documentNode,
                                        &comparisonTest.startDom,
-                                       &comparisonTest.startDataContainer);
+                                       &comparisonTest.startTextStore);
         break;
     }
     case APPEND_TEXT_NODE: {
         domStatus = appendTextNode(foundNode, appendInput->text,
                                    &comparisonTest.startDom,
-                                   &comparisonTest.startDataContainer);
+                                   &comparisonTest.startTextStore);
         break;
     }
     case APPEND_FROM_STRING: {
         domStatus = appendHTMLFromString(foundNode, appendInput->text,
                                           &comparisonTest.startDom,
-                                          &comparisonTest.startDataContainer);
+                                          &comparisonTest.startTextStore);
         break;
     }
     default: {

@@ -62,12 +62,12 @@ static TestStatus testDeletion(const char *fileLocation1,
     switch (deletionType) {
     case DELETE_BOOLEAN_PROPERTY: {
         removeBooleanProperty(foundNode, propToDelete, &comparisonTest.startDom,
-                              &comparisonTest.startDataContainer);
+                              &comparisonTest.startTextStore);
         break;
     }
     case DELETE_PROPERTY: {
         removeProperty(foundNode, propToDelete, &comparisonTest.startDom,
-                       &comparisonTest.startDataContainer);
+                       &comparisonTest.startTextStore);
         break;
     }
     default: {

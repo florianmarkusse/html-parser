@@ -9,27 +9,27 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
                               const char *startFileLocation,
                               const char *expectedFileLocation) {
     ElementStatus initStatus =
-        createDataContainer(&comparisonTest->startDataContainer);
+        createTextStore(&comparisonTest->startTextStore);
     if (initStatus != ELEMENT_SUCCESS) {
         return failWithMessageAndCode(
-            "Failed to initialize start data container!\n",
+            "Failed to initialize start text store!\n",
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
     if (createDomFromFile(startFileLocation, &comparisonTest->startDom,
-                          &comparisonTest->startDataContainer) != DOM_SUCCESS) {
+                          &comparisonTest->startTextStore) != DOM_SUCCESS) {
         return failWithMessageAndCode("Failed to create start DOM from file!\n",
                                       TEST_ERROR_INITIALIZATION,
                                       comparisonTest);
     }
 
-    initStatus = createDataContainer(&comparisonTest->expectedDataContainer);
+    initStatus = createTextStore(&comparisonTest->expectedTextStore);
     if (initStatus != ELEMENT_SUCCESS) {
         return failWithMessageAndCode(
-            "Failed to initialize expected data container!\n",
+            "Failed to initialize expected text store!\n",
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
     if (createDomFromFile(expectedFileLocation, &comparisonTest->expectedDom,
-                          &comparisonTest->expectedDataContainer) !=
+                          &comparisonTest->expectedTextStore) !=
         DOM_SUCCESS) {
         return failWithMessageAndCode(
             "Failed to create expected DOM from file!\n",
@@ -44,7 +44,7 @@ TestStatus getNodeFromQuerySelector(const char *cssQuery,
                                     node_id *foundNode) {
     QueryStatus queryStatus =
         querySelector(cssQuery, &comparisonTest->startDom,
-                      &comparisonTest->startDataContainer, foundNode);
+                      &comparisonTest->startTextStore, foundNode);
 
     if (queryStatus != QUERY_SUCCESS) {
         destroyComparisonTest(comparisonTest);
@@ -92,8 +92,8 @@ TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
     node_id nodeID2 = 0;
     ComparisonStatus comp = equalsWithNode(
         &nodeID1, &comparisonTest->startDom,
-        &comparisonTest->startDataContainer, &nodeID2,
-        &comparisonTest->expectedDom, &comparisonTest->expectedDataContainer);
+        &comparisonTest->startTextStore, &nodeID2,
+        &comparisonTest->expectedDom, &comparisonTest->expectedTextStore);
 
     if (comp == expectedStatus) {
         printTestSuccess();
@@ -105,9 +105,9 @@ TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
             COMPARISON_SUCCESS, comparisonStatusToString(COMPARISON_SUCCESS),
             comp, comparisonStatusToString(comp));
         printFirstDifference(nodeID1, &comparisonTest->startDom,
-                             &comparisonTest->startDataContainer, nodeID2,
+                             &comparisonTest->startTextStore, nodeID2,
                              &comparisonTest->expectedDom,
-                             &comparisonTest->expectedDataContainer);
+                             &comparisonTest->expectedTextStore);
         printTestDemarcation();
     }
 
@@ -121,7 +121,7 @@ TestStatus compareAndEndTest(ComparisonTest *comparisonTest) {
 
 void destroyComparisonTest(ComparisonTest *comparisonTest) {
     destroyDom(&comparisonTest->startDom);
-    destroyDataContainer(&comparisonTest->startDataContainer);
+    destroyTextStore(&comparisonTest->startTextStore);
     destroyDom(&comparisonTest->expectedDom);
-    destroyDataContainer(&comparisonTest->expectedDataContainer);
+    destroyTextStore(&comparisonTest->expectedTextStore);
 }

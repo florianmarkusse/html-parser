@@ -39,11 +39,11 @@ typedef struct {
 
 bool filterNode(node_id nodeID, const FilterType *filters, size_t filterslen,
                 const Dom *dom);
-indexID getTagID(const char *tag, const DataContainer *dataContainer);
-indexID getBoolPropID(const char *boolProp, const DataContainer *dataContainer);
-indexID getPropKeyID(const char *keyProp, const DataContainer *dataContainer);
+indexID getTagID(const char *tag, const TextStore *textStore);
+indexID getBoolPropID(const char *boolProp, const TextStore *textStore);
+indexID getPropKeyID(const char *keyProp, const TextStore *textStore);
 indexID getPropValueID(const char *valueProp,
-                       const DataContainer *dataContainer);
+                       const TextStore *textStore);
 
 QueryStatus filterByTagID(element_id tagID, const Dom *dom, node_id *results,
                           size_t *len);

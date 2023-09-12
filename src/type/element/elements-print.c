@@ -48,25 +48,25 @@ void printStringRegistryStatus(const StringRegistry *newElements) {
     printElementPages(&newElements->container);
 }
 
-void printPropertyStatus(DataContainer *dataContainer) {
+void printPropertyStatus(TextStore *textStore) {
     printf("printing property status...\n\n");
     printf("printing keys...\n");
-    printStringRegistryStatus(&dataContainer->propKeys);
+    printStringRegistryStatus(&textStore->propKeys);
     printf("printing values...\n");
-    printStringRegistryStatus(&dataContainer->propValues);
+    printStringRegistryStatus(&textStore->propValues);
 }
 
-void printBoolPropStatus(DataContainer *dataContainer) {
+void printBoolPropStatus(TextStore *textStore) {
     printf("printing bool property status...\n\n");
-    printStringRegistryStatus(&dataContainer->boolProps);
+    printStringRegistryStatus(&textStore->boolProps);
 }
 
-void printTextStatus(DataContainer *dataContainer) {
+void printTextStatus(TextStore *textStore) {
     printf("printing text status...\n\n");
-    printElementPages(&dataContainer->text);
+    printElementPages(&textStore->text);
 }
 
-void printTagStatus(DataContainer *dataContainer) {
+void printTagStatus(TextStore *textStore) {
     printf("printing tags status...\n\n");
-    printStringRegistryStatus(&dataContainer->tags);
+    printStringRegistryStatus(&textStore->tags);
 }

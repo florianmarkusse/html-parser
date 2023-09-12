@@ -19,14 +19,14 @@
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   docNode         The `DocumentNode` to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus prependDocumentNodeWithQuery(const char *cssQuery,
                                        const DocumentNode *docNode, Dom *dom,
-                                       DataContainer *dataContainer);
+                                       TextStore *textStore);
 
 /**
  * @brief Prepend a text node to the DOM using a CSS query.
@@ -38,13 +38,13 @@ DomStatus prependDocumentNodeWithQuery(const char *cssQuery,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   text            The text content to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus prependTextNodeWithQuery(const char *cssQuery, const char *text,
-                                   Dom *dom, DataContainer *dataContainer);
+                                   Dom *dom, TextStore *textStore);
 
 /**
  * @brief Prepend HTML content from a string to the DOM using a CSS query.
@@ -56,14 +56,14 @@ DomStatus prependTextNodeWithQuery(const char *cssQuery, const char *text,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   htmlString      The HTML content as a string to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus prependHTMLFromStringWithQuery(const char *cssQuery,
                                          const char *htmlString, Dom *dom,
-                                         DataContainer *dataContainer);
+                                         TextStore *textStore);
 
 /**
  * @brief Prepend HTML content from a file to the DOM using a CSS query.
@@ -76,14 +76,14 @@ DomStatus prependHTMLFromStringWithQuery(const char *cssQuery,
  * @param[in]   fileLocation    The file location of the HTML content to
  *                              prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus prependHTMLFromFileWithQuery(const char *cssQuery,
                                        const char *fileLocation, Dom *dom,
-                                       DataContainer *dataContainer);
+                                       TextStore *textStore);
 
 /**
  * @brief Prepend a DocumentNode to the DOM.
@@ -95,13 +95,13 @@ DomStatus prependHTMLFromFileWithQuery(const char *cssQuery,
  *                              `DocumentNode` will be prepended.
  * @param[in]   docNode         The `DocumentNode` to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus prependDocumentNode(node_id parentID, const DocumentNode *docNode,
-                              Dom *dom, DataContainer *dataContainer);
+                              Dom *dom, TextStore *textStore);
 
 /**
  * @brief Prepend a text node to the DOM.
@@ -113,13 +113,13 @@ DomStatus prependDocumentNode(node_id parentID, const DocumentNode *docNode,
  *                              will be prepended.
  * @param[in]   text            The text content to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus prependTextNode(node_id parentID, const char *text, Dom *dom,
-                          DataContainer *dataContainer);
+                          TextStore *textStore);
 
 /**
  * @brief Prepend HTML content from a string to the DOM.
@@ -131,12 +131,12 @@ DomStatus prependTextNode(node_id parentID, const char *text, Dom *dom,
  *                              will be prepended.
  * @param[in]   htmlString      The HTML content as a string to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   dataContainer   The data container.
+ * @param[in]   textStore   The text store.
  *
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 DomStatus prependHTMLFromString(node_id parentID, const char *htmlString,
-                                Dom *dom, DataContainer *dataContainer);
+                                Dom *dom, TextStore *textStore);
 
 #endif

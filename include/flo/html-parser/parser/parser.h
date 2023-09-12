@@ -12,11 +12,11 @@ typedef struct {
     size_t len;
 } __attribute__((aligned(128))) NodeDepth;
 
-DomStatus parse(const char *htmlString, Dom *dom, DataContainer *dataContainer);
+DomStatus parse(const char *htmlString, Dom *dom, TextStore *textStore);
 DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
-                               DataContainer *dataContainer,
+                               TextStore *textStore,
                                node_id *newNodeID);
 DomStatus parseTextElement(const char *text, Dom *dom,
-                           DataContainer *dataContainer, node_id *newNodeID);
+                           TextStore *textStore, node_id *newNodeID);
 
 #endif

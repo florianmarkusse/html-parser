@@ -23,10 +23,10 @@ typedef struct {
     StringRegistry propKeys;
     StringRegistry propValues;
     ElementsContainer text;
-} __attribute__((aligned(128))) DataContainer;
+} __attribute__((aligned(128))) TextStore;
 
-ElementStatus createDataContainer(DataContainer *dataContainer);
-void destroyDataContainer(DataContainer *dataContainer);
+ElementStatus createTextStore(TextStore *textStore);
+void destroyTextStore(TextStore *textStore);
 
 ElementStatus createElement(ElementsContainer *container, const char *element,
                             element_id *currentElementsLen, element_id offset,

@@ -56,7 +56,7 @@ static TestStatus testModification(const char *fileLocation1,
     if (newPropValue == NULL) {
         DomStatus domStatus =
             setTextContent(foundNode, propKey, &comparisonTest.startDom,
-                           &comparisonTest.startDataContainer);
+                           &comparisonTest.startTextStore);
         if (domStatus != DOM_SUCCESS) {
             return failWithMessage("Failed to set text content!\n",
                                    &comparisonTest);
@@ -64,7 +64,7 @@ static TestStatus testModification(const char *fileLocation1,
     } else {
         ElementStatus elementStatus = setPropertyValue(
             foundNode, propKey, newPropValue, &comparisonTest.startDom,
-            &comparisonTest.startDataContainer);
+            &comparisonTest.startTextStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             return failWithMessage("Failed to set property value!\n",
                                    &comparisonTest);

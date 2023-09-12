@@ -190,19 +190,19 @@ static TestStatus testReplacements(const char *fileLocation1,
     case REPLACEMENT_DOCUMENT_NODE: {
         domStatus = replaceWithDocumentNode(
             foundNode, &replacementInput->documentNode,
-            &comparisonTest.startDom, &comparisonTest.startDataContainer);
+            &comparisonTest.startDom, &comparisonTest.startTextStore);
         break;
     }
     case REPLACEMENT_TEXT_NODE: {
         domStatus = replaceWithTextNode(foundNode, replacementInput->text,
                                         &comparisonTest.startDom,
-                                        &comparisonTest.startDataContainer);
+                                        &comparisonTest.startTextStore);
         break;
     }
     case REPLACEMENT_FROM_STRING: {
         domStatus = replaceWithHTMLFromString(
             foundNode, replacementInput->text, &comparisonTest.startDom,
-            &comparisonTest.startDataContainer);
+            &comparisonTest.startTextStore);
         break;
     }
     default: {

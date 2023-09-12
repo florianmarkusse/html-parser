@@ -69,12 +69,12 @@ ElementStatus
 addPropertyToNodeStringsWithLength(const node_id nodeID, const char *keyBuffer,
                                    const size_t keyLen, const char *valueBuffer,
                                    const size_t valueLen, Dom *dom,
-                                   DataContainer *dataContainer) {
+                                   TextStore *textStore) {
     ElementStatus result = ELEMENT_SUCCESS;
 
     element_id keyID = 0;
     result = getCreatedPropIDFromString(PROPERTY_TYPE_KEY, keyBuffer, keyLen,
-                                        dom, &dataContainer->propKeys, &keyID);
+                                        dom, &textStore->propKeys, &keyID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
@@ -82,7 +82,7 @@ addPropertyToNodeStringsWithLength(const node_id nodeID, const char *keyBuffer,
     element_id valueID = 0;
     result =
         getCreatedPropIDFromString(PROPERTY_TYPE_VALUE, valueBuffer, valueLen,
-                                   dom, &dataContainer->propValues, &valueID);
+                                   dom, &textStore->propValues, &valueID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
@@ -98,21 +98,21 @@ addPropertyToNodeStringsWithLength(const node_id nodeID, const char *keyBuffer,
 ElementStatus addPropertyToNodeStrings(const node_id nodeID,
                                        const char *keyBuffer,
                                        const char *valueBuffer, Dom *dom,
-                                       DataContainer *dataContainer) {
+                                       TextStore *textStore) {
     return addPropertyToNodeStringsWithLength(
         nodeID, keyBuffer, strlen(keyBuffer), valueBuffer, strlen(valueBuffer),
-        dom, dataContainer);
+        dom, textStore);
 }
 
 ElementStatus addBooleanPropertyToNodeStringWithLength(
     const node_id nodeID, const char *boolPropBuffer, const size_t boolPropLen,
-    Dom *dom, DataContainer *dataContainer) {
+    Dom *dom, TextStore *textStore) {
     ElementStatus result = ELEMENT_SUCCESS;
 
     element_id boolPropID = 0;
     result = getCreatedPropIDFromString(PROPERTY_TYPE_BOOL, boolPropBuffer,
                                         boolPropLen, dom,
-                                        &dataContainer->boolProps, &boolPropID);
+                                        &textStore->boolProps, &boolPropID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
@@ -128,15 +128,15 @@ ElementStatus addBooleanPropertyToNodeStringWithLength(
 ElementStatus addBooleanPropertyToNodeString(const node_id nodeID,
                                              const char *boolPropBuffer,
                                              Dom *dom,
-                                             DataContainer *dataContainer) {
+                                             TextStore *textStore) {
     return addBooleanPropertyToNodeStringWithLength(
-        nodeID, boolPropBuffer, strlen(boolPropBuffer), dom, dataContainer);
+        nodeID, boolPropBuffer, strlen(boolPropBuffer), dom, textStore);
 }
 
 ElementStatus setPropertyValue(const node_id nodeID, const char *key,
                                const char *newValue, Dom *dom,
-                               DataContainer *dataContainer) {
-    element_id keyID = getPropKeyID(key, dataContainer);
+                               TextStore *textStore) {
+    element_id keyID = getPropKeyID(key, textStore);
     if (keyID == 0) {
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
@@ -149,7 +149,7 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
     element_id newValueID = 0;
     ElementStatus result = getCreatedPropIDFromString(
         PROPERTY_TYPE_VALUE, newValue, strlen(newValue), dom,
-        &dataContainer->propValues, &newValueID);
+        &textStore->propValues, &newValueID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
@@ -160,12 +160,12 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
 }
 
 DomStatus setTextContent(const node_id nodeID, const char *text, Dom *dom,
-                         DataContainer *dataContainer) {
+                         TextStore *textStore) {
     removeChildren(nodeID, dom);
 
     node_id newNodeID = 0;
     DomStatus domStatus =
-        parseTextElement(text, dom, dataContainer, &newNodeID);
+        parseTextElement(text, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse text element!\n");
         return domStatus;
@@ -176,7 +176,7 @@ DomStatus setTextContent(const node_id nodeID, const char *text, Dom *dom,
 
 ElementStatus addTextToTextNode(Node *node, const char *textStart,
                                 const size_t textLen, Dom *dom,
-                                DataContainer *dataContainer, bool isAppend) {
+                                TextStore *textStore, bool isAppend) {
     const char *prevText = node->text;
     const size_t mergedLen =
         strlen(prevText) + textLen + 2; // Adding a whitespace in between.
@@ -196,7 +196,7 @@ ElementStatus addTextToTextNode(Node *node, const char *textStart,
     buffer[mergedLen - 1] = '\0';
     char *dataLocation = NULL;
     ElementStatus elementStatus =
-        insertElement(&dataContainer->text, buffer, mergedLen, &dataLocation);
+        insertElement(&textStore->text, buffer, mergedLen, &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {
         ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
                              "Failed to insert text");
@@ -209,11 +209,11 @@ ElementStatus addTextToTextNode(Node *node, const char *textStart,
 
 DomStatus setTagOnDocumentNode(const char *tagStart, const size_t tagLen,
                                const node_id nodeID, const bool isPaired,
-                               Dom *dom, DataContainer *dataContainer) {
+                               Dom *dom, TextStore *textStore) {
     DomStatus domStatus = DOM_SUCCESS;
     HashElement hashElement;
     indexID newTagID = 0;
-    ElementStatus indexStatus = elementToIndex(&dataContainer->tags, tagStart,
+    ElementStatus indexStatus = elementToIndex(&textStore->tags, tagStart,
                                                tagLen, &hashElement, &newTagID);
 
     switch (indexStatus) {

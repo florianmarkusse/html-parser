@@ -8,10 +8,10 @@
 #include "flo/html-parser/utils/print/error.h"
 
 void printAttributes(const indexID tagID1, const StringHashSet *set1,
-                     const Dom *dom1, const DataContainer *dataContainer1,
+                     const Dom *dom1, const TextStore *textStore1,
                      const indexID tagID2, const StringHashSet *set2,
-                     const Dom *dom2, const DataContainer *dataContainer2) {
-    const char *tag1 = getTag(tagID1, dom1, dataContainer1);
+                     const Dom *dom2, const TextStore *textStore2) {
+    const char *tag1 = getTag(tagID1, dom1, textStore1);
     PRINT_ERROR("Printing certain attributes of node 1 with tag %s:\n", tag1);
 
     StringHashSetIterator iterator;
@@ -22,7 +22,7 @@ void printAttributes(const indexID tagID1, const StringHashSet *set1,
         PRINT_ERROR("%s\n", attribute);
     }
 
-    const char *tag2 = getTag(tagID2, dom2, dataContainer2);
+    const char *tag2 = getTag(tagID2, dom2, textStore2);
     PRINT_ERROR("Printing certain attributes of node 2 with tag %s:\n", tag2);
 
     initStringHashSetIterator(&iterator, set2);
@@ -34,7 +34,7 @@ void printAttributes(const indexID tagID1, const StringHashSet *set1,
 }
 
 HashStatus createPropsSet(const node_id nodeID, const Dom *dom,
-                          const DataContainer *dataContainer,
+                          const TextStore *textStore,
                           StringHashSet *keySet, StringHashSet *valueSet) {
     HashStatus status = HASH_SUCCESS;
     if ((status =
@@ -54,7 +54,7 @@ HashStatus createPropsSet(const node_id nodeID, const Dom *dom,
     for (size_t i = 0; i < dom->propsLen; i++) {
         if (dom->props[i].nodeID == nodeID) {
             indexID keyID = dom->props[i].keyID;
-            const char *propKey = getPropKey(keyID, dom, dataContainer);
+            const char *propKey = getPropKey(keyID, dom, textStore);
             if ((status = insertStringHashSet(keySet, propKey)) !=
                 HASH_SUCCESS) {
                 ERROR_WITH_CODE_FORMAT(hashStatusToString(status),
@@ -66,7 +66,7 @@ HashStatus createPropsSet(const node_id nodeID, const Dom *dom,
             }
 
             indexID valueID = dom->props[i].valueID;
-            const char *propValue = getPropValue(valueID, dom, dataContainer);
+            const char *propValue = getPropValue(valueID, dom, textStore);
             if ((status = insertStringHashSet(keySet, propValue)) !=
                 HASH_SUCCESS) {
                 ERROR_WITH_CODE_FORMAT(
@@ -83,16 +83,16 @@ HashStatus createPropsSet(const node_id nodeID, const Dom *dom,
 }
 
 ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
-                              const DataContainer *dataContainer1,
+                              const TextStore *textStore1,
                               const Node *node2, const Dom *dom2,
-                              const DataContainer *dataContainer2,
+                              const TextStore *textStore2,
                               const bool printDifferences) {
     HashStatus hashStatus = HASH_SUCCESS;
 
     StringHashSet keySet1;
     StringHashSet valueSet1;
 
-    if ((hashStatus = createPropsSet(node1->nodeID, dom1, dataContainer1,
+    if ((hashStatus = createPropsSet(node1->nodeID, dom1, textStore1,
                                      &keySet1, &valueSet1)) != HASH_SUCCESS) {
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -104,7 +104,7 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     StringHashSet keySet2;
     StringHashSet valueSet2;
 
-    if ((hashStatus = createPropsSet(node2->nodeID, dom2, dataContainer2,
+    if ((hashStatus = createPropsSet(node2->nodeID, dom2, textStore2,
                                      &keySet2, &valueSet2)) != HASH_SUCCESS) {
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -119,8 +119,8 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     if (result != COMPARISON_SUCCESS) {
         if (printDifferences) {
             PRINT_ERROR("Nodes contain different key props\n");
-            printAttributes(node1->tagID, &keySet1, dom1, dataContainer1,
-                            node2->tagID, &keySet2, dom2, dataContainer2);
+            printAttributes(node1->tagID, &keySet1, dom1, textStore1,
+                            node2->tagID, &keySet2, dom2, textStore2);
         }
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -133,8 +133,8 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
     if (result != COMPARISON_SUCCESS) {
         if (printDifferences) {
             PRINT_ERROR("Nodes contain different value props\n");
-            printAttributes(node1->tagID, &valueSet1, dom1, dataContainer1,
-                            node2->tagID, &valueSet2, dom2, dataContainer2);
+            printAttributes(node1->tagID, &valueSet1, dom1, textStore1,
+                            node2->tagID, &valueSet2, dom2, textStore2);
         }
         destroyStringHashSet(&keySet1);
         destroyStringHashSet(&valueSet1);
@@ -152,7 +152,7 @@ ComparisonStatus compareProps(const Node *node1, const Dom *dom1,
 }
 
 HashStatus createBoolPropsSet(const node_id nodeID, const Dom *dom,
-                              const DataContainer *dataContainer,
+                              const TextStore *textStore,
                               StringHashSet *set) {
     HashStatus status = HASH_SUCCESS;
     if ((status = initStringHashSet(set, MAX_PROPERTIES * 2) != HASH_SUCCESS)) {
@@ -164,7 +164,7 @@ HashStatus createBoolPropsSet(const node_id nodeID, const Dom *dom,
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
         if (dom->boolProps[i].nodeID == nodeID) {
             indexID propID = dom->boolProps[i].propID;
-            const char *boolProp = getBoolProp(propID, dom, dataContainer);
+            const char *boolProp = getBoolProp(propID, dom, textStore);
             if ((status = insertStringHashSet(set, boolProp)) != HASH_SUCCESS) {
                 ERROR_WITH_CODE_FORMAT(hashStatusToString(status),
                                        "Failed to insert %s into hash set",
@@ -179,13 +179,13 @@ HashStatus createBoolPropsSet(const node_id nodeID, const Dom *dom,
 }
 
 ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
-                                  const DataContainer *dataContainer1,
+                                  const TextStore *textStore1,
                                   const Node *node2, const Dom *dom2,
-                                  const DataContainer *dataContainer2,
+                                  const TextStore *textStore2,
                                   const bool printDifferences) {
     HashStatus hashStatus = HASH_SUCCESS;
     StringHashSet set1;
-    if ((hashStatus = createBoolPropsSet(node1->nodeID, dom1, dataContainer1,
+    if ((hashStatus = createBoolPropsSet(node1->nodeID, dom1, textStore1,
                                          &set1)) != HASH_SUCCESS) {
         ERROR_WITH_CODE_ONLY(hashStatusToString(hashStatus),
                              "Failed to create hash set 1");
@@ -193,7 +193,7 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
     }
 
     StringHashSet set2;
-    if ((hashStatus = createBoolPropsSet(node2->nodeID, dom2, dataContainer2,
+    if ((hashStatus = createBoolPropsSet(node2->nodeID, dom2, textStore2,
                                          &set2)) != HASH_SUCCESS) {
         destroyStringHashSet(&set1);
         ERROR_WITH_CODE_ONLY(hashStatusToString(hashStatus),
@@ -205,8 +205,8 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
 
     if (printDifferences && result != COMPARISON_SUCCESS) {
         PRINT_ERROR("Nodes contain different bool props\n");
-        printAttributes(node1->tagID, &set1, dom1, dataContainer1, node2->tagID,
-                        &set2, dom2, dataContainer2);
+        printAttributes(node1->tagID, &set1, dom1, textStore1, node2->tagID,
+                        &set2, dom2, textStore2);
     }
 
     destroyStringHashSet(&set1);
@@ -216,20 +216,20 @@ ComparisonStatus compareBoolProps(const Node *node1, const Dom *dom1,
 }
 
 bool tagStringEquals(const TagRegistration *tagRegistration1,
-                     const DataContainer *dataContainer1,
+                     const TextStore *textStore1,
                      const TagRegistration *tagRegistration2,
-                     const DataContainer *dataContainer2) {
-    const char *string1 = getStringFromHashSet(&dataContainer1->tags.set,
+                     const TextStore *textStore2) {
+    const char *string1 = getStringFromHashSet(&textStore1->tags.set,
                                                &tagRegistration1->hashElement);
-    const char *string2 = getStringFromHashSet(&dataContainer2->tags.set,
+    const char *string2 = getStringFromHashSet(&textStore2->tags.set,
                                                &tagRegistration2->hashElement);
     return strcmp(string1, string2) == 0;
 }
 
 ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
-                             const DataContainer *dataContainer1,
+                             const TextStore *textStore1,
                              const Node *node2, const Dom *dom2,
-                             const DataContainer *dataContainer2,
+                             const TextStore *textStore2,
                              const bool printDifferences) {
     if (node1->nodeType != node2->nodeType) {
         if (printDifferences) {
@@ -272,9 +272,9 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
                 }
 
                 const char *tag1 = getStringFromHashSet(
-                    &dataContainer1->tags.set, &tagRegistration1->hashElement);
+                    &textStore1->tags.set, &tagRegistration1->hashElement);
                 const char *tag2 = getStringFromHashSet(
-                    &dataContainer2->tags.set, &tagRegistration2->hashElement);
+                    &textStore2->tags.set, &tagRegistration2->hashElement);
                 PRINT_ERROR(
                     "Uncomparable nodes: single node and paired node.\nFound "
                     "single node in node %c.\n"
@@ -284,11 +284,11 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
             return COMPARISON_DIFFERENT_NODE_TYPE;
         }
 
-        if (!tagStringEquals(tagRegistration1, dataContainer1, tagRegistration2,
-                             dataContainer2)) {
+        if (!tagStringEquals(tagRegistration1, textStore1, tagRegistration2,
+                             textStore2)) {
             if (printDifferences) {
-                const char *tag1 = getTag(node1->nodeID, dom1, dataContainer1);
-                const char *tag2 = getTag(node2->nodeID, dom2, dataContainer2);
+                const char *tag1 = getTag(node1->nodeID, dom1, textStore1);
+                const char *tag2 = getTag(node2->nodeID, dom2, textStore2);
                 PRINT_ERROR("Nodes have different tags.\nnode 1 tag: %s\nnode "
                             "2 tag: %s\n",
                             tag1, tag2);
@@ -311,26 +311,26 @@ ComparisonStatus compareTags(const Node *node1, const Dom *dom1,
 }
 
 ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
-                             const DataContainer *dataContainer1,
+                             const TextStore *textStore1,
                              node_id *currNodeID2, const Dom *dom2,
-                             const DataContainer *dataContainer2) {
+                             const TextStore *textStore2) {
     Node node1 = dom1->nodes[*currNodeID1];
     Node node2 = dom2->nodes[*currNodeID2];
 
-    ComparisonStatus result = compareTags(&node1, dom1, dataContainer1, &node2,
-                                          dom2, dataContainer2, false);
+    ComparisonStatus result = compareTags(&node1, dom1, textStore1, &node2,
+                                          dom2, textStore2, false);
     if (result != COMPARISON_SUCCESS) {
         return result;
     }
 
     if (node1.nodeType == NODE_TYPE_DOCUMENT) {
-        result = compareBoolProps(&node1, dom1, dataContainer1, &node2, dom2,
-                                  dataContainer2, false);
+        result = compareBoolProps(&node1, dom1, textStore1, &node2, dom2,
+                                  textStore2, false);
         if (result != COMPARISON_SUCCESS) {
             return result;
         }
-        result = compareProps(&node1, dom1, dataContainer1, &node2, dom2,
-                              dataContainer2, false);
+        result = compareProps(&node1, dom1, textStore1, &node2, dom2,
+                              textStore2, false);
         if (result != COMPARISON_SUCCESS) {
             return result;
         }
@@ -342,8 +342,8 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
     *currNodeID2 = getFirstChild(*currNodeID2, dom2);
 
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp = compareNode(currNodeID1, dom1, dataContainer1,
-                                            currNodeID2, dom2, dataContainer2);
+        ComparisonStatus comp = compareNode(currNodeID1, dom1, textStore1,
+                                            currNodeID2, dom2, textStore2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -363,14 +363,14 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
 }
 
 ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
-                                const DataContainer *dataContainer1,
+                                const TextStore *textStore1,
                                 node_id *currNodeID2, const Dom *dom2,
-                                const DataContainer *dataContainer2) {
+                                const TextStore *textStore2) {
     *currNodeID1 = dom1->firstNodeID;
     *currNodeID2 = dom2->firstNodeID;
     while (*currNodeID1 && *currNodeID2) {
-        ComparisonStatus comp = compareNode(currNodeID1, dom1, dataContainer1,
-                                            currNodeID2, dom2, dataContainer2);
+        ComparisonStatus comp = compareNode(currNodeID1, dom1, textStore1,
+                                            currNodeID2, dom2, textStore2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -386,33 +386,33 @@ ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus equals(const Dom *dom1, const DataContainer *dataContainer1,
-                        const Dom *dom2, const DataContainer *dataContainer2) {
+ComparisonStatus equals(const Dom *dom1, const TextStore *textStore1,
+                        const Dom *dom2, const TextStore *textStore2) {
     node_id nodeID1 = 0;
     node_id nodeID2 = 0;
-    return equalsWithNode(&nodeID1, dom1, dataContainer1, &nodeID2, dom2,
-                          dataContainer2);
+    return equalsWithNode(&nodeID1, dom1, textStore1, &nodeID2, dom2,
+                          textStore2);
 }
 
 void printFirstDifference(const node_id nodeID1, const Dom *dom1,
-                          const DataContainer *dataContainer1,
+                          const TextStore *textStore1,
                           const node_id nodeID2, const Dom *dom2,
-                          const DataContainer *dataContainer2) {
+                          const TextStore *textStore2) {
     Node *node1 = &dom1->nodes[nodeID1];
     Node *node2 = &dom2->nodes[nodeID2];
 
-    if (compareTags(node1, dom1, dataContainer1, node2, dom2, dataContainer2,
+    if (compareTags(node1, dom1, textStore1, node2, dom2, textStore2,
                     true) != COMPARISON_SUCCESS) {
         return;
     }
 
     if (node1->nodeType == NODE_TYPE_DOCUMENT) {
-        if (compareBoolProps(node1, dom1, dataContainer1, node2, dom2,
-                             dataContainer2, true) != COMPARISON_SUCCESS) {
+        if (compareBoolProps(node1, dom1, textStore1, node2, dom2,
+                             textStore2, true) != COMPARISON_SUCCESS) {
             return;
         }
-        if (compareProps(node1, dom1, dataContainer1, node2, dom2,
-                         dataContainer2, true) != COMPARISON_SUCCESS) {
+        if (compareProps(node1, dom1, textStore1, node2, dom2,
+                         textStore2, true) != COMPARISON_SUCCESS) {
             return;
         }
     }

@@ -3,9 +3,9 @@
 
 #include "elements.h"
 
-void printPropertyStatus(DataContainer *dataContainer);
-void printBoolPropStatus(DataContainer *dataContainer);
-void printTextStatus(DataContainer *dataContainer);
-void printTagStatus(DataContainer *dataContainer);
+void printPropertyStatus(TextStore *textStore);
+void printBoolPropStatus(TextStore *textStore);
+void printTextStatus(TextStore *textStore);
+void printTagStatus(TextStore *textStore);
 
 #endif

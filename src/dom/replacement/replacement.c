@@ -17,45 +17,45 @@
 #include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/print/error.h"
 
-#define REPLACE_USING_QUERYSELECTOR(cssQuery, nodeData, dom, dataContainer,    \
+#define REPLACE_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,    \
                                     replaceWithFunction)                       \
     do {                                                                       \
         node_id parentNodeID = 0;                                              \
         QueryStatus queryResult =                                              \
-            querySelector(cssQuery, dom, dataContainer, &parentNodeID);        \
+            querySelector(cssQuery, dom, textStore, &parentNodeID);        \
         if (queryResult != QUERY_SUCCESS) {                                    \
             PRINT_ERROR("Could not find element using query selector: %s\n",   \
                         cssQuery);                                             \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
         return replaceWithFunction(parentNodeID, nodeData, dom,                \
-                                   dataContainer);                             \
+                                   textStore);                             \
     } while (0)
 
 DomStatus replaceWithDocumentNodeWithQuery(const char *cssQuery,
                                            const DocumentNode *docNode,
                                            Dom *dom,
-                                           DataContainer *dataContainer) {
-    REPLACE_USING_QUERYSELECTOR(cssQuery, docNode, dom, dataContainer,
+                                           TextStore *textStore) {
+    REPLACE_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
                                 replaceWithDocumentNode);
 }
 
 DomStatus replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
-                                       Dom *dom, DataContainer *dataContainer) {
-    REPLACE_USING_QUERYSELECTOR(cssQuery, text, dom, dataContainer,
+                                       Dom *dom, TextStore *textStore) {
+    REPLACE_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
                                 replaceWithTextNode);
 }
 
 DomStatus replaceWithHTMLFromStringWithQuery(const char *cssQuery,
                                              const char *htmlString, Dom *dom,
-                                             DataContainer *dataContainer) {
-    REPLACE_USING_QUERYSELECTOR(cssQuery, htmlString, dom, dataContainer,
+                                             TextStore *textStore) {
+    REPLACE_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
                                 replaceWithHTMLFromString);
 }
 
 DomStatus replaceWithHTMLFromFileWithQuery(const char *cssQuery,
                                            const char *fileLocation, Dom *dom,
-                                           DataContainer *dataContainer) {
+                                           TextStore *textStore) {
     char *buffer = NULL;
     FileStatus fileStatus = readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
@@ -64,7 +64,7 @@ DomStatus replaceWithHTMLFromFileWithQuery(const char *cssQuery,
         return DOM_ERROR_MEMORY;
     }
 
-    REPLACE_USING_QUERYSELECTOR(cssQuery, buffer, dom, dataContainer,
+    REPLACE_USING_QUERYSELECTOR(cssQuery, buffer, dom, textStore,
                                 replaceWithHTMLFromString);
 }
 
@@ -129,10 +129,10 @@ static DomStatus updateReferences(const node_id toReplaceNodeID,
 
 DomStatus replaceWithDocumentNode(node_id toReplaceNodeID,
                                   const DocumentNode *docNode, Dom *dom,
-                                  DataContainer *dataContainer) {
+                                  TextStore *textStore) {
     node_id newNodeID = 0;
     DomStatus domStatus =
-        parseDocumentElement(docNode, dom, dataContainer, &newNodeID);
+        parseDocumentElement(docNode, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse document element!\n");
         return domStatus;
@@ -142,14 +142,14 @@ DomStatus replaceWithDocumentNode(node_id toReplaceNodeID,
 
 MergeResult tryMergeBothSides(const node_id toReplaceNodeID,
                               const node_id replacingNodeID, Dom *dom,
-                              DataContainer *dataContainer) {
+                              TextStore *textStore) {
     Node *replacingNode = &dom->nodes[replacingNodeID];
     if (replacingNode->nodeType == NODE_TYPE_TEXT) {
         NextNode *previousNode = getPreviousNode(toReplaceNodeID, dom);
         if (previousNode != NULL) {
             MergeResult mergeTry =
                 tryMerge(&dom->nodes[previousNode->currentNodeID],
-                         replacingNode, dom, dataContainer, true);
+                         replacingNode, dom, textStore, true);
             if (mergeTry == FAILED_MERGE || mergeTry == COMPLETED_MERGE) {
                 return mergeTry;
             }
@@ -159,7 +159,7 @@ MergeResult tryMergeBothSides(const node_id toReplaceNodeID,
         if (nextNode != NULL) {
             MergeResult mergeTry =
                 tryMerge(&dom->nodes[nextNode->nextNodeID], replacingNode, dom,
-                         dataContainer, false);
+                         textStore, false);
             return mergeTry;
         }
     }
@@ -168,17 +168,17 @@ MergeResult tryMergeBothSides(const node_id toReplaceNodeID,
 }
 
 DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
-                              Dom *dom, DataContainer *dataContainer) {
+                              Dom *dom, TextStore *textStore) {
     node_id newNodeID = 0;
     DomStatus domStatus =
-        parseTextElement(text, dom, dataContainer, &newNodeID);
+        parseTextElement(text, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse text element!\n");
         return domStatus;
     }
 
     MergeResult mergeResult =
-        tryMergeBothSides(toReplaceNodeID, newNodeID, dom, dataContainer);
+        tryMergeBothSides(toReplaceNodeID, newNodeID, dom, textStore);
     if (mergeResult == COMPLETED_MERGE) {
         removeNode(newNodeID, dom);
         removeNode(toReplaceNodeID, dom);
@@ -194,9 +194,9 @@ DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
 
 DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
                                      const char *htmlString, Dom *dom,
-                                     DataContainer *dataContainer) {
+                                     TextStore *textStore) {
     node_id firstNewAddedNode = dom->nodeLen;
-    DomStatus domStatus = parse(htmlString, dom, dataContainer);
+    DomStatus domStatus = parse(htmlString, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse string!\n");
         return domStatus;
@@ -210,7 +210,7 @@ DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
             if (previousNode != NULL) {
                 MergeResult mergeResult =
                     tryMerge(&dom->nodes[previousNode->currentNodeID],
-                             firstAddedNode, dom, dataContainer, true);
+                             firstAddedNode, dom, textStore, true);
                 if (mergeResult == COMPLETED_MERGE) {
                     size_t secondNewAddedNode = getNext(firstNewAddedNode, dom);
                     removeNode(firstNewAddedNode, dom);
@@ -229,7 +229,7 @@ DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
             if (nextNode != NULL) {
                 MergeResult mergeResult = tryMerge(
                     &dom->nodes[nextNode->nextNodeID],
-                    &dom->nodes[lastNextNode], dom, dataContainer, false);
+                    &dom->nodes[lastNextNode], dom, textStore, false);
 
                 if (mergeResult == COMPLETED_MERGE) {
                     removeNode(lastNextNode, dom);
@@ -242,7 +242,7 @@ DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
         }
     } else {
         MergeResult mergeResult = tryMergeBothSides(
-            toReplaceNodeID, firstNewAddedNode, dom, dataContainer);
+            toReplaceNodeID, firstNewAddedNode, dom, textStore);
         if (mergeResult == COMPLETED_MERGE) {
             removeNode(firstNewAddedNode, dom);
             removeNode(toReplaceNodeID, dom);
