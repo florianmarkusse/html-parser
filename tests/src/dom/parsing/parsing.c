@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <flo/html-parser.h>
+#include <flo/html-parser/utils/memory/memory.h>
 #include <stdio.h>
 #include <string.h>
 

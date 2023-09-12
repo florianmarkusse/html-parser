@@ -1,5 +1,6 @@
 
 #include <flo/html-parser.h>
+#include <flo/html-parser/utils/memory/memory.h>
 
 #include "comparison-test.h"
 #include "integration-test.h"
@@ -73,11 +74,11 @@ static TestStatus parseQueryModify() {
     }
 
     prependHTMLFromString(currentNodeID,
-                           "<title "
-                           "id=\"first-title-tag\"></title><title>FIRST</"
-                           "title><title>SECOND</title><title>THIRD</title>",
-                           &comparisonTest.startDom,
-                           &comparisonTest.startDataContainer);
+                          "<title "
+                          "id=\"first-title-tag\"></title><title>FIRST</"
+                          "title><title>SECOND</title><title>THIRD</title>",
+                          &comparisonTest.startDom,
+                          &comparisonTest.startDataContainer);
 
     actual = querySelectorAll("title", &comparisonTest.startDom,
                               &comparisonTest.startDataContainer, &results,
