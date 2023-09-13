@@ -21,17 +21,14 @@
  * @param[in]   valueBuffer     The buffer containing the property value.
  * @param[in]   valueLen        The length of the property value.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus addPropertyToNodeStringsWithLength(node_id nodeID,
-                                                 const char *keyBuffer,
-                                                 size_t keyLen,
-                                                 const char *valueBuffer,
-                                                 size_t valueLen, Dom *dom,
-                                                 TextStore *textStore);
+ElementStatus addPropertyToNodeStringsWithLength(
+    node_id nodeID, const char *keyBuffer, size_t keyLen,
+    const char *valueBuffer, size_t valueLen, Dom *dom, TextStore *textStore);
 
 /**
  * @brief Add a property with specified key and value to an HTML element.
@@ -44,7 +41,7 @@ ElementStatus addPropertyToNodeStringsWithLength(node_id nodeID,
  * @param[in]   keyBuffer       The buffer containing the property key.
  * @param[in]   valueBuffer     The buffer containing the property value.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
@@ -65,7 +62,7 @@ ElementStatus addPropertyToNodeStrings(node_id nodeID, const char *keyBuffer,
  * @param[in]   boolPropBuffer  The buffer containing the boolean property.
  * @param[in]   boolPropLen     The length of the boolean property.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
@@ -84,15 +81,14 @@ ElementStatus addBooleanPropertyToNodeStringWithLength(
  *                              property will be added.
  * @param[in]   boolPropBuffer  The buffer containing the boolean property.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
 ElementStatus addBooleanPropertyToNodeString(node_id nodeID,
                                              const char *boolPropBuffer,
-                                             Dom *dom,
-                                             TextStore *textStore);
+                                             Dom *dom, TextStore *textStore);
 
 /**
  * @brief Set the value of an HTML element's property.
@@ -105,7 +101,7 @@ ElementStatus addBooleanPropertyToNodeString(node_id nodeID,
  * @param[in]   key             The key of the property to update.
  * @param[in]   newValue        The new value of the property.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the property update (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
@@ -124,7 +120,7 @@ ElementStatus setPropertyValue(node_id nodeID, const char *key,
  * @param[in]   nodeID          The ID of the HTML element to update.
  * @param[in]   text            The new text content.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the text content update (DOM_SUCCESS if successful,
  *          an error code otherwise).
@@ -144,7 +140,7 @@ DomStatus setTextContent(node_id nodeID, const char *text, Dom *dom,
  * @param[in]   textStart       A pointer to the start of the text content.
  * @param[in]   textLen         The length of the text content.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  * @param[in]   isAppend        Flag indicating whether to append or prepend the
  *                              text content.
  *
@@ -152,8 +148,8 @@ DomStatus setTextContent(node_id nodeID, const char *text, Dom *dom,
  *          an error code otherwise).
  */
 ElementStatus addTextToTextNode(Node *node, const char *textStart,
-                                size_t textLen, Dom *dom,
-                                TextStore *textStore, bool isAppend);
+                                size_t textLen, Dom *dom, TextStore *textStore,
+                                bool isAppend);
 
 /**
  * @brief Set the tag on a DocumentNode within the DOM.
@@ -167,9 +163,9 @@ ElementStatus addTextToTextNode(Node *node, const char *textStart,
  * @param[in]   tagLen          The length of the tag.
  * @param[in]   nodeID          The ID of the DocumentNode to update.
  * @param[in]   isPaired        Flag indicating whether the tag is paired or
- * not.
+ *                              not.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the tag setting operation (DOM_SUCCESS if successful,
  *          an error code otherwise).

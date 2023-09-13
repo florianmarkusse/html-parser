@@ -14,6 +14,9 @@
 // HTML document comparison
 #include "flo/html-parser/dom/comparison/comparison.h"
 
+// HTML document traversing
+#include "flo/html-parser/dom/traversal.h"
+
 // HTML document querying
 #include "flo/html-parser/dom/query/query.h"
 

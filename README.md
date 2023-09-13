@@ -1,6 +1,18 @@
-# HTML-PARSER
+# HTML-PARSER: Unleash the Power of Seamless HTML Parsing!
 
-This project contains an implementation of a lenient HTML-parser.
+Are you ready to dive into the world of effortless HTML parsing? Look no further! 🚀
+
+`html-parser` is not your ordinary HTML parsing library; it's a game-changer that combines speed, simplicity, and versatility in one extraordinary package. Say goodbye to the days of wrestling with clunky parsing tools and complex setups. With HTML-PARSER, you're in control!
+
+## What Makes `html-parser` So Special?
+
+- **No External Dependencies**: We believe in keeping things simple. That's why `html-parser` has zero external dependencies. Just grab it, build it, and you're good to go!
+
+- **Limitless Manipulation**: With a plethora of functions at your disposal, you can manipulate HTML documents like never before. Extract data, modify elements, or traverse the DOM tree with ease.
+
+- **Robust & Reliable**: `html-parser` is built with robustness in mind. It can gracefully handle even the most lenient HTML documents, so you can focus on your project without worrying about parsing quirks.
+
+- **Fast**: `html-parser` is designed for speed. Competitive benchmarks pending!
 
 ## Quick Example
 
@@ -10,10 +22,16 @@ In this section, you'll find a quick example to help you get started with the `h
 
 Before you begin, ensure that you have the `html-parser` library installed. Follow these straightforward steps for installation:
 
-1. **Install CMake:**
+1. **Clone the repository:**
+    Use the following command to clone this repository in your project (or favorite) folder:
+    ```shell
+    git clone https://github.com/florianmarkusse/html-parser.git
+    ```
+
+2. **Install CMake:**
    Make sure you have CMake installed on your system. You can find installation instructions [here](https://cmake.org/install/).
 
-2. **Build the Project:**
+3. **Build the Project:**
    Use the following commands to build the project based on your platform:
 
    - **For All Operating Systems:**
@@ -27,6 +45,8 @@ Before you begin, ensure that you have the `html-parser` library installed. Foll
      ```shell
      ./build.sh
      ```
+
+See [this section](#running-benchmarks-%26-tests) for more information on building and running the tests and benchmarks.
 
 
 ### Usage
@@ -266,10 +286,37 @@ The `html-parser` library provides a set of convenient functions to query and re
 
 - `getTextContent`: Retrieves the text content of a node, storing results in an array of strings. Remember to `free` this array as needed.
 
+### Traversal
+After querying, maybe you want to traverse the `Dom` to find the first child or the parent of the queries node. Here are some functions to do exactly that!
+
+- `getFirstChild`: Retrieves the ID of the first child node of a given node. Returns `0` if there are no child nodes.
+
+- `getFirstChildNode`: Returns a pointer to the `ParentChild` structure. Returns `NULL` if there are no child nodes.
+
+- `getNext`: Retrieves the ID of the next sibling node of a given node. Returns `0` if there are no more sibling nodes.
+
+- `getNextNode`: Returns a pointer to the `NextNode` structure. Returns `NULL` if there are no more sibling nodes.
+
+- `getPrevious`: Retrieves the ID of the previous sibling node of a given node. Returns `0` if there are no previous sibling nodes.
+
+- `getPreviousNode`: Returns a pointer to the `NextNode` structure. Returns `NULL` if there are no previous sibling nodes.
+
+- `getParent`: Retrieves the ID of the parent node of a given node. Returns `0` if there is no parent node.
+
+- `getParentNode`: Returns a pointer to the `ParentChild` structure. Returns `NULL` if there is no parent node.
+
+- `traverseDom`: Traverses the DOM structure from the specified node and returns the ID of the next node. Returns `0` if there are no more nodes to traverse.
+
+- `traverseNode`: Traverses the DOM structure of a specific to node with the given ID to traverse and returns the ID of the next node inside that specific node. Returns `0` if there are no more nodes in the specific node.
+
+- `getLastNext`: Retrieves the ID of the last next sibling node starting from a given node. Returns `0` if there are no more sibling nodes.
+
+- `getLastNextNode`: Returns a pointer to the `NextNode` structure representing the last next sibling node starting from a given node. Returns `NULL` if there are no more sibling nodes.
+
 
 ### Modifying
 
-Now that we have some `node_id`s after querying the `Dom`, we can modify the `Dom` to our heart's content. Again, these functions are split up into two levels: "dom-based" and "node-based". All operations modify the `Dom` in place.
+Now that we have some `node_id`s after querying and traversing the `Dom`, we can modify the `Dom` to our heart's content. Again, these functions are split up into two levels: "dom-based" and "node-based". All operations modify the `Dom` in place.
 
 #### Dom
 
@@ -293,13 +340,69 @@ For the sake of brevity, the `prepend...` and `replaceWith...` functions are lef
 
 #### Node
 
-### Printing
-After having modified the `Dom`, we often want to write out the resulting HTML. Below are a few functions that we provide:
+To make changes to specific nodes within the DOM, this library provides a set of functions for adding and updating properties, text content, and tags. These functions allow you to manipulate the HTML elements identified by their unique `node_id` within the DOM structure. Below are some key node modification functions:
 
+##### Adding Properties to an HTML Element
+
+- `addPropertyToNodeStringsWithLength`: Add a property with a specified key and value to an HTML element. This function takes the `node_id` of the target element, the property key, property value, and other necessary parameters.
+
+- `addPropertyToNodeStrings`: A simplified version of the above function for adding a single property to an HTML element.
+
+- `addBooleanPropertyToNodeStringWithLength`: Add a boolean property to an HTML element, specifying the property key, property value, and length.
+
+- `addBooleanPropertyToNodeString`: A simplified version of the above function for adding a single boolean property to an HTML element.
+
+- `setPropertyValue`: Set the value of an HTML element's property by specifying the `node_id`, property key, and the new value.
+
+- `setTextContent`: Set the text content of an HTML element identified by `node_id` to the specified text. This function allows you to update the content of an element. Note that this function will remove any child elements this node may have.
+
+- `addTextToTextNode`: Add text content to a text node within an HTML element. You can specify whether to append or prepend the text content. 
+
+- `setTagOnDocumentNode`: Set the tag for a DocumentNode within the DOM structure. You can specify the tag's start, length, and whether it is paired or not. 
+
+These functions provide a comprehensive set of tools for making precise modifications to the HTML elements within the DOM. You can use them to customize your parsed HTML content to suit your specific needs.
+
+### Printing & Writing
+Lastly, after making modifications to the parsed HTML content, you may want to output or print the resulting HTML. This library offers a set of functions to help you achieve this:
+
+- `printHTML`: Use this function to print the minified HTML representation. It displays all the elements, tags, and text content in a compact format. This is particularly helpful for inspecting the parsed HTML document directly within your program.
+
+- `writeHTMLToFile`: If you wish to save the parsed HTML document to a file, this function is your solution. It writes the minified HTML representation to the specified `filePath`. The function returns a status code to indicate the success or failure of the file-writing operation, making it easy to handle file I/O errors.
+
+- `printDomStatus`: This function allows you to print the status of the `Dom` and `TextStore`. It provides information about node counts, registrations, and other relevant details. It can be a valuable tool for debugging and gaining insights into the structure of the parsed DOM.
+
+These printing and writing functions provide essential utilities for interacting with and exporting the parsed HTML content, whether you need to debug, inspect, or save the modified DOM structure to a file for further use.
 
 ## Contributing
 It would be amazing if you are willing to contribute to the project. Please look at any issues if they are present or reach out to [the maintainer](https://github.com/florianmarkusse) to collaborate!
 
+### Running Benchmarks & Tests
+This repository comes with tests and a simple benchmarking tool included. If you want to run these programs, please follow these steps:
+
+#### Build the Project:
+   Use the following commands to build the project based on your platform:
+
+   - **For All Operating Systems:**
+     ```shell
+     cmake -S . -B build/ -D CMAKE_BUILD_TYPE="Release" -D BUILD_SHARED_LIBS="false" -D BUILD_TESTS="true" -D BUILD_BENCHMARKS="true"
+     cmake --build build/
+     ```
+
+   - **For Linux or macOS:**
+     If you are on Linux or macOS, you can use the provided `build.sh` script. Run the script with the `-h` flag to view all available build options:
+     ```shell
+     ./build.sh -t -b
+     ```
+
+#### Running Tests
+```shell
+build/tests/html-parser-tests-Release
+```
+
+#### Running Benchmarks
+```shell
+build/benchmarks/html-parser-benchmarks-Release
+```
+
 ---
 **NB**: Since this parser is lenient, it can probably also be used to parse XML, or similar markup languages. Be advised, this has not been tested and is not the goal of this project.
-

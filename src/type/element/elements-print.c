@@ -14,7 +14,7 @@ void printElements(const size_t currentLen,
 
 void printElementPages(const ElementsContainer *container) {
     printf("element pages...\n");
-    printf("%-15s: %hhu\n", "pages length", container->pageLen);
+    printf("%-15s: %zu\n", "pages length", container->pageLen);
     for (size_t i = 0; i < container->pageLen; i++) {
         printf("%-15s: %lu\n", "space left", container->pages[i].spaceLeft);
 
@@ -48,7 +48,7 @@ void printStringRegistryStatus(const StringRegistry *newElements) {
     printElementPages(&newElements->container);
 }
 
-void printPropertyStatus(TextStore *textStore) {
+void printPropertyStatus(const TextStore *textStore) {
     printf("printing property status...\n\n");
     printf("printing keys...\n");
     printStringRegistryStatus(&textStore->propKeys);
@@ -56,17 +56,17 @@ void printPropertyStatus(TextStore *textStore) {
     printStringRegistryStatus(&textStore->propValues);
 }
 
-void printBoolPropStatus(TextStore *textStore) {
+void printBoolPropStatus(const TextStore *textStore) {
     printf("printing bool property status...\n\n");
     printStringRegistryStatus(&textStore->boolProps);
 }
 
-void printTextStatus(TextStore *textStore) {
+void printTextStatus(const TextStore *textStore) {
     printf("printing text status...\n\n");
     printElementPages(&textStore->text);
 }
 
-void printTagStatus(TextStore *textStore) {
+void printTagStatus(const TextStore *textStore) {
     printf("printing tags status...\n\n");
     printStringRegistryStatus(&textStore->tags);
 }

@@ -4,6 +4,7 @@
 #include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/traversal.h"
+#include "flo/html-parser/type/element/elements-print.h"
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/path.h"
 
@@ -109,6 +110,14 @@ void printBasicRegistry(const char *registryName,
 
 void printDomStatus(const Dom *dom, const TextStore *textStore) {
     printf("printing DOM status...\n\n");
+
+    printf("Printing Text Store contents...\n");
+    printPropertyStatus(textStore);
+    printBoolPropStatus(textStore);
+    printTextStatus(textStore);
+    printTagStatus(textStore);
+
+    printf("Printing DOM contents...\n");
 
     printf("nodes inside DOM...\n");
     printf("total number of nodes: %zu\n", dom->nodeLen);
