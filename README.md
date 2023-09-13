@@ -14,6 +14,9 @@ Are you ready to dive into the world of effortless HTML parsing? Look no further
 
 - **Fast**: `html-parser` is designed for speed. Competitive benchmarks pending!
 
+## Demo Project
+To see a complete example of how to install and use the `html-parser` library in a project, you can explore the [html-parser-demo-c repository](https://github.com/florianmarkusse/html-parser-demo-c). This demo project provides a practical demonstration of integrating and utilizing the `html-parser` library in a C application.
+
 ## Quick Example
 
 In this section, you'll find a quick example to help you get started with the `html-parser` library. The example provides a clear overview of the library's essential features and how to use them.
@@ -32,7 +35,7 @@ Before you begin, ensure that you have the `html-parser` library installed. Foll
    Make sure you have CMake installed on your system. You can find installation instructions [here](https://cmake.org/install/).
 
 3. **Build the Project:**
-   Use the following commands to build the project based on your platform:
+   Use the following commands inside the root folder of the repository to build the project based on your platform:
 
    - **For All Operating Systems:**
      ```shell
@@ -47,6 +50,10 @@ Before you begin, ensure that you have the `html-parser` library installed. Foll
      ```
 
 See [this section](#running-benchmarks-%26-tests) for more information on building and running the tests and benchmarks.
+
+
+### Demo project
+
 
 
 ### Usage
@@ -403,6 +410,10 @@ build/tests/html-parser-tests-Release
 ```shell
 build/benchmarks/html-parser-benchmarks-Release
 ```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/florianmarkusse/html-parser-demo-c/blob/main/LICENSE) file for details.
 
 ---
 **NB**: Since this parser is lenient, it can probably also be used to parse XML, or similar markup languages. Be advised, this has not been tested and is not the goal of this project.
