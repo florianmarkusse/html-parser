@@ -63,7 +63,7 @@ target_compile_options(${LIBRARY_NAME} PRIVATE
 )
 
 target_compile_definitions(${LIBRARY_NAME} PRIVATE
-    $<$<CONFIG:Debug>:ENABLE_DEBUG_MACRO>
+    $<$<CONFIG:Debug>:>
     $<$<CONFIG:Release>:>
     $<$<CONFIG:Profiling>:>
 )
