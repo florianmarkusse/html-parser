@@ -51,11 +51,6 @@ Before you begin, ensure that you have the `html-parser` library installed. Foll
 
 See [this section](#running-benchmarks-%26-tests) for more information on building and running the tests and benchmarks.
 
-
-### Demo project
-
-
-
 ### Usage
 Here's a comprehensive example showcasing how to use the html-parser library to parse and manipulate an HTML document using C:
 
