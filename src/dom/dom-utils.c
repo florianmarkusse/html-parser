@@ -12,9 +12,9 @@
 flo_html_DomStatus flo_html_createNode(flo_html_node_id *nodeID,
                                        const flo_html_NodeType nodeType,
                                        flo_html_Dom *dom) {
-    if ((dom->nodes = flo_html_resizeArray(dom->nodes, dom->nodeLen, &dom->nodeCap,
-                                  sizeof(flo_html_Node),
-                                  FLO_HTML_NODES_PER_PAGE)) == NULL) {
+    if ((dom->nodes = flo_html_resizeArray(dom->nodes, dom->nodeLen,
+                                           &dom->nodeCap, sizeof(flo_html_Node),
+                                           FLO_HTML_NODES_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 
@@ -64,10 +64,10 @@ flo_html_DomStatus flo_html_addParentFirstChild(const flo_html_node_id parentID,
 flo_html_DomStatus flo_html_addParentChild(const flo_html_node_id parentID,
                                            const flo_html_node_id childID,
                                            flo_html_Dom *dom) {
-    if ((dom->parentChilds =
-             flo_html_resizeArray(dom->parentChilds, dom->parentChildLen,
-                         &dom->parentChildCap, sizeof(flo_html_ParentChild),
-                         FLO_HTML_PARENT_CHILDS_PER_PAGE)) == NULL) {
+    if ((dom->parentChilds = flo_html_resizeArray(
+             dom->parentChilds, dom->parentChildLen, &dom->parentChildCap,
+             sizeof(flo_html_ParentChild), FLO_HTML_PARENT_CHILDS_PER_PAGE)) ==
+        NULL) {
         return DOM_ERROR_MEMORY;
     }
 
@@ -83,9 +83,9 @@ flo_html_DomStatus flo_html_addNextNode(const flo_html_node_id currentNodeID,
                                         const flo_html_node_id nextNodeID,
                                         flo_html_Dom *dom) {
     if ((dom->nextNodes =
-             flo_html_resizeArray(dom->nextNodes, dom->nextNodeLen, &dom->nextNodeCap,
-                         sizeof(flo_html_NextNode),
-                         NEXT_FLO_HTML_NODES_PER_PAGE)) == NULL) {
+             flo_html_resizeArray(dom->nextNodes, dom->nextNodeLen,
+                                  &dom->nextNodeCap, sizeof(flo_html_NextNode),
+                                  NEXT_FLO_HTML_NODES_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 
@@ -99,10 +99,10 @@ flo_html_DomStatus flo_html_addNextNode(const flo_html_node_id currentNodeID,
 flo_html_DomStatus flo_html_addBooleanProperty(const flo_html_node_id nodeID,
                                                const flo_html_element_id propID,
                                                flo_html_Dom *dom) {
-    if ((dom->boolProps =
-             flo_html_resizeArray(dom->boolProps, dom->boolPropsLen, &dom->boolPropsCap,
-                         sizeof(flo_html_BooleanProperty),
-                         BOOLEAN_PROPERTIES_PER_PAGE)) == NULL) {
+    if ((dom->boolProps = flo_html_resizeArray(
+             dom->boolProps, dom->boolPropsLen, &dom->boolPropsCap,
+             sizeof(flo_html_BooleanProperty), BOOLEAN_PROPERTIES_PER_PAGE)) ==
+        NULL) {
         return DOM_ERROR_MEMORY;
     }
 
@@ -118,9 +118,9 @@ flo_html_DomStatus flo_html_addProperty(const flo_html_node_id nodeID,
                                         const flo_html_element_id keyID,
                                         const flo_html_element_id valueID,
                                         flo_html_Dom *dom) {
-    if ((dom->props = flo_html_resizeArray(dom->props, dom->propsLen, &dom->propsCap,
-                                  sizeof(flo_html_Property),
-                                  PROPERTIES_PER_PAGE)) == NULL) {
+    if ((dom->props = flo_html_resizeArray(
+             dom->props, dom->propsLen, &dom->propsCap,
+             sizeof(flo_html_Property), PROPERTIES_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 
@@ -183,7 +183,8 @@ flo_html_MergeResult flo_html_tryMerge(flo_html_Node *possibleMergeNode,
             possibleMergeNode, replacingNode->text, strlen(replacingNode->text),
             dom, textStore, isAppend);
         if (elementStatus != ELEMENT_CREATED) {
-            FLO_HTML_PRINT_ERROR("Failed to merge new text node with up node!\n");
+            FLO_HTML_PRINT_ERROR(
+                "Failed to merge new text node with up node!\n");
             return FAILED_MERGE;
         }
         return COMPLETED_MERGE;

@@ -46,8 +46,9 @@ void flo_html_printHTML(const flo_html_Dom *dom,
  *          completed, an error code otherwise). See @ref
  *          "flo/html-parser/utils/file/file-status.h#flo_html_FileStatus".
  */
-flo_html_FileStatus flo_html_writeHTMLToFile(const flo_html_Dom *dom,
-                                    const flo_html_TextStore *textStore,
-                                    const char *filePath);
+flo_html_FileStatus
+flo_html_writeHTMLToFile(const flo_html_Dom *dom,
+                         const flo_html_TextStore *textStore,
+                         const char *filePath);
 
 #endif

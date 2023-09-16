@@ -24,12 +24,11 @@
  *          otherwise). See @ref
  *          "flo/html-parser/comparison-status.h#flo_html_ComparisonStatus".
  */
-flo_html_ComparisonStatus flo_html_equalsWithNode(flo_html_node_id *currNodeID1,
-                                         const flo_html_Dom *dom1,
-                                         const flo_html_TextStore *textStore1,
-                                         flo_html_node_id *currNodeID2,
-                                         const flo_html_Dom *dom2,
-                                         const flo_html_TextStore *textStore2);
+flo_html_ComparisonStatus
+flo_html_equalsWithNode(flo_html_node_id *currNodeID1, const flo_html_Dom *dom1,
+                        const flo_html_TextStore *textStore1,
+                        flo_html_node_id *currNodeID2, const flo_html_Dom *dom2,
+                        const flo_html_TextStore *textStore2);
 
 /**
  * @brief Compare two DOM structures.
@@ -48,9 +47,9 @@ flo_html_ComparisonStatus flo_html_equalsWithNode(flo_html_node_id *currNodeID1,
  *          "flo/html-parser/comparison-status.h#flo_html_ComparisonStatus".
  */
 flo_html_ComparisonStatus flo_html_equals(const flo_html_Dom *dom1,
-                                 const flo_html_TextStore *textStore1,
-                                 const flo_html_Dom *dom2,
-                                 const flo_html_TextStore *textStore2);
+                                          const flo_html_TextStore *textStore1,
+                                          const flo_html_Dom *dom2,
+                                          const flo_html_TextStore *textStore2);
 
 /**
  * @brief Print the first difference between two nodes.
@@ -65,9 +64,11 @@ flo_html_ComparisonStatus flo_html_equals(const flo_html_Dom *dom1,
  * @param[in]   dom2                The second DOM structure to compare.
  * @param[in]   textStore2      The text store for the second DOM.
  */
-void flo_html_printFirstDifference(flo_html_node_id nodeID1, const flo_html_Dom *dom1,
+void flo_html_printFirstDifference(flo_html_node_id nodeID1,
+                                   const flo_html_Dom *dom1,
                                    const flo_html_TextStore *textStore1,
-                                   flo_html_node_id nodeID2, const flo_html_Dom *dom2,
+                                   flo_html_node_id nodeID2,
+                                   const flo_html_Dom *dom2,
                                    const flo_html_TextStore *textStore2);
 
 #endif

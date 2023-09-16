@@ -37,8 +37,8 @@ void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom);
  * @param[in]   dom             The DOM structure.
  * @param[in]   textStore   The text store.
  */
-void flo_html_removeBooleanProperty(flo_html_node_id nodeID, const char *boolProp,
-                                    flo_html_Dom *dom,
+void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
+                                    const char *boolProp, flo_html_Dom *dom,
                                     const flo_html_TextStore *textStore);
 
 /**

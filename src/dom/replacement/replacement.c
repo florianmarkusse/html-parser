@@ -24,8 +24,9 @@
         flo_html_QueryStatus queryResult =                                     \
             flo_html_querySelector(cssQuery, dom, textStore, &parentNodeID);   \
         if (queryResult != QUERY_SUCCESS) {                                    \
-            FLO_HTML_PRINT_ERROR("Could not find element using query selector: %s\n",   \
-                        cssQuery);                                             \
+            FLO_HTML_PRINT_ERROR(                                              \
+                "Could not find element using query selector: %s\n",           \
+                cssQuery);                                                     \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
         return replaceWithFunction(parentNodeID, nodeData, dom, textStore);    \
@@ -60,7 +61,8 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
     flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
-                               "Failed to read file: \"%s\"", fileLocation);
+                                        "Failed to read file: \"%s\"",
+                                        fileLocation);
         return DOM_ERROR_MEMORY;
     }
 

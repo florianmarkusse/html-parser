@@ -17,7 +17,8 @@
  * @return  The type of the node (e.g., NODE_TYPE_DOCUMENT, NODE_TYPE_TEXT,
  * etc.). See @ref /flo/html-parser/type/node/node.h#flo_html_NodeType.
  */
-flo_html_NodeType flo_html_getflo_html_NodeType(flo_html_node_id nodeID, const flo_html_Dom *dom);
+flo_html_NodeType flo_html_getflo_html_NodeType(flo_html_node_id nodeID,
+                                                const flo_html_Dom *dom);
 
 /**
  * @brief Check if a DOM node has a boolean property.

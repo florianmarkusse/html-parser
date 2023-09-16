@@ -40,8 +40,9 @@ flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore) {
     if ((currentStatus = flo_html_initStringRegistry(
              &textStore->tags, FLO_HTML_TOTAL_ELEMENTS,
              FLO_HTML_TAGS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(currentStatus),
-                             "Failed to initialize tags string registry!\n");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_elementStatusToString(currentStatus),
+            "Failed to initialize tags string registry!\n");
         result = currentStatus;
     }
 
@@ -75,8 +76,9 @@ flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore) {
     if ((currentStatus = initflo_html_ElementsContainer(
                              &textStore->text, FLO_HTML_TEXT_PAGE_SIZE) !=
                          ELEMENT_SUCCESS)) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(currentStatus),
-                             "Failed to initialize text elements container!\n");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_elementStatusToString(currentStatus),
+            "Failed to initialize text elements container!\n");
         result = currentStatus;
     }
 
@@ -99,15 +101,17 @@ flo_html_ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
                                         const char *elementStart,
                                         const size_t elementLength) {
     if (elementLength >= bufferLen) {
-        FLO_HTML_PRINT_ERROR("Element is too long, size=%zu, to fit into page.\n",
-                    elementLength);
+        FLO_HTML_PRINT_ERROR(
+            "Element is too long, size=%zu, to fit into page.\n",
+            elementLength);
         FLO_HTML_PRINT_ERROR("Printing first part of element:\n");
 
         memcpy(buffer, elementStart, bufferLen - 1);
         buffer[bufferLen - 1] = '\0';
 
         FLO_HTML_PRINT_ERROR("%s\n", buffer);
-        FLO_HTML_PRINT_ERROR("max size is %zu (null terminator :))\n", bufferLen - 1);
+        FLO_HTML_PRINT_ERROR("max size is %zu (null terminator :))\n",
+                             bufferLen - 1);
 
         return ELEMENT_TOO_LONG;
     }
@@ -124,9 +128,9 @@ flo_html_ElementStatus createNewElement(flo_html_StringRegistry *stringRegistry,
         element, strlen(element) + 1, FLO_HTML_TOTAL_PAGES, stringRegistry,
         hashElement, flo_html_indexID);
     if (insertStatus != DATA_PAGE_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_dataPageStatusToString(insertStatus),
-                               "Could not find or create element \"%s\"",
-                               element);
+        FLO_HTML_ERROR_WITH_CODE_FORMAT(
+            flo_html_dataPageStatusToString(insertStatus),
+            "Could not find or create element \"%s\"", element);
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
 
@@ -137,11 +141,11 @@ flo_html_ElementStatus createNewElement(flo_html_StringRegistry *stringRegistry,
  * If the element is found, then  flo_html_indexID is set.
  * flo_html_HashElement is always set.
  */
-flo_html_ElementStatus flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
-                                      const char *elementStart,
-                                      size_t elementLength,
-                                      flo_html_HashElement *hashElement,
-                                      flo_html_indexID *flo_html_indexID) {
+flo_html_ElementStatus
+flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
+                        const char *elementStart, size_t elementLength,
+                        flo_html_HashElement *hashElement,
+                        flo_html_indexID *flo_html_indexID) {
     char buffer[stringRegistry->container.pageSize];
     const flo_html_ElementStatus sizeCheck =
         elementSizeCheck(buffer, stringRegistry->container.pageSize,
@@ -164,8 +168,8 @@ flo_html_ElementStatus flo_html_elementToIndex(flo_html_StringRegistry *stringRe
 
 flo_html_ElementStatus
 flo_html_insertElement(flo_html_ElementsContainer *elementsContainer,
-              const char *elementStart, size_t elementLength,
-              char **dataLocation) {
+                       const char *elementStart, size_t elementLength,
+                       char **dataLocation) {
     char buffer[elementsContainer->pageSize];
     const flo_html_ElementStatus sizeCheck = elementSizeCheck(
         buffer, elementsContainer->pageSize, elementStart, elementLength);
@@ -181,8 +185,9 @@ flo_html_insertElement(flo_html_ElementsContainer *elementsContainer,
                                         FLO_HTML_TOTAL_PAGES, elementsContainer,
                                         dataLocation);
     if (dataPageStatus != DATA_PAGE_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_dataPageStatusToString(dataPageStatus),
-                             "Failed to insert element\n");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_dataPageStatusToString(dataPageStatus),
+            "Failed to insert element\n");
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
 

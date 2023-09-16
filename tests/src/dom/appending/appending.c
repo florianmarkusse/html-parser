@@ -1,4 +1,3 @@
-
 #include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stdio.h>

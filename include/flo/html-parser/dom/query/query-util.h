@@ -42,8 +42,9 @@ typedef struct {
     } data;
 } __attribute__((aligned(8))) flo_html_FilterType;
 
-bool flo_html_filterNode(flo_html_node_id nodeID, const flo_html_FilterType *filters,
-                         size_t filterslen, const flo_html_Dom *dom);
+bool flo_html_filterNode(flo_html_node_id nodeID,
+                         const flo_html_FilterType *filters, size_t filterslen,
+                         const flo_html_Dom *dom);
 flo_html_indexID flo_html_getTagID(const char *tag,
                                    const flo_html_TextStore *textStore);
 flo_html_indexID flo_html_getBoolPropID(const char *boolProp,
@@ -55,7 +56,8 @@ flo_html_indexID flo_html_getPropValueID(const char *valueProp,
 
 flo_html_QueryStatus flo_html_filterByTagID(flo_html_element_id tagID,
                                             const flo_html_Dom *dom,
-                                            flo_html_node_id *results, size_t *len);
+                                            flo_html_node_id *results,
+                                            size_t *len);
 flo_html_QueryStatus flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     size_t filtersLen, const flo_html_Dom *dom, flo_html_Uint16HashSet *set);

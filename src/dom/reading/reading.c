@@ -102,9 +102,11 @@ flo_html_QueryStatus flo_html_getTextContent(const flo_html_node_id nodeID,
         flo_html_Node node = dom->nodes[currentNodeID];
 
         if (node.nodeType == NODE_TYPE_TEXT) {
-            if ((*results = flo_html_resizeArray(*results, *reusultsLen, &currentCap,
-                                        sizeof(const char *), 64)) == NULL) {
-                FLO_HTML_PRINT_ERROR("Failed to allocate memory for results array!\n");
+            if ((*results =
+                     flo_html_resizeArray(*results, *reusultsLen, &currentCap,
+                                          sizeof(const char *), 64)) == NULL) {
+                FLO_HTML_PRINT_ERROR(
+                    "Failed to allocate memory for results array!\n");
                 return QUERY_MEMORY_ERROR;
             }
 

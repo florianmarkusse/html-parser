@@ -37,8 +37,9 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     flo_html_TextStore textStore;
     flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(initStatus),
-                             "Failed to initialize text store");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_elementStatusToString(initStatus),
+            "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 

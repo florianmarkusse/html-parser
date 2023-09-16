@@ -23,8 +23,9 @@
         flo_html_QueryStatus queryResult =                                     \
             flo_html_querySelector(cssQuery, dom, textStore, &parentNodeID);   \
         if (queryResult != QUERY_SUCCESS) {                                    \
-            FLO_HTML_PRINT_ERROR("Could not find element using query selector: %s\n",   \
-                        cssQuery);                                             \
+            FLO_HTML_PRINT_ERROR(                                              \
+                "Could not find element using query selector: %s\n",           \
+                cssQuery);                                                     \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
         return prependFunction(parentNodeID, nodeData, dom, textStore);        \
@@ -59,7 +60,8 @@ flo_html_DomStatus flo_html_prependHTMLFromFileWithQuery(
     flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
-                               "Failed to read file: \"%s\"", fileLocation);
+                                        "Failed to read file: \"%s\"",
+                                        fileLocation);
         return DOM_ERROR_MEMORY;
     }
 
@@ -86,7 +88,8 @@ updateReferences(const flo_html_node_id parentID,
             domStatus =
                 flo_html_addNextNode(lastNextNode, previousFirstNodeID, dom);
             if (domStatus != DOM_SUCCESS) {
-                FLO_HTML_PRINT_ERROR("Failed to add new node ID in next nodes!\n");
+                FLO_HTML_PRINT_ERROR(
+                    "Failed to add new node ID in next nodes!\n");
                 return domStatus;
             }
         }

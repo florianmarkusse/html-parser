@@ -101,7 +101,8 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
     }
 
     size_t elementStartIndex = *currentPosition;
-    while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '>' && ch != '\0') {
+    while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '>' &&
+           ch != '\0') {
         ch = htmlString[++(*currentPosition)];
     }
     size_t elementLen = *currentPosition - elementStartIndex;
@@ -373,8 +374,9 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
             flo_html_addTextToTextNode(prevNode, &htmlString[elementStartIndex],
                                        elementLen, dom, textStore, true);
         if (elementStatus != ELEMENT_CREATED) {
-            FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
-                                 "Failed to insert text");
+            FLO_HTML_ERROR_WITH_CODE_ONLY(
+                flo_html_elementStatusToString(elementStatus),
+                "Failed to insert text");
             return DOM_NO_ELEMENT;
         }
     } else {
@@ -389,8 +391,9 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
                                                &htmlString[elementStartIndex],
                                                elementLen, &dataLocation);
         if (elementStatus != ELEMENT_CREATED) {
-            FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
-                                 "Failed to index text!\n");
+            FLO_HTML_ERROR_WITH_CODE_ONLY(
+                flo_html_elementStatusToString(elementStatus),
+                "Failed to index text!\n");
             return DOM_NO_ELEMENT;
         }
 
@@ -426,8 +429,9 @@ flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
 
         // Text node.
         if (context != BASIC_CONTEXT || ch != '<' ||
-            (ch == '<' && (htmlString[currentPosition + 1] == ' ' ||
-                           flo_html_isSpecialSpace(htmlString[currentPosition + 1])))) {
+            (ch == '<' &&
+             (htmlString[currentPosition + 1] == ' ' ||
+              flo_html_isSpecialSpace(htmlString[currentPosition + 1])))) {
             if (context == BASIC_CONTEXT && ch == '<' &&
                 (htmlString[currentPosition + 1] == ' ' ||
                  flo_html_isSpecialSpace(htmlString[currentPosition + 1]))) {
@@ -521,7 +525,8 @@ flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
                 }
                 if (!isSingle) {
                     if (nodeStack.len >= FLO_HTML_MAX_NODE_DEPTH) {
-                        FLO_HTML_PRINT_ERROR("Reached max node depth, aborting\n");
+                        FLO_HTML_PRINT_ERROR(
+                            "Reached max node depth, aborting\n");
                         return DOM_TOO_DEEP;
                     }
                     nodeStack.stack[nodeStack.len] = lastParsedNodeID;
@@ -559,7 +564,8 @@ flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
             flo_html_addBooleanPropertyToNodeString(*newNodeID, boolProp, dom,
                                                     textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
-            FLO_HTML_PRINT_ERROR("Failed to boolean property to new node ID!\n");
+            FLO_HTML_PRINT_ERROR(
+                "Failed to boolean property to new node ID!\n");
             return DOM_NO_ELEMENT;
         }
     }
@@ -594,8 +600,9 @@ flo_html_DomStatus flo_html_parseTextElement(const char *text,
     flo_html_ElementStatus elementStatus = flo_html_insertElement(
         &textStore->text, text, strlen(text), &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
-                             "Failed to index text!\n");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_elementStatusToString(elementStatus),
+            "Failed to index text!\n");
         return DOM_NO_ELEMENT;
     }
 

@@ -55,7 +55,8 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
             break;
         }
         default: {
-            FLO_HTML_PRINT_ERROR("Unknown attribute selector in filter function\n");
+            FLO_HTML_PRINT_ERROR(
+                "Unknown attribute selector in filter function\n");
             return false;
         }
         }
@@ -110,8 +111,9 @@ flo_html_QueryStatus flo_html_getNodesWithoutflo_html_Combinator(
             flo_html_HashStatus status =
                 flo_html_insertUint16HashSet(set, dom->nodes[i].nodeID);
             if (status != HASH_SUCCESS) {
-                FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(status),
-                                     "inserting into hash set failed!\n");
+                FLO_HTML_ERROR_WITH_CODE_ONLY(
+                    flo_html_hashStatusToString(status),
+                    "inserting into hash set failed!\n");
                 return QUERY_MEMORY_ERROR;
             }
         }
@@ -175,8 +177,9 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
                     &filteredAdjacents, nextNodeID);
                 if (status != HASH_SUCCESS) {
                     flo_html_destroyUint16HashSet(&filteredAdjacents);
-                    FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(status),
-                                         "inserting into hash set failed!\n");
+                    FLO_HTML_ERROR_WITH_CODE_ONLY(
+                        flo_html_hashStatusToString(status),
+                        "inserting into hash set failed!\n");
                     return QUERY_MEMORY_ERROR;
                 }
             }
@@ -232,8 +235,9 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
                 if (status != HASH_SUCCESS) {
                     flo_html_destroyUint16HashSet(&firstDescendants);
                     flo_html_destroyUint16HashSet(&secondDescendants);
-                    FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(status),
-                                         "inserting into hash set failed!\n");
+                    FLO_HTML_ERROR_WITH_CODE_ONLY(
+                        flo_html_hashStatusToString(status),
+                        "inserting into hash set failed!\n");
                     return QUERY_MEMORY_ERROR;
                 }
                 if (flo_html_filterNode(parentChildNode.childID, filters,

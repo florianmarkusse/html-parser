@@ -13,14 +13,15 @@ flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
     set->entries = 0;
     set->array = calloc(capacity, sizeof(flo_html_HashEntry));
     if (set->array == NULL) {
-        FLO_HTML_PRINT_ERROR("Could not allocate memory for string hash set!\n");
+        FLO_HTML_PRINT_ERROR(
+            "Could not allocate memory for string hash set!\n");
         return HASH_ERROR_MEMORY;
     }
     return HASH_SUCCESS;
 }
 
-// Sets the flo_html_indexID that is used in the DOM, starting at 1 because then 0 can be
-// used as an error/init value.
+// Sets the flo_html_indexID that is used in the DOM, starting at 1 because then
+// 0 can be used as an error/init value.
 flo_html_HashStatus
 flo_html_insertStringAtHash(flo_html_StringHashSet *set, const char *string,
                             const flo_html_HashElement *hashElement,
@@ -41,8 +42,8 @@ flo_html_insertStringAtHash(flo_html_StringHashSet *set, const char *string,
     return HASH_SUCCESS;
 }
 
-// Sets the flo_html_indexID that is used in the DOM, starting at 1 because then 0 can be
-// used as an error/init value.
+// Sets the flo_html_indexID that is used in the DOM, starting at 1 because then
+// 0 can be used as an error/init value.
 flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                                  const char *string) {
     if (set->entries >= set->arrayLen) {
@@ -76,10 +77,9 @@ bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
                                                   &ignore2);
 }
 
-bool flo_html_containsStringWithDataHashSet(const flo_html_StringHashSet *set,
-                                            const char *string,
-                                            flo_html_HashElement *hashElement,
-                                            flo_html_indexID *flo_html_indexID) {
+bool flo_html_containsStringWithDataHashSet(
+    const flo_html_StringHashSet *set, const char *string,
+    flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID) {
     size_t index = flo_html_hashString(string) % set->arrayLen;
     hashElement->hash = index;
 

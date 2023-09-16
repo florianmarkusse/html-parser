@@ -1,4 +1,3 @@
-
 #include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -61,13 +60,15 @@ static TestStatus testDeletion(const char *fileLocation1,
 
     switch (deletionType) {
     case DELETE_BOOLEAN_PROPERTY: {
-        flo_html_removeBooleanProperty(foundNode, propToDelete, &comparisonTest.startflo_html_Dom,
-                              &comparisonTest.startTextStore);
+        flo_html_removeBooleanProperty(foundNode, propToDelete,
+                                       &comparisonTest.startflo_html_Dom,
+                                       &comparisonTest.startTextStore);
         break;
     }
     case DELETE_PROPERTY: {
-        flo_html_removeProperty(foundNode, propToDelete, &comparisonTest.startflo_html_Dom,
-                       &comparisonTest.startTextStore);
+        flo_html_removeProperty(foundNode, propToDelete,
+                                &comparisonTest.startflo_html_Dom,
+                                &comparisonTest.startTextStore);
         break;
     }
     default: {

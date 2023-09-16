@@ -76,9 +76,10 @@ void flo_html_printHTML(const flo_html_Dom *dom,
     printf("\n\n");
 }
 
-flo_html_FileStatus flo_html_writeHTMLToFile(const flo_html_Dom *dom,
-                                    const flo_html_TextStore *textStore,
-                                    const char *filePath) {
+flo_html_FileStatus
+flo_html_writeHTMLToFile(const flo_html_Dom *dom,
+                         const flo_html_TextStore *textStore,
+                         const char *filePath) {
     flo_html_createPath(filePath);
     FILE *file = fopen(filePath, "wbe");
     if (file == NULL) {

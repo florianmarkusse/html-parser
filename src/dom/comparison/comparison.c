@@ -13,7 +13,8 @@ void printAttributes(
     const flo_html_indexID tagID2, const flo_html_StringHashSet *set2,
     const flo_html_Dom *dom2, const flo_html_TextStore *textStore2) {
     const char *tag1 = flo_html_getTag(tagID1, dom1, textStore1);
-    FLO_HTML_PRINT_ERROR("Printing certain attributes of node 1 with tag %s:\n", tag1);
+    FLO_HTML_PRINT_ERROR("Printing certain attributes of node 1 with tag %s:\n",
+                         tag1);
 
     flo_html_StringHashSetIterator iterator;
     flo_html_initStringHashSetIterator(&iterator, set1);
@@ -24,7 +25,8 @@ void printAttributes(
     }
 
     const char *tag2 = flo_html_getTag(tagID2, dom2, textStore2);
-    FLO_HTML_PRINT_ERROR("Printing certain attributes of node 2 with tag %s:\n", tag2);
+    FLO_HTML_PRINT_ERROR("Printing certain attributes of node 2 with tag %s:\n",
+                         tag2);
 
     flo_html_initStringHashSetIterator(&iterator, set2);
 
@@ -43,13 +45,13 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
     if ((status = flo_html_initStringHashSet(keySet, FLO_HTML_MAX_PROPERTIES *
                                                          2) != HASH_SUCCESS)) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(status),
-                             "Failed to initialize hash key set");
+                                      "Failed to initialize hash key set");
         return status;
     }
     if ((status = flo_html_initStringHashSet(
                       valueSet, FLO_HTML_MAX_PROPERTIES * 2) != HASH_SUCCESS)) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(status),
-                             "Failed to initialize hash value set");
+                                      "Failed to initialize hash value set");
         flo_html_destroyStringHashSet(keySet);
         return status;
     }
@@ -60,9 +62,9 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
             const char *propKey = flo_html_getPropKey(keyID, dom, textStore);
             if ((status = flo_html_insertStringHashSet(keySet, propKey)) !=
                 HASH_SUCCESS) {
-                FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_hashStatusToString(status),
-                                       "Failed to insert %s into key hash set",
-                                       propKey);
+                FLO_HTML_ERROR_WITH_CODE_FORMAT(
+                    flo_html_hashStatusToString(status),
+                    "Failed to insert %s into key hash set", propKey);
                 flo_html_destroyStringHashSet(keySet);
                 flo_html_destroyStringHashSet(valueSet);
                 return status;
@@ -101,7 +103,7 @@ compareProps(const flo_html_Node *node1, const flo_html_Dom *dom1,
         flo_html_destroyStringHashSet(&keySet1);
         flo_html_destroyStringHashSet(&valueSet1);
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(hashStatus),
-                             "Failed to create hash sets for node 1");
+                                      "Failed to create hash sets for node 1");
         return COMPARISON_MEMORY;
     }
 
@@ -115,11 +117,12 @@ compareProps(const flo_html_Node *node1, const flo_html_Dom *dom1,
         flo_html_destroyStringHashSet(&keySet2);
         flo_html_destroyStringHashSet(&valueSet2);
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(hashStatus),
-                             "Failed to create hash sets for node 2");
+                                      "Failed to create hash sets for node 2");
         return COMPARISON_MEMORY;
     }
 
-    flo_html_ComparisonStatus result = flo_html_equalsStringHashSet(&keySet1, &keySet2);
+    flo_html_ComparisonStatus result =
+        flo_html_equalsStringHashSet(&keySet1, &keySet2);
     if (result != COMPARISON_SUCCESS) {
         if (printDifferences) {
             FLO_HTML_PRINT_ERROR("Nodes contain different key props\n");
@@ -163,7 +166,7 @@ flo_html_HashStatus createBoolPropsSet(const flo_html_node_id nodeID,
     if ((status = flo_html_initStringHashSet(set, FLO_HTML_MAX_PROPERTIES *
                                                       2) != HASH_SUCCESS)) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(status),
-                             "Failed to initialize hash set");
+                                      "Failed to initialize hash set");
         return status;
     }
     // TODO(florian): make faster. (BTREE)
@@ -173,9 +176,9 @@ flo_html_HashStatus createBoolPropsSet(const flo_html_node_id nodeID,
             const char *boolProp = flo_html_getBoolProp(propID, dom, textStore);
             if ((status = flo_html_insertStringHashSet(set, boolProp)) !=
                 HASH_SUCCESS) {
-                FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_hashStatusToString(status),
-                                       "Failed to insert %s into hash set",
-                                       boolProp);
+                FLO_HTML_ERROR_WITH_CODE_FORMAT(
+                    flo_html_hashStatusToString(status),
+                    "Failed to insert %s into hash set", boolProp);
                 flo_html_destroyStringHashSet(set);
                 return status;
             }
@@ -186,18 +189,18 @@ flo_html_HashStatus createBoolPropsSet(const flo_html_node_id nodeID,
 }
 
 flo_html_ComparisonStatus compareBoolProps(const flo_html_Node *node1,
-                                  const flo_html_Dom *dom1,
-                                  const flo_html_TextStore *textStore1,
-                                  const flo_html_Node *node2,
-                                  const flo_html_Dom *dom2,
-                                  const flo_html_TextStore *textStore2,
-                                  const bool printDifferences) {
+                                           const flo_html_Dom *dom1,
+                                           const flo_html_TextStore *textStore1,
+                                           const flo_html_Node *node2,
+                                           const flo_html_Dom *dom2,
+                                           const flo_html_TextStore *textStore2,
+                                           const bool printDifferences) {
     flo_html_HashStatus hashStatus = HASH_SUCCESS;
     flo_html_StringHashSet set1;
     if ((hashStatus = createBoolPropsSet(node1->nodeID, dom1, textStore1,
                                          &set1)) != HASH_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(hashStatus),
-                             "Failed to create hash set 1");
+                                      "Failed to create hash set 1");
         return COMPARISON_MEMORY;
     }
 
@@ -206,11 +209,12 @@ flo_html_ComparisonStatus compareBoolProps(const flo_html_Node *node1,
                                          &set2)) != HASH_SUCCESS) {
         flo_html_destroyStringHashSet(&set1);
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(hashStatus),
-                             "Failed to create hash set 2");
+                                      "Failed to create hash set 2");
         return COMPARISON_MEMORY;
     }
 
-    flo_html_ComparisonStatus result = flo_html_equalsStringHashSet(&set1, &set2);
+    flo_html_ComparisonStatus result =
+        flo_html_equalsStringHashSet(&set1, &set2);
 
     if (printDifferences && result != COMPARISON_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Nodes contain different bool props\n");
@@ -245,9 +249,9 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
             const char *nodeType1 = flo_html_nodeTypeToString(node1->nodeType);
             const char *nodeType2 = flo_html_nodeTypeToString(node2->nodeType);
             FLO_HTML_PRINT_ERROR("Uncomparable nodes:\n"
-                        "node 1 type: %s\n"
-                        "node 2 type: %s\n",
-                        nodeType1, nodeType2);
+                                 "node 1 type: %s\n"
+                                 "node 2 type: %s\n",
+                                 nodeType1, nodeType2);
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
@@ -262,8 +266,8 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
         }
 
         if (printDifferences) {
-            FLO_HTML_PRINT_ERROR("Different text nodes\nnode 1: %s\nnode 2: %s\n", text1,
-                        text2);
+            FLO_HTML_PRINT_ERROR(
+                "Different text nodes\nnode 1: %s\nnode 2: %s\n", text1, text2);
         }
         return COMPARISON_DIFFERENT_CONTENT;
     }
@@ -300,9 +304,10 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
                     flo_html_getTag(node1->nodeID, dom1, textStore1);
                 const char *tag2 =
                     flo_html_getTag(node2->nodeID, dom2, textStore2);
-                FLO_HTML_PRINT_ERROR("Nodes have different tags.\nnode 1 tag: %s\nnode "
-                            "2 tag: %s\n",
-                            tag1, tag2);
+                FLO_HTML_PRINT_ERROR(
+                    "Nodes have different tags.\nnode 1 tag: %s\nnode "
+                    "2 tag: %s\n",
+                    tag1, tag2);
             }
             return COMPARISON_DIFFERENT_CONTENT;
         }
@@ -312,9 +317,10 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
     default: {
         if (printDifferences) {
             const char *nodeType1 = flo_html_nodeTypeToString(node1->nodeType);
-            FLO_HTML_PRINT_ERROR("Comparison not implemented for this node type:"
-                        "node type: %s\n",
-                        nodeType1);
+            FLO_HTML_PRINT_ERROR(
+                "Comparison not implemented for this node type:"
+                "node type: %s\n",
+                nodeType1);
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
@@ -353,8 +359,8 @@ compareNode(flo_html_node_id *currNodeID1, const flo_html_Dom *dom1,
     *currNodeID2 = flo_html_getFirstChild(*currNodeID2, dom2);
 
     while (*currNodeID1 && *currNodeID2) {
-        flo_html_ComparisonStatus comp = compareNode(currNodeID1, dom1, textStore1,
-                                            currNodeID2, dom2, textStore2);
+        flo_html_ComparisonStatus comp = compareNode(
+            currNodeID1, dom1, textStore1, currNodeID2, dom2, textStore2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -373,17 +379,16 @@ compareNode(flo_html_node_id *currNodeID1, const flo_html_Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-flo_html_ComparisonStatus flo_html_equalsWithNode(flo_html_node_id *currNodeID1,
-                                         const flo_html_Dom *dom1,
-                                         const flo_html_TextStore *textStore1,
-                                         flo_html_node_id *currNodeID2,
-                                         const flo_html_Dom *dom2,
-                                         const flo_html_TextStore *textStore2) {
+flo_html_ComparisonStatus
+flo_html_equalsWithNode(flo_html_node_id *currNodeID1, const flo_html_Dom *dom1,
+                        const flo_html_TextStore *textStore1,
+                        flo_html_node_id *currNodeID2, const flo_html_Dom *dom2,
+                        const flo_html_TextStore *textStore2) {
     *currNodeID1 = dom1->firstNodeID;
     *currNodeID2 = dom2->firstNodeID;
     while (*currNodeID1 && *currNodeID2) {
-        flo_html_ComparisonStatus comp = compareNode(currNodeID1, dom1, textStore1,
-                                            currNodeID2, dom2, textStore2);
+        flo_html_ComparisonStatus comp = compareNode(
+            currNodeID1, dom1, textStore1, currNodeID2, dom2, textStore2);
         if (comp != COMPARISON_SUCCESS) {
             return comp;
         }
@@ -399,10 +404,10 @@ flo_html_ComparisonStatus flo_html_equalsWithNode(flo_html_node_id *currNodeID1,
     return COMPARISON_SUCCESS;
 }
 
-flo_html_ComparisonStatus flo_html_equals(const flo_html_Dom *dom1,
-                                 const flo_html_TextStore *textStore1,
-                                 const flo_html_Dom *dom2,
-                                 const flo_html_TextStore *textStore2) {
+flo_html_ComparisonStatus
+flo_html_equals(const flo_html_Dom *dom1, const flo_html_TextStore *textStore1,
+                const flo_html_Dom *dom2,
+                const flo_html_TextStore *textStore2) {
     flo_html_node_id nodeID1 = 0;
     flo_html_node_id nodeID2 = 0;
     return flo_html_equalsWithNode(&nodeID1, dom1, textStore1, &nodeID2, dom2,

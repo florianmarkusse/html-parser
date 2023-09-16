@@ -29,21 +29,20 @@ typedef struct {
 flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore);
 void flo_html_destroyTextStore(flo_html_TextStore *textStore);
 
-flo_html_ElementStatus flo_html_createElement(flo_html_ElementsContainer *container,
-                                     const char *element,
-                                     flo_html_element_id *currentElementsLen,
-                                     flo_html_element_id offset,
-                                     flo_html_element_id *elementID);
+flo_html_ElementStatus flo_html_createElement(
+    flo_html_ElementsContainer *container, const char *element,
+    flo_html_element_id *currentElementsLen, flo_html_element_id offset,
+    flo_html_element_id *elementID);
 
 flo_html_ElementStatus
 flo_html_insertElement(flo_html_ElementsContainer *elementsContainer,
-              const char *elementStart, size_t elementLength,
-              char **dataLocation);
+                       const char *elementStart, size_t elementLength,
+                       char **dataLocation);
 
-flo_html_ElementStatus flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
-                                      const char *elementStart,
-                                      size_t elementLength,
-                                      flo_html_HashElement *hashElement,
-                                      flo_html_indexID *flo_html_indexID);
+flo_html_ElementStatus
+flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
+                        const char *elementStart, size_t elementLength,
+                        flo_html_HashElement *hashElement,
+                        flo_html_indexID *flo_html_indexID);
 
 #endif

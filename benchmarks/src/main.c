@@ -1,4 +1,3 @@
-
 #include <dirent.h>
 #include <flo/html-parser.h>
 #include <math.h>

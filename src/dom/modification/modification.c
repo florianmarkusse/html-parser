@@ -30,8 +30,9 @@ getCreatedPropIDFromString(const PropertyType propertyType, const char *buffer,
     flo_html_ElementStatus elementStatus = flo_html_elementToIndex(
         stringRegistry, buffer, propLen, &hashKey, propID);
     if (elementStatus != ELEMENT_FOUND && elementStatus != ELEMENT_CREATED) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
-                             "Failed to get prop ID");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_elementStatusToString(elementStatus),
+            "Failed to get prop ID");
         return elementStatus;
     }
     if (elementStatus == ELEMENT_CREATED) {
@@ -201,8 +202,9 @@ flo_html_addTextToTextNode(flo_html_Node *node, const char *textStart,
     flo_html_ElementStatus elementStatus = flo_html_insertElement(
         &textStore->text, buffer, mergedLen, &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
-                             "Failed to insert text");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_elementStatusToString(elementStatus),
+            "Failed to insert text");
         return elementStatus;
     }
     flo_html_setNodeText(node->nodeID, dataLocation, dom);
@@ -233,8 +235,9 @@ flo_html_DomStatus flo_html_setTagOnDocumentNode(
         break;
     }
     default: {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(indexStatus),
-                             "Failed to insert into new tag names!\n");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_elementStatusToString(indexStatus),
+            "Failed to insert into new tag names!\n");
         return DOM_NO_ELEMENT;
     }
     }

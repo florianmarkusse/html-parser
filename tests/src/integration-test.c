@@ -1,4 +1,3 @@
-
 #include <flo/html-parser.h>
 #include <flo/html-parser/utils/memory/memory.h>
 
@@ -24,16 +23,16 @@ static TestStatus parseQueryModify() {
 
     flo_html_node_id *results = NULL;
     size_t resultsLen = 0;
-    flo_html_QueryStatus actual = flo_html_querySelectorAll("title", &comparisonTest.startflo_html_Dom,
-                                          &comparisonTest.startTextStore,
-                                          &results, &resultsLen);
+    flo_html_QueryStatus actual = flo_html_querySelectorAll(
+        "title", &comparisonTest.startflo_html_Dom,
+        &comparisonTest.startTextStore, &results, &resultsLen);
 
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
-            flo_html_queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+            actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         return TEST_FAILURE;
     }
@@ -50,45 +49,47 @@ static TestStatus parseQueryModify() {
         FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
-    flo_html_setTextContent(results[0], "FOURTH", &comparisonTest.startflo_html_Dom,
-                   &comparisonTest.startTextStore);
+    flo_html_setTextContent(results[0], "FOURTH",
+                            &comparisonTest.startflo_html_Dom,
+                            &comparisonTest.startTextStore);
     flo_html_addBooleanPropertyToNodeString(results[0], "the-fourth",
-                                   &comparisonTest.startflo_html_Dom,
-                                   &comparisonTest.startTextStore);
+                                            &comparisonTest.startflo_html_Dom,
+                                            &comparisonTest.startTextStore);
     flo_html_addPropertyToNodeStrings(results[0], "the-property", "my value",
-                             &comparisonTest.startflo_html_Dom,
-                             &comparisonTest.startTextStore);
+                                      &comparisonTest.startflo_html_Dom,
+                                      &comparisonTest.startTextStore);
     FLO_HTML_FREE_TO_NULL(results);
 
     flo_html_node_id currentNodeID = 0;
-    actual = flo_html_querySelector("head", &comparisonTest.startflo_html_Dom,
-                           &comparisonTest.startTextStore, &currentNodeID);
+    actual =
+        flo_html_querySelector("head", &comparisonTest.startflo_html_Dom,
+                               &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
-            flo_html_queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+            actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         return TEST_FAILURE;
     }
 
-    flo_html_prependHTMLFromString(currentNodeID,
-                          "<title "
-                          "id=\"first-title-tag\"></title><title>FIRST</"
-                          "title><title>SECOND</title><title>THIRD</title>",
-                          &comparisonTest.startflo_html_Dom,
-                          &comparisonTest.startTextStore);
+    flo_html_prependHTMLFromString(
+        currentNodeID,
+        "<title "
+        "id=\"first-title-tag\"></title><title>FIRST</"
+        "title><title>SECOND</title><title>THIRD</title>",
+        &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
 
-    actual = flo_html_querySelectorAll("title", &comparisonTest.startflo_html_Dom,
-                              &comparisonTest.startTextStore, &results,
-                              &resultsLen);
+    actual = flo_html_querySelectorAll(
+        "title", &comparisonTest.startflo_html_Dom,
+        &comparisonTest.startTextStore, &results, &resultsLen);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
-            flo_html_queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+            actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
@@ -109,14 +110,15 @@ static TestStatus parseQueryModify() {
 
     FLO_HTML_FREE_TO_NULL(results);
 
-    actual = flo_html_querySelector("#first-title-tag", &comparisonTest.startflo_html_Dom,
-                           &comparisonTest.startTextStore, &currentNodeID);
+    actual = flo_html_querySelector(
+        "#first-title-tag", &comparisonTest.startflo_html_Dom,
+        &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
-            flo_html_queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+            actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
@@ -124,15 +126,15 @@ static TestStatus parseQueryModify() {
 
     flo_html_removeNode(currentNodeID, &comparisonTest.startflo_html_Dom);
 
-    actual = flo_html_querySelectorAll("title", &comparisonTest.startflo_html_Dom,
-                              &comparisonTest.startTextStore, &results,
-                              &resultsLen);
+    actual = flo_html_querySelectorAll(
+        "title", &comparisonTest.startflo_html_Dom,
+        &comparisonTest.startTextStore, &results, &resultsLen);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
-            flo_html_queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+            actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;

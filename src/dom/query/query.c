@@ -27,12 +27,15 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
 #define CHECK_FILTERS_LIMIT(filtersLen)                                        \
     do {                                                                       \
         if ((filtersLen) >= FLO_HTML_MAX_FILTERS_PER_ELEMENT) {                \
-            FLO_HTML_PRINT_ERROR("Too many filters in a single element detected!\n");   \
+            FLO_HTML_PRINT_ERROR(                                              \
+                "Too many filters in a single element detected!\n");           \
             return QUERY_TOO_MANY_ELEMENT_FILTERS;                             \
         }                                                                      \
     } while (0)
 
-bool isPropStartChar(const char ch) { return flo_html_isAlphaBetical(ch) || ch == '!'; }
+bool isPropStartChar(const char ch) {
+    return flo_html_isAlphaBetical(ch) || ch == '!';
+}
 
 bool isElementStartChar(const char ch) {
     return isPropStartChar(ch) || ch == '.' || ch == '#';
@@ -47,8 +50,8 @@ bool isflo_html_Combinator(const char ch) {
 }
 
 bool endOfCurrentFilter(const char ch) {
-    return isflo_html_Combinator(ch) || flo_html_isSpecialSpace(ch) || ch == '[' ||
-           ch == '.' || ch == '#';
+    return isflo_html_Combinator(ch) || flo_html_isSpecialSpace(ch) ||
+           ch == '[' || ch == '.' || ch == '#';
 }
 
 flo_html_QueryStatus getQueryResults(const char *cssQuery,
@@ -135,8 +138,8 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
             }
 
             tokenStart = currentPosition;
-            while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '=' && ch != ']' &&
-                   ch != '\0') {
+            while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '=' &&
+                   ch != ']' && ch != '\0') {
                 ch = cssQuery[++currentPosition];
             }
             tokenLength =
@@ -237,7 +240,8 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
         }
 
         if (filtersLen < 1) {
-            FLO_HTML_PRINT_ERROR("Did not receive any filters in the css query\n");
+            FLO_HTML_PRINT_ERROR(
+                "Did not receive any filters in the css query\n");
             return QUERY_INVALID_ELEMENT;
         }
 
@@ -283,7 +287,8 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
             break;
         }
         default: {
-            FLO_HTML_PRINT_ERROR("Unknown current combinator, aborting css query!\n");
+            FLO_HTML_PRINT_ERROR(
+                "Unknown current combinator, aborting css query!\n");
             return QUERY_INVALID_COMBINATOR;
         }
         }
@@ -369,8 +374,9 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
                 flo_html_destroyUint16HashSet(&resultsSet);
                 flo_html_destroyUint16HashSet(&set);
                 FLO_HTML_FREE_TO_NULL(toFree);
-                FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_queryingStatusToString(result),
-                                     "Unable get query results!\n");
+                FLO_HTML_ERROR_WITH_CODE_ONLY(
+                    flo_html_queryingStatusToString(result),
+                    "Unable get query results!\n");
                 return result;
             }
 
@@ -401,8 +407,9 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
         if ((result = getQueryResults(cssQuery, dom, textStore, &resultsSet)) !=
             QUERY_SUCCESS) {
             flo_html_destroyUint16HashSet(&resultsSet);
-            FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_queryingStatusToString(result),
-                                 "Unable get query results!\n");
+            FLO_HTML_ERROR_WITH_CODE_ONLY(
+                flo_html_queryingStatusToString(result),
+                "Unable get query results!\n");
             return result;
         }
     }
@@ -410,8 +417,9 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
     flo_html_HashStatus conversionResult =
         flo_html_uint16HashSetToArray(&resultsSet, results, resultsLen);
     if (conversionResult != HASH_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(conversionResult),
-                             "Failed to convert set to array!\n");
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_hashStatusToString(conversionResult),
+            "Failed to convert set to array!\n");
         flo_html_destroyUint16HashSet(&resultsSet);
         return QUERY_MEMORY_ERROR;
     }

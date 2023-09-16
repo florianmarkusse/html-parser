@@ -6,10 +6,10 @@ flo_html_DomStatus
 flo_html_addTagRegistration(const flo_html_indexID tagID, const bool isPaired,
                             const flo_html_HashElement *hashElement,
                             flo_html_Dom *dom) {
-    if ((dom->tagRegistry =
-             flo_html_resizeArray(dom->tagRegistry, dom->tagRegistryLen,
-                         &dom->tagRegistryCap, sizeof(flo_html_TagRegistration),
-                         FLO_HTML_TAG_REGISTRATIONS_PER_PAGE)) == NULL) {
+    if ((dom->tagRegistry = flo_html_resizeArray(
+             dom->tagRegistry, dom->tagRegistryLen, &dom->tagRegistryCap,
+             sizeof(flo_html_TagRegistration),
+             FLO_HTML_TAG_REGISTRATIONS_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 
@@ -27,10 +27,10 @@ flo_html_DomStatus
 flo_html_addRegistration(const flo_html_indexID flo_html_indexID,
                          const flo_html_HashElement *hashElement,
                          flo_html_BasicRegistry *basicRegistry) {
-    if ((basicRegistry->registry =
-             flo_html_resizeArray(basicRegistry->registry, basicRegistry->len,
-                         &basicRegistry->cap, sizeof(flo_html_Registration),
-                         FLO_HTML_PROP_REGISTRATIONS_PER_PAGE)) == NULL) {
+    if ((basicRegistry->registry = flo_html_resizeArray(
+             basicRegistry->registry, basicRegistry->len, &basicRegistry->cap,
+             sizeof(flo_html_Registration),
+             FLO_HTML_PROP_REGISTRATIONS_PER_PAGE)) == NULL) {
         return DOM_ERROR_MEMORY;
     }
 

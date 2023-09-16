@@ -12,7 +12,8 @@ flo_html_HashStatus flo_html_initUint16HashSet(flo_html_Uint16HashSet *set,
     set->entries = 0;
     set->array = calloc(capacity, sizeof(flo_html_Uint16Entry));
     if (set->array == NULL) {
-        FLO_HTML_PRINT_ERROR("Could not allocate memory for element hash set!\n");
+        FLO_HTML_PRINT_ERROR(
+            "Could not allocate memory for element hash set!\n");
         return HASH_ERROR_MEMORY;
     }
     return HASH_SUCCESS;
@@ -36,8 +37,9 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
         didResize = true;
         // See if it makes sense to grow.
         if (set->arrayLen >= MAX_CAPACITY * 0.9) {
-            FLO_HTML_PRINT_ERROR("Hash set capacity would exceed the maximum capacity "
-                        "for uint16_t!\n");
+            FLO_HTML_PRINT_ERROR(
+                "Hash set capacity would exceed the maximum capacity "
+                "for uint16_t!\n");
             return HASH_ERROR_CAPACITY;
         }
 
@@ -91,7 +93,8 @@ flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
     *resultsLen = set->entries;
     *results = (uint16_t *)malloc(*resultsLen * sizeof(uint16_t));
     if (*results == NULL) {
-        FLO_HTML_PRINT_ERROR("Could not allocate memory for the result array!\n");
+        FLO_HTML_PRINT_ERROR(
+            "Could not allocate memory for the result array!\n");
         return HASH_ERROR_MEMORY;
     }
 

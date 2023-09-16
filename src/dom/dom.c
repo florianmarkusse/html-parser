@@ -19,7 +19,8 @@ flo_html_DomStatus createflo_html_DomFromFile(const char *fileLocation,
     flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
-                               "Failed to read file: \"%s\"", fileLocation);
+                                        "Failed to read file: \"%s\"",
+                                        fileLocation);
         return DOM_ERROR_MEMORY;
     }
 
@@ -27,9 +28,9 @@ flo_html_DomStatus createflo_html_DomFromFile(const char *fileLocation,
         createflo_html_Dom(buffer, dom, textStore);
     if (documentStatus != DOM_SUCCESS) {
         FLO_HTML_FREE_TO_NULL(buffer);
-        FLO_HTML_ERROR_WITH_CODE_FORMAT(documentStatusToString(documentStatus),
-                               "Failed to create document from file \"%s\"",
-                               fileLocation);
+        FLO_HTML_ERROR_WITH_CODE_FORMAT(
+            documentStatusToString(documentStatus),
+            "Failed to create document from file \"%s\"", fileLocation);
         return documentStatus;
     }
     FLO_HTML_FREE_TO_NULL(buffer);

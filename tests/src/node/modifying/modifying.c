@@ -1,4 +1,3 @@
-
 #include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -54,9 +53,9 @@ static TestStatus testModification(const char *fileLocation1,
     }
 
     if (newPropValue == NULL) {
-        flo_html_DomStatus domStatus =
-            flo_html_setTextContent(foundNode, propKey, &comparisonTest.startflo_html_Dom,
-                           &comparisonTest.startTextStore);
+        flo_html_DomStatus domStatus = flo_html_setTextContent(
+            foundNode, propKey, &comparisonTest.startflo_html_Dom,
+            &comparisonTest.startTextStore);
         if (domStatus != DOM_SUCCESS) {
             return failWithMessage("Failed to set text content!\n",
                                    &comparisonTest);

@@ -124,6 +124,7 @@ flo_html_QueryStatus flo_html_querySelector(const char *cssQuery,
  */
 flo_html_QueryStatus
 flo_html_getElementByID(const char *id, const flo_html_Dom *dom,
-                        const flo_html_TextStore *textStore, flo_html_node_id *result);
+                        const flo_html_TextStore *textStore,
+                        flo_html_node_id *result);
 
 #endif
