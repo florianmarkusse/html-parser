@@ -4,9 +4,9 @@
 #include "node.h"
 
 typedef struct {
-    node_id nodeID;
-    indexID keyID;
-    indexID valueID;
-} __attribute__((aligned(8))) Property;
+    flo_html_node_id nodeID;
+    flo_html_indexID keyID;
+    flo_html_indexID valueID;
+} __attribute__((aligned(8))) flo_html_Property;
 
 #endif

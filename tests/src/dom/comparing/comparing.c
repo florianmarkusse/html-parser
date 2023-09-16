@@ -38,7 +38,7 @@
 typedef struct {
     const char *fileLocation1;
     const char *fileLocation2;
-    ComparisonStatus expectedStatus;
+    flo_html_ComparisonStatus expectedStatus;
     const char *testName;
 } __attribute__((aligned(32))) TestFile;
 
@@ -77,7 +77,7 @@ static const TestFile testFiles[] = {
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
-                        const ComparisonStatus expectedResult) {
+                        const flo_html_ComparisonStatus expectedResult) {
     TestStatus result = TEST_FAILURE;
 
     ComparisonTest comparisonTest;
@@ -89,7 +89,7 @@ TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
     return compareWithCodeAndEndTest(&comparisonTest, expectedResult);
 }
 
-bool testDomComparisons(size_t *successes, size_t *failures) {
+bool testflo_html_DomComparisons(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM comparisons");
     size_t localSuccesses = 0;
     size_t localFailures = 0;

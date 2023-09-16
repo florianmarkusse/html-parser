@@ -7,16 +7,16 @@ typedef enum {
     HASH_MAX_PROBES,
     HASH_ERROR_CAPACITY,
     HASH_NUM_STATUS
-} HashStatus;
+} flo_html_HashStatus;
 
-static const char *const HashStatusStrings[HASH_NUM_STATUS] = {
+static const char *const hashStatusStrings[HASH_NUM_STATUS] = {
     "Success", "Memory Error", "Reached maximum number of probes",
     "Reached/Over capacity"};
 
 __attribute__((unused)) static const char *
-hashStatusToString(HashStatus status) {
+flo_html_hashStatusToString(flo_html_HashStatus status) {
     if (status >= 0 && status < HASH_NUM_STATUS) {
-        return HashStatusStrings[status];
+        return hashStatusStrings[status];
     }
     return "Unknown hash status code!";
 }

@@ -8,10 +8,10 @@
 #include "test-status.h"
 
 typedef struct {
-    Dom startDom;
-    TextStore startTextStore;
-    Dom expectedDom;
-    TextStore expectedTextStore;
+    flo_html_Dom startflo_html_Dom;
+    flo_html_TextStore startTextStore;
+    flo_html_Dom expectedflo_html_Dom;
+    flo_html_TextStore expectedTextStore;
 } ComparisonTest;
 
 TestStatus initComparisonTest(ComparisonTest *comparisonTest,
@@ -20,11 +20,11 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
 
 TestStatus compareAndEndTest(ComparisonTest *comparisonTest);
 TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
-                                     ComparisonStatus expectedStatus);
+                                     flo_html_ComparisonStatus expectedStatus);
 
 TestStatus getNodeFromQuerySelector(const char *cssQuery,
                                     ComparisonTest *comparisonTest,
-                                    node_id *foundNode);
+                                    flo_html_node_id *foundNode);
 TestStatus failWithMessageAndCode(const char *failureMessage,
                                   TestStatus failureStatus,
                                   ComparisonTest *comparisonTest);

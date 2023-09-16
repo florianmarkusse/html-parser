@@ -43,7 +43,7 @@ typedef enum {
 } PrependType;
 
 typedef union {
-    const DocumentNode documentNode;
+    const flo_html_DocumentNode documentNode;
     const char *text;
 } PrependInput;
 
@@ -183,7 +183,7 @@ static TestStatus testPrependix(const char *fileLocation1,
         return result;
     }
 
-    node_id foundNode = 0;
+    flo_html_node_id foundNode = 0;
     if (cssQuery != NULL) {
         result =
             getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
@@ -192,24 +192,24 @@ static TestStatus testPrependix(const char *fileLocation1,
         return result;
     }
 
-    DomStatus domStatus = DOM_SUCCESS;
+    flo_html_DomStatus domStatus = DOM_SUCCESS;
     switch (prependType) {
     case PREPEND_DOCUMENT_NODE: {
-        domStatus = flo_html_prependDocumentNode(foundNode, &prependInput->documentNode,
-                                        &comparisonTest.startDom,
-                                        &comparisonTest.startTextStore);
+        domStatus = flo_html_prependDocumentNode(
+            foundNode, &prependInput->documentNode,
+            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
         break;
     }
     case PREPEND_TEXT_NODE: {
         domStatus = flo_html_prependTextNode(foundNode, prependInput->text,
-                                    &comparisonTest.startDom,
-                                    &comparisonTest.startTextStore);
+                                             &comparisonTest.startflo_html_Dom,
+                                             &comparisonTest.startTextStore);
         break;
     }
     case PREPEND_FROM_STRING: {
-        domStatus = flo_html_prependHTMLFromString(foundNode, prependInput->text,
-                                           &comparisonTest.startDom,
-                                           &comparisonTest.startTextStore);
+        domStatus = flo_html_prependHTMLFromString(
+            foundNode, prependInput->text, &comparisonTest.startflo_html_Dom,
+            &comparisonTest.startTextStore);
         break;
     }
     default: {
@@ -226,7 +226,7 @@ static TestStatus testPrependix(const char *fileLocation1,
     return compareAndEndTest(&comparisonTest);
 }
 
-bool testDomPrependices(size_t *successes, size_t *failures) {
+bool testflo_html_DomPrependices(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM prependices");
 
     size_t localSuccesses = 0;

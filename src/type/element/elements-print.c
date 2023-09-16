@@ -3,16 +3,16 @@
 #include "flo/html-parser/type/element/elements-print.h"
 
 void printElements(const size_t currentLen,
-                   char *const elements[TOTAL_ELEMENTS],
+                   char *const elements[FLO_HTML_TOTAL_ELEMENTS],
                    const size_t offsetMask) {
-    printf("capacity: %zu/%u\n", currentLen, POSSIBLE_ELEMENTS);
+    printf("capacity: %zu/%u\n", currentLen, FLO_HTML_POSSIBLE_ELEMENTS);
     for (size_t i = offsetMask; i < (offsetMask | currentLen); i++) {
         printf("element ID: %-7zuelement: %-20s\n", i, elements[i]);
     }
     printf("\n\n");
 }
 
-void printElementPages(const ElementsContainer *container) {
+void printElementPages(const flo_html_ElementsContainer *container) {
     printf("element pages...\n");
     printf("%-15s: %zu\n", "pages length", container->pageLen);
     for (size_t i = 0; i < container->pageLen; i++) {
@@ -35,38 +35,39 @@ void printElementPages(const ElementsContainer *container) {
     printf("\n\n");
 }
 
-void printStringRegistryStatus(const StringRegistry *newElements) {
+void printflo_html_StringRegistryStatus(
+    const flo_html_StringRegistry *newElements) {
     printf("hash set contents...\n");
-    StringHashSetIterator iterator;
-    initStringHashSetIterator(&iterator, &newElements->set);
+    flo_html_StringHashSetIterator iterator;
+    flo_html_initStringHashSetIterator(&iterator, &newElements->set);
 
-    while (hasNextStringHashSetIterator(&iterator)) {
-        const char *string = nextStringHashSetIterator(&iterator);
+    while (flo_html_hasNextStringHashSetIterator(&iterator)) {
+        const char *string = flo_html_nextStringHashSetIterator(&iterator);
         printf("%s\n", string);
     }
 
     printElementPages(&newElements->container);
 }
 
-void printPropertyStatus(const TextStore *textStore) {
+void flo_html_printPropertyStatus(const flo_html_TextStore *textStore) {
     printf("printing property status...\n\n");
     printf("printing keys...\n");
-    printStringRegistryStatus(&textStore->propKeys);
+    printflo_html_StringRegistryStatus(&textStore->propKeys);
     printf("printing values...\n");
-    printStringRegistryStatus(&textStore->propValues);
+    printflo_html_StringRegistryStatus(&textStore->propValues);
 }
 
-void printBoolPropStatus(const TextStore *textStore) {
+void flo_html_printBoolPropStatus(const flo_html_TextStore *textStore) {
     printf("printing bool property status...\n\n");
-    printStringRegistryStatus(&textStore->boolProps);
+    printflo_html_StringRegistryStatus(&textStore->boolProps);
 }
 
-void printTextStatus(const TextStore *textStore) {
+void flo_html_printTextStatus(const flo_html_TextStore *textStore) {
     printf("printing text status...\n\n");
     printElementPages(&textStore->text);
 }
 
-void printTagStatus(const TextStore *textStore) {
+void flo_html_printTagStatus(const flo_html_TextStore *textStore) {
     printf("printing tags status...\n\n");
-    printStringRegistryStatus(&textStore->tags);
+    printflo_html_StringRegistryStatus(&textStore->tags);
 }

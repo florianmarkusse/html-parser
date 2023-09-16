@@ -6,9 +6,9 @@ typedef enum {
     DATA_PAGE_NO_CAPACITY,
     DATA_PAGE_ERROR_MEMORY,
     DATA_PAGE_NUM_STATUS
-} DataPageStatus;
+} flo_html_DataPageStatus;
 
-static const char *const DataPageStatusStrings[DATA_PAGE_NUM_STATUS] = {
+static const char *const dataPageStatusStrings[DATA_PAGE_NUM_STATUS] = {
     "Success",
     "No capacity",
     "Memory",
@@ -17,9 +17,9 @@ static const char *const DataPageStatusStrings[DATA_PAGE_NUM_STATUS] = {
 // Not always used, but very handy for those that actually do want readable
 // error codes.
 __attribute__((unused)) static const char *
-dataPageStatusToString(DataPageStatus status) {
+flo_html_dataPageStatusToString(flo_html_DataPageStatus status) {
     if (status >= 0 && status < DATA_PAGE_NUM_STATUS) {
-        return DataPageStatusStrings[status];
+        return dataPageStatusStrings[status];
     }
     return "Unknown data page status code!";
 }

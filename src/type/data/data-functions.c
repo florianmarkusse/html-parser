@@ -8,10 +8,10 @@
 #include "flo/html-parser/type/data/data-page.h"
 #include "flo/html-parser/utils/print/error.h"
 
-DataPageStatus createDataPage(DataPage *dataPage, const size_t pageSize) {
+flo_html_DataPageStatus createflo_html_DataPage(flo_html_DataPage *dataPage, const size_t pageSize) {
     dataPage->start = malloc(pageSize);
     if (dataPage->start == NULL) {
-        PRINT_ERROR("Failed to allocate memory for new tag page.\n");
+        FLO_HTML_PRINT_ERROR("Failed to allocate memory for new tag page.\n");
         return DATA_PAGE_ERROR_MEMORY;
     }
     dataPage->freeSpace = dataPage->start;
@@ -20,11 +20,11 @@ DataPageStatus createDataPage(DataPage *dataPage, const size_t pageSize) {
     return DATA_PAGE_SUCCESS;
 }
 
-DataPageStatus insertInSuitablePage(const void *data, const size_t byteLen,
+flo_html_DataPageStatus flo_html_insertIntoSuitablePage(const void *data, const size_t byteLen,
                                     const size_t totalPages,
-                                    ElementsContainer *container,
+                                    flo_html_ElementsContainer *container,
                                     char **dataLocation) {
-    DataPageStatus status = DATA_PAGE_SUCCESS;
+    flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;
     size_t index = container->pageLen;
     for (size_t i = 0; i < container->pageLen; ++i) {
         if (container->pages[i].spaceLeft >= byteLen) {
@@ -35,16 +35,16 @@ DataPageStatus insertInSuitablePage(const void *data, const size_t byteLen,
 
     if (index == container->pageLen) {
         if (container->pageLen < totalPages) {
-            DataPage dataPage;
-            if ((status = createDataPage(&dataPage, container->pageSize)) !=
+            flo_html_DataPage dataPage;
+            if ((status = createflo_html_DataPage(&dataPage, container->pageSize)) !=
                 DATA_PAGE_SUCCESS) {
                 return status;
             }
             container->pages[index] = dataPage;
             container->pageLen++;
         } else {
-            PRINT_ERROR("No more capacity to create new pages.\n");
-            PRINT_ERROR("All %zu page(s) of %zu bytes are full.\n", totalPages,
+            FLO_HTML_PRINT_ERROR("No more capacity to create new pages.\n");
+            FLO_HTML_PRINT_ERROR("All %zu page(s) of %zu bytes are full.\n", totalPages,
                         container->pageSize);
             return DATA_PAGE_NO_CAPACITY;
         }
@@ -58,25 +58,25 @@ DataPageStatus insertInSuitablePage(const void *data, const size_t byteLen,
     return status;
 }
 
-DataPageStatus insertIntoPageWithhash(const void *data, const size_t byteLen,
+flo_html_DataPageStatus flo_html_insertIntoPageWithHash(const void *data, const size_t byteLen,
                                       const size_t totalPages,
-                                      StringRegistry *stringRegistry,
-                                      HashElement *hashElement,
-                                      indexID *indexID) {
-    DataPageStatus status = DATA_PAGE_SUCCESS;
+                                      flo_html_StringRegistry *stringRegistry,
+                                      flo_html_HashElement *hashElement,
+                                      flo_html_indexID *flo_html_indexID) {
+    flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;
 
-    ElementsContainer *container = &stringRegistry->container;
+    flo_html_ElementsContainer *container = &stringRegistry->container;
     char *dataLocation = NULL;
-    if ((status = insertInSuitablePage(data, byteLen, totalPages, container,
+    if ((status = flo_html_insertIntoSuitablePage(data, byteLen, totalPages, container,
                                        &dataLocation)) != DATA_PAGE_SUCCESS) {
-        ERROR_WITH_CODE_FORMAT(dataPageStatusToString(status),
+        FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_dataPageStatusToString(status),
                                "Failed to insert data in suitable page %s\n",
                                (char *)data);
         return status;
     }
 
-    insertStringAtHash(&stringRegistry->set, dataLocation, hashElement,
-                       indexID);
+    flo_html_insertStringAtHash(&stringRegistry->set, dataLocation, hashElement,
+                       flo_html_indexID);
 
     return status;
 }

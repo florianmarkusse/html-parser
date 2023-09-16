@@ -50,26 +50,27 @@ static const TestFile testFiles[] = {
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
-                            const QueryStatus expectedStatus,
+                            const flo_html_QueryStatus expectedStatus,
                             const size_t expectedNumberOfNodes) {
-    TextStore textStore;
-    ElementStatus initStatus = createTextStore(&textStore);
+    flo_html_TextStore textStore;
+    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
+        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(initStatus),
                              "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 
-    Dom dom;
-    if (createDomFromFile(fileLocation, &dom, &textStore) != DOM_SUCCESS) {
-        destroyTextStore(&textStore);
+    flo_html_Dom dom;
+    if (createflo_html_DomFromFile(fileLocation, &dom, &textStore) !=
+        DOM_SUCCESS) {
+        flo_html_destroyTextStore(&textStore);
         return TEST_ERROR_INITIALIZATION;
     }
 
-    node_id *results = NULL;
+    flo_html_node_id *results = NULL;
     size_t resultsLen = 0;
-    QueryStatus actual =
-        querySelectorAll(cssQuery, &dom, &textStore, &results, &resultsLen);
+    flo_html_QueryStatus actual = flo_html_querySelectorAll(
+        cssQuery, &dom, &textStore, &results, &resultsLen);
 
     TestStatus result = TEST_FAILURE;
 
@@ -82,8 +83,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         printTestDemarcation();
         if (actual != expectedStatus) {
             printTestResultDifferenceErrorCode(
-                expectedStatus, flo_html_queryingStatusToString(expectedStatus), actual,
-                flo_html_queryingStatusToString(actual));
+                expectedStatus, flo_html_queryingStatusToString(expectedStatus),
+                actual, flo_html_queryingStatusToString(actual));
         } else {
             printTestResultDifferenceNumber(expectedNumberOfNodes, resultsLen);
             printf("Node IDs received...\n");
@@ -95,9 +96,9 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         printTestDemarcation();
     }
 
-    FREE_TO_NULL(results);
-    destroyDom(&dom);
-    destroyTextStore(&textStore);
+    FLO_HTML_FREE_TO_NULL(results);
+    destroyflo_html_Dom(&dom);
+    flo_html_destroyTextStore(&textStore);
 
     return result;
 }

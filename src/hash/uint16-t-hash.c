@@ -6,19 +6,21 @@
 
 #define MAX_CAPACITY ((1U << 16U) - 1) // Maximum capacity for uint16_t
 
-HashStatus initUint16HashSet(Uint16HashSet *set, const uint16_t capacity) {
+flo_html_HashStatus flo_html_initUint16HashSet(flo_html_Uint16HashSet *set,
+                                               const uint16_t capacity) {
     set->arrayLen = capacity;
     set->entries = 0;
-    set->array = calloc(capacity, sizeof(Uint16Entry));
+    set->array = calloc(capacity, sizeof(flo_html_Uint16Entry));
     if (set->array == NULL) {
-        PRINT_ERROR("Could not allocate memory for element hash set!\n");
+        FLO_HTML_PRINT_ERROR("Could not allocate memory for element hash set!\n");
         return HASH_ERROR_MEMORY;
     }
     return HASH_SUCCESS;
 }
 
-HashStatus insertUint16HashSet(Uint16HashSet *set, const uint16_t id) {
-    uint16_t hash = hash16_xm3(id); // Calculate the hash once
+flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
+                                                 const uint16_t id) {
+    uint16_t hash = flo_html_hash16_xm3(id); // Calculate the hash once
 
     size_t index = hash % set->arrayLen;
 
@@ -34,7 +36,7 @@ HashStatus insertUint16HashSet(Uint16HashSet *set, const uint16_t id) {
         didResize = true;
         // See if it makes sense to grow.
         if (set->arrayLen >= MAX_CAPACITY * 0.9) {
-            PRINT_ERROR("Hash set capacity would exceed the maximum capacity "
+            FLO_HTML_PRINT_ERROR("Hash set capacity would exceed the maximum capacity "
                         "for uint16_t!\n");
             return HASH_ERROR_CAPACITY;
         }
@@ -42,9 +44,10 @@ HashStatus insertUint16HashSet(Uint16HashSet *set, const uint16_t id) {
         size_t newCapacity = (set->arrayLen * 2 <= MAX_CAPACITY)
                                  ? set->arrayLen * 2
                                  : MAX_CAPACITY;
-        Uint16Entry *newArray = calloc(newCapacity, sizeof(Uint16Entry));
+        flo_html_Uint16Entry *newArray =
+            calloc(newCapacity, sizeof(flo_html_Uint16Entry));
         if (newArray == NULL) {
-            PRINT_ERROR(
+            FLO_HTML_PRINT_ERROR(
                 "Could not allocate memory for element hash set expansion!\n");
             return HASH_ERROR_MEMORY;
         }
@@ -60,7 +63,7 @@ HashStatus insertUint16HashSet(Uint16HashSet *set, const uint16_t id) {
             }
         }
 
-        FREE_TO_NULL(set->array);
+        FLO_HTML_FREE_TO_NULL(set->array);
         set->array = newArray;
         set->arrayLen = newCapacity;
     }
@@ -82,12 +85,13 @@ HashStatus insertUint16HashSet(Uint16HashSet *set, const uint16_t id) {
     return HASH_SUCCESS;
 }
 
-HashStatus uint16HashSetToArray(const Uint16HashSet *set, uint16_t **results,
-                                size_t *resultsLen) {
+flo_html_HashStatus
+flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
+                              uint16_t **results, size_t *resultsLen) {
     *resultsLen = set->entries;
     *results = (uint16_t *)malloc(*resultsLen * sizeof(uint16_t));
     if (*results == NULL) {
-        PRINT_ERROR("Could not allocate memory for the result array!\n");
+        FLO_HTML_PRINT_ERROR("Could not allocate memory for the result array!\n");
         return HASH_ERROR_MEMORY;
     }
 
@@ -101,8 +105,9 @@ HashStatus uint16HashSetToArray(const Uint16HashSet *set, uint16_t **results,
     return HASH_SUCCESS;
 }
 
-bool containsUint16HashSet(const Uint16HashSet *set, const uint16_t id) {
-    size_t index = hash16_xm3(id) % set->arrayLen;
+bool flo_html_containsUint16HashSet(const flo_html_Uint16HashSet *set,
+                                    const uint16_t id) {
+    size_t index = flo_html_hash16_xm3(id) % set->arrayLen;
 
     while (set->array[index].value != 0) {
         if (set->array[index].value == id) {
@@ -114,21 +119,22 @@ bool containsUint16HashSet(const Uint16HashSet *set, const uint16_t id) {
     return false;
 }
 
-void destroyUint16HashSet(Uint16HashSet *set) {
-    FREE_TO_NULL(set->array);
+void flo_html_destroyUint16HashSet(flo_html_Uint16HashSet *set) {
+    FLO_HTML_FREE_TO_NULL(set->array);
     set->arrayLen = 0;
     set->entries = 0;
 }
 
-HashStatus copyUint16HashSet(const Uint16HashSet *originalSet,
-                             Uint16HashSet *copy) {
-    HashStatus status = HASH_SUCCESS;
-    if ((status = initUint16HashSet(copy, originalSet->arrayLen)) !=
+flo_html_HashStatus
+flo_html_copyUint16HashSet(const flo_html_Uint16HashSet *originalSet,
+                           flo_html_Uint16HashSet *copy) {
+    flo_html_HashStatus status = HASH_SUCCESS;
+    if ((status = flo_html_initUint16HashSet(copy, originalSet->arrayLen)) !=
         HASH_SUCCESS) {
         return status;
     }
 
-    size_t arraySize = originalSet->arrayLen * sizeof(Uint16Entry);
+    size_t arraySize = originalSet->arrayLen * sizeof(flo_html_Uint16Entry);
     memcpy(copy->array, originalSet->array, arraySize);
 
     copy->entries = originalSet->entries;
@@ -136,21 +142,23 @@ HashStatus copyUint16HashSet(const Uint16HashSet *originalSet,
     return status;
 }
 
-void resetUint16HashSet(Uint16HashSet *set) {
+void flo_html_resetUint16HashSet(flo_html_Uint16HashSet *set) {
     if (set->array != NULL) {
-        memset(set->array, 0, set->arrayLen * sizeof(Uint16Entry));
+        memset(set->array, 0, set->arrayLen * sizeof(flo_html_Uint16Entry));
     }
     set->entries = 0;
 }
 
-void initUint16HashSetIterator(Uint16HashSetIterator *iterator,
-                               const Uint16HashSet *set) {
+void flo_html_initUint16HashSetIterator(
+    flo_html_Uint16HashSetIterator *iterator,
+    const flo_html_Uint16HashSet *set) {
     iterator->set = set;
     iterator->index = 0;
 }
 
-uint16_t nextUint16HashSetIterator(Uint16HashSetIterator *iterator) {
-    const Uint16HashSet *set = iterator->set;
+uint16_t
+flo_html_nextUint16HashSetIterator(flo_html_Uint16HashSetIterator *iterator) {
+    const flo_html_Uint16HashSet *set = iterator->set;
 
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index].value != 0) {
@@ -164,8 +172,9 @@ uint16_t nextUint16HashSetIterator(Uint16HashSetIterator *iterator) {
     return 0;
 }
 
-bool hasNextUint16HashSetIterator(Uint16HashSetIterator *iterator) {
-    const Uint16HashSet *set = iterator->set;
+bool flo_html_hasNextUint16HashSetIterator(
+    flo_html_Uint16HashSetIterator *iterator) {
+    const flo_html_Uint16HashSet *set = iterator->set;
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index].value != 0) {
             return true;
@@ -175,6 +184,7 @@ bool hasNextUint16HashSetIterator(Uint16HashSetIterator *iterator) {
     return false;
 }
 
-void resetUint16HashSetIterator(Uint16HashSetIterator *iterator) {
+void flo_html_resetUint16HashSetIterator(
+    flo_html_Uint16HashSetIterator *iterator) {
     iterator->index = 0;
 }

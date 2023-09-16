@@ -4,19 +4,23 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/type/node/document-node.h"
 
-#define MAX_NODE_DEPTH 1U << 7U
-#define MAX_PROPERTIES 1U << 7U
+#define FLO_HTML_MAX_NODE_DEPTH 1U << 7U
+#define FLO_HTML_MAX_PROPERTIES 1U << 7U
 
 typedef struct {
-    node_id stack[MAX_NODE_DEPTH];
+    flo_html_node_id stack[FLO_HTML_MAX_NODE_DEPTH];
     size_t len;
-} __attribute__((aligned(128))) NodeDepth;
+} __attribute__((aligned(128))) flo_html_NodeDepth;
 
-DomStatus parse(const char *htmlString, Dom *dom, TextStore *textStore);
-DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
-                               TextStore *textStore,
-                               node_id *newNodeID);
-DomStatus parseTextElement(const char *text, Dom *dom,
-                           TextStore *textStore, node_id *newNodeID);
+flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
+                                  flo_html_TextStore *textStore);
+flo_html_DomStatus
+flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
+                              flo_html_Dom *dom, flo_html_TextStore *textStore,
+                              flo_html_node_id *newNodeID);
+flo_html_DomStatus flo_html_parseTextElement(const char *text,
+                                             flo_html_Dom *dom,
+                                             flo_html_TextStore *textStore,
+                                             flo_html_node_id *newNodeID);
 
 #endif

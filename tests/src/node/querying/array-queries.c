@@ -34,40 +34,41 @@ static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                             const ArrayFunctionType functionType,
                             const size_t expectedResult) {
-    TextStore textStore;
-    ElementStatus initStatus = createTextStore(&textStore);
+    flo_html_TextStore textStore;
+    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
+        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(initStatus),
                              "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 
-    Dom dom;
-    if (createDomFromFile(fileLocation, &dom, &textStore) != DOM_SUCCESS) {
-        destroyTextStore(&textStore);
+    flo_html_Dom dom;
+    if (createflo_html_DomFromFile(fileLocation, &dom, &textStore) !=
+        DOM_SUCCESS) {
+        flo_html_destroyTextStore(&textStore);
         return TEST_ERROR_INITIALIZATION;
     }
 
     TestStatus result = TEST_FAILURE;
-    node_id foundNode = 0;
-    QueryStatus queryStatus =
-        querySelector(cssQuery, &dom, &textStore, &foundNode);
+    flo_html_node_id foundNode = 0;
+    flo_html_QueryStatus queryStatus =
+        flo_html_querySelector(cssQuery, &dom, &textStore, &foundNode);
 
     if (queryStatus != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), queryStatus,
-            flo_html_queryingStatusToString(queryStatus));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+            queryStatus, flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
         size_t actualResult = 0;
         switch (functionType) {
         case TEXT_CONTENT: {
             const char **results = NULL;
-            queryStatus =
-                getTextContent(foundNode, &dom, &results, &actualResult);
-            FREE_TO_NULL(results);
+            queryStatus = flo_html_getTextContent(foundNode, &dom, &results,
+                                                  &actualResult);
+            FLO_HTML_FREE_TO_NULL(results);
             break;
         }
         default: {
@@ -87,8 +88,9 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
             printTestDemarcation();
             if (queryStatus != QUERY_SUCCESS) {
                 printTestResultDifferenceErrorCode(
-                    QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
-                    queryStatus, flo_html_queryingStatusToString(queryStatus));
+                    QUERY_SUCCESS,
+                    flo_html_queryingStatusToString(QUERY_SUCCESS), queryStatus,
+                    flo_html_queryingStatusToString(queryStatus));
             }
             printTestResultDifferenceNumber(expectedResult, actualResult);
             printTestDemarcation();
@@ -96,8 +98,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
 freeMemory:
-    destroyDom(&dom);
-    destroyTextStore(&textStore);
+    destroyflo_html_Dom(&dom);
+    flo_html_destroyTextStore(&textStore);
 
     return result;
 }

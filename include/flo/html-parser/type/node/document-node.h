@@ -4,16 +4,16 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define MAX_PROPS_LEN_APPENDIX (1U << 4U)
+#define FLO_HTML_MAX_PROPS_LEN_APPENDIX (1U << 4U)
 
 typedef struct {
     const char *tag;
     const bool isPaired;
-    const char *boolProps[MAX_PROPS_LEN_APPENDIX];
+    const char *boolProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
     const size_t boolPropsLen;
-    const char *keyProps[MAX_PROPS_LEN_APPENDIX];
-    const char *valueProps[MAX_PROPS_LEN_APPENDIX];
+    const char *keyProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
+    const char *valueProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
     const size_t propsLen;
-} __attribute__((aligned(128))) DocumentNode;
+} __attribute__((aligned(128))) flo_html_DocumentNode;
 
 #endif

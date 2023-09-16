@@ -14,7 +14,8 @@
  * @param[in]   dom             The DOM structure to print status for.
  * @param[in]   textStore   The text store associated with the DOM.
  */
-void printDomStatus(const Dom *dom, const TextStore *textStore);
+void flo_html_printDomStatus(const flo_html_Dom *dom,
+                             const flo_html_TextStore *textStore);
 
 /**
  * @brief Print the minified HTML representation of a DOM structure.
@@ -26,7 +27,8 @@ void printDomStatus(const Dom *dom, const TextStore *textStore);
  * @param[in]   dom             The DOM structure to print as minified HTML.
  * @param[in]   textStore   The text store associated with the DOM.
  */
-void printHTML(const Dom *dom, const TextStore *textStore);
+void flo_html_printHTML(const flo_html_Dom *dom,
+                        const flo_html_TextStore *textStore);
 
 /**
  * @brief Write the minified HTML representation of a DOM structure to a file.
@@ -42,9 +44,10 @@ void printHTML(const Dom *dom, const TextStore *textStore);
  *
  * @return  The status of the file writing operation (FILE_SUCCESS if
  *          completed, an error code otherwise). See @ref
- *          "flo/html-parser/utils/file/file-status.h#FileStatus".
+ *          "flo/html-parser/utils/file/file-status.h#flo_html_FileStatus".
  */
-FileStatus writeHTMLToFile(const Dom *dom, const TextStore *textStore,
-                           const char *filePath);
+flo_html_FileStatus flo_html_writeHTMLToFile(const flo_html_Dom *dom,
+                                    const flo_html_TextStore *textStore,
+                                    const char *filePath);
 
 #endif

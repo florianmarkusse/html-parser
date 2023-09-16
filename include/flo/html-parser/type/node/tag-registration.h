@@ -8,9 +8,9 @@
 #include "node.h"
 
 typedef struct {
-    indexID tagID;
-    HashElement hashElement;
+    flo_html_indexID tagID;
+    flo_html_HashElement hashElement;
     bool isPaired;
-} __attribute__((aligned(32))) TagRegistration;
+} __attribute__((aligned(32))) flo_html_TagRegistration;
 
 #endif

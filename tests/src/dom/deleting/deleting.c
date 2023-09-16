@@ -84,7 +84,7 @@ static TestStatus testDeletions(const char *fileLocation1,
         return result;
     }
 
-    node_id foundNode = 0;
+    flo_html_node_id foundNode = 0;
     result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
     if (result != TEST_SUCCESS) {
         return result;
@@ -92,11 +92,11 @@ static TestStatus testDeletions(const char *fileLocation1,
 
     switch (deletionType) {
     case DELETE_NODE: {
-        flo_html_removeNode(foundNode, &comparisonTest.startDom);
+        flo_html_removeNode(foundNode, &comparisonTest.startflo_html_Dom);
         break;
     }
     case DELETE_CHILDREN: {
-        flo_html_removeChildren(foundNode, &comparisonTest.startDom);
+        flo_html_removeChildren(foundNode, &comparisonTest.startflo_html_Dom);
         break;
     }
     default: {
@@ -108,7 +108,7 @@ static TestStatus testDeletions(const char *fileLocation1,
     return compareAndEndTest(&comparisonTest);
 }
 
-bool testDomDeletions(size_t *successes, size_t *failures) {
+bool testflo_html_DomDeletions(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM deletions");
 
     size_t localSuccesses = 0;

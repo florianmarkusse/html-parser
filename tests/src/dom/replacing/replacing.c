@@ -41,7 +41,7 @@ typedef enum {
 } ReplacementType;
 
 typedef union {
-    const DocumentNode documentNode;
+    const flo_html_DocumentNode documentNode;
     const char *text;
 } ReplacementInput;
 
@@ -176,7 +176,7 @@ static TestStatus testReplacements(const char *fileLocation1,
         return result;
     }
 
-    node_id foundNode = 0;
+    flo_html_node_id foundNode = 0;
     if (cssQuery != NULL) {
         result =
             getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
@@ -185,24 +185,24 @@ static TestStatus testReplacements(const char *fileLocation1,
         return result;
     }
 
-    DomStatus domStatus = DOM_SUCCESS;
+    flo_html_DomStatus domStatus = DOM_SUCCESS;
     switch (replacementType) {
     case REPLACEMENT_DOCUMENT_NODE: {
-        domStatus = replaceWithDocumentNode(
+        domStatus = flo_html_replaceWithDocumentNode(
             foundNode, &replacementInput->documentNode,
-            &comparisonTest.startDom, &comparisonTest.startTextStore);
+            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
         break;
     }
     case REPLACEMENT_TEXT_NODE: {
-        domStatus = replaceWithTextNode(foundNode, replacementInput->text,
-                                        &comparisonTest.startDom,
-                                        &comparisonTest.startTextStore);
+        domStatus = flo_html_replaceWithTextNode(
+            foundNode, replacementInput->text,
+            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
         break;
     }
     case REPLACEMENT_FROM_STRING: {
-        domStatus = replaceWithHTMLFromString(
-            foundNode, replacementInput->text, &comparisonTest.startDom,
-            &comparisonTest.startTextStore);
+        domStatus = flo_html_replaceWithHTMLFromString(
+            foundNode, replacementInput->text,
+            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
         break;
     }
     default: {
@@ -218,7 +218,7 @@ static TestStatus testReplacements(const char *fileLocation1,
     return compareAndEndTest(&comparisonTest);
 }
 
-bool testDomReplacements(size_t *successes, size_t *failures) {
+bool testflo_html_DomReplacements(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM replacements");
 
     size_t localSuccesses = 0;

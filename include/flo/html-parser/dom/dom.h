@@ -12,75 +12,78 @@
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/file-status.h"
 
-#define NODES_PAGE_SIZE (1U << 10U)
-#define NODES_PER_PAGE (NODES_PAGE_SIZE / sizeof(Node))
+#define FLO_HTML_NODES_PAGE_SIZE (1U << 10U)
+#define FLO_HTML_NODES_PER_PAGE                                                \
+    (FLO_HTML_NODES_PAGE_SIZE / sizeof(flo_html_Node))
 
-#define TAG_REGISTRY_PAGE_SIZE (1U << 8U)
-#define TAG_REGISTRATIONS_PER_PAGE                                             \
-    (TAG_REGISTRY_PAGE_SIZE / sizeof(TagRegistration))
+#define FLO_HTML_TAG_REGISTRY_PAGE_SIZE (1U << 8U)
+#define FLO_HTML_TAG_REGISTRATIONS_PER_PAGE                                    \
+    (FLO_HTML_TAG_REGISTRY_PAGE_SIZE / sizeof(flo_html_TagRegistration))
 
-#define PROP_REGISTRY_PAGE_SIZE (1U << 8U)
-#define PROP_REGISTRATIONS_PER_PAGE                                            \
-    (PROP_REGISTRY_PAGE_SIZE / sizeof(Registration))
+#define FLO_HTML_PROP_REGISTRY_PAGE_SIZE (1U << 8U)
+#define FLO_HTML_PROP_REGISTRATIONS_PER_PAGE                                   \
+    (FLO_HTML_PROP_REGISTRY_PAGE_SIZE / sizeof(flo_html_Registration))
 
-#define PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
-#define PARENT_FIRST_CHILDS_PER_PAGE                                           \
-    (PARENT_FIRST_CHILDS_PAGE_SIZE / sizeof(ParentChild))
+#define FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
+#define FLO_HTML_PARENT_FIRST_CHILDS_PER_PAGE                                  \
+    (FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE / sizeof(flo_html_ParentChild))
 
-#define PARENT_CHILDS_PAGE_SIZE (1U << 8U)
-#define PARENT_CHILDS_PER_PAGE (PARENT_CHILDS_PAGE_SIZE / sizeof(ParentChild))
+#define FLO_HTML_PARENT_CHILDS_PAGE_SIZE (1U << 8U)
+#define FLO_HTML_PARENT_CHILDS_PER_PAGE                                        \
+    (FLO_HTML_PARENT_CHILDS_PAGE_SIZE / sizeof(flo_html_ParentChild))
 
-#define NEXT_NODES_PAGE_SIZE (1U << 8U)
-#define NEXT_NODES_PER_PAGE (NEXT_NODES_PAGE_SIZE / sizeof(NextNode))
+#define NEXT_FLO_HTML_NODES_PAGE_SIZE (1U << 8U)
+#define NEXT_FLO_HTML_NODES_PER_PAGE                                           \
+    (NEXT_FLO_HTML_NODES_PAGE_SIZE / sizeof(flo_html_NextNode))
 
 #define BOOLEAN_PROPERTIES_PAGE_SIZE (1U << 8U)
 #define BOOLEAN_PROPERTIES_PER_PAGE                                            \
-    (BOOLEAN_PROPERTIES_PAGE_SIZE / sizeof(BooleanProperty))
+    (BOOLEAN_PROPERTIES_PAGE_SIZE / sizeof(flo_html_BooleanProperty))
 
 #define PROPERTIES_PAGE_SIZE (1U << 8U)
-#define PROPERTIES_PER_PAGE (PROPERTIES_PAGE_SIZE / sizeof(Property))
+#define PROPERTIES_PER_PAGE (PROPERTIES_PAGE_SIZE / sizeof(flo_html_Property))
 
 typedef struct {
-    Registration *registry;
+    flo_html_Registration *registry;
     size_t len;
     size_t cap;
-} __attribute__((aligned(32))) BasicRegistry;
+} __attribute__((aligned(32))) flo_html_BasicRegistry;
 
 typedef struct {
-    node_id firstNodeID;
+    flo_html_node_id firstNodeID;
 
-    Node *nodes;
+    flo_html_Node *nodes;
     size_t nodeLen;
     size_t nodeCap;
 
-    ParentChild *parentFirstChilds;
+    flo_html_ParentChild *parentFirstChilds;
     size_t parentFirstChildLen;
     size_t parentFirstChildCap;
 
-    ParentChild *parentChilds;
+    flo_html_ParentChild *parentChilds;
     size_t parentChildLen;
     size_t parentChildCap;
 
-    NextNode *nextNodes;
+    flo_html_NextNode *nextNodes;
     size_t nextNodeLen;
     size_t nextNodeCap;
 
-    BooleanProperty *boolProps;
+    flo_html_BooleanProperty *boolProps;
     size_t boolPropsLen;
     size_t boolPropsCap;
 
-    Property *props;
+    flo_html_Property *props;
     size_t propsLen;
     size_t propsCap;
 
-    TagRegistration *tagRegistry;
+    flo_html_TagRegistration *tagRegistry;
     size_t tagRegistryLen;
     size_t tagRegistryCap;
 
-    BasicRegistry boolPropRegistry;
-    BasicRegistry propKeyRegistry;
-    BasicRegistry propValueRegistry;
-} __attribute__((aligned(128))) Dom;
+    flo_html_BasicRegistry boolPropRegistry;
+    flo_html_BasicRegistry propKeyRegistry;
+    flo_html_BasicRegistry propValueRegistry;
+} __attribute__((aligned(128))) flo_html_Dom;
 
 /**
  * @brief Create a DOM structure from an HTML string.
@@ -96,9 +99,10 @@ typedef struct {
  *
  * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
  *          an error code otherwise). See @ref
- *          "flo/html-parser/dom/dom-status.h#DomStatus".
+ *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-DomStatus createDom(const char *htmlString, Dom *dom, TextStore *textStore);
+flo_html_DomStatus createflo_html_Dom(const char *htmlString, flo_html_Dom *dom,
+                                      flo_html_TextStore *textStore);
 
 /**
  * @brief Create a DOM structure from an HTML file.
@@ -113,10 +117,11 @@ DomStatus createDom(const char *htmlString, Dom *dom, TextStore *textStore);
  *
  * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
  *          an error code otherwise). See @ref
- *          "flo/html-parser/dom/dom-status.h#DomStatus".
+ *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
-                            TextStore *textStore);
+flo_html_DomStatus createflo_html_DomFromFile(const char *fileLocation,
+                                              flo_html_Dom *dom,
+                                              flo_html_TextStore *textStore);
 
 /**
  * @brief Destroy a DOM structure and release associated memory.
@@ -126,6 +131,6 @@ DomStatus createDomFromFile(const char *fileLocation, Dom *dom,
  *
  * @param[in]   dom     The DOM structure to destroy.
  */
-void destroyDom(Dom *dom);
+void destroyflo_html_Dom(flo_html_Dom *dom);
 
 #endif

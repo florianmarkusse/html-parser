@@ -26,9 +26,10 @@
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus flo_html_addPropertyToNodeStringsWithLength(
-    node_id nodeID, const char *keyBuffer, size_t keyLen,
-    const char *valueBuffer, size_t valueLen, Dom *dom, TextStore *textStore);
+flo_html_ElementStatus flo_html_addPropertyToNodeStringsWithLength(
+    flo_html_node_id nodeID, const char *keyBuffer, size_t keyLen,
+    const char *valueBuffer, size_t valueLen, flo_html_Dom *dom,
+    flo_html_TextStore *textStore);
 
 /**
  * @brief Add a property with specified key and value to an HTML element.
@@ -46,9 +47,9 @@ ElementStatus flo_html_addPropertyToNodeStringsWithLength(
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus flo_html_addPropertyToNodeStrings(node_id nodeID, const char *keyBuffer,
-                                       const char *valueBuffer, Dom *dom,
-                                       TextStore *textStore);
+flo_html_ElementStatus flo_html_addPropertyToNodeStrings(
+    flo_html_node_id nodeID, const char *keyBuffer, const char *valueBuffer,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Add a boolean property to an HTML element with specified length.
@@ -67,9 +68,9 @@ ElementStatus flo_html_addPropertyToNodeStrings(node_id nodeID, const char *keyB
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus flo_html_addBooleanPropertyToNodeStringWithLength(
-    node_id nodeID, const char *boolPropBuffer, size_t boolPropLen, Dom *dom,
-    TextStore *textStore);
+flo_html_ElementStatus flo_html_addBooleanPropertyToNodeStringWithLength(
+    flo_html_node_id nodeID, const char *boolPropBuffer, size_t boolPropLen,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Add a boolean property to an HTML element.
@@ -86,9 +87,9 @@ ElementStatus flo_html_addBooleanPropertyToNodeStringWithLength(
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus flo_html_addBooleanPropertyToNodeString(node_id nodeID,
-                                             const char *boolPropBuffer,
-                                             Dom *dom, TextStore *textStore);
+flo_html_ElementStatus flo_html_addBooleanPropertyToNodeString(
+    flo_html_node_id nodeID, const char *boolPropBuffer, flo_html_Dom *dom,
+    flo_html_TextStore *textStore);
 
 /**
  * @brief Set the value of an HTML element's property.
@@ -106,9 +107,11 @@ ElementStatus flo_html_addBooleanPropertyToNodeString(node_id nodeID,
  * @return  The status of the property update (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus flo_html_setPropertyValue(node_id nodeID, const char *key,
-                               const char *newValue, Dom *dom,
-                               TextStore *textStore);
+flo_html_ElementStatus flo_html_setPropertyValue(flo_html_node_id nodeID,
+                                                 const char *key,
+                                                 const char *newValue,
+                                                 flo_html_Dom *dom,
+                                                 flo_html_TextStore *textStore);
 
 /**
  * @brief Set the text content of an HTML element.
@@ -125,8 +128,9 @@ ElementStatus flo_html_setPropertyValue(node_id nodeID, const char *key,
  * @return  The status of the text content update (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_setTextContent(node_id nodeID, const char *text, Dom *dom,
-                         TextStore *textStore);
+flo_html_DomStatus flo_html_setTextContent(flo_html_node_id nodeID,
+                                           const char *text, flo_html_Dom *dom,
+                                           flo_html_TextStore *textStore);
 
 /**
  * @brief Add text to a text node within an HTML element.
@@ -147,9 +151,10 @@ DomStatus flo_html_setTextContent(node_id nodeID, const char *text, Dom *dom,
  * @return  The status of the text addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus flo_html_addTextToTextNode(Node *node, const char *textStart,
-                                size_t textLen, Dom *dom, TextStore *textStore,
-                                bool isAppend);
+flo_html_ElementStatus
+flo_html_addTextToTextNode(flo_html_Node *node, const char *textStart,
+                           size_t textLen, flo_html_Dom *dom,
+                           flo_html_TextStore *textStore, bool isAppend);
 
 /**
  * @brief Set the tag on a DocumentNode within the DOM.
@@ -170,8 +175,9 @@ ElementStatus flo_html_addTextToTextNode(Node *node, const char *textStart,
  * @return  The status of the tag setting operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_setTagOnDocumentNode(const char *tagStart, size_t tagLen,
-                               node_id nodeID, bool isPaired, Dom *dom,
-                               TextStore *textStore);
+flo_html_DomStatus
+flo_html_setTagOnDocumentNode(const char *tagStart, size_t tagLen,
+                              flo_html_node_id nodeID, bool isPaired,
+                              flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 #endif

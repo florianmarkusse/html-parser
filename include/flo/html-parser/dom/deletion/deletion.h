@@ -12,7 +12,7 @@
  * @param[in]   nodeID  The ID of the node to remove.
  * @param[in]   dom     The DOM structure.
  */
-void flo_html_removeNode(node_id nodeID, Dom *dom);
+void flo_html_removeNode(flo_html_node_id nodeID, flo_html_Dom *dom);
 
 /**
  * @brief Remove all children of a node in the DOM.
@@ -23,7 +23,7 @@ void flo_html_removeNode(node_id nodeID, Dom *dom);
  * @param[in]   nodeID  The ID of the node whose children will be removed.
  * @param[in]   dom     The DOM structure.
  */
-void flo_html_removeChildren(node_id nodeID, Dom *dom);
+void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom);
 
 /**
  * @brief Remove a boolean property from a node in the DOM.
@@ -37,8 +37,9 @@ void flo_html_removeChildren(node_id nodeID, Dom *dom);
  * @param[in]   dom             The DOM structure.
  * @param[in]   textStore   The text store.
  */
-void flo_html_removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
-                           const TextStore *textStore);
+void flo_html_removeBooleanProperty(flo_html_node_id nodeID, const char *boolProp,
+                                    flo_html_Dom *dom,
+                                    const flo_html_TextStore *textStore);
 
 /**
  * @brief Remove a property with a given key from a node in the DOM.
@@ -52,7 +53,8 @@ void flo_html_removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *d
  * @param[in]   dom             The DOM structure.
  * @param[in]   textStore   The text store.
  */
-void flo_html_removeProperty(node_id nodeID, const char *keyProp, Dom *dom,
-                    const TextStore *textStore);
+void flo_html_removeProperty(flo_html_node_id nodeID, const char *keyProp,
+                             flo_html_Dom *dom,
+                             const flo_html_TextStore *textStore);
 
 #endif

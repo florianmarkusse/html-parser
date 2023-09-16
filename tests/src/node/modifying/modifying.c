@@ -47,23 +47,23 @@ static TestStatus testModification(const char *fileLocation1,
         return result;
     }
 
-    node_id foundNode = 0;
+    flo_html_node_id foundNode = 0;
     result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
     if (result != TEST_SUCCESS) {
         return result;
     }
 
     if (newPropValue == NULL) {
-        DomStatus domStatus =
-            flo_html_setTextContent(foundNode, propKey, &comparisonTest.startDom,
+        flo_html_DomStatus domStatus =
+            flo_html_setTextContent(foundNode, propKey, &comparisonTest.startflo_html_Dom,
                            &comparisonTest.startTextStore);
         if (domStatus != DOM_SUCCESS) {
             return failWithMessage("Failed to set text content!\n",
                                    &comparisonTest);
         }
     } else {
-        ElementStatus elementStatus = flo_html_setPropertyValue(
-            foundNode, propKey, newPropValue, &comparisonTest.startDom,
+        flo_html_ElementStatus elementStatus = flo_html_setPropertyValue(
+            foundNode, propKey, newPropValue, &comparisonTest.startflo_html_Dom,
             &comparisonTest.startTextStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             return failWithMessage("Failed to set property value!\n",

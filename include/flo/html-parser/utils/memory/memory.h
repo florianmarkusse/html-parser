@@ -14,7 +14,7 @@
  *
  * @param[in,out] ptr   A pointer to be freed and set to NULL.
  */
-#define FREE_TO_NULL(ptr)                                                      \
+#define FLO_HTML_FREE_TO_NULL(ptr)                                                      \
     do {                                                                       \
         free(ptr);                                                             \
         (ptr) = NULL;                                                          \
@@ -37,7 +37,7 @@
  *
  * @return  A pointer to the resized array, or NULL if reallocation fails.
  */
-static inline void *resizeArray(void *array, size_t currentLen,
+static inline void *flo_html_resizeArray(void *array, size_t currentLen,
                                 size_t *currentCap, size_t elementSize,
                                 size_t extraElements) {
     if (currentLen < *currentCap) {
@@ -46,7 +46,7 @@ static inline void *resizeArray(void *array, size_t currentLen,
     size_t newCap = (currentLen + extraElements);
     void *newArray = realloc(array, newCap * elementSize);
     if (newArray == NULL) {
-        PRINT_ERROR("Failed to reallocate more memory for the array.\n");
+        FLO_HTML_PRINT_ERROR("Failed to reallocate more memory for the array.\n");
         return NULL;
     }
     *currentCap = newCap;

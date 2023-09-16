@@ -6,7 +6,7 @@
 
 #define FULL_ACCESS 0700
 
-void createPath(const char *fileLocation) {
+void flo_html_createPath(const char *fileLocation) {
     const char *lastSlash = strrchr(fileLocation, '/');
     if (lastSlash != NULL) {
         // Calculate the length of the directory path

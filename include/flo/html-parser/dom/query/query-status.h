@@ -10,9 +10,9 @@ typedef enum {
     QUERY_MEMORY_ERROR,
     QUERY_INITIALIZATION_ERROR,
     QUERY_NUM_STATUS
-} QueryStatus;
+} flo_html_QueryStatus;
 
-static const char *const QueryStatusStrings[QUERY_NUM_STATUS] = {
+static const char *const queryStatusStrings[QUERY_NUM_STATUS] = {
     "Success",
     "Invalid element",
     "Invalid combinator",
@@ -22,9 +22,9 @@ static const char *const QueryStatusStrings[QUERY_NUM_STATUS] = {
     "Initialization error"};
 
 __attribute__((unused)) static const char *
-flo_html_queryingStatusToString(QueryStatus status) {
+flo_html_queryingStatusToString(flo_html_QueryStatus status) {
     if (status >= 0 && status < QUERY_NUM_STATUS) {
-        return QueryStatusStrings[status];
+        return queryStatusStrings[status];
     }
     return "Unknown query status code!";
 }

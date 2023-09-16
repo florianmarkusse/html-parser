@@ -24,9 +24,9 @@
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_prependDocumentNodeWithQuery(const char *cssQuery,
-                                       const DocumentNode *docNode, Dom *dom,
-                                       TextStore *textStore);
+flo_html_DomStatus flo_html_prependDocumentNodeWithQuery(
+    const char *cssQuery, const flo_html_DocumentNode *docNode,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Prepend a text node to the DOM using a CSS query.
@@ -43,8 +43,10 @@ DomStatus flo_html_prependDocumentNodeWithQuery(const char *cssQuery,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_prependTextNodeWithQuery(const char *cssQuery, const char *text,
-                                   Dom *dom, TextStore *textStore);
+flo_html_DomStatus
+flo_html_prependTextNodeWithQuery(const char *cssQuery, const char *text,
+                                  flo_html_Dom *dom,
+                                  flo_html_TextStore *textStore);
 
 /**
  * @brief Prepend HTML content from a string to the DOM using a CSS query.
@@ -61,9 +63,9 @@ DomStatus flo_html_prependTextNodeWithQuery(const char *cssQuery, const char *te
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_prependHTMLFromStringWithQuery(const char *cssQuery,
-                                         const char *htmlString, Dom *dom,
-                                         TextStore *textStore);
+flo_html_DomStatus flo_html_prependHTMLFromStringWithQuery(
+    const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
+    flo_html_TextStore *textStore);
 
 /**
  * @brief Prepend HTML content from a file to the DOM using a CSS query.
@@ -81,9 +83,9 @@ DomStatus flo_html_prependHTMLFromStringWithQuery(const char *cssQuery,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_prependHTMLFromFileWithQuery(const char *cssQuery,
-                                       const char *fileLocation, Dom *dom,
-                                       TextStore *textStore);
+flo_html_DomStatus flo_html_prependHTMLFromFileWithQuery(
+    const char *cssQuery, const char *fileLocation, flo_html_Dom *dom,
+    flo_html_TextStore *textStore);
 
 /**
  * @brief Prepend a DocumentNode to the DOM.
@@ -100,8 +102,10 @@ DomStatus flo_html_prependHTMLFromFileWithQuery(const char *cssQuery,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_prependDocumentNode(node_id parentID, const DocumentNode *docNode,
-                              Dom *dom, TextStore *textStore);
+flo_html_DomStatus
+flo_html_prependDocumentNode(flo_html_node_id parentID,
+                             const flo_html_DocumentNode *docNode,
+                             flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Prepend a text node to the DOM.
@@ -118,8 +122,9 @@ DomStatus flo_html_prependDocumentNode(node_id parentID, const DocumentNode *doc
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_prependTextNode(node_id parentID, const char *text, Dom *dom,
-                          TextStore *textStore);
+flo_html_DomStatus flo_html_prependTextNode(flo_html_node_id parentID,
+                                            const char *text, flo_html_Dom *dom,
+                                            flo_html_TextStore *textStore);
 
 /**
  * @brief Prepend HTML content from a string to the DOM.
@@ -136,7 +141,9 @@ DomStatus flo_html_prependTextNode(node_id parentID, const char *text, Dom *dom,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus flo_html_prependHTMLFromString(node_id parentID, const char *htmlString,
-                                Dom *dom, TextStore *textStore);
+flo_html_DomStatus
+flo_html_prependHTMLFromString(flo_html_node_id parentID,
+                               const char *htmlString, flo_html_Dom *dom,
+                               flo_html_TextStore *textStore);
 
 #endif

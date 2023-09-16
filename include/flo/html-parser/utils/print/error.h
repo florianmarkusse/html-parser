@@ -12,7 +12,7 @@
  *
  * @param[in]   ...     The error message format and arguments.
  */
-#define PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
+#define FLO_HTML_PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
 
 /**
  * @brief Print an error message with a code and message.
@@ -24,10 +24,10 @@
  * @param[in]   code        The error code to print.
  * @param[in]   message     The error message to print.
  */
-#define ERROR_WITH_CODE_ONLY(code, message)                                    \
+#define FLO_HTML_ERROR_WITH_CODE_ONLY(code, message)                           \
     do {                                                                       \
-        PRINT_ERROR("Error code: %s\n", code);                                 \
-        PRINT_ERROR("%s\n\n", message);                                        \
+        FLO_HTML_PRINT_ERROR("Error code: %s\n", code);                        \
+        FLO_HTML_PRINT_ERROR("%s\n\n", message);                               \
     } while (0)
 
 /**
@@ -41,10 +41,10 @@
  * @param[in]   format      The format string for the error message.
  * @param[in]   ...         The arguments to format the error message.
  */
-#define ERROR_WITH_CODE_FORMAT(code, format, ...)                              \
+#define FLO_HTML_ERROR_WITH_CODE_FORMAT(code, format, ...)                     \
     do {                                                                       \
-        PRINT_ERROR("Error code: %s\n", code);                                 \
-        PRINT_ERROR(format "\n\n", __VA_ARGS__);                               \
+        FLO_HTML_PRINT_ERROR("Error code: %s\n", code);                        \
+        FLO_HTML_PRINT_ERROR(format "\n\n", __VA_ARGS__);                      \
     } while (0)
 
 #endif

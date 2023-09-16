@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-bool testDomAppendices(size_t *successes, size_t *failures);
+bool testflo_html_DomAppendices(size_t *successes, size_t *failures);
 
 #endif

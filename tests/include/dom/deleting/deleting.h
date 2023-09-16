@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-bool testDomDeletions(size_t *successes, size_t *failures);
+bool testflo_html_DomDeletions(size_t *successes, size_t *failures);
 
 #endif

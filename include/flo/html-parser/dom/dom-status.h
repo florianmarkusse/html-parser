@@ -9,9 +9,9 @@ typedef enum {
     DOM_TOO_DEEP,
     DOM_TOO_MANY_ATTRIBUTES,
     DOM_NUM_STATUS
-} DomStatus;
+} flo_html_DomStatus;
 
-static const char *const DomStatusStrings[DOM_NUM_STATUS] = {
+static const char *const domStatusStrings[DOM_NUM_STATUS] = {
     "Success",
     "Memory",
     "Could not add to dom",
@@ -22,9 +22,9 @@ static const char *const DomStatusStrings[DOM_NUM_STATUS] = {
 // Not always used, but very handy for those that actually do want readable
 // error codes.
 __attribute__((unused)) static const char *
-documentStatusToString(DomStatus status) {
+documentStatusToString(flo_html_DomStatus status) {
     if (status >= 0 && status < DOM_NUM_STATUS) {
-        return DomStatusStrings[status];
+        return domStatusStrings[status];
     }
     return "Unknown dom status code!";
 }

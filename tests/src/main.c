@@ -22,19 +22,19 @@ int main() {
     size_t successes = 0;
     size_t failures = 0;
 
-    testDomParsings(&successes, &failures);
+    testflo_html_DomParsings(&successes, &failures);
     printf("\n");
 
-    testDomComparisons(&successes, &failures);
+    testflo_html_DomComparisons(&successes, &failures);
     printf("\n");
 
-    testDomQueries(&successes, &failures);
+    testflo_html_DomQueries(&successes, &failures);
     printf("\n");
 
     testNodeQueries(&successes, &failures);
     printf("\n");
 
-    testDomDeletions(&successes, &failures);
+    testflo_html_DomDeletions(&successes, &failures);
     printf("\n");
 
     testNodeModifications(&successes, &failures);
@@ -43,13 +43,13 @@ int main() {
     testNodeDeletions(&successes, &failures);
     printf("\n");
 
-    testDomAppendices(&successes, &failures);
+    testflo_html_DomAppendices(&successes, &failures);
     printf("\n");
 
-    testDomPrependices(&successes, &failures);
+    testflo_html_DomPrependices(&successes, &failures);
     printf("\n");
 
-    testDomReplacements(&successes, &failures);
+    testflo_html_DomReplacements(&successes, &failures);
     printf("\n");
 
     testIntegrations(&successes, &failures);

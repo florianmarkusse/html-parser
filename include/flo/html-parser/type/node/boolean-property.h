@@ -5,8 +5,8 @@
 #include "node.h"
 
 typedef struct {
-    node_id nodeID;
-    element_id propID;
-} __attribute__((aligned(4))) BooleanProperty;
+    flo_html_node_id nodeID;
+    flo_html_element_id propID;
+} __attribute__((aligned(4))) flo_html_BooleanProperty;
 
 #endif

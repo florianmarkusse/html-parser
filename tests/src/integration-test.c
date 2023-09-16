@@ -22,9 +22,9 @@ static TestStatus parseQueryModify() {
         return result;
     }
 
-    node_id *results = NULL;
+    flo_html_node_id *results = NULL;
     size_t resultsLen = 0;
-    QueryStatus actual = querySelectorAll("title", &comparisonTest.startDom,
+    flo_html_QueryStatus actual = flo_html_querySelectorAll("title", &comparisonTest.startflo_html_Dom,
                                           &comparisonTest.startTextStore,
                                           &results, &resultsLen);
 
@@ -47,21 +47,21 @@ static TestStatus parseQueryModify() {
             printf("%u\n", results[i]);
         }
         printTestDemarcation();
-        FREE_TO_NULL(results);
+        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
-    flo_html_setTextContent(results[0], "FOURTH", &comparisonTest.startDom,
+    flo_html_setTextContent(results[0], "FOURTH", &comparisonTest.startflo_html_Dom,
                    &comparisonTest.startTextStore);
     flo_html_addBooleanPropertyToNodeString(results[0], "the-fourth",
-                                   &comparisonTest.startDom,
+                                   &comparisonTest.startflo_html_Dom,
                                    &comparisonTest.startTextStore);
     flo_html_addPropertyToNodeStrings(results[0], "the-property", "my value",
-                             &comparisonTest.startDom,
+                             &comparisonTest.startflo_html_Dom,
                              &comparisonTest.startTextStore);
-    FREE_TO_NULL(results);
+    FLO_HTML_FREE_TO_NULL(results);
 
-    node_id currentNodeID = 0;
-    actual = querySelector("head", &comparisonTest.startDom,
+    flo_html_node_id currentNodeID = 0;
+    actual = flo_html_querySelector("head", &comparisonTest.startflo_html_Dom,
                            &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
@@ -77,10 +77,10 @@ static TestStatus parseQueryModify() {
                           "<title "
                           "id=\"first-title-tag\"></title><title>FIRST</"
                           "title><title>SECOND</title><title>THIRD</title>",
-                          &comparisonTest.startDom,
+                          &comparisonTest.startflo_html_Dom,
                           &comparisonTest.startTextStore);
 
-    actual = querySelectorAll("title", &comparisonTest.startDom,
+    actual = flo_html_querySelectorAll("title", &comparisonTest.startflo_html_Dom,
                               &comparisonTest.startTextStore, &results,
                               &resultsLen);
     if (actual != QUERY_SUCCESS) {
@@ -90,7 +90,7 @@ static TestStatus parseQueryModify() {
             QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
             flo_html_queryingStatusToString(actual));
         printTestDemarcation();
-        FREE_TO_NULL(results);
+        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
@@ -103,13 +103,13 @@ static TestStatus parseQueryModify() {
             printf("%u\n", results[i]);
         }
         printTestDemarcation();
-        FREE_TO_NULL(results);
+        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    FREE_TO_NULL(results);
+    FLO_HTML_FREE_TO_NULL(results);
 
-    actual = querySelector("#first-title-tag", &comparisonTest.startDom,
+    actual = flo_html_querySelector("#first-title-tag", &comparisonTest.startflo_html_Dom,
                            &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
@@ -118,13 +118,13 @@ static TestStatus parseQueryModify() {
             QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
             flo_html_queryingStatusToString(actual));
         printTestDemarcation();
-        FREE_TO_NULL(results);
+        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    flo_html_removeNode(currentNodeID, &comparisonTest.startDom);
+    flo_html_removeNode(currentNodeID, &comparisonTest.startflo_html_Dom);
 
-    actual = querySelectorAll("title", &comparisonTest.startDom,
+    actual = flo_html_querySelectorAll("title", &comparisonTest.startflo_html_Dom,
                               &comparisonTest.startTextStore, &results,
                               &resultsLen);
     if (actual != QUERY_SUCCESS) {
@@ -134,7 +134,7 @@ static TestStatus parseQueryModify() {
             QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
             flo_html_queryingStatusToString(actual));
         printTestDemarcation();
-        FREE_TO_NULL(results);
+        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
@@ -147,11 +147,11 @@ static TestStatus parseQueryModify() {
             printf("%u\n", results[i]);
         }
         printTestDemarcation();
-        FREE_TO_NULL(results);
+        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    FREE_TO_NULL(results);
+    FLO_HTML_FREE_TO_NULL(results);
 
     return compareAndEndTest(&comparisonTest);
 }

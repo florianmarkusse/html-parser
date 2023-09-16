@@ -8,7 +8,7 @@
 // http://www.cse.yorku.ca/~oz/hash.html
 // djb2 hash
 // NOLINTNEXTLINE(clang-diagnostic-identifier)
-__attribute__((unused)) static size_t hashString(const char *string) {
+__attribute__((unused)) static size_t flo_html_hashString(const char *string) {
     size_t hash = 5381;
     int c = 0;
 
@@ -25,7 +25,7 @@ __attribute__((unused)) static size_t hashString(const char *string) {
 // https://github.com/skeeto/hash-prospector
 // 3-round xorshift-multiply (-Xn3)
 // bias = 0.0045976709018820602
-__attribute__((unused)) static uint16_t hash16_xm3(uint16_t x) {
+__attribute__((unused)) static uint16_t flo_html_hash16_xm3(uint16_t x) {
     x ^= x >> 7;
     x *= 0x2993U;
     x ^= x >> 5;

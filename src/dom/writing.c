@@ -8,9 +8,10 @@
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/path.h"
 
-void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
-               const TextStore *textStore, FILE *output) {
-    Node node = dom->nodes[nodeID];
+void printNode(const flo_html_node_id nodeID, const size_t indentation,
+               const flo_html_Dom *dom, const flo_html_TextStore *textStore,
+               FILE *output) {
+    flo_html_Node node = dom->nodes[nodeID];
 
     if (node.nodeType == NODE_TYPE_ERROR) {
         return;
@@ -21,30 +22,32 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
         return;
     }
 
-    const char *tag = getTag(node.tagID, dom, textStore);
+    const char *tag = flo_html_getTag(node.tagID, dom, textStore);
     fprintf(output, "<%s", tag);
 
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
-        BooleanProperty boolProp = dom->boolProps[i];
+        flo_html_BooleanProperty boolProp = dom->boolProps[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            const char *prop = getBoolProp(boolProp.propID, dom, textStore);
+            const char *prop =
+                flo_html_getBoolProp(boolProp.propID, dom, textStore);
             fprintf(output, " %s", prop);
         }
     }
 
     for (size_t i = 0; i < dom->propsLen; i++) {
-        Property prop = dom->props[i];
+        flo_html_Property prop = dom->props[i];
 
         if (prop.nodeID == node.nodeID) {
-            const char *key = getPropKey(prop.keyID, dom, textStore);
-            const char *value = getPropValue(prop.valueID, dom, textStore);
+            const char *key = flo_html_getPropKey(prop.keyID, dom, textStore);
+            const char *value =
+                flo_html_getPropValue(prop.valueID, dom, textStore);
             fprintf(output, " %s=\"%s\"", key, value);
         }
     }
 
-    TagRegistration *tagRegistration = NULL;
-    getTagRegistration(node.tagID, dom, &tagRegistration);
+    flo_html_TagRegistration *tagRegistration = NULL;
+    flo_html_getTagRegistration(node.tagID, dom, &tagRegistration);
     if (!tagRegistration->isPaired) {
         if (strcmp(tag, "!DOCTYPE") == 0) {
             fprintf(output, ">");
@@ -54,37 +57,39 @@ void printNode(const node_id nodeID, const size_t indentation, const Dom *dom,
         return;
     }
     fprintf(output, ">");
-    node_id childNode = getFirstChild(nodeID, dom);
+    flo_html_node_id childNode = flo_html_getFirstChild(nodeID, dom);
     while (childNode) {
         printNode(childNode, indentation + 1, dom, textStore, output);
-        childNode = getNext(childNode, dom);
+        childNode = flo_html_getNext(childNode, dom);
     }
     fprintf(output, "</%s>", tag);
 }
 
-void printHTML(const Dom *dom, const TextStore *textStore) {
+void flo_html_printHTML(const flo_html_Dom *dom,
+                        const flo_html_TextStore *textStore) {
     printf("printing HTML...\n\n");
-    node_id currentNodeID = dom->firstNodeID;
+    flo_html_node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, dom, textStore, stdout);
-        currentNodeID = getNext(currentNodeID, dom);
+        currentNodeID = flo_html_getNext(currentNodeID, dom);
     }
     printf("\n\n");
 }
 
-FileStatus writeHTMLToFile(const Dom *dom, const TextStore *textStore,
-                           const char *filePath) {
-    createPath(filePath);
+flo_html_FileStatus flo_html_writeHTMLToFile(const flo_html_Dom *dom,
+                                    const flo_html_TextStore *textStore,
+                                    const char *filePath) {
+    flo_html_createPath(filePath);
     FILE *file = fopen(filePath, "wbe");
     if (file == NULL) {
         printf("Failed to open file for writing: %s\n", filePath);
         return FILE_CANT_OPEN;
     }
 
-    node_id currentNodeID = dom->firstNodeID;
+    flo_html_node_id currentNodeID = dom->firstNodeID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, dom, textStore, file);
-        currentNodeID = getNext(currentNodeID, dom);
+        currentNodeID = flo_html_getNext(currentNodeID, dom);
     }
 
     fclose(file);
@@ -92,44 +97,46 @@ FileStatus writeHTMLToFile(const Dom *dom, const TextStore *textStore,
     return FILE_SUCCESS;
 }
 
-void printBasicRegistry(const char *registryName,
-                        const BasicRegistry *basicRegistry,
-                        const StringHashSet *set) {
+void printflo_html_BasicRegistry(const char *registryName,
+                                 const flo_html_BasicRegistry *basicRegistry,
+                                 const flo_html_StringHashSet *set) {
     printf("%-20s registration nodes inside DOM...\n", registryName);
     printf("total number of nodes: %zu\n", basicRegistry->len);
     for (size_t i = 0; i < basicRegistry->len; i++) {
-        Registration registration = basicRegistry->registry[i];
+        flo_html_Registration registration = basicRegistry->registry[i];
         const char *value =
-            getStringFromHashSet(set, &registration.hashElement);
+            flo_html_getStringFromHashSet(set, &registration.hashElement);
         printf("index ID: %-5u value: %-20s hash: %zu offset: %u\n",
-               registration.indexID, value, registration.hashElement.hash,
-               registration.hashElement.offset);
+               registration.flo_html_indexID, value,
+               registration.hashElement.hash, registration.hashElement.offset);
     }
     printf("\n");
 }
 
-void printDomStatus(const Dom *dom, const TextStore *textStore) {
+void flo_html_printDomStatus(const flo_html_Dom *dom,
+                             const flo_html_TextStore *textStore) {
     printf("printing DOM status...\n\n");
 
     printf("Printing Text Store contents...\n");
-    printPropertyStatus(textStore);
-    printBoolPropStatus(textStore);
-    printTextStatus(textStore);
-    printTagStatus(textStore);
+    flo_html_printPropertyStatus(textStore);
+    flo_html_printBoolPropStatus(textStore);
+    flo_html_printTextStatus(textStore);
+    flo_html_printTagStatus(textStore);
 
     printf("Printing DOM contents...\n");
 
     printf("nodes inside DOM...\n");
     printf("total number of nodes: %zu\n", dom->nodeLen);
     for (size_t i = 0; i < dom->nodeLen; i++) {
-        Node node = dom->nodes[i];
+        flo_html_Node node = dom->nodes[i];
 
         if (node.nodeType == NODE_TYPE_TEXT) {
             printf("node ID: %-5u node type: %-10s containing text\n",
-                   node.nodeID, nodeTypeToString(node.nodeType));
+                   node.nodeID, flo_html_nodeTypeToString(node.nodeType));
         } else {
             printf("node ID: %-5u node type: %-10s with tag ID: %-5u\n",
-                   node.nodeID, nodeTypeToString(node.nodeType), node.tagID);
+                   node.nodeID, flo_html_nodeTypeToString(node.nodeType),
+                   node.tagID);
         }
     }
     printf("\n");
@@ -138,9 +145,9 @@ void printDomStatus(const Dom *dom, const TextStore *textStore) {
     printf("total number of tag registration nodes: %zu\n",
            dom->tagRegistryLen);
     for (size_t i = 0; i < dom->tagRegistryLen; i++) {
-        TagRegistration tagRegistration = dom->tagRegistry[i];
-        const char *tag = getStringFromHashSet(&textStore->tags.set,
-                                               &tagRegistration.hashElement);
+        flo_html_TagRegistration tagRegistration = dom->tagRegistry[i];
+        const char *tag = flo_html_getStringFromHashSet(
+            &textStore->tags.set, &tagRegistration.hashElement);
         printf("tag ID: %-5u tag: %-20s isPaired: %d hash: %zu offset: %u\n",
                tagRegistration.tagID, tag, tagRegistration.isPaired,
                tagRegistration.hashElement.hash,
@@ -148,17 +155,17 @@ void printDomStatus(const Dom *dom, const TextStore *textStore) {
     }
     printf("\n");
 
-    printBasicRegistry("bool props", &dom->boolPropRegistry,
-                       &textStore->boolProps.set);
-    printBasicRegistry("key props", &dom->propKeyRegistry,
-                       &textStore->propKeys.set);
-    printBasicRegistry("value props", &dom->propValueRegistry,
-                       &textStore->propValues.set);
+    printflo_html_BasicRegistry("bool props", &dom->boolPropRegistry,
+                                &textStore->boolProps.set);
+    printflo_html_BasicRegistry("key props", &dom->propKeyRegistry,
+                                &textStore->propKeys.set);
+    printflo_html_BasicRegistry("value props", &dom->propValueRegistry,
+                                &textStore->propValues.set);
 
     printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
-        BooleanProperty boolProps = dom->boolProps[i];
+        flo_html_BooleanProperty boolProps = dom->boolProps[i];
         printf("node ID: %-5u prop ID: %-5u\n", boolProps.nodeID,
                boolProps.propID);
     }
@@ -167,7 +174,7 @@ void printDomStatus(const Dom *dom, const TextStore *textStore) {
     printf("key-value property nodes inside DOM...\n");
     printf("total number of key-value properties: %zu\n", dom->propsLen);
     for (size_t i = 0; i < dom->propsLen; i++) {
-        Property property = dom->props[i];
+        flo_html_Property property = dom->props[i];
         printf("node ID: %-5u key ID: %-5u value ID: %-5u\n", property.nodeID,
                property.keyID, property.valueID);
     }

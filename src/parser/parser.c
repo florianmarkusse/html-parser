@@ -40,38 +40,41 @@ bool isVoidElement(const char *str, size_t len) {
     return false; // No match found
 }
 
-DomStatus getNewNodeID(node_id *lastParsedNodeID, const NodeType nodeType,
-                       node_id *prevNodeID, Dom *dom) {
+flo_html_DomStatus getNewNodeID(flo_html_node_id *lastParsedNodeID,
+                                const flo_html_NodeType nodeType,
+                                flo_html_node_id *prevNodeID,
+                                flo_html_Dom *dom) {
     *prevNodeID = *lastParsedNodeID;
-    return createNode(lastParsedNodeID, nodeType, dom);
+    return flo_html_createNode(lastParsedNodeID, nodeType, dom);
 }
 
-static DomStatus updateReferences(const node_id newNodeID,
-                                  const node_id previousNodeID,
-                                  const NodeDepth *depthStack, Dom *dom) {
-    DomStatus documentStatus = DOM_SUCCESS;
+static flo_html_DomStatus
+updateReferences(const flo_html_node_id newNodeID,
+                 const flo_html_node_id previousNodeID,
+                 const flo_html_NodeDepth *depthStack, flo_html_Dom *dom) {
+    flo_html_DomStatus documentStatus = DOM_SUCCESS;
 
     if (newNodeID > 0 && previousNodeID > 0) {
         if (depthStack->len == 0) {
-            if ((documentStatus = addNextNode(previousNodeID, newNodeID,
-                                              dom)) != DOM_SUCCESS) {
+            if ((documentStatus = flo_html_addNextNode(
+                     previousNodeID, newNodeID, dom)) != DOM_SUCCESS) {
                 return documentStatus;
             }
         } else {
             const unsigned int parentNodeID =
                 depthStack->stack[depthStack->len - 1];
-            if ((documentStatus = addParentChild(parentNodeID, newNodeID,
-                                                 dom)) != DOM_SUCCESS) {
+            if ((documentStatus = flo_html_addParentChild(
+                     parentNodeID, newNodeID, dom)) != DOM_SUCCESS) {
                 return documentStatus;
             }
             if (parentNodeID == previousNodeID) {
-                if ((documentStatus = addParentFirstChild(
+                if ((documentStatus = flo_html_addParentFirstChild(
                          parentNodeID, newNodeID, dom)) != DOM_SUCCESS) {
                     return documentStatus;
                 }
             } else {
-                if ((documentStatus = addNextNode(previousNodeID, newNodeID,
-                                                  dom)) != DOM_SUCCESS) {
+                if ((documentStatus = flo_html_addNextNode(
+                         previousNodeID, newNodeID, dom)) != DOM_SUCCESS) {
                     return documentStatus;
                 }
             }
@@ -81,23 +84,24 @@ static DomStatus updateReferences(const node_id newNodeID,
     return documentStatus;
 }
 
-DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
-                       node_id *prevNodeID, node_id *newNodeID,
-                       unsigned char *isSingle, TextParsing *context,
-                       unsigned char exclamStart, Dom *dom,
-                       TextStore *textStore) {
-    ElementStatus elementStatus = ELEMENT_SUCCESS;
-    DomStatus documentStatus = DOM_SUCCESS;
+flo_html_DomStatus
+parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
+                      flo_html_node_id *prevNodeID, flo_html_node_id *newNodeID,
+                      unsigned char *isSingle, TextParsing *context,
+                      unsigned char exclamStart, flo_html_Dom *dom,
+                      flo_html_TextStore *textStore) {
+    flo_html_ElementStatus elementStatus = ELEMENT_SUCCESS;
+    flo_html_DomStatus documentStatus = DOM_SUCCESS;
     char ch = htmlString[++(*currentPosition)];
 
     if ((documentStatus = getNewNodeID(newNodeID, NODE_TYPE_DOCUMENT,
                                        prevNodeID, dom)) != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to create node.\n");
+        FLO_HTML_PRINT_ERROR("Failed to create node.\n");
         return documentStatus;
     }
 
     size_t elementStartIndex = *currentPosition;
-    while (ch != ' ' && !isSpecialSpace(ch) && ch != '>' && ch != '\0') {
+    while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '>' && ch != '\0') {
         ch = htmlString[++(*currentPosition)];
     }
     size_t elementLen = *currentPosition - elementStartIndex;
@@ -117,7 +121,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
 
     // Collect attributes here.
     while (ch != '>' && ch != '/' && ch != '\0') {
-        while (ch == ' ' || isSpecialSpace(ch)) {
+        while (ch == ' ' || flo_html_isSpecialSpace(ch)) {
             ch = htmlString[++(*currentPosition)];
         }
         if (ch == '/' || ch == '>') {
@@ -163,7 +167,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
                     ch = htmlString[++(*currentPosition)];
                 }
             } else {
-                while (ch != ' ' && !isSpecialSpace(ch) && ch != '>' &&
+                while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '>' &&
                        ch != '\0') {
                     ch = htmlString[++(*currentPosition)];
                 }
@@ -173,11 +177,11 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
 
             elementStatus = flo_html_addPropertyToNodeStringsWithLength(
                 *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen,
-                &htmlString[attrValueStartIndex], attrValueLen, dom,
-                textStore);
+                &htmlString[attrValueStartIndex], attrValueLen, dom, textStore);
             if (elementStatus != ELEMENT_SUCCESS) {
-                ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                     "Failed to add key-value property!\n");
+                FLO_HTML_ERROR_WITH_CODE_ONLY(
+                    flo_html_elementStatusToString(elementStatus),
+                    "Failed to add key-value property!\n");
                 return DOM_NO_ELEMENT;
             }
 
@@ -189,8 +193,9 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
                 textStore);
 
             if (elementStatus != ELEMENT_SUCCESS) {
-                ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
-                                     "Failed to add boolean property!\n");
+                FLO_HTML_ERROR_WITH_CODE_ONLY(
+                    flo_html_elementStatusToString(elementStatus),
+                    "Failed to add boolean property!\n");
                 return DOM_NO_ELEMENT;
             }
         }
@@ -214,7 +219,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
     if ((documentStatus = flo_html_setTagOnDocumentNode(
              &htmlString[elementStartIndex], elementLen, *newNodeID,
              !(*isSingle), dom, textStore)) != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to add tag to node ID.\n");
+        FLO_HTML_PRINT_ERROR("Failed to add tag to node ID.\n");
         return documentStatus;
     }
 
@@ -228,36 +233,41 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
     return documentStatus;
 }
 
-DomStatus parseBasicdomNode(const char *htmlString, size_t *currentPosition,
-                            node_id *prevNodeID, node_id *newNodeID,
-                            unsigned char *isSingle, TextParsing *context,
-                            Dom *dom, TextStore *textStore) {
-    return parseDomNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        isSingle, context, 0, dom, textStore);
+flo_html_DomStatus
+parseBasicdomNode(const char *htmlString, size_t *currentPosition,
+                  flo_html_node_id *prevNodeID, flo_html_node_id *newNodeID,
+                  unsigned char *isSingle, TextParsing *context,
+                  flo_html_Dom *dom, flo_html_TextStore *textStore) {
+    return parseflo_html_DomNode(htmlString, currentPosition, prevNodeID,
+                                 newNodeID, isSingle, context, 0, dom,
+                                 textStore);
 }
 
-DomStatus parseExclamdomNode(const char *htmlString, size_t *currentPosition,
-                             node_id *prevNodeID, node_id *newNodeID, Dom *dom,
-                             TextStore *textStore) {
+flo_html_DomStatus
+parseExclamdomNode(const char *htmlString, size_t *currentPosition,
+                   flo_html_node_id *prevNodeID, flo_html_node_id *newNodeID,
+                   flo_html_Dom *dom, flo_html_TextStore *textStore) {
     unsigned char ignore = 0;
     TextParsing ignore2 = BASIC_CONTEXT;
-    return parseDomNode(htmlString, currentPosition, prevNodeID, newNodeID,
-                        &ignore, &ignore2, 1, dom, textStore);
+    return parseflo_html_DomNode(htmlString, currentPosition, prevNodeID,
+                                 newNodeID, &ignore, &ignore2, 1, dom,
+                                 textStore);
 }
 
 unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
                                  const size_t currentPosition) {
-    return (ch != '\0' && !isSpecialSpace(ch) &&
+    return (ch != '\0' && !flo_html_isSpecialSpace(ch) &&
             (ch != ' ' ||
              (currentPosition > 0 && htmlString[currentPosition - 1] != ' ')));
 }
 
-DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
-                        node_id *prevNodeID, node_id *lastParsedNodeID,
-                        TextParsing *context, unsigned char *isMerge, Dom *dom,
-                        TextStore *textStore) {
-    ElementStatus elementStatus = ELEMENT_SUCCESS;
-    DomStatus documentStatus = DOM_SUCCESS;
+flo_html_DomStatus
+parseTextNode(const char *htmlString, size_t *currentPosition,
+              flo_html_node_id *prevNodeID, flo_html_node_id *lastParsedNodeID,
+              TextParsing *context, unsigned char *isMerge, flo_html_Dom *dom,
+              flo_html_TextStore *textStore) {
+    flo_html_ElementStatus elementStatus = ELEMENT_SUCCESS;
+    flo_html_DomStatus documentStatus = DOM_SUCCESS;
     size_t elementStartIndex = *currentPosition;
     char ch = htmlString[*currentPosition];
     size_t elementLen = 0;
@@ -356,58 +366,58 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     }
     }
 
-    Node *prevNode = &dom->nodes[*lastParsedNodeID];
+    flo_html_Node *prevNode = &dom->nodes[*lastParsedNodeID];
     if (prevNode->nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
         elementStatus =
             flo_html_addTextToTextNode(prevNode, &htmlString[elementStartIndex],
-                              elementLen, dom, textStore, true);
+                                       elementLen, dom, textStore, true);
         if (elementStatus != ELEMENT_CREATED) {
-            ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+            FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
                                  "Failed to insert text");
             return DOM_NO_ELEMENT;
         }
     } else {
         if ((documentStatus = getNewNodeID(lastParsedNodeID, NODE_TYPE_TEXT,
                                            prevNodeID, dom)) != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to create node for domument.\n");
+            FLO_HTML_PRINT_ERROR("Failed to create node for domument.\n");
             return documentStatus;
         }
 
         char *dataLocation = NULL;
-        elementStatus =
-            insertElement(&textStore->text, &htmlString[elementStartIndex],
-                          elementLen, &dataLocation);
+        elementStatus = flo_html_insertElement(&textStore->text,
+                                               &htmlString[elementStartIndex],
+                                               elementLen, &dataLocation);
         if (elementStatus != ELEMENT_CREATED) {
-            ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+            FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
                                  "Failed to index text!\n");
             return DOM_NO_ELEMENT;
         }
 
-        setNodeText(*lastParsedNodeID, dataLocation, dom);
+        flo_html_setNodeText(*lastParsedNodeID, dataLocation, dom);
     }
 
     return documentStatus;
 }
 
-DomStatus parse(const char *htmlString, Dom *dom,
-                TextStore *textStore) {
-    DomStatus documentStatus = DOM_SUCCESS;
+flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
+                                  flo_html_TextStore *textStore) {
+    flo_html_DomStatus documentStatus = DOM_SUCCESS;
 
     size_t currentPosition = 0;
 
-    NodeDepth nodeStack;
+    flo_html_NodeDepth nodeStack;
     nodeStack.len = 0;
 
     TextParsing context = BASIC_CONTEXT;
 
-    node_id prevNodeID = 0;
-    node_id lastParsedNodeID = 0;
+    flo_html_node_id prevNodeID = 0;
+    flo_html_node_id lastParsedNodeID = 0;
     char ch = htmlString[currentPosition];
 
     while (ch != '\0') {
         ch = htmlString[currentPosition];
-        while (ch == ' ' || isSpecialSpace(ch)) {
+        while (ch == ' ' || flo_html_isSpecialSpace(ch)) {
             ch = htmlString[++currentPosition];
         }
         if (ch == '\0') {
@@ -417,10 +427,10 @@ DomStatus parse(const char *htmlString, Dom *dom,
         // Text node.
         if (context != BASIC_CONTEXT || ch != '<' ||
             (ch == '<' && (htmlString[currentPosition + 1] == ' ' ||
-                           isSpecialSpace(htmlString[currentPosition + 1])))) {
+                           flo_html_isSpecialSpace(htmlString[currentPosition + 1])))) {
             if (context == BASIC_CONTEXT && ch == '<' &&
                 (htmlString[currentPosition + 1] == ' ' ||
-                 isSpecialSpace(htmlString[currentPosition + 1]))) {
+                 flo_html_isSpecialSpace(htmlString[currentPosition + 1]))) {
                 context = ROGUE_OPEN_TAG;
             }
             unsigned char isMerge = 0;
@@ -510,8 +520,8 @@ DomStatus parse(const char *htmlString, Dom *dom,
                     return documentStatus;
                 }
                 if (!isSingle) {
-                    if (nodeStack.len >= MAX_NODE_DEPTH) {
-                        PRINT_ERROR("Reached max node depth, aborting\n");
+                    if (nodeStack.len >= FLO_HTML_MAX_NODE_DEPTH) {
+                        FLO_HTML_PRINT_ERROR("Reached max node depth, aborting\n");
                         return DOM_TOO_DEEP;
                     }
                     nodeStack.stack[nodeStack.len] = lastParsedNodeID;
@@ -524,12 +534,14 @@ DomStatus parse(const char *htmlString, Dom *dom,
     return documentStatus;
 }
 
-DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
-                               TextStore *textStore,
-                               node_id *newNodeID) {
-    DomStatus domStatus = createNode(newNodeID, NODE_TYPE_DOCUMENT, dom);
+flo_html_DomStatus
+flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
+                              flo_html_Dom *dom, flo_html_TextStore *textStore,
+                              flo_html_node_id *newNodeID) {
+    flo_html_DomStatus domStatus =
+        flo_html_createNode(newNodeID, NODE_TYPE_DOCUMENT, dom);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to retrieve a new node ID!\n");
+        FLO_HTML_PRINT_ERROR("Failed to retrieve a new node ID!\n");
         return domStatus;
     }
 
@@ -537,16 +549,17 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
         documentNode->tag, strlen(documentNode->tag), *newNodeID,
         documentNode->isPaired, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to add tag to new node ID!\n");
+        FLO_HTML_PRINT_ERROR("Failed to add tag to new node ID!\n");
         return domStatus;
     }
 
     for (size_t i = 0; i < documentNode->boolPropsLen; i++) {
         const char *boolProp = documentNode->boolProps[i];
-        ElementStatus elementStatus = flo_html_addBooleanPropertyToNodeString(
-            *newNodeID, boolProp, dom, textStore);
+        flo_html_ElementStatus elementStatus =
+            flo_html_addBooleanPropertyToNodeString(*newNodeID, boolProp, dom,
+                                                    textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
-            PRINT_ERROR("Failed to boolean property to new node ID!\n");
+            FLO_HTML_PRINT_ERROR("Failed to boolean property to new node ID!\n");
             return DOM_NO_ELEMENT;
         }
     }
@@ -554,10 +567,11 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
     for (size_t i = 0; i < documentNode->propsLen; i++) {
         const char *keyProp = documentNode->keyProps[i];
         const char *valueProp = documentNode->valueProps[i];
-        ElementStatus elementStatus = flo_html_addPropertyToNodeStrings(
-            *newNodeID, keyProp, valueProp, dom, textStore);
+        flo_html_ElementStatus elementStatus =
+            flo_html_addPropertyToNodeStrings(*newNodeID, keyProp, valueProp,
+                                              dom, textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
-            PRINT_ERROR("Failed to property to new node ID!\n");
+            FLO_HTML_PRINT_ERROR("Failed to property to new node ID!\n");
             return DOM_NO_ELEMENT;
         }
     }
@@ -565,24 +579,27 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
     return domStatus;
 }
 
-DomStatus parseTextElement(const char *text, Dom *dom,
-                           TextStore *textStore, node_id *newNodeID) {
-    DomStatus domStatus = createNode(newNodeID, NODE_TYPE_TEXT, dom);
+flo_html_DomStatus flo_html_parseTextElement(const char *text,
+                                             flo_html_Dom *dom,
+                                             flo_html_TextStore *textStore,
+                                             flo_html_node_id *newNodeID) {
+    flo_html_DomStatus domStatus =
+        flo_html_createNode(newNodeID, NODE_TYPE_TEXT, dom);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to retrieve a new node ID!\n");
+        FLO_HTML_PRINT_ERROR("Failed to retrieve a new node ID!\n");
         return domStatus;
     }
 
     char *dataLocation = NULL;
-    ElementStatus elementStatus =
-        insertElement(&textStore->text, text, strlen(text), &dataLocation);
+    flo_html_ElementStatus elementStatus = flo_html_insertElement(
+        &textStore->text, text, strlen(text), &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
+        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(elementStatus),
                              "Failed to index text!\n");
         return DOM_NO_ELEMENT;
     }
 
-    setNodeText(*newNodeID, dataLocation, dom);
+    flo_html_setNodeText(*newNodeID, dataLocation, dom);
 
     return domStatus;
 }

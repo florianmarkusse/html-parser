@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-bool testDomReplacements(size_t *successes, size_t *failures);
+bool testflo_html_DomReplacements(size_t *successes, size_t *failures);
 
 #endif

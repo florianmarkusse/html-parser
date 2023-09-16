@@ -10,18 +10,19 @@
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"
 
 unsigned char parseFile(const char *fileLocation) {
-    TextStore textStore;
-    if (createTextStore(&textStore) != ELEMENT_SUCCESS) {
+    flo_html_TextStore textStore;
+    if (flo_html_createTextStore(&textStore) != ELEMENT_SUCCESS) {
         return 0;
     }
-    Dom dom1;
-    if (createDomFromFile(fileLocation, &dom1, &textStore) != DOM_SUCCESS) {
-        destroyTextStore(&textStore);
+    flo_html_Dom dom1;
+    if (createflo_html_DomFromFile(fileLocation, &dom1, &textStore) !=
+        DOM_SUCCESS) {
+        flo_html_destroyTextStore(&textStore);
         return 0;
     }
 
-    destroyDom(&dom1);
-    destroyTextStore(&textStore);
+    destroyflo_html_Dom(&dom1);
+    flo_html_destroyTextStore(&textStore);
     return 1;
 }
 

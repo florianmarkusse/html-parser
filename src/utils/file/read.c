@@ -5,10 +5,10 @@
 #include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/print/error.h"
 
-FileStatus readFile(const char *srcPath, char **buffer) {
+flo_html_FileStatus flo_html_readFile(const char *srcPath, char **buffer) {
     FILE *srcFile = fopen(srcPath, "rbe");
     if (srcFile == NULL) {
-        PRINT_ERROR("Failed to open source file: %s\n", srcPath);
+        FLO_HTML_PRINT_ERROR("Failed to open source file: %s\n", srcPath);
         return FILE_CANT_OPEN;
     }
 
@@ -18,16 +18,16 @@ FileStatus readFile(const char *srcPath, char **buffer) {
 
     *buffer = (char *)malloc(dataLen + 1);
     if (*buffer == NULL) {
-        PRINT_ERROR("Failed to allocate memory.\n");
+        FLO_HTML_PRINT_ERROR("Failed to allocate memory.\n");
         fclose(srcFile);
         return FILE_CANT_ALLOCATE;
     }
 
     size_t result = fread(*buffer, 1, dataLen, srcFile);
     if (result != dataLen) {
-        PRINT_ERROR("Failed to read the file.\n");
+        FLO_HTML_PRINT_ERROR("Failed to read the file.\n");
         fclose(srcFile);
-        FREE_TO_NULL(*buffer);
+        FLO_HTML_FREE_TO_NULL(*buffer);
         return FILE_CANT_READ;
     }
 

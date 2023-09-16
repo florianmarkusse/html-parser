@@ -6,7 +6,7 @@
 
 #include "flo/html-parser/type/data/definitions.h"
 
-typedef uint16_t node_id;
+typedef uint16_t flo_html_node_id;
 
 typedef enum {
     NODE_TYPE_DOCUMENT,
@@ -14,25 +14,26 @@ typedef enum {
     NODE_TYPE_REMOVED,
     NODE_TYPE_ERROR,
     NODE_TYPE_NUM
-} NodeType;
+} flo_html_NodeType;
 
-static const char *const NodeTypeStrings[NODE_TYPE_NUM] = {"Document", "Text",
+static const char *const nodeTypeStrings[NODE_TYPE_NUM] = {"Document", "Text",
                                                            "Removed", "Error"};
 
-__attribute__((unused)) static const char *nodeTypeToString(NodeType type) {
+__attribute__((unused)) static const char *
+flo_html_nodeTypeToString(flo_html_NodeType type) {
     if (type >= 0 && type < NODE_TYPE_NUM) {
-        return NodeTypeStrings[type];
+        return nodeTypeStrings[type];
     }
     return "Unknown node type!";
 }
 
 typedef struct {
-    node_id nodeID;
-    NodeType nodeType;
+    flo_html_node_id nodeID;
+    flo_html_NodeType nodeType;
     union {
-        indexID tagID;
+        flo_html_indexID tagID;
         const char *text;
     };
-} __attribute__((aligned(16))) Node;
+} __attribute__((aligned(16))) flo_html_Node;
 
 #endif

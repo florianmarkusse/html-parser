@@ -11,50 +11,63 @@
 #include "hash-status.h"
 
 typedef struct {
-    indexID indexID;
+    flo_html_indexID flo_html_indexID;
     const char *string;
-} __attribute__((aligned(16))) HashEntry;
+} __attribute__((aligned(16))) flo_html_HashEntry;
 
 /**
  * Hashing with linear probing for natural values > 0 up until size_t max
  * size.
  */
 typedef struct {
-    HashEntry *array;
+    flo_html_HashEntry *array;
     size_t arrayLen;
     size_t entries;
-} __attribute__((aligned(32))) StringHashSet;
+} __attribute__((aligned(32))) flo_html_StringHashSet;
 
-HashStatus initStringHashSet(StringHashSet *set, size_t capacity);
+flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
+                                               size_t capacity);
 
-HashStatus insertStringHashSet(StringHashSet *set, const char *string);
+flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
+                                                 const char *string);
 
-HashStatus insertStringAtHash(StringHashSet *set, const char *string,
-                              const HashElement *hashElement, indexID *indexID);
+flo_html_HashStatus
+flo_html_insertStringAtHash(flo_html_StringHashSet *set, const char *string,
+                            const flo_html_HashElement *hashElement,
+                            flo_html_indexID *flo_html_indexID);
 
-bool containsStringHashSet(const StringHashSet *set, const char *string);
-bool containsStringWithDataHashSet(const StringHashSet *set, const char *string,
-                                   HashElement *hashElement, indexID *indexID);
-const char *getStringFromHashSet(const StringHashSet *set,
-                                 const HashElement *hashElement);
+bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
+                                    const char *string);
+bool flo_html_containsStringWithDataHashSet(const flo_html_StringHashSet *set,
+                                            const char *string,
+                                            flo_html_HashElement *hashElement,
+                                            flo_html_indexID *flo_html_indexID);
+const char *
+flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
+                              const flo_html_HashElement *hashElement);
 
-ComparisonStatus equalsStringHashSet(const StringHashSet *set1,
-                                     const StringHashSet *set2);
+flo_html_ComparisonStatus
+flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
+                             const flo_html_StringHashSet *set2);
 
-void destroyStringHashSet(StringHashSet *set);
+void flo_html_destroyStringHashSet(flo_html_StringHashSet *set);
 
 typedef struct {
-    const StringHashSet *set;
+    const flo_html_StringHashSet *set;
     size_t index;
-} __attribute__((aligned(16))) StringHashSetIterator;
+} __attribute__((aligned(16))) flo_html_StringHashSetIterator;
 
-void initStringHashSetIterator(StringHashSetIterator *iterator,
-                               const StringHashSet *set);
+void flo_html_initStringHashSetIterator(
+    flo_html_StringHashSetIterator *iterator,
+    const flo_html_StringHashSet *set);
 
-const char *nextStringHashSetIterator(StringHashSetIterator *iterator);
+const char *
+flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator);
 
-bool hasNextStringHashSetIterator(StringHashSetIterator *iterator);
+bool flo_html_hasNextStringHashSetIterator(
+    flo_html_StringHashSetIterator *iterator);
 
-void resetStringHashSetIterator(StringHashSetIterator *iterator);
+void flo_html_resetStringHashSetIterator(
+    flo_html_StringHashSetIterator *iterator);
 
 #endif

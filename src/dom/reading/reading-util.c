@@ -1,10 +1,11 @@
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/type/node/boolean-property.h"
 
-Property *getProperty(const node_id nodeID, const element_id propKeyID,
-                      const Dom *dom) {
+flo_html_Property *flo_html_getProperty(const flo_html_node_id nodeID,
+                                        const flo_html_element_id propKeyID,
+                                        const flo_html_Dom *dom) {
     for (size_t i = 0; i < dom->propsLen; i++) {
-        Property *prop = &dom->props[i];
+        flo_html_Property *prop = &dom->props[i];
 
         if (prop->nodeID == nodeID && prop->keyID == propKeyID) {
             return prop;
@@ -14,10 +15,12 @@ Property *getProperty(const node_id nodeID, const element_id propKeyID,
     return NULL;
 }
 
-BooleanProperty *getBooleanProperty(node_id nodeID, element_id boolPropID,
-                                    const Dom *dom) {
+flo_html_BooleanProperty *
+flo_html_getBooleanProperty(flo_html_node_id nodeID,
+                            flo_html_element_id boolPropID,
+                            const flo_html_Dom *dom) {
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
-        BooleanProperty *prop = &dom->boolProps[i];
+        flo_html_BooleanProperty *prop = &dom->boolProps[i];
 
         if (prop->nodeID == nodeID && prop->propID == boolPropID) {
             return prop;

@@ -53,7 +53,7 @@ static TestStatus testDeletion(const char *fileLocation1,
         return result;
     }
 
-    node_id foundNode = 0;
+    flo_html_node_id foundNode = 0;
     result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
     if (result != TEST_SUCCESS) {
         return result;
@@ -61,12 +61,12 @@ static TestStatus testDeletion(const char *fileLocation1,
 
     switch (deletionType) {
     case DELETE_BOOLEAN_PROPERTY: {
-        flo_html_removeBooleanProperty(foundNode, propToDelete, &comparisonTest.startDom,
+        flo_html_removeBooleanProperty(foundNode, propToDelete, &comparisonTest.startflo_html_Dom,
                               &comparisonTest.startTextStore);
         break;
     }
     case DELETE_PROPERTY: {
-        flo_html_removeProperty(foundNode, propToDelete, &comparisonTest.startDom,
+        flo_html_removeProperty(foundNode, propToDelete, &comparisonTest.startflo_html_Dom,
                        &comparisonTest.startTextStore);
         break;
     }

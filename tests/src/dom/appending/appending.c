@@ -44,7 +44,7 @@ typedef enum {
 } AppendType;
 
 typedef union {
-    const DocumentNode documentNode;
+    const flo_html_DocumentNode documentNode;
     const char *text;
 } AppendInput;
 
@@ -184,7 +184,7 @@ static TestStatus testAppendix(const char *fileLocation1,
         return result;
     }
 
-    node_id foundNode = 0;
+    flo_html_node_id foundNode = 0;
     if (cssQuery != NULL) {
         result =
             getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
@@ -193,24 +193,24 @@ static TestStatus testAppendix(const char *fileLocation1,
         }
     }
 
-    DomStatus domStatus = DOM_SUCCESS;
+    flo_html_DomStatus domStatus = DOM_SUCCESS;
     switch (appendType) {
     case APPEND_DOCUMENT_NODE: {
-        domStatus = flo_html_appendDocumentNode(foundNode, &appendInput->documentNode,
-                                       &comparisonTest.startDom,
-                                       &comparisonTest.startTextStore);
+        domStatus = flo_html_appendDocumentNode(
+            foundNode, &appendInput->documentNode,
+            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
         break;
     }
     case APPEND_TEXT_NODE: {
         domStatus = flo_html_appendTextNode(foundNode, appendInput->text,
-                                   &comparisonTest.startDom,
-                                   &comparisonTest.startTextStore);
+                                            &comparisonTest.startflo_html_Dom,
+                                            &comparisonTest.startTextStore);
         break;
     }
     case APPEND_FROM_STRING: {
-        domStatus = flo_html_appendHTMLFromString(foundNode, appendInput->text,
-                                          &comparisonTest.startDom,
-                                          &comparisonTest.startTextStore);
+        domStatus = flo_html_appendHTMLFromString(
+            foundNode, appendInput->text, &comparisonTest.startflo_html_Dom,
+            &comparisonTest.startTextStore);
         break;
     }
     default: {
@@ -227,7 +227,7 @@ static TestStatus testAppendix(const char *fileLocation1,
     return compareAndEndTest(&comparisonTest);
 }
 
-bool testDomAppendices(size_t *successes, size_t *failures) {
+bool testflo_html_DomAppendices(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM appendices");
 
     size_t localSuccesses = 0;

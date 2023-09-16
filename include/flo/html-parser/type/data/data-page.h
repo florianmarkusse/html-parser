@@ -6,13 +6,13 @@
 
 #include "data-page-status.h"
 
-typedef uint64_t page_space;
-typedef uint8_t page_id;
+typedef uint64_t flo_html_page_space;
+typedef uint8_t flo_html_page_id;
 
 typedef struct {
     char *start;
     char *freeSpace;
-    page_space spaceLeft;
-} __attribute__((aligned(32))) DataPage;
+    flo_html_page_space spaceLeft;
+} __attribute__((aligned(32))) flo_html_DataPage;
 
 #endif

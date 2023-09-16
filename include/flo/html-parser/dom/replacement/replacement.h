@@ -24,10 +24,9 @@
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus replaceWithDocumentNodeWithQuery(const char *cssQuery,
-                                           const DocumentNode *docNode,
-                                           Dom *dom,
-                                           TextStore *textStore);
+flo_html_DomStatus flo_html_replaceWithDocumentNodeWithQuery(
+    const char *cssQuery, const flo_html_DocumentNode *docNode,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with a text node using a CSS query.
@@ -44,8 +43,10 @@ DomStatus replaceWithDocumentNodeWithQuery(const char *cssQuery,
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
-                                       Dom *dom, TextStore *textStore);
+flo_html_DomStatus
+flo_html_replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
+                                      flo_html_Dom *dom,
+                                      flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with HTML content from a string using a CSS
@@ -63,9 +64,9 @@ DomStatus replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus replaceWithHTMLFromStringWithQuery(const char *cssQuery,
-                                             const char *htmlString, Dom *dom,
-                                             TextStore *textStore);
+flo_html_DomStatus flo_html_replaceWithHTMLFromStringWithQuery(
+    const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
+    flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with HTML content from a file using a CSS
@@ -84,9 +85,9 @@ DomStatus replaceWithHTMLFromStringWithQuery(const char *cssQuery,
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus replaceWithHTMLFromFileWithQuery(const char *cssQuery,
-                                           const char *fileLocation, Dom *dom,
-                                           TextStore *textStore);
+flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
+    const char *cssQuery, const char *fileLocation, flo_html_Dom *dom,
+    flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with a DocumentNode.
@@ -103,9 +104,9 @@ DomStatus replaceWithHTMLFromFileWithQuery(const char *cssQuery,
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus replaceWithDocumentNode(node_id toReplaceNodeID,
-                                  const DocumentNode *docNode, Dom *dom,
-                                  TextStore *textStore);
+flo_html_DomStatus flo_html_replaceWithDocumentNode(
+    flo_html_node_id toReplaceNodeID, const flo_html_DocumentNode *docNode,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with a text node.
@@ -122,8 +123,9 @@ DomStatus replaceWithDocumentNode(node_id toReplaceNodeID,
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
-                              Dom *dom, TextStore *textStore);
+flo_html_DomStatus
+flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID, const char *text,
+                             flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with HTML content from a string.
@@ -140,8 +142,9 @@ DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
-                                    const char *htmlString, Dom *dom,
-                                    TextStore *textStore);
+flo_html_DomStatus
+flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
+                                   const char *htmlString, flo_html_Dom *dom,
+                                   flo_html_TextStore *textStore);
 
 #endif

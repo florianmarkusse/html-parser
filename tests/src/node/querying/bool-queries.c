@@ -91,53 +91,55 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
                             const StringUnion stringUnion,
                             const BoolFunctionType boolFunctionType,
                             const bool expectedResult) {
-    TextStore textStore;
-    ElementStatus initStatus = createTextStore(&textStore);
+    flo_html_TextStore textStore;
+    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
+        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(initStatus),
                              "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 
-    Dom dom;
-    if (createDomFromFile(fileLocation, &dom, &textStore) != DOM_SUCCESS) {
-        destroyTextStore(&textStore);
+    flo_html_Dom dom;
+    if (createflo_html_DomFromFile(fileLocation, &dom, &textStore) !=
+        DOM_SUCCESS) {
+        flo_html_destroyTextStore(&textStore);
         return TEST_ERROR_INITIALIZATION;
     }
 
     TestStatus result = TEST_FAILURE;
-    node_id foundNode = 0;
-    QueryStatus queryStatus =
-        querySelector(cssQuery, &dom, &textStore, &foundNode);
+    flo_html_node_id foundNode = 0;
+    flo_html_QueryStatus queryStatus =
+        flo_html_querySelector(cssQuery, &dom, &textStore, &foundNode);
 
     if (queryStatus != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), queryStatus,
-            flo_html_queryingStatusToString(queryStatus));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+            queryStatus, flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
         bool actualResult = false;
         switch (boolFunctionType) {
         case HAS_BOOL_PROP: {
-            actualResult = hasBoolProp(foundNode, stringUnion.attribute, &dom,
-                                       &textStore);
+            actualResult = flo_html_hasBoolProp(
+                foundNode, stringUnion.attribute, &dom, &textStore);
             break;
         }
         case HAS_PROP_KEY: {
-            actualResult = hasPropKey(foundNode, stringUnion.attribute, &dom,
-                                      &textStore);
+            actualResult = flo_html_hasPropKey(foundNode, stringUnion.attribute,
+                                               &dom, &textStore);
             break;
         }
         case HAS_PROP_VALUE: {
-            actualResult = hasPropValue(foundNode, stringUnion.attribute, &dom,
-                                        &textStore);
+            actualResult = flo_html_hasPropValue(
+                foundNode, stringUnion.attribute, &dom, &textStore);
             break;
         }
         case HAS_PROPERTY: {
-            actualResult = hasProperty(foundNode, stringUnion.key,
-                                       stringUnion.value, &dom, &textStore);
+            actualResult =
+                flo_html_hasProperty(foundNode, stringUnion.key,
+                                     stringUnion.value, &dom, &textStore);
             break;
         }
         default: {
@@ -161,8 +163,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
 freeMemory:
-    destroyDom(&dom);
-    destroyTextStore(&textStore);
+    destroyflo_html_Dom(&dom);
+    flo_html_destroyTextStore(&textStore);
 
     return result;
 }

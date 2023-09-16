@@ -15,9 +15,9 @@
  * @param[in]   dom             The DOM structure.
  *
  * @return  The type of the node (e.g., NODE_TYPE_DOCUMENT, NODE_TYPE_TEXT,
- * etc.). See @ref /flo/html-parser/type/node/node.h#NodeType.
+ * etc.). See @ref /flo/html-parser/type/node/node.h#flo_html_NodeType.
  */
-NodeType getNodeType(node_id nodeID, const Dom *dom);
+flo_html_NodeType flo_html_getflo_html_NodeType(flo_html_node_id nodeID, const flo_html_Dom *dom);
 
 /**
  * @brief Check if a DOM node has a boolean property.
@@ -32,8 +32,9 @@ NodeType getNodeType(node_id nodeID, const Dom *dom);
  *
  * @return  True if the property exists and is true, otherwise false.
  */
-bool hasBoolProp(node_id nodeID, const char *boolProp, const Dom *dom,
-                 const TextStore *textStore);
+bool flo_html_hasBoolProp(flo_html_node_id nodeID, const char *boolProp,
+                          const flo_html_Dom *dom,
+                          const flo_html_TextStore *textStore);
 
 /**
  * @brief Check if a DOM node has a property with a given key.
@@ -48,8 +49,9 @@ bool hasBoolProp(node_id nodeID, const char *boolProp, const Dom *dom,
  *
  * @return  True if a property with the key exists, otherwise false.
  */
-bool hasPropKey(node_id nodeID, const char *propKey, const Dom *dom,
-                const TextStore *textStore);
+bool flo_html_hasPropKey(flo_html_node_id nodeID, const char *propKey,
+                         const flo_html_Dom *dom,
+                         const flo_html_TextStore *textStore);
 
 /**
  * @brief Check if a DOM node has a property with a given value.
@@ -64,8 +66,9 @@ bool hasPropKey(node_id nodeID, const char *propKey, const Dom *dom,
  *
  * @return  True if a property with the value exists, otherwise false.
  */
-bool hasPropValue(node_id nodeID, const char *propValue, const Dom *dom,
-                  const TextStore *textStore);
+bool flo_html_hasPropValue(flo_html_node_id nodeID, const char *propValue,
+                           const flo_html_Dom *dom,
+                           const flo_html_TextStore *textStore);
 
 /**
  * @brief Check if a DOM node has a property with a specific key and value.
@@ -82,8 +85,9 @@ bool hasPropValue(node_id nodeID, const char *propValue, const Dom *dom,
  * @return  True if a property with the specified key and value exists,
  *          otherwise false.
  */
-bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
-                 const Dom *dom, const TextStore *textStore);
+bool flo_html_hasProperty(flo_html_node_id nodeID, const char *propKey,
+                          const char *propValue, const flo_html_Dom *dom,
+                          const flo_html_TextStore *textStore);
 
 /**
  * @brief Get the value of a property associated with a DOM node.
@@ -98,8 +102,9 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
  *
  * @return  The value of the property if it exists, or NULL if not found.
  */
-const char *getValue(node_id nodeID, const char *propKey, const Dom *dom,
-                     const TextStore *textStore);
+const char *flo_html_getValue(flo_html_node_id nodeID, const char *propKey,
+                              const flo_html_Dom *dom,
+                              const flo_html_TextStore *textStore);
 
 /**
  * @brief Get the text content of a DOM node.
@@ -119,7 +124,9 @@ const char *getValue(node_id nodeID, const char *propKey, const Dom *dom,
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-QueryStatus getTextContent(node_id nodeID, const Dom *dom,
-                           const char ***results, size_t *resultsLen);
+flo_html_QueryStatus flo_html_getTextContent(flo_html_node_id nodeID,
+                                             const flo_html_Dom *dom,
+                                             const char ***results,
+                                             size_t *resultsLen);
 
 #endif

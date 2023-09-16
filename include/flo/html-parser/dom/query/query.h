@@ -21,14 +21,15 @@
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
  *          otherwise). See @ref
- *          "flo/html-parser/dom/query/query-status.h#QueryStatus".
+ *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  *
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
-                             const TextStore *textStore,
-                             node_id **results, size_t *resultsLen);
+flo_html_QueryStatus
+flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
+                          const flo_html_TextStore *textStore,
+                          flo_html_node_id **results, size_t *resultsLen);
 
 /**
  * @brief Get elements by their class name in the DOM.
@@ -47,14 +48,15 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
  *          otherwise). See @ref
- *          "flo/html-parser/dom/query/query-status.h#QueryStatus".
+ *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  *
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-QueryStatus getElementsByClassName(const char *class, const Dom *dom,
-                                   const TextStore *textStore,
-                                   node_id **results, size_t *resultsLen);
+flo_html_QueryStatus
+flo_html_getElementsByClassName(const char *class, const flo_html_Dom *dom,
+                                const flo_html_TextStore *textStore,
+                                flo_html_node_id **results, size_t *resultsLen);
 
 /**
  * @brief Get elements by their tag name in the DOM.
@@ -73,14 +75,15 @@ QueryStatus getElementsByClassName(const char *class, const Dom *dom,
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
  *          otherwise). See @ref
- *          "flo/html-parser/dom/query/query-status.h#QueryStatus".
+ *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  *
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
-                                 const TextStore *textStore,
-                                 node_id **results, size_t *resultsLen);
+flo_html_QueryStatus
+flo_html_getElementsByTagName(const char *tag, const flo_html_Dom *dom,
+                              const flo_html_TextStore *textStore,
+                              flo_html_node_id **results, size_t *resultsLen);
 
 /**
  * @brief Query for the first element matching a CSS selector in the DOM.
@@ -96,10 +99,12 @@ QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
  *          otherwise). See @ref
- *          "flo/html-parser/dom/query/query-status.h#QueryStatus".
+ *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
-QueryStatus querySelector(const char *cssQuery, const Dom *dom,
-                          const TextStore *textStore, node_id *result);
+flo_html_QueryStatus flo_html_querySelector(const char *cssQuery,
+                                            const flo_html_Dom *dom,
+                                            const flo_html_TextStore *textStore,
+                                            flo_html_node_id *result);
 
 /**
  * @brief Get an element by its ID attribute in the DOM.
@@ -115,9 +120,10 @@ QueryStatus querySelector(const char *cssQuery, const Dom *dom,
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
  *          otherwise). See @ref
- *          "flo/html-parser/dom/query/query-status.h#QueryStatus".
+ *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
-QueryStatus getElementByID(const char *id, const Dom *dom,
-                           const TextStore *textStore, node_id *result);
+flo_html_QueryStatus
+flo_html_getElementByID(const char *id, const flo_html_Dom *dom,
+                        const flo_html_TextStore *textStore, flo_html_node_id *result);
 
 #endif

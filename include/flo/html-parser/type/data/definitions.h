@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-typedef uint16_t indexID;
+typedef uint16_t flo_html_indexID;
 
 #endif

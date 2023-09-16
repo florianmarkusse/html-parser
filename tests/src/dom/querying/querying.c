@@ -3,7 +3,7 @@
 #include "dom/querying/querying.h"
 #include "test.h"
 
-unsigned char testDomQueries(size_t *successes, size_t *failures) {
+unsigned char testflo_html_DomQueries(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM queries");
 
     size_t localSuccesses = 0;

@@ -4,14 +4,14 @@
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/type/element/elements.h"
 
-DataPageStatus insertInSuitablePage(const void *data, size_t byteLen,
+flo_html_DataPageStatus flo_html_insertIntoSuitablePage(const void *data, size_t byteLen,
                                     size_t totalPages,
-                                    ElementsContainer *container,
+                                    flo_html_ElementsContainer *container,
                                     char **dataLocation);
 
-DataPageStatus insertIntoPageWithhash(const void *data, size_t byteLen,
+flo_html_DataPageStatus flo_html_insertIntoPageWithHash(const void *data, size_t byteLen,
                                       size_t totalPages,
-                                      StringRegistry *stringRegistry,
-                                      HashElement *hashElement,
-                                      indexID *indexID);
+                                      flo_html_StringRegistry *stringRegistry,
+                                      flo_html_HashElement *hashElement,
+                                      flo_html_indexID *flo_html_indexID);
 #endif

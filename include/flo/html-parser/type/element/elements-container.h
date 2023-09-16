@@ -7,43 +7,33 @@
 #include "element-status.h"
 #include "flo/html-parser/type/data/data-page.h"
 
-typedef uint16_t element_id;
+typedef uint16_t flo_html_element_id;
+#define FLO_HTML_EXPONENT 16U
+#define FLO_HTML_TOTAL_ELEMENTS (1U << FLO_HTML_EXPONENT)
+#define FLO_HTML_POSSIBLE_ELEMENTS (1U << FLO_HTML_EXPONENT)
 
-#define TOTAL_ELEMENTS_NUM_BITS (sizeof(element_id) * 8)
-
-#define EXPONENT 16U
-
-// masks
-#define TEXT_MASK (EXPONENT - 1)
-#define TEXT_OFFSET (1U << TEXT_MASK)
-
-#define SINGLES_MASK (EXPONENT - 2)
-#define SINGLES_OFFSET (1U << SINGLES_MASK)
-
-// The remaining bits are for the IDs.
-#define TOTAL_ELEMENTS (1U << EXPONENT)
-#define POSSIBLE_ELEMENTS (1U << SINGLES_MASK)
-
-#define TOTAL_PAGES (1U << 9U)
+#define FLO_HTML_TOTAL_PAGES (1U << 9U)
 
 // TODO(florian): THIS IS VERY BIG TO START WITH
 // The size of each page of each global.
-#define TAGS_PAGE_SIZE (1U << 12U)
-#define BOOL_PROPS_PAGE_SIZE (1U << 12U)
-#define PROP_KEYS_PAGE_SIZE (1U << 12U)
-#define PROP_VALUES_PAGE_SIZE (1U << 14U)
-#define TEXT_PAGE_SIZE (1U << 17U)
+#define FLO_HTML_TAGS_PAGE_SIZE (1U << 12U)
+#define FLO_HTML_BOOL_PROPS_PAGE_SIZE (1U << 12U)
+#define FLO_HTML_PROP_KEYS_PAGE_SIZE (1U << 12U)
+#define FLO_HTML_PROP_VALUES_PAGE_SIZE (1U << 14U)
+#define FLO_HTML_TEXT_PAGE_SIZE (1U << 17U)
 
 // TODO(florian): maybe also do smth similar with the pages array instead of
 // having fixed pagesize?
 typedef struct {
-    DataPage *pages;
+    flo_html_DataPage *pages;
     size_t pageLen;
     size_t pageSize;
-} __attribute__((aligned(32))) ElementsContainer;
+} __attribute__((aligned(32))) flo_html_ElementsContainer;
 
-ElementStatus initElementsContainer(ElementsContainer *elementsContainer,
-                                    size_t pageSize);
-void destroyElementsContainer(ElementsContainer *elementsContainer);
+flo_html_ElementStatus
+initflo_html_ElementsContainer(flo_html_ElementsContainer *elementsContainer,
+                               size_t pageSize);
+void destroyflo_html_ElementsContainer(
+    flo_html_ElementsContainer *elementsContainer);
 
 #endif

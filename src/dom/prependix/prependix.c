@@ -19,48 +19,46 @@
 #define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,        \
                                     prependFunction)                           \
     do {                                                                       \
-        node_id parentNodeID = 0;                                              \
-        QueryStatus queryResult =                                              \
-            querySelector(cssQuery, dom, textStore, &parentNodeID);            \
+        flo_html_node_id parentNodeID = 0;                                     \
+        flo_html_QueryStatus queryResult =                                     \
+            flo_html_querySelector(cssQuery, dom, textStore, &parentNodeID);   \
         if (queryResult != QUERY_SUCCESS) {                                    \
-            PRINT_ERROR("Could not find element using query selector: %s\n",   \
+            FLO_HTML_PRINT_ERROR("Could not find element using query selector: %s\n",   \
                         cssQuery);                                             \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
         return prependFunction(parentNodeID, nodeData, dom, textStore);        \
     } while (0)
 
-DomStatus flo_html_prependDocumentNodeWithQuery(const char *cssQuery,
-                                                const DocumentNode *docNode,
-                                                Dom *dom,
-                                                TextStore *textStore) {
+flo_html_DomStatus flo_html_prependDocumentNodeWithQuery(
+    const char *cssQuery, const flo_html_DocumentNode *docNode,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
                                 flo_html_prependDocumentNode);
 }
 
-DomStatus flo_html_prependTextNodeWithQuery(const char *cssQuery,
-                                            const char *text, Dom *dom,
-                                            TextStore *textStore) {
+flo_html_DomStatus
+flo_html_prependTextNodeWithQuery(const char *cssQuery, const char *text,
+                                  flo_html_Dom *dom,
+                                  flo_html_TextStore *textStore) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
                                 flo_html_prependTextNode);
 }
 
-DomStatus flo_html_prependHTMLFromStringWithQuery(const char *cssQuery,
-                                                  const char *htmlString,
-                                                  Dom *dom,
-                                                  TextStore *textStore) {
+flo_html_DomStatus flo_html_prependHTMLFromStringWithQuery(
+    const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
+    flo_html_TextStore *textStore) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
                                 flo_html_prependHTMLFromString);
 }
 
-DomStatus flo_html_prependHTMLFromFileWithQuery(const char *cssQuery,
-                                                const char *fileLocation,
-                                                Dom *dom,
-                                                TextStore *textStore) {
+flo_html_DomStatus flo_html_prependHTMLFromFileWithQuery(
+    const char *cssQuery, const char *fileLocation, flo_html_Dom *dom,
+    flo_html_TextStore *textStore) {
     char *buffer = NULL;
-    FileStatus fileStatus = readFile(fileLocation, &buffer);
+    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
-        ERROR_WITH_CODE_FORMAT(fileStatusToString(fileStatus),
+        FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                "Failed to read file: \"%s\"", fileLocation);
         return DOM_ERROR_MEMORY;
     }
@@ -69,23 +67,26 @@ DomStatus flo_html_prependHTMLFromFileWithQuery(const char *cssQuery,
                                 flo_html_prependHTMLFromString);
 }
 
-static DomStatus updateReferences(const node_id parentID,
-                                  const node_id firstNewNodeID, Dom *dom) {
-    DomStatus domStatus = DOM_SUCCESS;
+static flo_html_DomStatus
+updateReferences(const flo_html_node_id parentID,
+                 const flo_html_node_id firstNewNodeID, flo_html_Dom *dom) {
+    flo_html_DomStatus domStatus = DOM_SUCCESS;
     if (parentID == 0) {
-        node_id previousFirstNodeID = dom->firstNodeID;
-        domStatus = addNextNode(firstNewNodeID, dom->firstNodeID, dom);
+        flo_html_node_id previousFirstNodeID = dom->firstNodeID;
+        domStatus = flo_html_addNextNode(firstNewNodeID, dom->firstNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to add new node ID in next nodes!\n");
+            FLO_HTML_PRINT_ERROR("Failed to add new node ID in next nodes!\n");
             return domStatus;
         }
         dom->firstNodeID = firstNewNodeID;
 
-        node_id lastNextNode = getLastNext(dom->firstNodeID, dom);
+        flo_html_node_id lastNextNode =
+            flo_html_getLastNext(dom->firstNodeID, dom);
         if (lastNextNode > firstNewNodeID) {
-            domStatus = addNextNode(lastNextNode, previousFirstNodeID, dom);
+            domStatus =
+                flo_html_addNextNode(lastNextNode, previousFirstNodeID, dom);
             if (domStatus != DOM_SUCCESS) {
-                PRINT_ERROR("Failed to add new node ID in next nodes!\n");
+                FLO_HTML_PRINT_ERROR("Failed to add new node ID in next nodes!\n");
                 return domStatus;
             }
         }
@@ -93,79 +94,85 @@ static DomStatus updateReferences(const node_id parentID,
         return domStatus;
     }
 
-    ParentChild *firstChild = getFirstChildNode(parentID, dom);
+    flo_html_ParentChild *firstChild =
+        flo_html_getFirstChildNode(parentID, dom);
     if (firstChild == NULL) {
-        domStatus = addParentFirstChild(parentID, firstNewNodeID, dom);
+        domStatus = flo_html_addParentFirstChild(parentID, firstNewNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to add new node ID as first child!\n");
+            FLO_HTML_PRINT_ERROR("Failed to add new node ID as first child!\n");
             return domStatus;
         }
 
-        domStatus = addParentChild(parentID, firstNewNodeID, dom);
+        domStatus = flo_html_addParentChild(parentID, firstNewNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to add new node ID as child!\n");
+            FLO_HTML_PRINT_ERROR("Failed to add new node ID as child!\n");
             return domStatus;
         }
 
-        domStatus = connectOtherNodesToParent(parentID, firstNewNodeID, dom);
+        domStatus =
+            flo_html_connectOtherNodesToParent(parentID, firstNewNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
-            PRINT_ERROR("Failed to add remaning node IDs as child!\n");
+            FLO_HTML_PRINT_ERROR("Failed to add remaning node IDs as child!\n");
             return domStatus;
         }
 
         return domStatus;
     }
 
-    node_id previousFirstChild = firstChild->childID;
+    flo_html_node_id previousFirstChild = firstChild->childID;
     firstChild->childID = firstNewNodeID;
 
-    node_id lastNextOfNew = getLastNext(firstNewNodeID, dom);
-    domStatus = addNextNode(lastNextOfNew, previousFirstChild, dom);
+    flo_html_node_id lastNextOfNew = flo_html_getLastNext(firstNewNodeID, dom);
+    domStatus = flo_html_addNextNode(lastNextOfNew, previousFirstChild, dom);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to add new node ID in next nodes!\n");
+        FLO_HTML_PRINT_ERROR("Failed to add new node ID in next nodes!\n");
         return domStatus;
     }
 
-    domStatus = addParentChild(parentID, firstNewNodeID, dom);
+    domStatus = flo_html_addParentChild(parentID, firstNewNodeID, dom);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to add new node ID as child!\n");
+        FLO_HTML_PRINT_ERROR("Failed to add new node ID as child!\n");
         return domStatus;
     }
 
-    domStatus = connectOtherNodesToParent(parentID, firstNewNodeID, dom);
+    domStatus =
+        flo_html_connectOtherNodesToParent(parentID, firstNewNodeID, dom);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to add remaning node IDs as child!\n");
+        FLO_HTML_PRINT_ERROR("Failed to add remaning node IDs as child!\n");
         return domStatus;
     }
 
     return domStatus;
 }
 
-DomStatus flo_html_prependDocumentNode(const node_id parentID,
-                                       const DocumentNode *docNode, Dom *dom,
-                                       TextStore *textStore) {
-    node_id newNodeID = 0;
-    DomStatus domStatus =
-        parseDocumentElement(docNode, dom, textStore, &newNodeID);
+flo_html_DomStatus
+flo_html_prependDocumentNode(const flo_html_node_id parentID,
+                             const flo_html_DocumentNode *docNode,
+                             flo_html_Dom *dom, flo_html_TextStore *textStore) {
+    flo_html_node_id newNodeID = 0;
+    flo_html_DomStatus domStatus =
+        flo_html_parseDocumentElement(docNode, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to parse document element!\n");
+        FLO_HTML_PRINT_ERROR("Failed to parse document element!\n");
         return domStatus;
     }
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus flo_html_prependTextNode(const node_id parentID, const char *text,
-                                   Dom *dom, TextStore *textStore) {
-    node_id newNodeID = 0;
-    DomStatus domStatus = parseTextElement(text, dom, textStore, &newNodeID);
+flo_html_DomStatus flo_html_prependTextNode(const flo_html_node_id parentID,
+                                            const char *text, flo_html_Dom *dom,
+                                            flo_html_TextStore *textStore) {
+    flo_html_node_id newNodeID = 0;
+    flo_html_DomStatus domStatus =
+        flo_html_parseTextElement(text, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to parse text element!\n");
+        FLO_HTML_PRINT_ERROR("Failed to parse text element!\n");
         return domStatus;
     }
 
-    node_id child = getFirstChild(parentID, dom);
+    flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
     if (child > 0) {
-        MergeResult mergeTry = tryMerge(
+        flo_html_MergeResult mergeTry = flo_html_tryMerge(
             &dom->nodes[child], &dom->nodes[newNodeID], dom, textStore, false);
 
         if (mergeTry == COMPLETED_MERGE) {
@@ -181,25 +188,27 @@ DomStatus flo_html_prependTextNode(const node_id parentID, const char *text,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus flo_html_prependHTMLFromString(const node_id parentID,
-                                         const char *htmlString, Dom *dom,
-                                         TextStore *textStore) {
-    node_id firstNewAddedNode = dom->nodeLen;
-    DomStatus domStatus = parse(htmlString, dom, textStore);
+flo_html_DomStatus
+flo_html_prependHTMLFromString(const flo_html_node_id parentID,
+                               const char *htmlString, flo_html_Dom *dom,
+                               flo_html_TextStore *textStore) {
+    flo_html_node_id firstNewAddedNode = dom->nodeLen;
+    flo_html_DomStatus domStatus = flo_html_parse(htmlString, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
-        PRINT_ERROR("Failed to parse string!\n");
+        FLO_HTML_PRINT_ERROR("Failed to parse string!\n");
         return domStatus;
     }
 
-    node_id firstChild = getFirstChild(parentID, dom);
+    flo_html_node_id firstChild = flo_html_getFirstChild(parentID, dom);
     if (firstChild > 0) {
-        node_id lastNextNode = getLastNext(firstNewAddedNode, dom);
+        flo_html_node_id lastNextNode =
+            flo_html_getLastNext(firstNewAddedNode, dom);
         if (lastNextNode > firstNewAddedNode) {
-            Node *lastAddedNode = &dom->nodes[lastNextNode];
+            flo_html_Node *lastAddedNode = &dom->nodes[lastNextNode];
             if (lastAddedNode->nodeType == NODE_TYPE_TEXT) {
-                MergeResult mergeResult =
-                    tryMerge(&dom->nodes[firstChild], lastAddedNode, dom,
-                             textStore, false);
+                flo_html_MergeResult mergeResult =
+                    flo_html_tryMerge(&dom->nodes[firstChild], lastAddedNode,
+                                      dom, textStore, false);
                 if (mergeResult == COMPLETED_MERGE) {
                     flo_html_removeNode(lastNextNode, dom);
                 }
@@ -209,11 +218,11 @@ DomStatus flo_html_prependHTMLFromString(const node_id parentID,
                 }
             }
         } else {
-            Node *firstAddedNode = &dom->nodes[firstNewAddedNode];
+            flo_html_Node *firstAddedNode = &dom->nodes[firstNewAddedNode];
             if (firstAddedNode->nodeType == NODE_TYPE_TEXT) {
-                MergeResult mergeResult =
-                    tryMerge(&dom->nodes[firstChild], firstAddedNode, dom,
-                             textStore, false);
+                flo_html_MergeResult mergeResult =
+                    flo_html_tryMerge(&dom->nodes[firstChild], firstAddedNode,
+                                      dom, textStore, false);
                 if (mergeResult == COMPLETED_MERGE) {
                     flo_html_removeNode(firstNewAddedNode, dom);
                     return domStatus;

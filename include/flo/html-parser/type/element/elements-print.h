@@ -3,9 +3,9 @@
 
 #include "elements.h"
 
-void printPropertyStatus(const TextStore *textStore);
-void printBoolPropStatus(const TextStore *textStore);
-void printTextStatus(const TextStore *textStore);
-void printTagStatus(const TextStore *textStore);
+void flo_html_printPropertyStatus(const flo_html_TextStore *textStore);
+void flo_html_printBoolPropStatus(const flo_html_TextStore *textStore);
+void flo_html_printTextStatus(const flo_html_TextStore *textStore);
+void flo_html_printTagStatus(const flo_html_TextStore *textStore);
 
 #endif

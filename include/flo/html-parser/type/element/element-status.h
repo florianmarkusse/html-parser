@@ -10,9 +10,9 @@ typedef enum {
     ELEMENT_TOO_LONG,
     ELEMENT_ARRAY_FULL,
     ELEMENT_NUM_STATUS
-} ElementStatus;
+} flo_html_ElementStatus;
 
-static const char *const ElementStatusStrings[ELEMENT_NUM_STATUS] = {
+static const char *const elementStatusStrings[ELEMENT_NUM_STATUS] = {
     "Success",
     "Element created",
     "Element found",
@@ -25,9 +25,9 @@ static const char *const ElementStatusStrings[ELEMENT_NUM_STATUS] = {
 // Not always used, but very handy for those that actually do want readable
 // error codes.
 __attribute__((unused)) static const char *
-elementStatusToString(ElementStatus status) {
+flo_html_elementStatusToString(flo_html_ElementStatus status) {
     if (status >= 0 && status < ELEMENT_NUM_STATUS) {
-        return ElementStatusStrings[status];
+        return elementStatusStrings[status];
     }
     return "Unknown element status code!";
 }

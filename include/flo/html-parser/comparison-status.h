@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_STATUS_H
-#define FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_STATUS_H
+#ifndef FLO_HTML_PARSER_COMPARISON_STATUS_H
+#define FLO_HTML_PARSER_COMPARISON_STATUS_H
 
 typedef enum {
     COMPARISON_SUCCESS,
@@ -8,18 +8,18 @@ typedef enum {
     COMPARISON_DIFFERENT_SIZES,
     COMPARISON_DIFFERENT_CONTENT,
     COMPARISON_NUM_STATUS
-} ComparisonStatus;
+} flo_html_ComparisonStatus;
 
-static const char *const ComparisonStatusStrings[COMPARISON_NUM_STATUS] = {
+static const char *const comparisonStatusStrings[COMPARISON_NUM_STATUS] = {
     "Success", "Memory error", "Different type of node",
     "Collections have different sizes", "Collections have different content"};
 
 // Not always used, but very handy for those that actually do want readable
 // error codes.
 __attribute__((unused)) static const char *
-comparisonStatusToString(ComparisonStatus status) {
+flo_html_comparisonStatusToString(flo_html_ComparisonStatus status) {
     if (status >= 0 && status < COMPARISON_NUM_STATUS) {
-        return ComparisonStatusStrings[status];
+        return comparisonStatusStrings[status];
     }
     return "Unknown comparison status code!";
 }

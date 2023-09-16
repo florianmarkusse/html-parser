@@ -12,21 +12,22 @@
 #define TEST_1 CURRENT_DIR "test-1.html"
 
 unsigned char parseFile(const char *fileLocation) {
-    TextStore textStore;
-    ElementStatus initStatus = createTextStore(&textStore);
+    flo_html_TextStore textStore;
+    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
-        ERROR_WITH_CODE_ONLY(elementStatusToString(initStatus),
+        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(initStatus),
                              "Failed to initialize text store");
         return TEST_ERROR_INITIALIZATION;
     }
 
-    Dom dom1;
-    if (createDomFromFile(fileLocation, &dom1, &textStore) != DOM_SUCCESS) {
-        destroyTextStore(&textStore);
+    flo_html_Dom dom1;
+    if (createflo_html_DomFromFile(fileLocation, &dom1, &textStore) !=
+        DOM_SUCCESS) {
+        flo_html_destroyTextStore(&textStore);
         return 0;
     }
-    destroyDom(&dom1);
-    destroyTextStore(&textStore);
+    destroyflo_html_Dom(&dom1);
+    flo_html_destroyTextStore(&textStore);
     return 1;
 }
 
@@ -62,7 +63,7 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
     closedir(dir);
 }
 
-unsigned char testDomParsings(size_t *successes, size_t *failures) {
+unsigned char testflo_html_DomParsings(size_t *successes, size_t *failures) {
     printTestTopicStart("DOM parsings");
     size_t localSuccesses = 0;
     size_t localFailures = 0;

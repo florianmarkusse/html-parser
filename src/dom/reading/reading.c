@@ -8,19 +8,22 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/utils/memory/memory.h"
 
-NodeType getNodeType(const node_id nodeID, const Dom *dom) {
+flo_html_NodeType flo_html_getflo_html_NodeType(const flo_html_node_id nodeID,
+                                                const flo_html_Dom *dom) {
     return dom->nodes[nodeID].nodeType;
 }
 
-bool hasBoolProp(const node_id nodeID, const char *boolProp, const Dom *dom,
-                 const TextStore *textStore) {
-    element_id boolPropID = getBoolPropID(boolProp, textStore);
+bool flo_html_hasBoolProp(const flo_html_node_id nodeID, const char *boolProp,
+                          const flo_html_Dom *dom,
+                          const flo_html_TextStore *textStore) {
+    flo_html_element_id boolPropID =
+        flo_html_getBoolPropID(boolProp, textStore);
     if (boolPropID == 0) {
         return false;
     }
 
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
-        BooleanProperty *booleanProperty = &dom->boolProps[i];
+        flo_html_BooleanProperty *booleanProperty = &dom->boolProps[i];
         if (booleanProperty->nodeID == nodeID &&
             booleanProperty->propID == boolPropID) {
             return true;
@@ -29,15 +32,16 @@ bool hasBoolProp(const node_id nodeID, const char *boolProp, const Dom *dom,
     return false;
 }
 
-bool hasPropKey(const node_id nodeID, const char *propKey, const Dom *dom,
-                const TextStore *textStore) {
-    element_id propKeyID = getPropKeyID(propKey, textStore);
+bool flo_html_hasPropKey(const flo_html_node_id nodeID, const char *propKey,
+                         const flo_html_Dom *dom,
+                         const flo_html_TextStore *textStore) {
+    flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return false;
     }
 
     for (size_t i = 0; i < dom->propsLen; i++) {
-        Property *property = &dom->props[i];
+        flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
             return true;
         }
@@ -45,15 +49,17 @@ bool hasPropKey(const node_id nodeID, const char *propKey, const Dom *dom,
     return false;
 }
 
-bool hasPropValue(const node_id nodeID, const char *propValue, const Dom *dom,
-                  const TextStore *textStore) {
-    element_id propValueID = getPropValueID(propValue, textStore);
+bool flo_html_hasPropValue(const flo_html_node_id nodeID, const char *propValue,
+                           const flo_html_Dom *dom,
+                           const flo_html_TextStore *textStore) {
+    flo_html_element_id propValueID =
+        flo_html_getPropValueID(propValue, textStore);
     if (propValueID == 0) {
         return false;
     }
 
     for (size_t i = 0; i < dom->propsLen; i++) {
-        Property *property = &dom->props[i];
+        flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->valueID == propValueID) {
             return true;
         }
@@ -61,20 +67,22 @@ bool hasPropValue(const node_id nodeID, const char *propValue, const Dom *dom,
     return false;
 }
 
-bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
-                 const Dom *dom, const TextStore *textStore) {
-    element_id propKeyID = getPropKeyID(propKey, textStore);
+bool flo_html_hasProperty(flo_html_node_id nodeID, const char *propKey,
+                          const char *propValue, const flo_html_Dom *dom,
+                          const flo_html_TextStore *textStore) {
+    flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return false;
     }
 
-    element_id propValueID = getPropValueID(propValue, textStore);
+    flo_html_element_id propValueID =
+        flo_html_getPropValueID(propValue, textStore);
     if (propKeyID == 0) {
         return false;
     }
 
     for (size_t i = 0; i < dom->propsLen; i++) {
-        Property *property = &dom->props[i];
+        flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID &&
             property->valueID == propValueID) {
             return true;
@@ -83,17 +91,20 @@ bool hasProperty(node_id nodeID, const char *propKey, const char *propValue,
     return false;
 }
 
-QueryStatus getTextContent(const node_id nodeID, const Dom *dom,
-                           const char ***results, size_t *reusultsLen) {
-    node_id currentNodeID = nodeID;
+flo_html_QueryStatus flo_html_getTextContent(const flo_html_node_id nodeID,
+                                             const flo_html_Dom *dom,
+                                             const char ***results,
+                                             size_t *reusultsLen) {
+    flo_html_node_id currentNodeID = nodeID;
     size_t currentCap = 0;
-    while ((currentNodeID = traverseNode(currentNodeID, nodeID, dom)) != 0) {
-        Node node = dom->nodes[currentNodeID];
+    while ((currentNodeID =
+                flo_html_traverseNode(currentNodeID, nodeID, dom)) != 0) {
+        flo_html_Node node = dom->nodes[currentNodeID];
 
         if (node.nodeType == NODE_TYPE_TEXT) {
-            if ((*results = resizeArray(*results, *reusultsLen, &currentCap,
+            if ((*results = flo_html_resizeArray(*results, *reusultsLen, &currentCap,
                                         sizeof(const char *), 64)) == NULL) {
-                PRINT_ERROR("Failed to allocate memory for results array!\n");
+                FLO_HTML_PRINT_ERROR("Failed to allocate memory for results array!\n");
                 return QUERY_MEMORY_ERROR;
             }
 
@@ -105,17 +116,18 @@ QueryStatus getTextContent(const node_id nodeID, const Dom *dom,
     return QUERY_SUCCESS;
 }
 
-const char *getValue(const node_id nodeID, const char *propKey, const Dom *dom,
-                     const TextStore *textStore) {
-    element_id propKeyID = getPropKeyID(propKey, textStore);
+const char *flo_html_getValue(const flo_html_node_id nodeID,
+                              const char *propKey, const flo_html_Dom *dom,
+                              const flo_html_TextStore *textStore) {
+    flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return NULL;
     }
 
     for (size_t i = 0; i < dom->propsLen; i++) {
-        Property *property = &dom->props[i];
+        flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
-            return getPropValue(property->valueID, dom, textStore);
+            return flo_html_getPropValue(property->valueID, dom, textStore);
         }
     }
     return NULL;

@@ -4,8 +4,8 @@
 #include "node.h"
 
 typedef struct {
-    node_id currentNodeID;
-    node_id nextNodeID;
-} __attribute__((aligned(4))) NextNode;
+    flo_html_node_id currentNodeID;
+    flo_html_node_id nextNodeID;
+} __attribute__((aligned(4))) flo_html_NextNode;
 
 #endif

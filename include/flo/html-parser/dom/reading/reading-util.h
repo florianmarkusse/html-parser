@@ -6,7 +6,11 @@
 #include "flo/html-parser/type/node/boolean-property.h"
 #include "flo/html-parser/type/node/property.h"
 
-Property *getProperty(node_id nodeID, element_id propKeyID, const Dom *dom);
-BooleanProperty *getBooleanProperty(node_id nodeID, element_id boolPropID,
-                                    const Dom *dom);
+flo_html_Property *flo_html_getProperty(flo_html_node_id nodeID,
+                                        flo_html_element_id propKeyID,
+                                        const flo_html_Dom *dom);
+flo_html_BooleanProperty *
+flo_html_getBooleanProperty(flo_html_node_id nodeID,
+                            flo_html_element_id boolPropID,
+                            const flo_html_Dom *dom);
 #endif

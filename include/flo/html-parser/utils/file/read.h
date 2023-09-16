@@ -5,6 +5,6 @@
 
 #include "file-status.h"
 
-FileStatus readFile(const char *srcPath, char **buffer);
+flo_html_FileStatus flo_html_readFile(const char *srcPath, char **buffer);
 
 #endif
