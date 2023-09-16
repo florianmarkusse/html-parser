@@ -53,8 +53,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         printTestDemarcation();
         if (actual != expectedStatus) {
             printTestResultDifferenceErrorCode(
-                expectedStatus, queryingStatusToString(expectedStatus), actual,
-                queryingStatusToString(actual));
+                expectedStatus, flo_html_queryingStatusToString(expectedStatus), actual,
+                flo_html_queryingStatusToString(actual));
         } else {
             printTestResultDifferenceNumber(expectedNode, actualNode);
         }

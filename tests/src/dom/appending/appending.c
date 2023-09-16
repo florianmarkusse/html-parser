@@ -196,19 +196,19 @@ static TestStatus testAppendix(const char *fileLocation1,
     DomStatus domStatus = DOM_SUCCESS;
     switch (appendType) {
     case APPEND_DOCUMENT_NODE: {
-        domStatus = appendDocumentNode(foundNode, &appendInput->documentNode,
+        domStatus = flo_html_appendDocumentNode(foundNode, &appendInput->documentNode,
                                        &comparisonTest.startDom,
                                        &comparisonTest.startTextStore);
         break;
     }
     case APPEND_TEXT_NODE: {
-        domStatus = appendTextNode(foundNode, appendInput->text,
+        domStatus = flo_html_appendTextNode(foundNode, appendInput->text,
                                    &comparisonTest.startDom,
                                    &comparisonTest.startTextStore);
         break;
     }
     case APPEND_FROM_STRING: {
-        domStatus = appendHTMLFromString(foundNode, appendInput->text,
+        domStatus = flo_html_appendHTMLFromString(foundNode, appendInput->text,
                                           &comparisonTest.startDom,
                                           &comparisonTest.startTextStore);
         break;

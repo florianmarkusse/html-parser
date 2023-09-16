@@ -152,7 +152,7 @@ const char *getPropValue(const indexID propValueID, const Dom *dom,
 MergeResult tryMerge(Node *possibleMergeNode, Node *replacingNode, Dom *dom,
                      TextStore *textStore, bool isAppend) {
     if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
-        ElementStatus elementStatus = addTextToTextNode(
+        ElementStatus elementStatus = flo_html_addTextToTextNode(
             possibleMergeNode, replacingNode->text, strlen(replacingNode->text),
             dom, textStore, isAppend);
         if (elementStatus != ELEMENT_CREATED) {

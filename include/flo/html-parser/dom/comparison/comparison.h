@@ -24,7 +24,7 @@
  *          otherwise). See @ref
  *          "flo/html-parser/comparison-status.h#ComparisonStatus".
  */
-ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
+ComparisonStatus flo_html_equalsWithNode(node_id *currNodeID1, const Dom *dom1,
                                 const TextStore *textStore1,
                                 node_id *currNodeID2, const Dom *dom2,
                                 const TextStore *textStore2);
@@ -45,7 +45,7 @@ ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
  *          otherwise). See @ref
  *          "flo/html-parser/comparison-status.h#ComparisonStatus".
  */
-ComparisonStatus equals(const Dom *dom1, const TextStore *textStore1,
+ComparisonStatus flo_html_equals(const Dom *dom1, const TextStore *textStore1,
                         const Dom *dom2, const TextStore *textStore2);
 
 /**
@@ -61,7 +61,7 @@ ComparisonStatus equals(const Dom *dom1, const TextStore *textStore1,
  * @param[in]   dom2                The second DOM structure to compare.
  * @param[in]   textStore2      The text store for the second DOM.
  */
-void printFirstDifference(node_id nodeID1, const Dom *dom1,
+void flo_html_printFirstDifference(node_id nodeID1, const Dom *dom1,
                           const TextStore *textStore1, node_id nodeID2,
                           const Dom *dom2, const TextStore *textStore2);
 

@@ -22,7 +22,7 @@ static const char *const QueryStatusStrings[QUERY_NUM_STATUS] = {
     "Initialization error"};
 
 __attribute__((unused)) static const char *
-queryingStatusToString(QueryStatus status) {
+flo_html_queryingStatusToString(QueryStatus status) {
     if (status >= 0 && status < QUERY_NUM_STATUS) {
         return QueryStatusStrings[status];
     }

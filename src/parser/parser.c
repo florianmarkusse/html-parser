@@ -171,7 +171,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
 
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
 
-            elementStatus = addPropertyToNodeStringsWithLength(
+            elementStatus = flo_html_addPropertyToNodeStringsWithLength(
                 *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen,
                 &htmlString[attrValueStartIndex], attrValueLen, dom,
                 textStore);
@@ -184,7 +184,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
             // Move past '"'
             ch = htmlString[++(*currentPosition)];
         } else {
-            elementStatus = addBooleanPropertyToNodeStringWithLength(
+            elementStatus = flo_html_addBooleanPropertyToNodeStringWithLength(
                 *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen, dom,
                 textStore);
 
@@ -211,7 +211,7 @@ DomStatus parseDomNode(const char *htmlString, size_t *currentPosition,
         *context = STYLE_CONTEXT;
     }
 
-    if ((documentStatus = setTagOnDocumentNode(
+    if ((documentStatus = flo_html_setTagOnDocumentNode(
              &htmlString[elementStartIndex], elementLen, *newNodeID,
              !(*isSingle), dom, textStore)) != DOM_SUCCESS) {
         PRINT_ERROR("Failed to add tag to node ID.\n");
@@ -360,7 +360,7 @@ DomStatus parseTextNode(const char *htmlString, size_t *currentPosition,
     if (prevNode->nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
         elementStatus =
-            addTextToTextNode(prevNode, &htmlString[elementStartIndex],
+            flo_html_addTextToTextNode(prevNode, &htmlString[elementStartIndex],
                               elementLen, dom, textStore, true);
         if (elementStatus != ELEMENT_CREATED) {
             ERROR_WITH_CODE_ONLY(elementStatusToString(elementStatus),
@@ -533,7 +533,7 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
         return domStatus;
     }
 
-    domStatus = setTagOnDocumentNode(
+    domStatus = flo_html_setTagOnDocumentNode(
         documentNode->tag, strlen(documentNode->tag), *newNodeID,
         documentNode->isPaired, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
@@ -543,7 +543,7 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
 
     for (size_t i = 0; i < documentNode->boolPropsLen; i++) {
         const char *boolProp = documentNode->boolProps[i];
-        ElementStatus elementStatus = addBooleanPropertyToNodeString(
+        ElementStatus elementStatus = flo_html_addBooleanPropertyToNodeString(
             *newNodeID, boolProp, dom, textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             PRINT_ERROR("Failed to boolean property to new node ID!\n");
@@ -554,7 +554,7 @@ DomStatus parseDocumentElement(const DocumentNode *documentNode, Dom *dom,
     for (size_t i = 0; i < documentNode->propsLen; i++) {
         const char *keyProp = documentNode->keyProps[i];
         const char *valueProp = documentNode->valueProps[i];
-        ElementStatus elementStatus = addPropertyToNodeStrings(
+        ElementStatus elementStatus = flo_html_addPropertyToNodeStrings(
             *newNodeID, keyProp, valueProp, dom, textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             PRINT_ERROR("Failed to property to new node ID!\n");

@@ -66,30 +66,27 @@ bool filterNode(const node_id nodeID, const FilterType *filters,
 indexID getTagID(const char *tag, const TextStore *textStore) {
     HashElement ignore;
     indexID tagID = 0;
-    containsStringWithDataHashSet(&textStore->tags.set, tag, &ignore,
-                                  &tagID);
+    containsStringWithDataHashSet(&textStore->tags.set, tag, &ignore, &tagID);
     return tagID;
 }
 
-indexID getBoolPropID(const char *boolProp,
-                      const TextStore *textStore) {
+indexID getBoolPropID(const char *boolProp, const TextStore *textStore) {
     HashElement ignore;
     indexID propID = 0;
-    containsStringWithDataHashSet(&textStore->boolProps.set, boolProp,
-                                  &ignore, &propID);
+    containsStringWithDataHashSet(&textStore->boolProps.set, boolProp, &ignore,
+                                  &propID);
     return propID;
 }
 
 indexID getPropKeyID(const char *keyProp, const TextStore *textStore) {
     HashElement ignore;
     indexID keyID = 0;
-    containsStringWithDataHashSet(&textStore->propKeys.set, keyProp,
-                                  &ignore, &keyID);
+    containsStringWithDataHashSet(&textStore->propKeys.set, keyProp, &ignore,
+                                  &keyID);
     return keyID;
 }
 
-indexID getPropValueID(const char *valueProp,
-                       const TextStore *textStore) {
+indexID getPropValueID(const char *valueProp, const TextStore *textStore) {
     HashElement ignore;
     indexID valueID = 0;
     containsStringWithDataHashSet(&textStore->propValues.set, valueProp,

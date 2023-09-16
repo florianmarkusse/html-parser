@@ -114,8 +114,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), queryStatus,
-            queryingStatusToString(queryStatus));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), queryStatus,
+            flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
         bool actualResult = false;

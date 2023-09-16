@@ -195,19 +195,19 @@ static TestStatus testPrependix(const char *fileLocation1,
     DomStatus domStatus = DOM_SUCCESS;
     switch (prependType) {
     case PREPEND_DOCUMENT_NODE: {
-        domStatus = prependDocumentNode(foundNode, &prependInput->documentNode,
+        domStatus = flo_html_prependDocumentNode(foundNode, &prependInput->documentNode,
                                         &comparisonTest.startDom,
                                         &comparisonTest.startTextStore);
         break;
     }
     case PREPEND_TEXT_NODE: {
-        domStatus = prependTextNode(foundNode, prependInput->text,
+        domStatus = flo_html_prependTextNode(foundNode, prependInput->text,
                                     &comparisonTest.startDom,
                                     &comparisonTest.startTextStore);
         break;
     }
     case PREPEND_FROM_STRING: {
-        domStatus = prependHTMLFromString(foundNode, prependInput->text,
+        domStatus = flo_html_prependHTMLFromString(foundNode, prependInput->text,
                                            &comparisonTest.startDom,
                                            &comparisonTest.startTextStore);
         break;

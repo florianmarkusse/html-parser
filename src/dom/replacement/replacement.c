@@ -180,8 +180,8 @@ DomStatus replaceWithTextNode(node_id toReplaceNodeID, const char *text,
     MergeResult mergeResult =
         tryMergeBothSides(toReplaceNodeID, newNodeID, dom, textStore);
     if (mergeResult == COMPLETED_MERGE) {
-        removeNode(newNodeID, dom);
-        removeNode(toReplaceNodeID, dom);
+        flo_html_removeNode(newNodeID, dom);
+        flo_html_removeNode(toReplaceNodeID, dom);
         return domStatus;
     }
 
@@ -213,7 +213,7 @@ DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
                              firstAddedNode, dom, textStore, true);
                 if (mergeResult == COMPLETED_MERGE) {
                     size_t secondNewAddedNode = getNext(firstNewAddedNode, dom);
-                    removeNode(firstNewAddedNode, dom);
+                    flo_html_removeNode(firstNewAddedNode, dom);
                     firstNewAddedNode = secondNewAddedNode;
                 }
 
@@ -232,7 +232,7 @@ DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
                     &dom->nodes[lastNextNode], dom, textStore, false);
 
                 if (mergeResult == COMPLETED_MERGE) {
-                    removeNode(lastNextNode, dom);
+                    flo_html_removeNode(lastNextNode, dom);
                 }
 
                 if (mergeResult == FAILED_MERGE) {
@@ -244,8 +244,8 @@ DomStatus replaceWithHTMLFromString(node_id toReplaceNodeID,
         MergeResult mergeResult = tryMergeBothSides(
             toReplaceNodeID, firstNewAddedNode, dom, textStore);
         if (mergeResult == COMPLETED_MERGE) {
-            removeNode(firstNewAddedNode, dom);
-            removeNode(toReplaceNodeID, dom);
+            flo_html_removeNode(firstNewAddedNode, dom);
+            flo_html_removeNode(toReplaceNodeID, dom);
             return domStatus;
         }
 

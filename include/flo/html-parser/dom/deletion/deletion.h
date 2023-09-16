@@ -12,7 +12,7 @@
  * @param[in]   nodeID  The ID of the node to remove.
  * @param[in]   dom     The DOM structure.
  */
-void removeNode(node_id nodeID, Dom *dom);
+void flo_html_removeNode(node_id nodeID, Dom *dom);
 
 /**
  * @brief Remove all children of a node in the DOM.
@@ -23,7 +23,7 @@ void removeNode(node_id nodeID, Dom *dom);
  * @param[in]   nodeID  The ID of the node whose children will be removed.
  * @param[in]   dom     The DOM structure.
  */
-void removeChildren(node_id nodeID, Dom *dom);
+void flo_html_removeChildren(node_id nodeID, Dom *dom);
 
 /**
  * @brief Remove a boolean property from a node in the DOM.
@@ -37,7 +37,7 @@ void removeChildren(node_id nodeID, Dom *dom);
  * @param[in]   dom             The DOM structure.
  * @param[in]   textStore   The text store.
  */
-void removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
+void flo_html_removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
                            const TextStore *textStore);
 
 /**
@@ -52,7 +52,7 @@ void removeBooleanProperty(node_id nodeID, const char *boolProp, Dom *dom,
  * @param[in]   dom             The DOM structure.
  * @param[in]   textStore   The text store.
  */
-void removeProperty(node_id nodeID, const char *keyProp, Dom *dom,
+void flo_html_removeProperty(node_id nodeID, const char *keyProp, Dom *dom,
                     const TextStore *textStore);
 
 #endif

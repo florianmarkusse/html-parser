@@ -26,7 +26,7 @@
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus addPropertyToNodeStringsWithLength(
+ElementStatus flo_html_addPropertyToNodeStringsWithLength(
     node_id nodeID, const char *keyBuffer, size_t keyLen,
     const char *valueBuffer, size_t valueLen, Dom *dom, TextStore *textStore);
 
@@ -46,7 +46,7 @@ ElementStatus addPropertyToNodeStringsWithLength(
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus addPropertyToNodeStrings(node_id nodeID, const char *keyBuffer,
+ElementStatus flo_html_addPropertyToNodeStrings(node_id nodeID, const char *keyBuffer,
                                        const char *valueBuffer, Dom *dom,
                                        TextStore *textStore);
 
@@ -67,7 +67,7 @@ ElementStatus addPropertyToNodeStrings(node_id nodeID, const char *keyBuffer,
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus addBooleanPropertyToNodeStringWithLength(
+ElementStatus flo_html_addBooleanPropertyToNodeStringWithLength(
     node_id nodeID, const char *boolPropBuffer, size_t boolPropLen, Dom *dom,
     TextStore *textStore);
 
@@ -86,7 +86,7 @@ ElementStatus addBooleanPropertyToNodeStringWithLength(
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus addBooleanPropertyToNodeString(node_id nodeID,
+ElementStatus flo_html_addBooleanPropertyToNodeString(node_id nodeID,
                                              const char *boolPropBuffer,
                                              Dom *dom, TextStore *textStore);
 
@@ -106,7 +106,7 @@ ElementStatus addBooleanPropertyToNodeString(node_id nodeID,
  * @return  The status of the property update (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus setPropertyValue(node_id nodeID, const char *key,
+ElementStatus flo_html_setPropertyValue(node_id nodeID, const char *key,
                                const char *newValue, Dom *dom,
                                TextStore *textStore);
 
@@ -125,7 +125,7 @@ ElementStatus setPropertyValue(node_id nodeID, const char *key,
  * @return  The status of the text content update (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus setTextContent(node_id nodeID, const char *text, Dom *dom,
+DomStatus flo_html_setTextContent(node_id nodeID, const char *text, Dom *dom,
                          TextStore *textStore);
 
 /**
@@ -147,7 +147,7 @@ DomStatus setTextContent(node_id nodeID, const char *text, Dom *dom,
  * @return  The status of the text addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-ElementStatus addTextToTextNode(Node *node, const char *textStart,
+ElementStatus flo_html_addTextToTextNode(Node *node, const char *textStart,
                                 size_t textLen, Dom *dom, TextStore *textStore,
                                 bool isAppend);
 
@@ -170,7 +170,7 @@ ElementStatus addTextToTextNode(Node *node, const char *textStart,
  * @return  The status of the tag setting operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus setTagOnDocumentNode(const char *tagStart, size_t tagLen,
+DomStatus flo_html_setTagOnDocumentNode(const char *tagStart, size_t tagLen,
                                node_id nodeID, bool isPaired, Dom *dom,
                                TextStore *textStore);
 

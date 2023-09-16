@@ -55,14 +55,14 @@ static TestStatus testModification(const char *fileLocation1,
 
     if (newPropValue == NULL) {
         DomStatus domStatus =
-            setTextContent(foundNode, propKey, &comparisonTest.startDom,
+            flo_html_setTextContent(foundNode, propKey, &comparisonTest.startDom,
                            &comparisonTest.startTextStore);
         if (domStatus != DOM_SUCCESS) {
             return failWithMessage("Failed to set text content!\n",
                                    &comparisonTest);
         }
     } else {
-        ElementStatus elementStatus = setPropertyValue(
+        ElementStatus elementStatus = flo_html_setPropertyValue(
             foundNode, propKey, newPropValue, &comparisonTest.startDom,
             &comparisonTest.startTextStore);
         if (elementStatus != ELEMENT_SUCCESS) {

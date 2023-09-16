@@ -16,43 +16,47 @@
 #include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/print/error.h"
 
-#define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,    \
+#define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,        \
                                     prependFunction)                           \
     do {                                                                       \
         node_id parentNodeID = 0;                                              \
         QueryStatus queryResult =                                              \
-            querySelector(cssQuery, dom, textStore, &parentNodeID);        \
+            querySelector(cssQuery, dom, textStore, &parentNodeID);            \
         if (queryResult != QUERY_SUCCESS) {                                    \
             PRINT_ERROR("Could not find element using query selector: %s\n",   \
                         cssQuery);                                             \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
-        return prependFunction(parentNodeID, nodeData, dom, textStore);    \
+        return prependFunction(parentNodeID, nodeData, dom, textStore);        \
     } while (0)
 
-DomStatus prependDocumentNodeWithQuery(const char *cssQuery,
-                                       const DocumentNode *docNode, Dom *dom,
-                                       TextStore *textStore) {
+DomStatus flo_html_prependDocumentNodeWithQuery(const char *cssQuery,
+                                                const DocumentNode *docNode,
+                                                Dom *dom,
+                                                TextStore *textStore) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
-                                prependDocumentNode);
+                                flo_html_prependDocumentNode);
 }
 
-DomStatus prependTextNodeWithQuery(const char *cssQuery, const char *text,
-                                   Dom *dom, TextStore *textStore) {
+DomStatus flo_html_prependTextNodeWithQuery(const char *cssQuery,
+                                            const char *text, Dom *dom,
+                                            TextStore *textStore) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
-                                prependTextNode);
+                                flo_html_prependTextNode);
 }
 
-DomStatus prependHTMLFromStringWithQuery(const char *cssQuery,
-                                         const char *htmlString, Dom *dom,
-                                         TextStore *textStore) {
+DomStatus flo_html_prependHTMLFromStringWithQuery(const char *cssQuery,
+                                                  const char *htmlString,
+                                                  Dom *dom,
+                                                  TextStore *textStore) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
-                                prependHTMLFromString);
+                                flo_html_prependHTMLFromString);
 }
 
-DomStatus prependHTMLFromFileWithQuery(const char *cssQuery,
-                                       const char *fileLocation, Dom *dom,
-                                       TextStore *textStore) {
+DomStatus flo_html_prependHTMLFromFileWithQuery(const char *cssQuery,
+                                                const char *fileLocation,
+                                                Dom *dom,
+                                                TextStore *textStore) {
     char *buffer = NULL;
     FileStatus fileStatus = readFile(fileLocation, &buffer);
     if (fileStatus != FILE_SUCCESS) {
@@ -62,7 +66,7 @@ DomStatus prependHTMLFromFileWithQuery(const char *cssQuery,
     }
 
     PREPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, textStore,
-                                prependHTMLFromString);
+                                flo_html_prependHTMLFromString);
 }
 
 static DomStatus updateReferences(const node_id parentID,
@@ -137,9 +141,9 @@ static DomStatus updateReferences(const node_id parentID,
     return domStatus;
 }
 
-DomStatus prependDocumentNode(const node_id parentID,
-                              const DocumentNode *docNode, Dom *dom,
-                              TextStore *textStore) {
+DomStatus flo_html_prependDocumentNode(const node_id parentID,
+                                       const DocumentNode *docNode, Dom *dom,
+                                       TextStore *textStore) {
     node_id newNodeID = 0;
     DomStatus domStatus =
         parseDocumentElement(docNode, dom, textStore, &newNodeID);
@@ -150,11 +154,10 @@ DomStatus prependDocumentNode(const node_id parentID,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus prependTextNode(const node_id parentID, const char *text, Dom *dom,
-                          TextStore *textStore) {
+DomStatus flo_html_prependTextNode(const node_id parentID, const char *text,
+                                   Dom *dom, TextStore *textStore) {
     node_id newNodeID = 0;
-    DomStatus domStatus =
-        parseTextElement(text, dom, textStore, &newNodeID);
+    DomStatus domStatus = parseTextElement(text, dom, textStore, &newNodeID);
     if (domStatus != DOM_SUCCESS) {
         PRINT_ERROR("Failed to parse text element!\n");
         return domStatus;
@@ -162,12 +165,11 @@ DomStatus prependTextNode(const node_id parentID, const char *text, Dom *dom,
 
     node_id child = getFirstChild(parentID, dom);
     if (child > 0) {
-        MergeResult mergeTry =
-            tryMerge(&dom->nodes[child], &dom->nodes[newNodeID], dom,
-                     textStore, false);
+        MergeResult mergeTry = tryMerge(
+            &dom->nodes[child], &dom->nodes[newNodeID], dom, textStore, false);
 
         if (mergeTry == COMPLETED_MERGE) {
-            removeNode(newNodeID, dom);
+            flo_html_removeNode(newNodeID, dom);
             return domStatus;
         }
 
@@ -179,8 +181,9 @@ DomStatus prependTextNode(const node_id parentID, const char *text, Dom *dom,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus prependHTMLFromString(const node_id parentID, const char *htmlString,
-                                 Dom *dom, TextStore *textStore) {
+DomStatus flo_html_prependHTMLFromString(const node_id parentID,
+                                         const char *htmlString, Dom *dom,
+                                         TextStore *textStore) {
     node_id firstNewAddedNode = dom->nodeLen;
     DomStatus domStatus = parse(htmlString, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
@@ -198,7 +201,7 @@ DomStatus prependHTMLFromString(const node_id parentID, const char *htmlString,
                     tryMerge(&dom->nodes[firstChild], lastAddedNode, dom,
                              textStore, false);
                 if (mergeResult == COMPLETED_MERGE) {
-                    removeNode(lastNextNode, dom);
+                    flo_html_removeNode(lastNextNode, dom);
                 }
 
                 if (mergeResult == FAILED_MERGE) {
@@ -212,7 +215,7 @@ DomStatus prependHTMLFromString(const node_id parentID, const char *htmlString,
                     tryMerge(&dom->nodes[firstChild], firstAddedNode, dom,
                              textStore, false);
                 if (mergeResult == COMPLETED_MERGE) {
-                    removeNode(firstNewAddedNode, dom);
+                    flo_html_removeNode(firstNewAddedNode, dom);
                     return domStatus;
                 }
 

@@ -52,8 +52,7 @@ bool endOfCurrentFilter(const char ch) {
 }
 
 QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
-                            const TextStore *textStore,
-                            Uint16HashSet *set) {
+                            const TextStore *textStore, Uint16HashSet *set) {
     QueryStatus result = QUERY_SUCCESS;
 
     FilterType filters[MAX_FILTERS_PER_ELEMENT];
@@ -326,8 +325,8 @@ QueryStatus getQueryResults(const char *cssQuery, const Dom *dom,
 }
 
 QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
-                             const TextStore *textStore,
-                             node_id **results, size_t *resultsLen) {
+                             const TextStore *textStore, node_id **results,
+                             size_t *resultsLen) {
     Uint16HashSet resultsSet;
     if (initUint16HashSet(&resultsSet, INITIAL_QUERY_CAP) != HASH_SUCCESS) {
         PRINT_ERROR(
@@ -364,7 +363,7 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
                 destroyUint16HashSet(&resultsSet);
                 destroyUint16HashSet(&set);
                 FREE_TO_NULL(toFree);
-                ERROR_WITH_CODE_ONLY(queryingStatusToString(result),
+                ERROR_WITH_CODE_ONLY(flo_html_queryingStatusToString(result),
                                      "Unable get query results!\n");
                 return result;
             }
@@ -393,10 +392,10 @@ QueryStatus querySelectorAll(const char *cssQuery, const Dom *dom,
         FREE_TO_NULL(toFree);
         destroyUint16HashSet(&set);
     } else {
-        if ((result = getQueryResults(cssQuery, dom, textStore,
-                                      &resultsSet)) != QUERY_SUCCESS) {
+        if ((result = getQueryResults(cssQuery, dom, textStore, &resultsSet)) !=
+            QUERY_SUCCESS) {
             destroyUint16HashSet(&resultsSet);
-            ERROR_WITH_CODE_ONLY(queryingStatusToString(result),
+            ERROR_WITH_CODE_ONLY(flo_html_queryingStatusToString(result),
                                  "Unable get query results!\n");
             return result;
         }
@@ -426,8 +425,8 @@ QueryStatus getElementsByClassName(const char *class, const Dom *dom,
 }
 
 QueryStatus getElementsByTagName(const char *tag, const Dom *dom,
-                                 const TextStore *textStore,
-                                 node_id **results, size_t *resultsLen) {
+                                 const TextStore *textStore, node_id **results,
+                                 size_t *resultsLen) {
     return querySelectorAll(tag, dom, textStore, results, resultsLen);
 }
 
@@ -465,8 +464,7 @@ QueryStatus querySelector(const char *cssQuery, const Dom *dom,
 }
 
 QueryStatus getElementByID(const char *id, const Dom *dom,
-                           const TextStore *textStore,
-                           node_id *result) {
+                           const TextStore *textStore, node_id *result) {
     size_t cssQueryLen = strlen(id) + 2;
     char cssQuery[cssQueryLen];
     snprintf(cssQuery, cssQueryLen, "#%s", id);

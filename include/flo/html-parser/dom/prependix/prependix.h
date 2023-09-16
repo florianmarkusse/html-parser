@@ -24,7 +24,7 @@
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus prependDocumentNodeWithQuery(const char *cssQuery,
+DomStatus flo_html_prependDocumentNodeWithQuery(const char *cssQuery,
                                        const DocumentNode *docNode, Dom *dom,
                                        TextStore *textStore);
 
@@ -43,7 +43,7 @@ DomStatus prependDocumentNodeWithQuery(const char *cssQuery,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus prependTextNodeWithQuery(const char *cssQuery, const char *text,
+DomStatus flo_html_prependTextNodeWithQuery(const char *cssQuery, const char *text,
                                    Dom *dom, TextStore *textStore);
 
 /**
@@ -61,7 +61,7 @@ DomStatus prependTextNodeWithQuery(const char *cssQuery, const char *text,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus prependHTMLFromStringWithQuery(const char *cssQuery,
+DomStatus flo_html_prependHTMLFromStringWithQuery(const char *cssQuery,
                                          const char *htmlString, Dom *dom,
                                          TextStore *textStore);
 
@@ -81,7 +81,7 @@ DomStatus prependHTMLFromStringWithQuery(const char *cssQuery,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus prependHTMLFromFileWithQuery(const char *cssQuery,
+DomStatus flo_html_prependHTMLFromFileWithQuery(const char *cssQuery,
                                        const char *fileLocation, Dom *dom,
                                        TextStore *textStore);
 
@@ -100,7 +100,7 @@ DomStatus prependHTMLFromFileWithQuery(const char *cssQuery,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus prependDocumentNode(node_id parentID, const DocumentNode *docNode,
+DomStatus flo_html_prependDocumentNode(node_id parentID, const DocumentNode *docNode,
                               Dom *dom, TextStore *textStore);
 
 /**
@@ -118,7 +118,7 @@ DomStatus prependDocumentNode(node_id parentID, const DocumentNode *docNode,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus prependTextNode(node_id parentID, const char *text, Dom *dom,
+DomStatus flo_html_prependTextNode(node_id parentID, const char *text, Dom *dom,
                           TextStore *textStore);
 
 /**
@@ -136,7 +136,7 @@ DomStatus prependTextNode(node_id parentID, const char *text, Dom *dom,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-DomStatus prependHTMLFromString(node_id parentID, const char *htmlString,
+DomStatus flo_html_prependHTMLFromString(node_id parentID, const char *htmlString,
                                 Dom *dom, TextStore *textStore);
 
 #endif

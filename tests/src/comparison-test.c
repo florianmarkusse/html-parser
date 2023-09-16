@@ -52,8 +52,8 @@ TestStatus getNodeFromQuerySelector(const char *cssQuery,
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), queryStatus,
-            queryingStatusToString(queryStatus));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), queryStatus,
+            flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
 
         return TEST_FAILURE;
@@ -90,7 +90,7 @@ TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
 
     node_id nodeID1 = 0;
     node_id nodeID2 = 0;
-    ComparisonStatus comp = equalsWithNode(
+    ComparisonStatus comp = flo_html_equalsWithNode(
         &nodeID1, &comparisonTest->startDom,
         &comparisonTest->startTextStore, &nodeID2,
         &comparisonTest->expectedDom, &comparisonTest->expectedTextStore);
@@ -104,7 +104,7 @@ TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
         printTestResultDifferenceErrorCode(
             COMPARISON_SUCCESS, comparisonStatusToString(COMPARISON_SUCCESS),
             comp, comparisonStatusToString(comp));
-        printFirstDifference(nodeID1, &comparisonTest->startDom,
+        flo_html_printFirstDifference(nodeID1, &comparisonTest->startDom,
                              &comparisonTest->startTextStore, nodeID2,
                              &comparisonTest->expectedDom,
                              &comparisonTest->expectedTextStore);

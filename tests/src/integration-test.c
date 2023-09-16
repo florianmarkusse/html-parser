@@ -32,8 +32,8 @@ static TestStatus parseQueryModify() {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), actual,
-            queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
+            flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         return TEST_FAILURE;
     }
@@ -50,12 +50,12 @@ static TestStatus parseQueryModify() {
         FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
-    setTextContent(results[0], "FOURTH", &comparisonTest.startDom,
+    flo_html_setTextContent(results[0], "FOURTH", &comparisonTest.startDom,
                    &comparisonTest.startTextStore);
-    addBooleanPropertyToNodeString(results[0], "the-fourth",
+    flo_html_addBooleanPropertyToNodeString(results[0], "the-fourth",
                                    &comparisonTest.startDom,
                                    &comparisonTest.startTextStore);
-    addPropertyToNodeStrings(results[0], "the-property", "my value",
+    flo_html_addPropertyToNodeStrings(results[0], "the-property", "my value",
                              &comparisonTest.startDom,
                              &comparisonTest.startTextStore);
     FREE_TO_NULL(results);
@@ -67,13 +67,13 @@ static TestStatus parseQueryModify() {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), actual,
-            queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
+            flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         return TEST_FAILURE;
     }
 
-    prependHTMLFromString(currentNodeID,
+    flo_html_prependHTMLFromString(currentNodeID,
                           "<title "
                           "id=\"first-title-tag\"></title><title>FIRST</"
                           "title><title>SECOND</title><title>THIRD</title>",
@@ -87,8 +87,8 @@ static TestStatus parseQueryModify() {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), actual,
-            queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
+            flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         FREE_TO_NULL(results);
         return TEST_FAILURE;
@@ -115,14 +115,14 @@ static TestStatus parseQueryModify() {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), actual,
-            queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
+            flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    removeNode(currentNodeID, &comparisonTest.startDom);
+    flo_html_removeNode(currentNodeID, &comparisonTest.startDom);
 
     actual = querySelectorAll("title", &comparisonTest.startDom,
                               &comparisonTest.startTextStore, &results,
@@ -131,8 +131,8 @@ static TestStatus parseQueryModify() {
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), actual,
-            queryingStatusToString(actual));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), actual,
+            flo_html_queryingStatusToString(actual));
         printTestDemarcation();
         FREE_TO_NULL(results);
         return TEST_FAILURE;

@@ -362,7 +362,7 @@ ComparisonStatus compareNode(node_id *currNodeID1, const Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
+ComparisonStatus flo_html_equalsWithNode(node_id *currNodeID1, const Dom *dom1,
                                 const TextStore *textStore1,
                                 node_id *currNodeID2, const Dom *dom2,
                                 const TextStore *textStore2) {
@@ -386,15 +386,15 @@ ComparisonStatus equalsWithNode(node_id *currNodeID1, const Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-ComparisonStatus equals(const Dom *dom1, const TextStore *textStore1,
+ComparisonStatus flo_html_equals(const Dom *dom1, const TextStore *textStore1,
                         const Dom *dom2, const TextStore *textStore2) {
     node_id nodeID1 = 0;
     node_id nodeID2 = 0;
-    return equalsWithNode(&nodeID1, dom1, textStore1, &nodeID2, dom2,
+    return flo_html_equalsWithNode(&nodeID1, dom1, textStore1, &nodeID2, dom2,
                           textStore2);
 }
 
-void printFirstDifference(const node_id nodeID1, const Dom *dom1,
+void flo_html_printFirstDifference(const node_id nodeID1, const Dom *dom1,
                           const TextStore *textStore1,
                           const node_id nodeID2, const Dom *dom2,
                           const TextStore *textStore2) {

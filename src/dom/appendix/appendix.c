@@ -29,27 +29,27 @@
         return appendFunction(parentNodeID, nodeData, dom, textStore);     \
     } while (0)
 
-DomStatus appendDocumentNodeWithQuery(const char *cssQuery,
+DomStatus flo_html_flo_html_appendDocumentNodeWithQuery(const char *cssQuery,
                                       const DocumentNode *docNode, Dom *dom,
                                       TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
-                               appendDocumentNode);
+                               flo_html_appendDocumentNode);
 }
 
-DomStatus appendTextNodeWithQuery(const char *cssQuery, const char *text,
+DomStatus flo_html_flo_html_appendTextNodeWithQuery(const char *cssQuery, const char *text,
                                   Dom *dom, TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
-                               appendTextNode);
+                               flo_html_appendTextNode);
 }
 
-DomStatus appendHTMLFromStringWithQuery(const char *cssQuery,
+DomStatus flo_html_flo_html_appendHTMLFromStringWithQuery(const char *cssQuery,
                                         const char *htmlString, Dom *dom,
                                         TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
-                               appendHTMLFromString);
+                               flo_html_appendHTMLFromString);
 }
 
-DomStatus appendHTMLFromFileWithQuery(const char *cssQuery,
+DomStatus flo_html_appendHTMLFromFileWithQuery(const char *cssQuery,
                                       const char *fileLocation, Dom *dom,
                                       TextStore *textStore) {
     char *buffer = NULL;
@@ -61,7 +61,7 @@ DomStatus appendHTMLFromFileWithQuery(const char *cssQuery,
     }
 
     APPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, textStore,
-                               appendHTMLFromString);
+                               flo_html_appendHTMLFromString);
 }
 
 static DomStatus updateReferences(const node_id parentID,
@@ -123,7 +123,7 @@ static DomStatus updateReferences(const node_id parentID,
     return domStatus;
 }
 
-DomStatus appendDocumentNode(const node_id parentID,
+DomStatus flo_html_appendDocumentNode(const node_id parentID,
                              const DocumentNode *docNode, Dom *dom,
                              TextStore *textStore) {
     node_id newNodeID = 0;
@@ -136,7 +136,7 @@ DomStatus appendDocumentNode(const node_id parentID,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
+DomStatus flo_html_appendTextNode(const node_id parentID, const char *text, Dom *dom,
                          TextStore *textStore) {
     node_id newNodeID = 0;
     DomStatus domStatus =
@@ -155,7 +155,7 @@ DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
                      textStore, true);
 
         if (mergeTry == COMPLETED_MERGE) {
-            removeNode(newNodeID, dom);
+            flo_html_removeNode(newNodeID, dom);
             return domStatus;
         }
 
@@ -167,7 +167,7 @@ DomStatus appendTextNode(const node_id parentID, const char *text, Dom *dom,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-DomStatus appendHTMLFromString(const node_id parentID, const char *htmlString,
+DomStatus flo_html_appendHTMLFromString(const node_id parentID, const char *htmlString,
                                 Dom *dom, TextStore *textStore) {
     node_id firstNewAddedNode = dom->nodeLen;
     DomStatus domStatus = parse(htmlString, dom, textStore);
@@ -188,7 +188,7 @@ DomStatus appendHTMLFromString(const node_id parentID, const char *htmlString,
                              textStore, true);
                 if (mergeResult == COMPLETED_MERGE) {
                     size_t secondNewAddedNode = getNext(firstNewAddedNode, dom);
-                    removeNode(firstNewAddedNode, dom);
+                    flo_html_removeNode(firstNewAddedNode, dom);
                     firstNewAddedNode = secondNewAddedNode;
                 }
 
@@ -204,7 +204,7 @@ DomStatus appendHTMLFromString(const node_id parentID, const char *htmlString,
                     tryMerge(&dom->nodes[lastNext], firstAddedNode, dom,
                              textStore, true);
                 if (mergeResult == COMPLETED_MERGE) {
-                    removeNode(firstNewAddedNode, dom);
+                    flo_html_removeNode(firstNewAddedNode, dom);
                     return domStatus;
                 }
 

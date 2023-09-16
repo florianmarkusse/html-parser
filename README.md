@@ -87,7 +87,7 @@ int main() {
     // In other words: "<body add-extra-p-element> ... </body>"
     if (hasBoolProp(bodyNodeID, "add-extra-p-element", &dom, &textStore)) {
         // Append HTML content to the <body> element
-        if (appendHTMLFromStringWithQuery("body", "<p>I am appended</p>", &dom,
+        if (flo_html_flo_html_appendHTMLFromStringWithQuery("body", "<p>I am appended</p>", &dom,
                                           &textStore) != DOM_SUCCESS) {
             destroyDom(&dom);
             destroyTextStore(&textStore);
@@ -124,7 +124,7 @@ This example demonstrates how to use the `html-parser` library to parse and mani
   With `hasBoolProp`, we check if the `<body>` element has a specific boolean property called "add-extra-p-element."
 
 - **Appending HTML:**
-  If the boolean property exists, we append an HTML string `<p>I am appended</p>` to the `<body>` element using `appendHTMLFromStringWithQuery`.
+  If the boolean property exists, we append an HTML string `<p>I am appended</p>` to the `<body>` element using `flo_html_flo_html_appendHTMLFromStringWithQuery`.
 
 - **Printing the Modified HTML:**
   We print the modified HTML, showing the changes made to the document.
@@ -324,19 +324,19 @@ Now that we have some `node_id`s after querying and traversing the `Dom`, we can
 
 Below, all the **append** functions provided. They append a new child to the provided parent node. This library also provides the same functionality to **prepend** and **replaceWith**. Prepending a node adds a new child as the first child node of the provided parent node. Lastly, Replacing a node completely, thus also all its children, does exactly that.
 
-- `appendDocumentNodeWithQuery`: Append a `DocumentNode` to the DOM using a CSS query. This function appends a `DocumentNode` specified by `docNode` to the DOM using the provided CSS query `cssQuery`.
+- `flo_html_flo_html_appendDocumentNodeWithQuery`: Append a `DocumentNode` to the DOM using a CSS query. This function appends a `DocumentNode` specified by `docNode` to the DOM using the provided CSS query `cssQuery`.
 
-- `appendTextNodeWithQuery`: Append a text node to the DOM using a CSS query. This function appends a text node with the specified `text` to the DOM using the provided CSS query `cssQuery`.
+- `flo_html_flo_html_appendTextNodeWithQuery`: Append a text node to the DOM using a CSS query. This function appends a text node with the specified `text` to the DOM using the provided CSS query `cssQuery`.
 
-- `appendHTMLFromStringWithQuery`: Append HTML content from a string to the DOM using a CSS query. This function appends HTML content specified by `htmlString` to the DOM using the provided CSS query `cssQuery`.
+- `flo_html_flo_html_appendHTMLFromStringWithQuery`: Append HTML content from a string to the DOM using a CSS query. This function appends HTML content specified by `htmlString` to the DOM using the provided CSS query `cssQuery`.
 
-- `appendHTMLFromFileWithQuery`: Append HTML content from a file to the DOM using a CSS query. This function appends HTML content from the specified `fileLocation` to the DOM using the provided CSS query `cssQuery`.
+- `flo_html_appendHTMLFromFileWithQuery`: Append HTML content from a file to the DOM using a CSS query. This function appends HTML content from the specified `fileLocation` to the DOM using the provided CSS query `cssQuery`.
 
-- `appendDocumentNode`: Append a `DocumentNode` to the DOM. This function appends a `DocumentNode` specified by `docNode` to the DOM.
+- `flo_html_appendDocumentNode`: Append a `DocumentNode` to the DOM. This function appends a `DocumentNode` specified by `docNode` to the DOM.
 
-- `appendTextNode`: Append a text node to the DOM. This function appends a text node with the specified `text` to the DOM.
+- `flo_html_appendTextNode`: Append a text node to the DOM. This function appends a text node with the specified `text` to the DOM.
 
-- `appendHTMLFromString`: Append HTML content from a string to the DOM. This function appends HTML content specified by `htmlString` to the DOM.
+- `flo_html_appendHTMLFromString`: Append HTML content from a string to the DOM. This function appends HTML content specified by `htmlString` to the DOM.
 
 For the sake of brevity, the `prepend...` and `replaceWith...` functions are left out but **are** present in the library. Simply replace `append` with your desired operation.
 
@@ -346,7 +346,7 @@ To make changes to specific nodes within the DOM, this library provides a set of
 
 ##### Adding Properties to an HTML Element
 
-- `addPropertyToNodeStringsWithLength`: Add a property with a specified key and value to an HTML element. This function takes the `node_id` of the target element, the property key, property value, and other necessary parameters.
+- `flo_html_addPropertyToNodeStringsWithLength`: Add a property with a specified key and value to an HTML element. This function takes the `node_id` of the target element, the property key, property value, and other necessary parameters.
 
 - `addPropertyToNodeStrings`: A simplified version of the above function for adding a single property to an HTML element.
 

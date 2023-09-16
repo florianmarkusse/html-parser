@@ -7,8 +7,8 @@
 #include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/node/boolean-property.h"
 
-void removeNode(const node_id nodeID, Dom *dom) {
-    removeChildren(nodeID, dom);
+void flo_html_removeNode(const node_id nodeID, Dom *dom) {
+    flo_html_removeChildren(nodeID, dom);
 
     Node *node = &dom->nodes[nodeID];
     NextNode *nextNode = getNextNode(node->nodeID, dom);
@@ -65,15 +65,15 @@ void removeNode(const node_id nodeID, Dom *dom) {
 // TODO(florian): improve the speed
 // Either make it so we can just mark nodes as DELETED and then they wont show
 // up in query resuls or printing.
-void removeChildren(const node_id nodeID, Dom *dom) {
+void flo_html_removeChildren(const node_id nodeID, Dom *dom) {
     node_id childID = getFirstChild(nodeID, dom);
     while (childID > 0) {
-        removeNode(childID, dom);
+        flo_html_removeNode(childID, dom);
         childID = getFirstChild(nodeID, dom);
     }
 }
 
-void removeBooleanProperty(const node_id nodeID, const char *boolProp, Dom *dom,
+void flo_html_removeBooleanProperty(const node_id nodeID, const char *boolProp, Dom *dom,
                            const TextStore *textStore) {
     indexID boolPropID = getBoolPropID(boolProp, textStore);
     if (boolPropID > 0) {
@@ -85,7 +85,7 @@ void removeBooleanProperty(const node_id nodeID, const char *boolProp, Dom *dom,
     }
 }
 
-void removeProperty(const node_id nodeID, const char *keyProp, Dom *dom,
+void flo_html_removeProperty(const node_id nodeID, const char *keyProp, Dom *dom,
                     const TextStore *textStore) {
     indexID keyPropID = getPropKeyID(keyProp, textStore);
     if (keyPropID > 0) {

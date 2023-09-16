@@ -57,8 +57,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS), queryStatus,
-            queryingStatusToString(queryStatus));
+            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS), queryStatus,
+            flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
         size_t actualResult = 0;
@@ -87,8 +87,8 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
             printTestDemarcation();
             if (queryStatus != QUERY_SUCCESS) {
                 printTestResultDifferenceErrorCode(
-                    QUERY_SUCCESS, queryingStatusToString(QUERY_SUCCESS),
-                    queryStatus, queryingStatusToString(queryStatus));
+                    QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+                    queryStatus, flo_html_queryingStatusToString(queryStatus));
             }
             printTestResultDifferenceNumber(expectedResult, actualResult);
             printTestDemarcation();

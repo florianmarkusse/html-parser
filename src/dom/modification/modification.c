@@ -66,7 +66,7 @@ ElementStatus getCreatedPropIDFromString(const PropertyType propertyType,
 }
 
 ElementStatus
-addPropertyToNodeStringsWithLength(const node_id nodeID, const char *keyBuffer,
+flo_html_addPropertyToNodeStringsWithLength(const node_id nodeID, const char *keyBuffer,
                                    const size_t keyLen, const char *valueBuffer,
                                    const size_t valueLen, Dom *dom,
                                    TextStore *textStore) {
@@ -95,16 +95,16 @@ addPropertyToNodeStringsWithLength(const node_id nodeID, const char *keyBuffer,
     return result;
 }
 
-ElementStatus addPropertyToNodeStrings(const node_id nodeID,
+ElementStatus flo_html_addPropertyToNodeStrings(const node_id nodeID,
                                        const char *keyBuffer,
                                        const char *valueBuffer, Dom *dom,
                                        TextStore *textStore) {
-    return addPropertyToNodeStringsWithLength(
+    return flo_html_addPropertyToNodeStringsWithLength(
         nodeID, keyBuffer, strlen(keyBuffer), valueBuffer, strlen(valueBuffer),
         dom, textStore);
 }
 
-ElementStatus addBooleanPropertyToNodeStringWithLength(
+ElementStatus flo_html_addBooleanPropertyToNodeStringWithLength(
     const node_id nodeID, const char *boolPropBuffer, const size_t boolPropLen,
     Dom *dom, TextStore *textStore) {
     ElementStatus result = ELEMENT_SUCCESS;
@@ -125,15 +125,15 @@ ElementStatus addBooleanPropertyToNodeStringWithLength(
     return result;
 }
 
-ElementStatus addBooleanPropertyToNodeString(const node_id nodeID,
+ElementStatus flo_html_addBooleanPropertyToNodeString(const node_id nodeID,
                                              const char *boolPropBuffer,
                                              Dom *dom,
                                              TextStore *textStore) {
-    return addBooleanPropertyToNodeStringWithLength(
+    return flo_html_addBooleanPropertyToNodeStringWithLength(
         nodeID, boolPropBuffer, strlen(boolPropBuffer), dom, textStore);
 }
 
-ElementStatus setPropertyValue(const node_id nodeID, const char *key,
+ElementStatus flo_html_setPropertyValue(const node_id nodeID, const char *key,
                                const char *newValue, Dom *dom,
                                TextStore *textStore) {
     element_id keyID = getPropKeyID(key, textStore);
@@ -159,9 +159,9 @@ ElementStatus setPropertyValue(const node_id nodeID, const char *key,
     return ELEMENT_SUCCESS;
 }
 
-DomStatus setTextContent(const node_id nodeID, const char *text, Dom *dom,
+DomStatus flo_html_setTextContent(const node_id nodeID, const char *text, Dom *dom,
                          TextStore *textStore) {
-    removeChildren(nodeID, dom);
+    flo_html_removeChildren(nodeID, dom);
 
     node_id newNodeID = 0;
     DomStatus domStatus =
@@ -174,7 +174,7 @@ DomStatus setTextContent(const node_id nodeID, const char *text, Dom *dom,
     return addParentFirstChild(nodeID, newNodeID, dom);
 }
 
-ElementStatus addTextToTextNode(Node *node, const char *textStart,
+ElementStatus flo_html_addTextToTextNode(Node *node, const char *textStart,
                                 const size_t textLen, Dom *dom,
                                 TextStore *textStore, bool isAppend) {
     const char *prevText = node->text;
@@ -207,7 +207,7 @@ ElementStatus addTextToTextNode(Node *node, const char *textStart,
     return elementStatus;
 }
 
-DomStatus setTagOnDocumentNode(const char *tagStart, const size_t tagLen,
+DomStatus flo_html_setTagOnDocumentNode(const char *tagStart, const size_t tagLen,
                                const node_id nodeID, const bool isPaired,
                                Dom *dom, TextStore *textStore) {
     DomStatus domStatus = DOM_SUCCESS;
