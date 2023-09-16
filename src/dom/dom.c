@@ -12,7 +12,7 @@ void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
     basicRegistry->cap = FLO_HTML_PROP_REGISTRATIONS_PER_PAGE;
 }
 
-flo_html_DomStatus createflo_html_DomFromFile(const char *fileLocation,
+flo_html_DomStatus flo_html_createDomFromFile(const char *fileLocation,
                                               flo_html_Dom *dom,
                                               flo_html_TextStore *textStore) {
     char *buffer = NULL;
@@ -25,7 +25,7 @@ flo_html_DomStatus createflo_html_DomFromFile(const char *fileLocation,
     }
 
     flo_html_DomStatus documentStatus =
-        createflo_html_Dom(buffer, dom, textStore);
+        flo_html_createDom(buffer, dom, textStore);
     if (documentStatus != DOM_SUCCESS) {
         FLO_HTML_FREE_TO_NULL(buffer);
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
@@ -38,7 +38,7 @@ flo_html_DomStatus createflo_html_DomFromFile(const char *fileLocation,
     return DOM_SUCCESS;
 }
 
-flo_html_DomStatus createflo_html_Dom(const char *htmlString, flo_html_Dom *dom,
+flo_html_DomStatus flo_html_createDom(const char *htmlString, flo_html_Dom *dom,
                                       flo_html_TextStore *textStore) {
     dom->firstNodeID = 0;
 

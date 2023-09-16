@@ -34,7 +34,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
     flo_html_Dom dom;
-    if (createflo_html_DomFromFile(fileLocation, &dom, &textStore) !=
+    if (flo_html_createDomFromFile(fileLocation, &dom, &textStore) !=
         DOM_SUCCESS) {
         flo_html_destroyTextStore(&textStore);
         return TEST_ERROR_INITIALIZATION;

@@ -15,7 +15,7 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
             "Failed to initialize start text store!\n",
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
-    if (createflo_html_DomFromFile(
+    if (flo_html_createDomFromFile(
             startFileLocation, &comparisonTest->startflo_html_Dom,
             &comparisonTest->startTextStore) != DOM_SUCCESS) {
         return failWithMessageAndCode("Failed to create start DOM from file!\n",
@@ -29,7 +29,7 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
             "Failed to initialize expected text store!\n",
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
-    if (createflo_html_DomFromFile(
+    if (flo_html_createDomFromFile(
             expectedFileLocation, &comparisonTest->expectedflo_html_Dom,
             &comparisonTest->expectedTextStore) != DOM_SUCCESS) {
         return failWithMessageAndCode(

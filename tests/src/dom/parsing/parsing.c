@@ -22,7 +22,7 @@ unsigned char parseFile(const char *fileLocation) {
     }
 
     flo_html_Dom dom1;
-    if (createflo_html_DomFromFile(fileLocation, &dom1, &textStore) !=
+    if (flo_html_createDomFromFile(fileLocation, &dom1, &textStore) !=
         DOM_SUCCESS) {
         flo_html_destroyTextStore(&textStore);
         return 0;

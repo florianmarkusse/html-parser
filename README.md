@@ -68,7 +68,7 @@ int main() {
 
     // Initialize a DOM structure
     flo_html_Dom dom;
-    if (createflo_html_DomFromFile("test-file.html", &dom, &textStore) != DOM_SUCCESS) {
+    if (flo_html_createDomFromFile("test-file.html", &dom, &textStore) != DOM_SUCCESS) {
         flo_html_destroyTextStore(&textStore);
         fprintf(stderr, "Failed to parse DOM from file!\n");
         return 1;
@@ -115,7 +115,7 @@ This example demonstrates how to use the `html-parser` library to parse and mani
   We initialize a `TextStore` to manage the text content of the HTML file.
 
 - **DOM Initialization:**
-  We create a `flo_html_Dom` structure and parse an HTML file named "test-file.html" using `createflo_html_DomFromFile`. The parsed DOM is stored in the `dom` structure.
+  We create a `flo_html_Dom` structure and parse an HTML file named "test-file.html" using `flo_html_createDomFromFile`. The parsed DOM is stored in the `dom` structure.
 
 - **Querying for the `<body>` Element:**
   We use `querySelector` to find the `<body>` element in the parsed DOM and retrieve its node ID.
