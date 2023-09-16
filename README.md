@@ -77,7 +77,7 @@ int main() {
     // Find the ID of the <body> element
     flo_html_node_id bodyNodeID = 0;
     if (flo_html_querySelector("body", &dom, &textStore, &bodyNodeID) != QUERY_SUCCESS) {
-        destroyflo_html_Dom(&dom);
+        flo_html_destroyDom(&dom);
         flo_html_destroyTextStore(&textStore);
         fprintf(stderr, "Failed to query DOM!\n");
         return 1;
@@ -89,7 +89,7 @@ int main() {
         // Append HTML content to the <body> element
         if (flo_html_flo_html_appendHTMLFromStringWithQuery("body", "<p>I am appended</p>", &dom,
                                           &textStore) != DOM_SUCCESS) {
-            destroyflo_html_Dom(&dom);
+            flo_html_destroyDom(&dom);
             flo_html_destroyTextStore(&textStore);
             fprintf(stderr, "Failed to append to DOM!\n");
             return 1;
@@ -100,7 +100,7 @@ int main() {
     flo_html_printHTML(&dom, &textStore);
 
     // Cleanup: Free memory and resources
-    destroyflo_html_Dom(&dom);
+    flo_html_destroyDom(&dom);
     flo_html_destroyTextStore(&textStore);
 
     return 0;

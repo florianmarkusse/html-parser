@@ -20,7 +20,7 @@ unsigned char parseFile(const char *fileLocation) {
         return 0;
     }
 
-    destroyflo_html_Dom(&dom1);
+    flo_html_destroyDom(&dom1);
     flo_html_destroyTextStore(&textStore);
     return 1;
 }

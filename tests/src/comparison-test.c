@@ -125,8 +125,8 @@ TestStatus compareAndEndTest(ComparisonTest *comparisonTest) {
 }
 
 void destroyComparisonTest(ComparisonTest *comparisonTest) {
-    destroyflo_html_Dom(&comparisonTest->startflo_html_Dom);
+    flo_html_destroyDom(&comparisonTest->startflo_html_Dom);
     flo_html_destroyTextStore(&comparisonTest->startTextStore);
-    destroyflo_html_Dom(&comparisonTest->expectedflo_html_Dom);
+    flo_html_destroyDom(&comparisonTest->expectedflo_html_Dom);
     flo_html_destroyTextStore(&comparisonTest->expectedTextStore);
 }

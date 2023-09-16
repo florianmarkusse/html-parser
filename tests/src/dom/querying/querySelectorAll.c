@@ -98,7 +98,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
     }
 
     FLO_HTML_FREE_TO_NULL(results);
-    destroyflo_html_Dom(&dom);
+    flo_html_destroyDom(&dom);
     flo_html_destroyTextStore(&textStore);
 
     return result;

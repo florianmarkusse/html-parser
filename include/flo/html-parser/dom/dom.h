@@ -131,6 +131,6 @@ flo_html_DomStatus flo_html_createDomFromFile(const char *fileLocation,
  *
  * @param[in]   dom     The DOM structure to destroy.
  */
-void destroyflo_html_Dom(flo_html_Dom *dom);
+void flo_html_destroyDom(flo_html_Dom *dom);
 
 #endif

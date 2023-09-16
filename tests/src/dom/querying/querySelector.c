@@ -64,7 +64,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         printTestDemarcation();
     }
 
-    destroyflo_html_Dom(&dom);
+    flo_html_destroyDom(&dom);
     flo_html_destroyTextStore(&textStore);
 
     return result;

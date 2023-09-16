@@ -101,7 +101,7 @@ flo_html_DomStatus flo_html_createDom(const char *htmlString, flo_html_Dom *dom,
         dom->nextNodes == NULL || dom->boolProps == NULL ||
         dom->props == NULL) {
         FLO_HTML_PRINT_ERROR("Failed to allocate memory for nodes.\n");
-        destroyflo_html_Dom(dom);
+        flo_html_destroyDom(dom);
         return DOM_ERROR_MEMORY;
     }
 
@@ -113,7 +113,7 @@ flo_html_DomStatus flo_html_createDom(const char *htmlString, flo_html_Dom *dom,
     return domumentStatus;
 }
 
-void destroyflo_html_Dom(flo_html_Dom *dom) {
+void flo_html_destroyDom(flo_html_Dom *dom) {
     FLO_HTML_FREE_TO_NULL(dom->nodes);
     FLO_HTML_FREE_TO_NULL(dom->tagRegistry);
     FLO_HTML_FREE_TO_NULL(dom->boolPropRegistry.registry);
