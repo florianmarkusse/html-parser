@@ -60,7 +60,7 @@ Here's a comprehensive example showcasing how to use the html-parser library to 
 
 int main() {
     // Initialize a text store to manage memory
-    TextStore textStore;
+    flo_html_TextStore textStore;
     if (flo_html_createTextStore(&textStore) != ELEMENT_SUCCESS) {
         fprintf(stderr, "Failed to create text store!\n");
         return 1;
@@ -87,7 +87,7 @@ int main() {
     // In other words: "<body add-extra-p-element> ... </body>"
     if (flo_html_hasBoolProp(bodyNodeID, "add-extra-p-element", &dom, &textStore)) {
         // Append HTML content to the <body> element
-        if (flo_html_flo_html_appendHTMLFromStringWithQuery("body", "<p>I am appended</p>", &dom,
+        if (flo_html_appendHTMLFromStringWithQuery("body", "<p>I am appended</p>", &dom,
                                           &textStore) != DOM_SUCCESS) {
             flo_html_destroyDom(&dom);
             flo_html_destroyTextStore(&textStore);
@@ -124,7 +124,7 @@ This example demonstrates how to use the `html-parser` library to parse and mani
   With `flo_html_hasBoolProp`, we check if the `<body>` element has a specific boolean property called "add-extra-p-element."
 
 - **Appending HTML:**
-  If the boolean property exists, we append an HTML string `<p>I am appended</p>` to the `<body>` element using `flo_html_flo_html_appendHTMLFromStringWithQuery`.
+  If the boolean property exists, we append an HTML string `<p>I am appended</p>` to the `<body>` element using `flo_html_appendHTMLFromStringWithQuery`.
 
 - **Printing the Modified HTML:**
   We print the modified HTML, showing the changes made to the document.
@@ -137,7 +137,7 @@ This example provides a practical demonstration of the `html-parser` library's c
 ## Functionalities
 
 ### 1. Parsing HTML
-- **Reading an HTML file or string into a `flo_html_Dom`:** The `html-parser` library provides a straightforward way to parse HTML content, whether it's stored in a file or a string. This feature allows you to create a structured representation of the HTML document.
+- **Reading an HTML file or string into a `Dom`:** The `html-parser` library provides a straightforward way to parse HTML content, whether it's stored in a file or a string. This feature allows you to create a structured representation of the HTML document.
 
 ### 2. Querying and Traversing
 - **Querying over the document with CSS queries:** One of the key features of the library is its ability to query and traverse the parsed DOM using CSS queries. This means you can select specific elements or groups of elements within the HTML document based on their attributes, classes, or tags.
@@ -228,20 +228,20 @@ The HTML string is parsed into a `flo_html_Dom`. Instead of a traditional tree s
   - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
 
 ##### Boolean Property Registry Table (`boolean-property-registry`)
-- `flo_html_indexID` | `hashElement`
+- `indexID` | `hashElement`
   - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
 
 ##### Property Key Registry Table (`property-key-registry`)
-- `flo_html_indexID` | `hashElement`
+- `indexID` | `hashElement`
   - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
 
 ##### Property Value Registry Table (`property-value-registry`)
-- `flo_html_indexID` | `hashElement`
+- `indexID` | `hashElement`
   - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
 
 #### Explanation
 
-As you can observe, the `flo_html_Dom` does not directly store text content but rather references `IDs` and `flo_html_HashElements`. To retrieve textual content, you use the `ID` to look up the corresponding `flo_html_HashElement`, which, in turn, is used to locate the text in a hash table. The `TextStore` struct holds all textual content from the parsed HTML.
+As you can observe, the `flo_html_Dom` does not directly store text content but rather references `IDs` and `HashElements`. To retrieve textual content, you use the `ID` to look up the corresponding `flo_html_HashElement`, which, in turn, is used to locate the text in a hash table. The `flo_html_TextStore` struct holds all textual content from the parsed HTML.
 
 For instance, if we have a *node* table entry: `{ 4, NODE_TYPE_DOCUMENT, 5 }`, and we want to find the text representation, we first look up the `flo_html_HashElement` of 5 (the `tagID`) in the `tag-registry` table. This yields `{ 194893, 0 }` as the `flo_html_HashElement`. To find the actual text, we perform a lookup in the tag hash table: `(hash + offset) % hash table length`, which in this case is `(194893 + 0 % tagHash.len)`.
 
@@ -256,7 +256,7 @@ This design choice enhances performance, reduces memory overhead, and optimizes 
 After parsing, we can query the `flo_html_Dom` for information that we are looking for. This section is split up into two sections: querying the `flo_html_Dom` and querying the contents of an individual node.
 Together, these functions empower you to query the `flo_html_Dom` and individual nodes allowing the user to query the `flo_html_Dom` effectively.
 
-#### flo_html_Dom
+#### Dom
 
 Querying the `flo_html_Dom` is possible with convenience methods similar to querying a web DOM. These methods include:
 
@@ -274,7 +274,7 @@ Querying the `flo_html_Dom` is possible with convenience methods similar to quer
 
 The `html-parser` library provides a set of convenient functions to query and retrieve properties and content from individual nodes within the `flo_html_Dom`. These functions allow you to inspect and work with specific attributes and text content of nodes. Here's a brief overview of the available functions:
 
-- `flo_html_getflo_html_NodeType`: Retrieves the type of a given node, such as whether it's a document node or a text node.
+- `flo_html_getNodeType`: Retrieves the type of a given node, such as whether it's a document node or a text node.
 
 - `flo_html_hasBoolProp`: Checks if a node has a specified boolean property and returns `true` if the property exists and is true.
 
@@ -291,48 +291,48 @@ The `html-parser` library provides a set of convenient functions to query and re
 ### Traversal
 After querying, maybe you want to traverse the `flo_html_Dom` to find the first child or the parent of the queries node. Here are some functions to do exactly that!
 
-- `getFirstChild`: Retrieves the ID of the first child node of a given node. Returns `0` if there are no child nodes.
+- `flo_html_getFirstChild`: Retrieves the ID of the first child node of a given node. Returns `0` if there are no child nodes.
 
-- `getFirstChildNode`: Returns a pointer to the `ParentChild` structure. Returns `NULL` if there are no child nodes.
+- `flo_html_getFirstChildNode`: Returns a pointer to the `flo_html_ParentChild` structure. Returns `NULL` if there are no child nodes.
 
-- `getNext`: Retrieves the ID of the next sibling node of a given node. Returns `0` if there are no more sibling nodes.
+- `flo_html_getNext`: Retrieves the ID of the next sibling node of a given node. Returns `0` if there are no more sibling nodes.
 
-- `getNextNode`: Returns a pointer to the `NextNode` structure. Returns `NULL` if there are no more sibling nodes.
+- `flo_html_getNextNode`: Returns a pointer to the `flo_html_NextNode` structure. Returns `NULL` if there are no more sibling nodes.
 
-- `getPrevious`: Retrieves the ID of the previous sibling node of a given node. Returns `0` if there are no previous sibling nodes.
+- `flo_html_getPrevious`: Retrieves the ID of the previous sibling node of a given node. Returns `0` if there are no previous sibling nodes.
 
-- `getPreviousNode`: Returns a pointer to the `NextNode` structure. Returns `NULL` if there are no previous sibling nodes.
+- `flo_html_getPreviousNode`: Returns a pointer to the `flo_html_NextNode` structure. Returns `NULL` if there are no previous sibling nodes.
 
-- `getParent`: Retrieves the ID of the parent node of a given node. Returns `0` if there is no parent node.
+- `flo_html_getParent`: Retrieves the ID of the parent node of a given node. Returns `0` if there is no parent node.
 
-- `getParentNode`: Returns a pointer to the `ParentChild` structure. Returns `NULL` if there is no parent node.
+- `flo_html_getParentNode`: Returns a pointer to the `flo_html_ParentChild` structure. Returns `NULL` if there is no parent node.
 
 - `flo_html_traverseDom`: Traverses the DOM structure from the specified node and returns the ID of the next node. Returns `0` if there are no more nodes to traverse.
 
-- `traverseNode`: Traverses the DOM structure of a specific to node with the given ID to traverse and returns the ID of the next node inside that specific node. Returns `0` if there are no more nodes in the specific node.
+- `flo_html_traverseNode`: Traverses the DOM structure of a specific to node with the given ID to traverse and returns the ID of the next node inside that specific node. Returns `0` if there are no more nodes in the specific node.
 
-- `getLastNext`: Retrieves the ID of the last next sibling node starting from a given node. Returns `0` if there are no more sibling nodes.
+- `flo_html_getLastNext`: Retrieves the ID of the last next sibling node starting from a given node. Returns `0` if there are no more sibling nodes.
 
-- `getLastNextNode`: Returns a pointer to the `NextNode` structure representing the last next sibling node starting from a given node. Returns `NULL` if there are no more sibling nodes.
+- `flo_html_getLastNextNode`: Returns a pointer to the `flo_html_NextNode` structure representing the last next sibling node starting from a given node. Returns `NULL` if there are no more sibling nodes.
 
 
 ### Modifying
 
 Now that we have some `flo_html_node_id`s after querying and traversing the `flo_html_Dom`, we can modify the `flo_html_Dom` to our heart's content. Again, these functions are split up into two levels: "dom-based" and "node-based". All operations modify the `flo_html_Dom` in place.
 
-#### flo_html_Dom
+#### Dom
 
 Below, all the **append** functions provided. They append a new child to the provided parent node. This library also provides the same functionality to **prepend** and **replaceWith**. Prepending a node adds a new child as the first child node of the provided parent node. Lastly, Replacing a node completely, thus also all its children, does exactly that.
 
-- `flo_html_flo_html_appendDocumentNodeWithQuery`: Append a `DocumentNode` to the DOM using a CSS query. This function appends a `DocumentNode` specified by `docNode` to the DOM using the provided CSS query `cssQuery`.
+- `flo_html_appendDocumentNodeWithQuery`: Append a `flo_html_DocumentNode` to the DOM using a CSS query. This function appends a `flo_html_DocumentNode` specified by `docNode` to the DOM using the provided CSS query `cssQuery`.
 
-- `flo_html_flo_html_appendTextNodeWithQuery`: Append a text node to the DOM using a CSS query. This function appends a text node with the specified `text` to the DOM using the provided CSS query `cssQuery`.
+- `flo_html_appendTextNodeWithQuery`: Append a text node to the DOM using a CSS query. This function appends a text node with the specified `text` to the DOM using the provided CSS query `cssQuery`.
 
-- `flo_html_flo_html_appendHTMLFromStringWithQuery`: Append HTML content from a string to the DOM using a CSS query. This function appends HTML content specified by `htmlString` to the DOM using the provided CSS query `cssQuery`.
+- `flo_html_appendHTMLFromStringWithQuery`: Append HTML content from a string to the DOM using a CSS query. This function appends HTML content specified by `htmlString` to the DOM using the provided CSS query `cssQuery`.
 
 - `flo_html_appendHTMLFromFileWithQuery`: Append HTML content from a file to the DOM using a CSS query. This function appends HTML content from the specified `fileLocation` to the DOM using the provided CSS query `cssQuery`.
 
-- `flo_html_appendDocumentNode`: Append a `DocumentNode` to the DOM. This function appends a `DocumentNode` specified by `docNode` to the DOM.
+- `flo_html_appendDocumentNode`: Append a `flo_html_DocumentNode` to the DOM. This function appends a `flo_html_DocumentNode` specified by `docNode` to the DOM.
 
 - `flo_html_appendTextNode`: Append a text node to the DOM. This function appends a text node with the specified `text` to the DOM.
 
@@ -348,19 +348,19 @@ To make changes to specific nodes within the DOM, this library provides a set of
 
 - `flo_html_addPropertyToNodeStringsWithLength`: Add a property with a specified key and value to an HTML element. This function takes the `flo_html_node_id` of the target element, the property key, property value, and other necessary parameters.
 
-- `addPropertyToNodeStrings`: A simplified version of the above function for adding a single property to an HTML element.
+- `flo_html_addPropertyToNodeStrings`: A simplified version of the above function for adding a single property to an HTML element.
 
-- `addBooleanPropertyToNodeStringWithLength`: Add a boolean property to an HTML element, specifying the property key, property value, and length.
+- `flo_html_addBooleanPropertyToNodeStringWithLength`: Add a boolean property to an HTML element, specifying the property key, property value, and length.
 
-- `addBooleanPropertyToNodeString`: A simplified version of the above function for adding a single boolean property to an HTML element.
+- `flo_html_addBooleanPropertyToNodeString`: A simplified version of the above function for adding a single boolean property to an HTML element.
 
-- `setPropertyValue`: Set the value of an HTML element's property by specifying the `flo_html_node_id`, property key, and the new value.
+- `flo_html_setPropertyValue`: Set the value of an HTML element's property by specifying the `flo_html_node_id`, property key, and the new value.
 
-- `setTextContent`: Set the text content of an HTML element identified by `flo_html_node_id` to the specified text. This function allows you to update the content of an element. Note that this function will remove any child elements this node may have.
+- `flo_html_setTextContent`: Set the text content of an HTML element identified by `flo_html_node_id` to the specified text. This function allows you to update the content of an element. Note that this function will remove any child elements this node may have.
 
-- `addTextToTextNode`: Add text content to a text node within an HTML element. You can specify whether to append or prepend the text content. 
+- `flo_html_addTextToTextNode`: Add text content to a text node within an HTML element. You can specify whether to append or prepend the text content. 
 
-- `setTagOnDocumentNode`: Set the tag for a DocumentNode within the DOM structure. You can specify the tag's start, length, and whether it is paired or not. 
+- `flo_html_setTagOnDocumentNode`: Set the tag for a DocumentNode within the DOM structure. You can specify the tag's start, length, and whether it is paired or not. 
 
 These functions provide a comprehensive set of tools for making precise modifications to the HTML elements within the DOM. You can use them to customize your parsed HTML content to suit your specific needs.
 
@@ -371,7 +371,7 @@ Lastly, after making modifications to the parsed HTML content, you may want to o
 
 - `flo_html_writeHTMLToFile`: If you wish to save the parsed HTML document to a file, this function is your solution. It writes the minified HTML representation to the specified `filePath`. The function returns a status code to indicate the success or failure of the file-writing operation, making it easy to handle file I/O errors.
 
-- `flo_html_printDomStatus`: This function allows you to print the status of the `flo_html_Dom` and `TextStore`. It provides information about node counts, registrations, and other relevant details. It can be a valuable tool for debugging and gaining insights into the structure of the parsed DOM.
+- `flo_html_printDomStatus`: This function allows you to print the status of the `flo_html_Dom` and `flo_html_TextStore`. It provides information about node counts, registrations, and other relevant details. It can be a valuable tool for debugging and gaining insights into the structure of the parsed DOM.
 
 These printing and writing functions provide essential utilities for interacting with and exporting the parsed HTML content, whether you need to debug, inspect, or save the modified DOM structure to a file for further use.
 
