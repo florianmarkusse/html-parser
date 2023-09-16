@@ -24,7 +24,7 @@
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_flo_html_appendDocumentNodeWithQuery(
+flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
     const char *cssQuery, const flo_html_DocumentNode *docNode,
     flo_html_Dom *dom, flo_html_TextStore *textStore);
 
@@ -44,9 +44,9 @@ flo_html_DomStatus flo_html_flo_html_appendDocumentNodeWithQuery(
  *          an error code otherwise).
  */
 flo_html_DomStatus
-flo_html_flo_html_appendTextNodeWithQuery(const char *cssQuery,
-                                          const char *text, flo_html_Dom *dom,
-                                          flo_html_TextStore *textStore);
+flo_html_appendTextNodeWithQuery(const char *cssQuery, const char *text,
+                                 flo_html_Dom *dom,
+                                 flo_html_TextStore *textStore);
 
 /**
  * @brief Append HTML content from a string to the DOM using a CSS query.
@@ -63,7 +63,7 @@ flo_html_flo_html_appendTextNodeWithQuery(const char *cssQuery,
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_flo_html_appendHTMLFromStringWithQuery(
+flo_html_DomStatus flo_html_appendHTMLFromStringWithQuery(
     const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
     flo_html_TextStore *textStore);
 

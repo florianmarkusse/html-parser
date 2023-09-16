@@ -30,7 +30,7 @@
         return appendFunction(parentNodeID, nodeData, dom, textStore);         \
     } while (0)
 
-flo_html_DomStatus flo_html_flo_html_appendDocumentNodeWithQuery(
+flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
     const char *cssQuery, const flo_html_DocumentNode *docNode,
     flo_html_Dom *dom, flo_html_TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
@@ -38,14 +38,14 @@ flo_html_DomStatus flo_html_flo_html_appendDocumentNodeWithQuery(
 }
 
 flo_html_DomStatus
-flo_html_flo_html_appendTextNodeWithQuery(const char *cssQuery,
+flo_html_appendTextNodeWithQuery(const char *cssQuery,
                                           const char *text, flo_html_Dom *dom,
                                           flo_html_TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
                                flo_html_appendTextNode);
 }
 
-flo_html_DomStatus flo_html_flo_html_appendHTMLFromStringWithQuery(
+flo_html_DomStatus flo_html_appendHTMLFromStringWithQuery(
     const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
     flo_html_TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
