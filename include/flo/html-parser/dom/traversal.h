@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_TRAVERSAL_H
 #define FLO_HTML_PARSER_DOM_TRAVERSAL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "dom.h"
 
 /**
@@ -200,5 +204,9 @@ flo_html_node_id flo_html_getLastNext(flo_html_node_id startNodeID,
  */
 flo_html_NextNode *flo_html_getLastNextNode(flo_html_node_id startNodeID,
                                             const flo_html_Dom *dom);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

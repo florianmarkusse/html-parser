@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_PREPENDIX_PREPENDIX_H
 #define FLO_HTML_PARSER_DOM_PREPENDIX_PREPENDIX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -145,5 +149,9 @@ flo_html_DomStatus
 flo_html_prependHTMLFromString(flo_html_node_id parentID,
                                const char *htmlString, flo_html_Dom *dom,
                                flo_html_TextStore *textStore);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

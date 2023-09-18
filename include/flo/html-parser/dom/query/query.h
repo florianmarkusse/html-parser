@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_QUERY_QUERY_H
 #define FLO_HTML_PARSER_DOM_QUERY_QUERY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "flo/html-parser/dom/dom.h"
 #include "query-status.h"
 
@@ -126,5 +130,9 @@ flo_html_QueryStatus
 flo_html_getElementByID(const char *id, const flo_html_Dom *dom,
                         const flo_html_TextStore *textStore,
                         flo_html_node_id *result);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

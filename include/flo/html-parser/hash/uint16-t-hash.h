@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_HASH_UINT16_T_HASH_H
 #define FLO_HTML_PARSER_HASH_UINT16_T_HASH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -58,5 +62,9 @@ bool flo_html_hasNextUint16HashSetIterator(
 
 void flo_html_resetUint16HashSetIterator(
     flo_html_Uint16HashSetIterator *iterator);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

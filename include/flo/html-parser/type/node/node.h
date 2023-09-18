@@ -6,6 +6,10 @@
 
 #include "flo/html-parser/type/data/definitions.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint16_t flo_html_node_id;
 
 typedef enum {
@@ -35,5 +39,9 @@ typedef struct {
         const char *text;
     };
 } __attribute__((aligned(16))) flo_html_Node;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

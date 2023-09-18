@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_QUERY_QUERY_UTIL_H
 #define FLO_HTML_PARSER_DOM_QUERY_QUERY_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 
 #include "flo/html-parser/dom/dom.h"
@@ -70,4 +74,9 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     size_t filtersLen, const flo_html_Dom *dom, size_t depth,
     flo_html_Uint16HashSet *set);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

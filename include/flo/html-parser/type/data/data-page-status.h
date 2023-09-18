@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_TYPE_DATA_DATA_PAGE_STATUS_H
 #define FLO_HTML_PARSER_TYPE_DATA_DATA_PAGE_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     DATA_PAGE_SUCCESS,
     DATA_PAGE_NO_CAPACITY,
@@ -23,5 +27,9 @@ flo_html_dataPageStatusToString(flo_html_DataPageStatus status) {
     }
     return "Unknown data page status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

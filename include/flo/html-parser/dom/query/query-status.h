@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_QUERY_QUERY_STATUS_H
 #define FLO_HTML_PARSER_DOM_QUERY_QUERY_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     QUERY_SUCCESS,
     QUERY_INVALID_ELEMENT,
@@ -28,5 +32,9 @@ flo_html_queryingStatusToString(flo_html_QueryStatus status) {
     }
     return "Unknown query status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

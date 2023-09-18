@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_MODIFICATION_MODIFICATION_H
 #define FLO_HTML_PARSER_DOM_MODIFICATION_MODIFICATION_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements.h"
@@ -179,5 +183,9 @@ flo_html_DomStatus
 flo_html_setTagOnDocumentNode(const char *tagStart, size_t tagLen,
                               flo_html_node_id nodeID, bool isPaired,
                               flo_html_Dom *dom, flo_html_TextStore *textStore);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_HASH_HASH_STATUS_H
 #define FLO_HTML_PARSER_HASH_HASH_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     HASH_SUCCESS,
     HASH_ERROR_MEMORY,
@@ -20,5 +24,9 @@ flo_html_hashStatusToString(flo_html_HashStatus status) {
     }
     return "Unknown hash status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

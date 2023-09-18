@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_H
 #define FLO_HTML_PARSER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Node reading functions
 #include "flo/html-parser/dom/reading/reading.h"
 
@@ -25,4 +29,9 @@
 
 // HTML document writing
 #include "flo/html-parser/dom/writing.h"
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

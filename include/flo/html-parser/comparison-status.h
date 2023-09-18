@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_COMPARISON_STATUS_H
 #define FLO_HTML_PARSER_COMPARISON_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     COMPARISON_SUCCESS,
     COMPARISON_MEMORY,
@@ -23,5 +27,9 @@ flo_html_comparisonStatusToString(flo_html_ComparisonStatus status) {
     }
     return "Unknown comparison status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

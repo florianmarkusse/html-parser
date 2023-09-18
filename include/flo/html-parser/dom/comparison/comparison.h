@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_H
 #define FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/dom/dom.h"
 
@@ -70,5 +74,9 @@ void flo_html_printFirstDifference(flo_html_node_id nodeID1,
                                    flo_html_node_id nodeID2,
                                    const flo_html_Dom *dom2,
                                    const flo_html_TextStore *textStore2);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_HASH_HASHES_H
 #define FLO_HTML_PARSER_HASH_HASHES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 
 #include "flo/html-parser/type/element/elements-container.h"
@@ -35,5 +39,9 @@ __attribute__((unused)) static uint16_t flo_html_hash16_xm3(uint16_t x) {
     x ^= x >> 10;
     return x;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

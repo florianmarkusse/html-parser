@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_READING_READING_H
 #define FLO_HTML_PARSER_DOM_READING_READING_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-status.h"
 #include "flo/html-parser/type/node/node.h"
@@ -129,5 +133,9 @@ flo_html_QueryStatus flo_html_getTextContent(flo_html_node_id nodeID,
                                              const flo_html_Dom *dom,
                                              const char ***results,
                                              size_t *resultsLen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_WRITING_H
 #define FLO_HTML_PARSER_DOM_WRITING_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "dom.h"
 
 /**
@@ -50,5 +54,9 @@ flo_html_FileStatus
 flo_html_writeHTMLToFile(const flo_html_Dom *dom,
                          const flo_html_TextStore *textStore,
                          const char *filePath);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

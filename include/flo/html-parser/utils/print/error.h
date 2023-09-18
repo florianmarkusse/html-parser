@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_UTILS_PRINT_ERROR_H
 #define FLO_HTML_PARSER_UTILS_PRINT_ERROR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 
 /**
@@ -46,5 +50,9 @@
         FLO_HTML_PRINT_ERROR("Error code: %s\n", code);                        \
         FLO_HTML_PRINT_ERROR(format "\n\n", __VA_ARGS__);                      \
     } while (0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

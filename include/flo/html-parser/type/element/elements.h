@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENTS_H
 #define FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENTS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -44,5 +48,9 @@ flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
                         const char *elementStart, size_t elementLength,
                         flo_html_HashElement *hashElement,
                         flo_html_indexID *flo_html_indexID);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

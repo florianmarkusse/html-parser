@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_REGISTRY_H
 #define FLO_HTML_PARSER_DOM_REGISTRY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "dom.h"
 
 flo_html_DomStatus
@@ -26,5 +30,9 @@ flo_html_DomStatus
 flo_html_addPropValueRegistration(flo_html_indexID propValueID,
                                   const flo_html_HashElement *hashElement,
                                   flo_html_Dom *dom);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

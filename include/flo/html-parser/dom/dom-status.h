@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_DOM_STATUS_H
 #define FLO_HTML_PARSER_DOM_DOM_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     DOM_SUCCESS,
     DOM_ERROR_MEMORY,
@@ -28,5 +32,9 @@ documentStatusToString(flo_html_DomStatus status) {
     }
     return "Unknown dom status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

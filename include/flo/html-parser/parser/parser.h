@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_PARSER_PARSER_H
 #define FLO_HTML_PARSER_PARSER_PARSER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/type/node/document-node.h"
 
@@ -22,5 +26,9 @@ flo_html_DomStatus flo_html_parseTextElement(const char *text,
                                              flo_html_Dom *dom,
                                              flo_html_TextStore *textStore,
                                              flo_html_node_id *newNodeID);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

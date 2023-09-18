@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_HASH_STRING_HASH_H
 #define FLO_HTML_PARSER_HASH_STRING_HASH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -69,5 +73,9 @@ bool flo_html_hasNextStringHashSetIterator(
 
 void flo_html_resetStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

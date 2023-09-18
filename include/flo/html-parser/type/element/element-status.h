@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENT_STATUS_H
 #define FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENT_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     ELEMENT_SUCCESS,
     ELEMENT_CREATED,
@@ -31,5 +35,9 @@ flo_html_elementStatusToString(flo_html_ElementStatus status) {
     }
     return "Unknown element status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

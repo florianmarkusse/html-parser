@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_DELETION_DELETION_H
 #define FLO_HTML_PARSER_DOM_DELETION_DELETION_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "flo/html-parser/dom/dom.h"
 
 /**
@@ -56,5 +60,9 @@ void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
 void flo_html_removeProperty(flo_html_node_id nodeID, const char *keyProp,
                              flo_html_Dom *dom,
                              const flo_html_TextStore *textStore);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

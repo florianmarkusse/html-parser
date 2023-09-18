@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_UTILS_MEMORY_MEMORY_H
 #define FLO_HTML_PARSER_UTILS_MEMORY_MEMORY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 
 #include "flo/html-parser/utils/print/error.h"
@@ -53,5 +57,9 @@ static inline void *flo_html_resizeArray(void *array, size_t currentLen,
     *currentCap = newCap;
     return newArray;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

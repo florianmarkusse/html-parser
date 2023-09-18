@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_DOM_H
 #define FLO_HTML_PARSER_DOM_DOM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "dom-status.h"
 #include "flo/html-parser/type/node/boolean-property.h"
 #include "flo/html-parser/type/node/next-node.h"
@@ -132,5 +136,9 @@ flo_html_DomStatus flo_html_createDomFromFile(const char *fileLocation,
  * @param[in]   dom     The DOM structure to destroy.
  */
 void flo_html_destroyDom(flo_html_Dom *dom);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

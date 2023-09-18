@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENTS_CONTAINER_H
 #define FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENTS_CONTAINER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -35,5 +39,9 @@ initflo_html_ElementsContainer(flo_html_ElementsContainer *elementsContainer,
                                size_t pageSize);
 void destroyflo_html_ElementsContainer(
     flo_html_ElementsContainer *elementsContainer);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

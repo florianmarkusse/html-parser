@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_DOM_DOM_UTILS_H
 #define FLO_HTML_PARSER_DOM_DOM_UTILS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "flo/html-parser/dom/dom.h"
 
 flo_html_DomStatus flo_html_createNode(flo_html_node_id *nodeID,
@@ -60,5 +64,9 @@ flo_html_DomStatus
 flo_html_connectOtherNodesToParent(flo_html_node_id parentID,
                                    flo_html_node_id lastAddedChild,
                                    flo_html_Dom *dom);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

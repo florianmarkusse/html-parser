@@ -1,6 +1,10 @@
 #ifndef FLO_HTML_PARSER_UTILS_FILE_FILE_STATUS_H
 #define FLO_HTML_PARSER_UTILS_FILE_FILE_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     FILE_SUCCESS,
     FILE_CANT_OPEN,
@@ -24,5 +28,9 @@ flo_html_fileStatusToString(flo_html_FileStatus status) {
     }
     return "Unknown file status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
