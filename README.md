@@ -14,8 +14,15 @@ Are you ready to dive into the world of effortless HTML parsing? Look no further
 
 - **Fast**: `html-parser` is designed for speed. Competitive benchmarks pending!
 
-## Demo Project
-To see a complete example of how to install and use the `html-parser` library in a project, you can explore the [html-parser-demo-c repository](https://github.com/florianmarkusse/html-parser-demo-c). This demo project provides a practical demonstration of integrating and utilizing the `html-parser` library in a C application.
+## Demo Projects
+
+To see complete examples of how to install and use the `html-parser` library in different projects, you can explore the following repositories:
+
+1. [C Demo Project](https://github.com/florianmarkusse/html-parser-demo-c): This demo project provides a practical demonstration of integrating and utilizing the `html-parser` library in a C application.
+
+2. [C++ Demo Project](https://github.com/your-username/html-parser-demo-cpp): This demo project provides a practical demonstration of integrating and utilizing the `html-parser` library in a C++ application.
+
+Feel free to choose the project that best suits your needs and explore how to use the `html-parser` library in your preferred programming language.
 
 ## Quick Example
 
