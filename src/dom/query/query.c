@@ -429,13 +429,13 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
 }
 
 flo_html_QueryStatus
-flo_html_getElementsByClassName(const char *class, const flo_html_Dom *dom,
+flo_html_getElementsByClassName(const char *className, const flo_html_Dom *dom,
                                 const flo_html_TextStore *textStore,
                                 flo_html_node_id **results,
                                 size_t *resultsLen) {
-    size_t cssQueryLen = strlen(class) + 2;
+    size_t cssQueryLen = strlen(className) + 2;
     char cssQuery[cssQueryLen];
-    snprintf(cssQuery, cssQueryLen, ".%s", class);
+    snprintf(cssQuery, cssQueryLen, ".%s", className);
 
     return flo_html_querySelectorAll(cssQuery, dom, textStore, results,
                                      resultsLen);

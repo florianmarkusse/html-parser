@@ -58,7 +58,7 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
  *          'results' when no longer needed.
  */
 flo_html_QueryStatus
-flo_html_getElementsByClassName(const char *class, const flo_html_Dom *dom,
+flo_html_getElementsByClassName(const char *className, const flo_html_Dom *dom,
                                 const flo_html_TextStore *textStore,
                                 flo_html_node_id **results, size_t *resultsLen);
 
