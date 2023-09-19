@@ -18,8 +18,9 @@ function display_usage() {
 	echo -e "${RED}${BOLD}Usage: $0 [${YELLOW}OPTIONS${RED}]${NO_COLOR}"
 	echo -e "${BOLD}Options:${NO_COLOR}"
 	echo -e "  -m, --build-mode <TYPE>    Set the build mode (${YELLOW}${BUILD_MODES[*]}${NO_COLOR}). Default is ${YELLOW}Release${NO_COLOR}."
-	echo -e "  -t, --run-tests            Run tests after building."
-	echo -e "  -b, --run-benchmarks       Run benchmarks after building."
+	echo -e "  -s, --shared-libs          Build shared libraries."
+	echo -e "  -t, --run-tests            Build tests after building."
+	echo -e "  -b, --run-benchmarks       Build benchmarks after building."
 	echo -e "  -h, --help                 Display this help message."
 	exit 1
 }
@@ -39,7 +40,7 @@ function is_valid_build_mode() {
 function display_configuration() {
 	echo -e "${BOLD}${YELLOW}Configuration...${NO_COLOR}"
 	echo -e "${BOLD}${YELLOW}BUILD_MODE${NO_COLOR}: ${YELLOW}${BUILD_MODE}${NO_COLOR}"
-	echo -e "${BOLD}${YELLOW}SHARED LIBS:${NO_COLOR}: ${YELLOW}${BUILD_SHARED_LIBS}${NO_COLOR}"
+	echo -e "${BOLD}${YELLOW}SHARED LIBS${NO_COLOR}: ${YELLOW}${BUILD_SHARED_LIBS}${NO_COLOR}"
 	if [ "$RUN_TESTS" = true ]; then
 		echo -e "${BOLD}${YELLOW}Run tests${NO_COLOR}: ${YELLOW}Yes${NO_COLOR}"
 	else
