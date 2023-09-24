@@ -42,9 +42,9 @@ typedef struct {
         struct {
             flo_html_element_id keyID;
             flo_html_element_id valueID;
-        } __attribute__((aligned(4))) keyValuePair;
+        } keyValuePair;
     } data;
-} __attribute__((aligned(8))) flo_html_FilterType;
+} flo_html_FilterType;
 
 bool flo_html_filterNode(flo_html_node_id nodeID,
                          const flo_html_FilterType *filters, size_t filterslen,

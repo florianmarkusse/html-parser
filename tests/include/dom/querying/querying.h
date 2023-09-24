@@ -10,7 +10,7 @@ typedef struct {
     flo_html_QueryStatus expectedStatus;
     size_t expectedResult;
     const char *testName;
-} __attribute__((aligned(64))) TestFile;
+} TestFile;
 
 unsigned char testflo_html_DomQueries(size_t *successes, size_t *failures);
 unsigned char testQuerySelectorAll(size_t *successes, size_t *failures);

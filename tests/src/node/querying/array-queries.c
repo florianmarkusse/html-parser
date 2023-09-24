@@ -18,7 +18,7 @@ typedef struct {
     const size_t expectedResult;
     const ArrayFunctionType functionType;
     const char *testName;
-} __attribute__((aligned(64))) TestFile;
+} TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1, "#my-first-div", 1, TEXT_CONTENT, "nested text node"},

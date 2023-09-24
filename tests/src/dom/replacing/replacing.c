@@ -52,7 +52,7 @@ typedef struct {
     const char *testName;
     const ReplacementType replacementType;
     const ReplacementInput replacementInput;
-} __attribute__((aligned(128))) TestFile;
+} TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,

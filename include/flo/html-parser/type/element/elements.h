@@ -15,7 +15,7 @@ extern "C" {
 typedef struct {
     flo_html_ElementsContainer container;
     flo_html_StringHashSet set;
-} __attribute__((aligned(64))) flo_html_StringRegistry;
+} flo_html_StringRegistry;
 
 flo_html_ElementStatus
 flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
@@ -28,7 +28,7 @@ typedef struct {
     flo_html_StringRegistry propKeys;
     flo_html_StringRegistry propValues;
     flo_html_ElementsContainer text;
-} __attribute__((aligned(128))) flo_html_TextStore;
+} flo_html_TextStore;
 
 flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore);
 void flo_html_destroyTextStore(flo_html_TextStore *textStore);

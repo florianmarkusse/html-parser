@@ -17,7 +17,7 @@ extern "C" {
 typedef struct {
     flo_html_indexID flo_html_indexID;
     const char *string;
-} __attribute__((aligned(16))) flo_html_HashEntry;
+} flo_html_HashEntry;
 
 /**
  * Hashing with linear probing for natural values > 0 up until size_t max
@@ -27,7 +27,7 @@ typedef struct {
     flo_html_HashEntry *array;
     size_t arrayLen;
     size_t entries;
-} __attribute__((aligned(32))) flo_html_StringHashSet;
+} flo_html_StringHashSet;
 
 flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
                                                size_t capacity);
@@ -59,7 +59,7 @@ void flo_html_destroyStringHashSet(flo_html_StringHashSet *set);
 typedef struct {
     const flo_html_StringHashSet *set;
     size_t index;
-} __attribute__((aligned(16))) flo_html_StringHashSetIterator;
+} flo_html_StringHashSetIterator;
 
 void flo_html_initStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator,

@@ -38,9 +38,9 @@ flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
 }
 
 flo_html_DomStatus
-flo_html_appendTextNodeWithQuery(const char *cssQuery,
-                                          const char *text, flo_html_Dom *dom,
-                                          flo_html_TextStore *textStore) {
+flo_html_appendTextNodeWithQuery(const char *cssQuery, const char *text,
+                                 flo_html_Dom *dom,
+                                 flo_html_TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
                                flo_html_appendTextNode);
 }

@@ -51,7 +51,7 @@ typedef struct {
     flo_html_Registration *registry;
     size_t len;
     size_t cap;
-} __attribute__((aligned(32))) flo_html_BasicRegistry;
+} flo_html_BasicRegistry;
 
 typedef struct {
     flo_html_node_id firstNodeID;
@@ -87,7 +87,7 @@ typedef struct {
     flo_html_BasicRegistry boolPropRegistry;
     flo_html_BasicRegistry propKeyRegistry;
     flo_html_BasicRegistry propValueRegistry;
-} __attribute__((aligned(128))) flo_html_Dom;
+} flo_html_Dom;
 
 /**
  * @brief Create a DOM structure from an HTML string.

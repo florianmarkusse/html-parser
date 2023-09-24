@@ -54,7 +54,7 @@ typedef struct {
     const char *testName;
     const AppendType appendType;
     const AppendInput appendInput;
-} __attribute__((aligned(128))) TestFile;
+} TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,

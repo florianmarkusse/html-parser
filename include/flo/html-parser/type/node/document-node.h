@@ -18,7 +18,7 @@ typedef struct {
     const char *keyProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
     const char *valueProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
     const size_t propsLen;
-} __attribute__((aligned(128))) flo_html_DocumentNode;
+} flo_html_DocumentNode;
 
 #ifdef __cplusplus
 }

@@ -10,7 +10,7 @@ extern "C" {
 typedef struct {
     flo_html_node_id currentNodeID;
     flo_html_node_id nextNodeID;
-} __attribute__((aligned(4))) flo_html_NextNode;
+} flo_html_NextNode;
 
 #ifdef __cplusplus
 }

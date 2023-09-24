@@ -11,7 +11,7 @@ extern "C" {
 typedef struct {
     flo_html_node_id nodeID;
     flo_html_element_id textID;
-} __attribute__((aligned(4))) flo_html_TextNode;
+} flo_html_TextNode;
 
 #ifdef __cplusplus
 }

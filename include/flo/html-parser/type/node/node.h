@@ -38,7 +38,7 @@ typedef struct {
         flo_html_indexID tagID;
         const char *text;
     };
-} __attribute__((aligned(16))) flo_html_Node;
+} flo_html_Node;
 
 #ifdef __cplusplus
 }

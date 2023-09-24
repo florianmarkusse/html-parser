@@ -1,6 +1,24 @@
-Checks: '*,-llvmlibc-restrict-system-libc-headers'
+Checks: 'performance-*,
+    misc-*,
+    android-cloexec-*,
+    readability-duplicate-include,
+    readability-misleading-indentation,
+    bugprone-assert-side-effect,
+    bugprone-macro-repeated-side-effects,
+    bugprone-infinite-loop,
+    bugprone-macro-parentheses,
+    bugprone-posix-return,
+    bugprone-reserved-identifier,
+    bugprone-signal-handler,
+    bugprone-signed-char-misuse,
+    bugprone-sizeof-expression,
+    bugprone-branch-clone,
+    -altera-struct-pack-align,
+    -clang-analyzer-security.insecureAPI.*,
+    -misc-no-recursion,,-llvmlibc-restrict-system-libc-headers'
 WarningsAsErrors: ''
 CheckOptions:
   - key: indentation.TabWidth
     value: '4'
 
+ExtraArgs: [-std=c11,-DDEBUG]

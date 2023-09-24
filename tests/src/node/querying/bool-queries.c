@@ -32,7 +32,7 @@ typedef struct {
     const bool expectedResult;
     const BoolFunctionType boolFunctionType;
     const char *testName;
-} __attribute__((aligned(64))) TestFile;
+} TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1,

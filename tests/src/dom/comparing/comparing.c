@@ -40,7 +40,7 @@ typedef struct {
     const char *fileLocation2;
     flo_html_ComparisonStatus expectedStatus;
     const char *testName;
-} __attribute__((aligned(32))) TestFile;
+} TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file"},

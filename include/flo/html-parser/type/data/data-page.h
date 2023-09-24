@@ -17,7 +17,7 @@ typedef struct {
     char *start;
     char *freeSpace;
     flo_html_page_space spaceLeft;
-} __attribute__((aligned(32))) flo_html_DataPage;
+} flo_html_DataPage;
 
 #ifdef __cplusplus
 }

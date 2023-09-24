@@ -12,7 +12,7 @@ typedef struct {
     unsigned char
         offset; // This offset is based on the linear probing tactic used. if
                 // this changes, this will likely go very wrong.
-} __attribute__((aligned(16))) flo_html_HashElement;
+} flo_html_HashElement;
 
 #ifdef __cplusplus
 }

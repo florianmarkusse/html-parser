@@ -43,7 +43,7 @@ typedef struct {
     const char *cssQuery;
     const DeletionType deletionType;
     const char *testName;
-} __attribute__((aligned(64))) TestFile;
+} TestFile;
 
 // TODO(florian): also try deleting the only node that exists
 static const TestFile testFiles[] = {

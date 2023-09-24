@@ -14,7 +14,7 @@ extern "C" {
 typedef struct {
     flo_html_node_id stack[FLO_HTML_MAX_NODE_DEPTH];
     size_t len;
-} __attribute__((aligned(128))) flo_html_NodeDepth;
+} flo_html_NodeDepth;
 
 flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
                                   flo_html_TextStore *textStore);

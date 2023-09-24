@@ -11,7 +11,7 @@ typedef struct {
     flo_html_node_id nodeID;
     flo_html_indexID keyID;
     flo_html_indexID valueID;
-} __attribute__((aligned(8))) flo_html_Property;
+} flo_html_Property;
 
 #ifdef __cplusplus
 }

@@ -14,7 +14,7 @@ extern "C" {
 typedef struct {
     flo_html_indexID flo_html_indexID;
     flo_html_HashElement hashElement;
-} __attribute__((aligned(32))) flo_html_Registration;
+} flo_html_Registration;
 
 #ifdef __cplusplus
 }

@@ -22,7 +22,7 @@ typedef struct {
     const char *propKey;
     const char *newPropValue;
     const char *testName;
-} __attribute__((aligned(64))) TestFile;
+} TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "body", "style", "newstyle",

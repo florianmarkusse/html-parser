@@ -32,7 +32,7 @@ typedef struct {
     flo_html_DataPage *pages;
     size_t pageLen;
     size_t pageSize;
-} __attribute__((aligned(32))) flo_html_ElementsContainer;
+} flo_html_ElementsContainer;
 
 flo_html_ElementStatus
 initflo_html_ElementsContainer(flo_html_ElementsContainer *elementsContainer,

@@ -19,7 +19,7 @@ typedef struct {
     const char *expectedResult;
     const CharFunctionType functionType;
     const char *testName;
-} __attribute__((aligned(64))) TestFile;
+} TestFile;
 
 static const TestFile testFiles[] = {
     {TEST_FILE_1, "body", "style", "class", GET_VALUE,
