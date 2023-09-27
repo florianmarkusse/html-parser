@@ -12,7 +12,8 @@ extern "C" {
 // http://www.cse.yorku.ca/~oz/hash.html
 // djb2 hash
 // NOLINTNEXTLINE(clang-diagnostic-identifier)
-__attribute__((unused)) static size_t flo_html_hashString(const char *string) {
+__attribute__((unused)) static size_t
+flo_html_hashString(const unsigned char *string) {
     size_t hash = 5381;
     int c = 0;
 

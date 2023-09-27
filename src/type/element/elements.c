@@ -7,6 +7,7 @@
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/utils/print/error.h"
+#include "flo/html-parser/utils/text/string.h"
 
 flo_html_ElementStatus
 flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
@@ -157,8 +158,9 @@ flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
     memcpy(buffer, elementStart, elementLength);
     buffer[elementLength] = '\0';
 
-    if (flo_html_containsStringWithDataHashSet(&stringRegistry->set, buffer,
-                                               hashElement, flo_html_indexID)) {
+    if (flo_html_containsStringWithDataHashSet(&stringRegistry->set,
+                                               FLO_HTML_S(buffer), hashElement,
+                                               flo_html_indexID)) {
         return ELEMENT_FOUND;
     }
 

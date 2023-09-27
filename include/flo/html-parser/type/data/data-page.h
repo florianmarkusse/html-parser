@@ -14,8 +14,8 @@ typedef uint64_t flo_html_page_space;
 typedef uint8_t flo_html_page_id;
 
 typedef struct {
-    char *start;
-    char *freeSpace;
+    void *start;
+    void *freeSpace;
     flo_html_page_space spaceLeft;
 } flo_html_DataPage;
 

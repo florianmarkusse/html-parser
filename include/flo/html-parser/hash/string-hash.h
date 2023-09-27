@@ -11,12 +11,13 @@ extern "C" {
 #include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements-container.h"
+#include "flo/html-parser/utils/text/string.h"
 #include "hash-element.h"
 #include "hash-status.h"
 
 typedef struct {
     flo_html_indexID flo_html_indexID;
-    const char *string;
+    flo_html_String string;
 } flo_html_HashEntry;
 
 /**
@@ -33,20 +34,21 @@ flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
                                                size_t capacity);
 
 flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
-                                                 const char *string);
+                                                 const flo_html_String string);
 
 flo_html_HashStatus
-flo_html_insertStringAtHash(flo_html_StringHashSet *set, const char *string,
+flo_html_insertStringAtHash(flo_html_StringHashSet *set,
+                            const flo_html_String string,
                             const flo_html_HashElement *hashElement,
                             flo_html_indexID *flo_html_indexID);
 
 bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
-                                    const char *string);
+                                    const flo_html_String string);
 bool flo_html_containsStringWithDataHashSet(const flo_html_StringHashSet *set,
-                                            const char *string,
+                                            const flo_html_String string,
                                             flo_html_HashElement *hashElement,
                                             flo_html_indexID *flo_html_indexID);
-const char *
+const flo_html_String
 flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
                               const flo_html_HashElement *hashElement);
 
@@ -65,7 +67,7 @@ void flo_html_initStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator,
     const flo_html_StringHashSet *set);
 
-const char *
+const flo_html_String
 flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator);
 
 bool flo_html_hasNextStringHashSetIterator(
