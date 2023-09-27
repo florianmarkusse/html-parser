@@ -13,7 +13,8 @@ flo_html_NodeType flo_html_getflo_html_NodeType(const flo_html_node_id nodeID,
     return dom->nodes[nodeID].nodeType;
 }
 
-bool flo_html_hasBoolProp(const flo_html_node_id nodeID, const char *boolProp,
+bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
+                          const flo_html_String boolProp,
                           const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore) {
     flo_html_element_id boolPropID =
@@ -32,8 +33,8 @@ bool flo_html_hasBoolProp(const flo_html_node_id nodeID, const char *boolProp,
     return false;
 }
 
-bool flo_html_hasPropKey(const flo_html_node_id nodeID, const char *propKey,
-                         const flo_html_Dom *dom,
+bool flo_html_hasPropKey(const flo_html_node_id nodeID,
+                         const flo_html_String propKey, const flo_html_Dom *dom,
                          const flo_html_TextStore *textStore) {
     flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
@@ -49,7 +50,8 @@ bool flo_html_hasPropKey(const flo_html_node_id nodeID, const char *propKey,
     return false;
 }
 
-bool flo_html_hasPropValue(const flo_html_node_id nodeID, const char *propValue,
+bool flo_html_hasPropValue(const flo_html_node_id nodeID,
+                           const flo_html_String propValue,
                            const flo_html_Dom *dom,
                            const flo_html_TextStore *textStore) {
     flo_html_element_id propValueID =
@@ -67,8 +69,10 @@ bool flo_html_hasPropValue(const flo_html_node_id nodeID, const char *propValue,
     return false;
 }
 
-bool flo_html_hasProperty(flo_html_node_id nodeID, const char *propKey,
-                          const char *propValue, const flo_html_Dom *dom,
+bool flo_html_hasProperty(flo_html_node_id nodeID,
+                          const flo_html_String propKey,
+                          const flo_html_String propValue,
+                          const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore) {
     flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
@@ -93,7 +97,7 @@ bool flo_html_hasProperty(flo_html_node_id nodeID, const char *propKey,
 
 flo_html_QueryStatus flo_html_getTextContent(const flo_html_node_id nodeID,
                                              const flo_html_Dom *dom,
-                                             const char ***results,
+                                             flo_html_String **results,
                                              size_t *reusultsLen) {
     flo_html_node_id currentNodeID = nodeID;
     size_t currentCap = 0;
@@ -102,9 +106,9 @@ flo_html_QueryStatus flo_html_getTextContent(const flo_html_node_id nodeID,
         flo_html_Node node = dom->nodes[currentNodeID];
 
         if (node.nodeType == NODE_TYPE_TEXT) {
-            if ((*results =
-                     flo_html_resizeArray(*results, *reusultsLen, &currentCap,
-                                          sizeof(const char *), 64)) == NULL) {
+            if ((*results = flo_html_resizeArray(
+                     *results, *reusultsLen, &currentCap,
+                     sizeof(const flo_html_String), 64)) == NULL) {
                 FLO_HTML_PRINT_ERROR(
                     "Failed to allocate memory for results array!\n");
                 return QUERY_MEMORY_ERROR;
@@ -118,12 +122,13 @@ flo_html_QueryStatus flo_html_getTextContent(const flo_html_node_id nodeID,
     return QUERY_SUCCESS;
 }
 
-const char *flo_html_getValue(const flo_html_node_id nodeID,
-                              const char *propKey, const flo_html_Dom *dom,
-                              const flo_html_TextStore *textStore) {
+const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
+                                        const flo_html_String propKey,
+                                        const flo_html_Dom *dom,
+                                        const flo_html_TextStore *textStore) {
     flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
-        return NULL;
+        return FLO_HTML_EMPTY_STRING;
     }
 
     for (size_t i = 0; i < dom->propsLen; i++) {
@@ -132,5 +137,5 @@ const char *flo_html_getValue(const flo_html_node_id nodeID,
             return flo_html_getPropValue(property->valueID, dom, textStore);
         }
     }
-    return NULL;
+    return FLO_HTML_EMPTY_STRING;
 }

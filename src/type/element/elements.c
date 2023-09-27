@@ -98,16 +98,15 @@ void flo_html_destroyTextStore(flo_html_TextStore *textStore) {
     destroyflo_html_ElementsContainer(&textStore->text);
 }
 
-flo_html_ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
-                                        const char *elementStart,
-                                        const size_t elementLength) {
-    if (elementLength >= bufferLen) {
+flo_html_ElementStatus elementSizeCheck(unsigned char *buffer,
+                                        const size_t bufferLen,
+                                        const flo_html_String element) {
+    if (element.len >= bufferLen) {
         FLO_HTML_PRINT_ERROR(
-            "Element is too long, size=%zu, to fit into page.\n",
-            elementLength);
+            "Element is too long, size=%zu, to fit into page.\n", element.len);
         FLO_HTML_PRINT_ERROR("Printing first part of element:\n");
 
-        memcpy(buffer, elementStart, bufferLen - 1);
+        memcpy(buffer, element.buf, bufferLen - 1);
         buffer[bufferLen - 1] = '\0';
 
         FLO_HTML_PRINT_ERROR("%s\n", buffer);
@@ -121,17 +120,17 @@ flo_html_ElementStatus elementSizeCheck(char *buffer, const size_t bufferLen,
 }
 
 flo_html_ElementStatus createNewElement(flo_html_StringRegistry *stringRegistry,
-                                        const char *element,
+                                        const flo_html_String element,
                                         flo_html_HashElement *hashElement,
                                         flo_html_indexID *flo_html_indexID) {
     // insert element into the has table.
     flo_html_DataPageStatus insertStatus = flo_html_insertIntoPageWithHash(
-        element, strlen(element) + 1, FLO_HTML_TOTAL_PAGES, stringRegistry,
-        hashElement, flo_html_indexID);
+        element, FLO_HTML_TOTAL_PAGES, stringRegistry, hashElement,
+        flo_html_indexID);
     if (insertStatus != DATA_PAGE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
             flo_html_dataPageStatusToString(insertStatus),
-            "Could not find or create element \"%s\"", element);
+            "Could not find or create element \"%s\"", element.buf);
         return ELEMENT_NOT_FOUND_OR_CREATED;
     }
 
@@ -142,50 +141,38 @@ flo_html_ElementStatus createNewElement(flo_html_StringRegistry *stringRegistry,
  * If the element is found, then  flo_html_indexID is set.
  * flo_html_HashElement is always set.
  */
-flo_html_ElementStatus
-flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
-                        const char *elementStart, size_t elementLength,
-                        flo_html_HashElement *hashElement,
-                        flo_html_indexID *flo_html_indexID) {
-    char buffer[stringRegistry->container.pageSize];
+flo_html_ElementStatus flo_html_elementToIndex(
+    flo_html_StringRegistry *stringRegistry, const flo_html_String element,
+    flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID) {
+    unsigned char buffer[stringRegistry->container.pageSize];
     const flo_html_ElementStatus sizeCheck =
-        elementSizeCheck(buffer, stringRegistry->container.pageSize,
-                         elementStart, elementLength);
+        elementSizeCheck(buffer, stringRegistry->container.pageSize, element);
     if (sizeCheck != ELEMENT_SUCCESS) {
         return sizeCheck;
     }
 
-    memcpy(buffer, elementStart, elementLength);
-    buffer[elementLength] = '\0';
-
-    if (flo_html_containsStringWithDataHashSet(&stringRegistry->set,
-                                               FLO_HTML_S(buffer), hashElement,
-                                               flo_html_indexID)) {
+    if (flo_html_containsStringWithDataHashSet(&stringRegistry->set, element,
+                                               hashElement, flo_html_indexID)) {
         return ELEMENT_FOUND;
     }
 
-    return createNewElement(stringRegistry, buffer, hashElement,
+    return createNewElement(stringRegistry, element, hashElement,
                             flo_html_indexID);
 }
 
 flo_html_ElementStatus
 flo_html_insertElement(flo_html_ElementsContainer *elementsContainer,
-                       const char *elementStart, size_t elementLength,
-                       char **dataLocation) {
-    char buffer[elementsContainer->pageSize];
-    const flo_html_ElementStatus sizeCheck = elementSizeCheck(
-        buffer, elementsContainer->pageSize, elementStart, elementLength);
+                       const flo_html_String element, char **dataLocation) {
+    unsigned char buffer[elementsContainer->pageSize];
+    const flo_html_ElementStatus sizeCheck =
+        elementSizeCheck(buffer, elementsContainer->pageSize, element);
     if (sizeCheck != ELEMENT_SUCCESS) {
         return sizeCheck;
     }
 
-    memcpy(buffer, elementStart, elementLength);
-    buffer[elementLength] = '\0';
-
     const flo_html_DataPageStatus dataPageStatus =
-        flo_html_insertIntoSuitablePage(buffer, elementLength + 1,
-                                        FLO_HTML_TOTAL_PAGES, elementsContainer,
-                                        dataLocation);
+        flo_html_insertIntoSuitablePage(element, FLO_HTML_TOTAL_PAGES,
+                                        elementsContainer, dataLocation);
     if (dataPageStatus != DATA_PAGE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(
             flo_html_dataPageStatusToString(dataPageStatus),

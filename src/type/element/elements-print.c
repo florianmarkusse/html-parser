@@ -42,8 +42,9 @@ void printflo_html_StringRegistryStatus(
     flo_html_initStringHashSetIterator(&iterator, &newElements->set);
 
     while (flo_html_hasNextStringHashSetIterator(&iterator)) {
-        const char *string = flo_html_nextStringHashSetIterator(&iterator);
-        printf("%s\n", string);
+        const flo_html_String string =
+            flo_html_nextStringHashSetIterator(&iterator);
+        printf("%s\n", string.buf);
     }
 
     printElementPages(&newElements->container);

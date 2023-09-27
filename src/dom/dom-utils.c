@@ -37,8 +37,8 @@ void flo_html_setNodeTagID(const flo_html_node_id nodeID,
     createdNode->tagID = tagID;
 }
 
-void flo_html_setNodeText(const flo_html_node_id nodeID, const char *text,
-                          flo_html_Dom *dom) {
+void flo_html_setNodeText(const flo_html_node_id nodeID,
+                          const flo_html_String text, flo_html_Dom *dom) {
     flo_html_Node *createdNode = &(dom->nodes[nodeID]);
     createdNode->text = text;
 }
@@ -132,9 +132,9 @@ flo_html_DomStatus flo_html_addProperty(const flo_html_node_id nodeID,
     return DOM_SUCCESS;
 }
 
-const char *flo_html_getTag(const flo_html_indexID tagID,
-                            const flo_html_Dom *dom,
-                            const flo_html_TextStore *textStore) {
+const flo_html_String flo_html_getTag(const flo_html_indexID tagID,
+                                      const flo_html_Dom *dom,
+                                      const flo_html_TextStore *textStore) {
     flo_html_TagRegistration *tagRegistration = &dom->tagRegistry[tagID];
     return flo_html_getStringFromHashSet(&textStore->tags.set,
                                          &tagRegistration->hashElement);
@@ -146,27 +146,28 @@ void flo_html_getTagRegistration(flo_html_indexID tagID,
     *tagRegistration = &dom->tagRegistry[tagID];
 }
 
-const char *flo_html_getBoolProp(const flo_html_indexID boolPropID,
-                                 const flo_html_Dom *dom,
-                                 const flo_html_TextStore *textStore) {
+const flo_html_String
+flo_html_getBoolProp(const flo_html_indexID boolPropID, const flo_html_Dom *dom,
+                     const flo_html_TextStore *textStore) {
     flo_html_Registration registration =
         dom->boolPropRegistry.registry[boolPropID];
     return flo_html_getStringFromHashSet(&textStore->boolProps.set,
                                          &registration.hashElement);
 }
 
-const char *flo_html_getPropKey(const flo_html_indexID propKeyID,
-                                const flo_html_Dom *dom,
-                                const flo_html_TextStore *textStore) {
+const flo_html_String flo_html_getPropKey(const flo_html_indexID propKeyID,
+                                          const flo_html_Dom *dom,
+                                          const flo_html_TextStore *textStore) {
     flo_html_Registration registration =
         dom->propKeyRegistry.registry[propKeyID];
     return flo_html_getStringFromHashSet(&textStore->propKeys.set,
                                          &registration.hashElement);
 }
 
-const char *flo_html_getPropValue(const flo_html_indexID propValueID,
-                                  const flo_html_Dom *dom,
-                                  const flo_html_TextStore *textStore) {
+const flo_html_String
+flo_html_getPropValue(const flo_html_indexID propValueID,
+                      const flo_html_Dom *dom,
+                      const flo_html_TextStore *textStore) {
     flo_html_Registration registration =
         dom->propValueRegistry.registry[propValueID];
     return flo_html_getStringFromHashSet(&textStore->propValues.set,
@@ -180,8 +181,7 @@ flo_html_MergeResult flo_html_tryMerge(flo_html_Node *possibleMergeNode,
                                        bool isAppend) {
     if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
         flo_html_ElementStatus elementStatus = flo_html_addTextToTextNode(
-            possibleMergeNode, replacingNode->text, strlen(replacingNode->text),
-            dom, textStore, isAppend);
+            possibleMergeNode, replacingNode->text, dom, textStore, isAppend);
         if (elementStatus != ELEMENT_CREATED) {
             FLO_HTML_PRINT_ERROR(
                 "Failed to merge new text node with up node!\n");

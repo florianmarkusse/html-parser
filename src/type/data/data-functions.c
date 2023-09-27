@@ -22,12 +22,12 @@ flo_html_DataPageStatus createflo_html_DataPage(flo_html_DataPage *dataPage,
 }
 
 flo_html_DataPageStatus flo_html_insertIntoSuitablePage(
-    const void *data, const size_t byteLen, const size_t totalPages,
+    const flo_html_String data, const size_t totalPages,
     flo_html_ElementsContainer *container, char **dataLocation) {
     flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;
     size_t index = container->pageLen;
     for (size_t i = 0; i < container->pageLen; ++i) {
-        if (container->pages[i].spaceLeft >= byteLen) {
+        if (container->pages[i].spaceLeft >= data.len + 1) {
             index = i;
             break;
         }
@@ -50,32 +50,32 @@ flo_html_DataPageStatus flo_html_insertIntoSuitablePage(
         }
     }
 
-    memcpy(container->pages[index].freeSpace, data, byteLen);
+    memcpy(container->pages[index].freeSpace, data.buf, data.len + 1);
     *dataLocation = container->pages[index].freeSpace;
-    container->pages[index].freeSpace += byteLen;
-    container->pages[index].spaceLeft -= byteLen;
+    container->pages[index].freeSpace += data.len + 1;
+    container->pages[index].spaceLeft -= data.len + 1;
 
     return status;
 }
 
 flo_html_DataPageStatus flo_html_insertIntoPageWithHash(
-    const void *data, const size_t byteLen, const size_t totalPages,
+    const flo_html_String data, const size_t totalPages,
     flo_html_StringRegistry *stringRegistry, flo_html_HashElement *hashElement,
     flo_html_indexID *flo_html_indexID) {
     flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;
 
     flo_html_ElementsContainer *container = &stringRegistry->container;
     char *dataLocation = NULL;
-    if ((status = flo_html_insertIntoSuitablePage(data, byteLen, totalPages,
-                                                  container, &dataLocation)) !=
+    if ((status = flo_html_insertIntoSuitablePage(data, totalPages, container,
+                                                  &dataLocation)) !=
         DATA_PAGE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
             flo_html_dataPageStatusToString(status),
-            "Failed to insert data in suitable page %s\n", (char *)data);
+            "Failed to insert data in suitable page %s\n", data.buf);
         return status;
     }
 
-    flo_html_insertStringAtHash(&stringRegistry->set, dataLocation, hashElement,
+    flo_html_insertStringAtHash(&stringRegistry->set, data, hashElement,
                                 flo_html_indexID);
 
     return status;

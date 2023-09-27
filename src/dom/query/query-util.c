@@ -65,7 +65,7 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
     return true;
 }
 
-flo_html_indexID flo_html_getTagID(const char *tag,
+flo_html_indexID flo_html_getTagID(const flo_html_String tag,
                                    const flo_html_TextStore *textStore) {
     flo_html_HashElement ignore;
     flo_html_indexID tagID = 0;
@@ -74,7 +74,7 @@ flo_html_indexID flo_html_getTagID(const char *tag,
     return tagID;
 }
 
-flo_html_indexID flo_html_getBoolPropID(const char *boolProp,
+flo_html_indexID flo_html_getBoolPropID(const flo_html_String boolProp,
                                         const flo_html_TextStore *textStore) {
     flo_html_HashElement ignore;
     flo_html_indexID propID = 0;
@@ -83,7 +83,7 @@ flo_html_indexID flo_html_getBoolPropID(const char *boolProp,
     return propID;
 }
 
-flo_html_indexID flo_html_getPropKeyID(const char *keyProp,
+flo_html_indexID flo_html_getPropKeyID(const flo_html_String keyProp,
                                        const flo_html_TextStore *textStore) {
     flo_html_HashElement ignore;
     flo_html_indexID keyID = 0;
@@ -92,7 +92,7 @@ flo_html_indexID flo_html_getPropKeyID(const char *keyProp,
     return keyID;
 }
 
-flo_html_indexID flo_html_getPropValueID(const char *valueProp,
+flo_html_indexID flo_html_getPropValueID(const flo_html_String valueProp,
                                          const flo_html_TextStore *textStore) {
     flo_html_HashElement ignore;
     flo_html_indexID valueID = 0;

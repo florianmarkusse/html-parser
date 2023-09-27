@@ -21,14 +21,14 @@ typedef enum {
 } PropertyType;
 
 flo_html_ElementStatus
-getCreatedPropIDFromString(const PropertyType propertyType, const char *buffer,
-                           const size_t propLen, flo_html_Dom *dom,
+getCreatedPropIDFromString(const PropertyType propertyType,
+                           const flo_html_String prop, flo_html_Dom *dom,
                            flo_html_StringRegistry *stringRegistry,
                            flo_html_element_id *propID) {
     flo_html_HashElement hashKey;
 
-    flo_html_ElementStatus elementStatus = flo_html_elementToIndex(
-        stringRegistry, buffer, propLen, &hashKey, propID);
+    flo_html_ElementStatus elementStatus =
+        flo_html_elementToIndex(stringRegistry, prop, &hashKey, propID);
     if (elementStatus != ELEMENT_FOUND && elementStatus != ELEMENT_CREATED) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(
             flo_html_elementStatusToString(elementStatus),
@@ -68,23 +68,23 @@ getCreatedPropIDFromString(const PropertyType propertyType, const char *buffer,
     return ELEMENT_SUCCESS;
 }
 
-flo_html_ElementStatus flo_html_addPropertyToNodeStringsWithLength(
-    const flo_html_node_id nodeID, const char *keyBuffer, const size_t keyLen,
-    const char *valueBuffer, const size_t valueLen, flo_html_Dom *dom,
-    flo_html_TextStore *textStore) {
+flo_html_ElementStatus
+flo_html_addPropertyToNode(const flo_html_node_id nodeID,
+                           const flo_html_String key,
+                           const flo_html_String value, flo_html_Dom *dom,
+                           flo_html_TextStore *textStore) {
     flo_html_ElementStatus result = ELEMENT_SUCCESS;
 
     flo_html_element_id keyID = 0;
-    result = getCreatedPropIDFromString(PROPERTY_TYPE_KEY, keyBuffer, keyLen,
-                                        dom, &textStore->propKeys, &keyID);
+    result = getCreatedPropIDFromString(PROPERTY_TYPE_KEY, key, dom,
+                                        &textStore->propKeys, &keyID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
 
     flo_html_element_id valueID = 0;
-    result =
-        getCreatedPropIDFromString(PROPERTY_TYPE_VALUE, valueBuffer, valueLen,
-                                   dom, &textStore->propValues, &valueID);
+    result = getCreatedPropIDFromString(PROPERTY_TYPE_VALUE, value, dom,
+                                        &textStore->propValues, &valueID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
@@ -97,24 +97,14 @@ flo_html_ElementStatus flo_html_addPropertyToNodeStringsWithLength(
     return result;
 }
 
-flo_html_ElementStatus flo_html_addPropertyToNodeStrings(
-    const flo_html_node_id nodeID, const char *keyBuffer,
-    const char *valueBuffer, flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    return flo_html_addPropertyToNodeStringsWithLength(
-        nodeID, keyBuffer, strlen(keyBuffer), valueBuffer, strlen(valueBuffer),
-        dom, textStore);
-}
-
-flo_html_ElementStatus flo_html_addBooleanPropertyToNodeStringWithLength(
-    const flo_html_node_id nodeID, const char *boolPropBuffer,
-    const size_t boolPropLen, flo_html_Dom *dom,
-    flo_html_TextStore *textStore) {
+flo_html_ElementStatus flo_html_addBooleanPropertyToNode(
+    const flo_html_node_id nodeID, const flo_html_String boolProp,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     flo_html_ElementStatus result = ELEMENT_SUCCESS;
 
     flo_html_element_id boolPropID = 0;
-    result = getCreatedPropIDFromString(PROPERTY_TYPE_BOOL, boolPropBuffer,
-                                        boolPropLen, dom, &textStore->boolProps,
-                                        &boolPropID);
+    result = getCreatedPropIDFromString(PROPERTY_TYPE_BOOL, boolProp, dom,
+                                        &textStore->boolProps, &boolPropID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
@@ -127,16 +117,10 @@ flo_html_ElementStatus flo_html_addBooleanPropertyToNodeStringWithLength(
     return result;
 }
 
-flo_html_ElementStatus flo_html_addBooleanPropertyToNodeString(
-    const flo_html_node_id nodeID, const char *boolPropBuffer,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    return flo_html_addBooleanPropertyToNodeStringWithLength(
-        nodeID, boolPropBuffer, strlen(boolPropBuffer), dom, textStore);
-}
-
 flo_html_ElementStatus
-flo_html_setPropertyValue(const flo_html_node_id nodeID, const char *key,
-                          const char *newValue, flo_html_Dom *dom,
+flo_html_setPropertyValue(const flo_html_node_id nodeID,
+                          const flo_html_String key,
+                          const flo_html_String newValue, flo_html_Dom *dom,
                           flo_html_TextStore *textStore) {
     flo_html_element_id keyID = flo_html_getPropKeyID(key, textStore);
     if (keyID == 0) {
@@ -149,9 +133,9 @@ flo_html_setPropertyValue(const flo_html_node_id nodeID, const char *key,
     }
 
     flo_html_element_id newValueID = 0;
-    flo_html_ElementStatus result = getCreatedPropIDFromString(
-        PROPERTY_TYPE_VALUE, newValue, strlen(newValue), dom,
-        &textStore->propValues, &newValueID);
+    flo_html_ElementStatus result =
+        getCreatedPropIDFromString(PROPERTY_TYPE_VALUE, newValue, dom,
+                                   &textStore->propValues, &newValueID);
     if (result != ELEMENT_SUCCESS) {
         return result;
     }
@@ -162,7 +146,8 @@ flo_html_setPropertyValue(const flo_html_node_id nodeID, const char *key,
 }
 
 flo_html_DomStatus flo_html_setTextContent(const flo_html_node_id nodeID,
-                                           const char *text, flo_html_Dom *dom,
+                                           const flo_html_String text,
+                                           flo_html_Dom *dom,
                                            flo_html_TextStore *textStore) {
     flo_html_removeChildren(nodeID, dom);
 
@@ -177,49 +162,59 @@ flo_html_DomStatus flo_html_setTextContent(const flo_html_node_id nodeID,
     return flo_html_addParentFirstChild(nodeID, newNodeID, dom);
 }
 
-flo_html_ElementStatus
-flo_html_addTextToTextNode(flo_html_Node *node, const char *textStart,
-                           const size_t textLen, flo_html_Dom *dom,
-                           flo_html_TextStore *textStore, bool isAppend) {
-    const char *prevText = node->text;
+flo_html_ElementStatus flo_html_addTextToTextNode(flo_html_Node *node,
+                                                  const flo_html_String text,
+                                                  flo_html_Dom *dom,
+                                                  flo_html_TextStore *textStore,
+                                                  bool isAppend) {
+    const flo_html_String prevText = node->text;
     const size_t mergedLen =
-        strlen(prevText) + textLen + 2; // Adding a whitespace in between.
+        prevText.len + text.len + 1; // Adding a whitespace in between.
 
-    char buffer[mergedLen];
+    unsigned char buffer[mergedLen + 1];
     if (isAppend) {
-        strcpy(buffer, prevText);
-        strcat(buffer, " ");
-        strncat(buffer, textStart, textLen);
+        for (ptrdiff_t i = 0; i < prevText.len; i++) {
+            buffer[i] = prevText.buf[i];
+        }
+        buffer[prevText.len] = ' ';
+        for (ptrdiff_t i = 0; i < text.len; i++) {
+            buffer[prevText.len + 1 + i] = text.buf[i];
+        }
     } else {
-        strncpy(buffer, textStart, textLen);
-        buffer[textLen] = '\0';
-        strcat(buffer, " ");
-        strcat(buffer, prevText);
+        for (ptrdiff_t i = 0; i < text.len; i++) {
+            buffer[i] = text.buf[i];
+        }
+        buffer[text.len] = ' ';
+        for (ptrdiff_t i = 0; i < prevText.len; i++) {
+            buffer[text.len + 1 + i] = prevText.buf[i];
+        }
     }
-
+    buffer[mergedLen] = '\0';
     buffer[mergedLen - 1] = '\0';
+
     char *dataLocation = NULL;
     flo_html_ElementStatus elementStatus = flo_html_insertElement(
-        &textStore->text, buffer, mergedLen, &dataLocation);
+        &textStore->text, FLO_HTML_S_LEN(buffer, mergedLen), &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(
             flo_html_elementStatusToString(elementStatus),
             "Failed to insert text");
         return elementStatus;
     }
-    flo_html_setNodeText(node->nodeID, dataLocation, dom);
+    flo_html_setNodeText(node->nodeID, FLO_HTML_S_LEN(dataLocation, mergedLen),
+                         dom);
 
     return elementStatus;
 }
 
 flo_html_DomStatus flo_html_setTagOnDocumentNode(
-    const char *tagStart, const size_t tagLen, const flo_html_node_id nodeID,
+    const flo_html_String tag, const flo_html_node_id nodeID,
     const bool isPaired, flo_html_Dom *dom, flo_html_TextStore *textStore) {
     flo_html_DomStatus domStatus = DOM_SUCCESS;
     flo_html_HashElement hashElement;
     flo_html_indexID newTagID = 0;
-    flo_html_ElementStatus indexStatus = flo_html_elementToIndex(
-        &textStore->tags, tagStart, tagLen, &hashElement, &newTagID);
+    flo_html_ElementStatus indexStatus =
+        flo_html_elementToIndex(&textStore->tags, tag, &hashElement, &newTagID);
 
     switch (indexStatus) {
     case ELEMENT_CREATED: {

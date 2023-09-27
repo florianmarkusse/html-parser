@@ -22,7 +22,7 @@ flo_html_DomStatus
 flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
                               flo_html_Dom *dom, flo_html_TextStore *textStore,
                               flo_html_node_id *newNodeID);
-flo_html_DomStatus flo_html_parseTextElement(const char *text,
+flo_html_DomStatus flo_html_parseTextElement(const flo_html_String text,
                                              flo_html_Dom *dom,
                                              flo_html_TextStore *textStore,
                                              flo_html_node_id *newNodeID);

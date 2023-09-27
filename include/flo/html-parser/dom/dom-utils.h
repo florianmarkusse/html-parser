@@ -12,7 +12,7 @@ flo_html_DomStatus flo_html_createNode(flo_html_node_id *nodeID,
                                        flo_html_Dom *dom);
 void flo_html_setNodeTagID(flo_html_node_id nodeID, flo_html_indexID tagID,
                            flo_html_Dom *dom);
-void flo_html_setNodeText(flo_html_node_id nodeID, const char *text,
+void flo_html_setNodeText(flo_html_node_id nodeID, const flo_html_String text,
                           flo_html_Dom *dom);
 
 flo_html_DomStatus flo_html_addParentFirstChild(flo_html_node_id parentID,
@@ -36,21 +36,22 @@ flo_html_DomStatus flo_html_addProperty(flo_html_node_id nodeID,
                                         flo_html_element_id valueID,
                                         flo_html_Dom *dom);
 
-const char *flo_html_getTag(flo_html_indexID tagID, const flo_html_Dom *dom,
-                            const flo_html_TextStore *textStore);
+const flo_html_String flo_html_getTag(flo_html_indexID tagID,
+                                      const flo_html_Dom *dom,
+                                      const flo_html_TextStore *textStore);
 void flo_html_getTagRegistration(flo_html_indexID tagID,
                                  const flo_html_Dom *dom,
                                  flo_html_TagRegistration **tagRegistration);
 
-const char *flo_html_getBoolProp(flo_html_indexID boolPropID,
-                                 const flo_html_Dom *dom,
-                                 const flo_html_TextStore *textStore);
-const char *flo_html_getPropKey(flo_html_indexID propKeyID,
-                                const flo_html_Dom *dom,
-                                const flo_html_TextStore *textStore);
-const char *flo_html_getPropValue(flo_html_indexID propValueID,
-                                  const flo_html_Dom *dom,
-                                  const flo_html_TextStore *textStore);
+const flo_html_String flo_html_getBoolProp(flo_html_indexID boolPropID,
+                                           const flo_html_Dom *dom,
+                                           const flo_html_TextStore *textStore);
+const flo_html_String flo_html_getPropKey(flo_html_indexID propKeyID,
+                                          const flo_html_Dom *dom,
+                                          const flo_html_TextStore *textStore);
+const flo_html_String
+flo_html_getPropValue(flo_html_indexID propValueID, const flo_html_Dom *dom,
+                      const flo_html_TextStore *textStore);
 
 typedef enum { COMPLETED_MERGE, NO_MERGE, FAILED_MERGE } flo_html_MergeResult;
 

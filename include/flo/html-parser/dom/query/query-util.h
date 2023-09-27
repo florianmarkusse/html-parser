@@ -49,13 +49,13 @@ typedef struct {
 bool flo_html_filterNode(flo_html_node_id nodeID,
                          const flo_html_FilterType *filters, size_t filterslen,
                          const flo_html_Dom *dom);
-flo_html_indexID flo_html_getTagID(const char *tag,
+flo_html_indexID flo_html_getTagID(const flo_html_String tag,
                                    const flo_html_TextStore *textStore);
-flo_html_indexID flo_html_getBoolPropID(const char *boolProp,
+flo_html_indexID flo_html_getBoolPropID(const flo_html_String boolProp,
                                         const flo_html_TextStore *textStore);
-flo_html_indexID flo_html_getPropKeyID(const char *keyProp,
+flo_html_indexID flo_html_getPropKeyID(const flo_html_String keyProp,
                                        const flo_html_TextStore *textStore);
-flo_html_indexID flo_html_getPropValueID(const char *valueProp,
+flo_html_indexID flo_html_getPropValueID(const flo_html_String valueProp,
                                          const flo_html_TextStore *textStore);
 
 flo_html_QueryStatus flo_html_filterByTagID(flo_html_element_id tagID,

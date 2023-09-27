@@ -1,14 +1,15 @@
 #ifndef FLO_HTML_PARSER_TYPE_NODE_NODE_H
 #define FLO_HTML_PARSER_TYPE_NODE_NODE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
 #include "flo/html-parser/type/data/definitions.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "flo/html-parser/utils/text/string.h"
 
 typedef uint16_t flo_html_node_id;
 
@@ -36,7 +37,7 @@ typedef struct {
     flo_html_NodeType nodeType;
     union {
         flo_html_indexID tagID;
-        const char *text;
+        flo_html_String text;
     };
 } flo_html_Node;
 

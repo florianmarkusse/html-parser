@@ -40,14 +40,11 @@ flo_html_ElementStatus flo_html_createElement(
 
 flo_html_ElementStatus
 flo_html_insertElement(flo_html_ElementsContainer *elementsContainer,
-                       const char *elementStart, size_t elementLength,
-                       char **dataLocation);
+                       const flo_html_String element, char **dataLocation);
 
-flo_html_ElementStatus
-flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
-                        const char *elementStart, size_t elementLength,
-                        flo_html_HashElement *hashElement,
-                        flo_html_indexID *flo_html_indexID);
+flo_html_ElementStatus flo_html_elementToIndex(
+    flo_html_StringRegistry *stringRegistry, const flo_html_String element,
+    flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID);
 
 #ifdef __cplusplus
 }

@@ -37,7 +37,8 @@ flo_html_NodeType flo_html_getflo_html_NodeType(flo_html_node_id nodeID,
  *
  * @return  True if the property exists and is true, otherwise false.
  */
-bool flo_html_hasBoolProp(flo_html_node_id nodeID, const char *boolProp,
+bool flo_html_hasBoolProp(flo_html_node_id nodeID,
+                          const flo_html_String boolProp,
                           const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore);
 
@@ -54,7 +55,7 @@ bool flo_html_hasBoolProp(flo_html_node_id nodeID, const char *boolProp,
  *
  * @return  True if a property with the key exists, otherwise false.
  */
-bool flo_html_hasPropKey(flo_html_node_id nodeID, const char *propKey,
+bool flo_html_hasPropKey(flo_html_node_id nodeID, const flo_html_String propKey,
                          const flo_html_Dom *dom,
                          const flo_html_TextStore *textStore);
 
@@ -71,7 +72,8 @@ bool flo_html_hasPropKey(flo_html_node_id nodeID, const char *propKey,
  *
  * @return  True if a property with the value exists, otherwise false.
  */
-bool flo_html_hasPropValue(flo_html_node_id nodeID, const char *propValue,
+bool flo_html_hasPropValue(flo_html_node_id nodeID,
+                           const flo_html_String propValue,
                            const flo_html_Dom *dom,
                            const flo_html_TextStore *textStore);
 
@@ -90,8 +92,10 @@ bool flo_html_hasPropValue(flo_html_node_id nodeID, const char *propValue,
  * @return  True if a property with the specified key and value exists,
  *          otherwise false.
  */
-bool flo_html_hasProperty(flo_html_node_id nodeID, const char *propKey,
-                          const char *propValue, const flo_html_Dom *dom,
+bool flo_html_hasProperty(flo_html_node_id nodeID,
+                          const flo_html_String propKey,
+                          const flo_html_String propValue,
+                          const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore);
 
 /**
@@ -107,9 +111,10 @@ bool flo_html_hasProperty(flo_html_node_id nodeID, const char *propKey,
  *
  * @return  The value of the property if it exists, or NULL if not found.
  */
-const char *flo_html_getValue(flo_html_node_id nodeID, const char *propKey,
-                              const flo_html_Dom *dom,
-                              const flo_html_TextStore *textStore);
+const flo_html_String flo_html_getValue(flo_html_node_id nodeID,
+                                        const flo_html_String propKey,
+                                        const flo_html_Dom *dom,
+                                        const flo_html_TextStore *textStore);
 
 /**
  * @brief Get the text content of a DOM node.
@@ -131,7 +136,7 @@ const char *flo_html_getValue(flo_html_node_id nodeID, const char *propKey,
  */
 flo_html_QueryStatus flo_html_getTextContent(flo_html_node_id nodeID,
                                              const flo_html_Dom *dom,
-                                             const char ***results,
+                                             flo_html_String **results,
                                              size_t *resultsLen);
 
 #ifdef __cplusplus

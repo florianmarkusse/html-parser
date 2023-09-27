@@ -56,7 +56,7 @@ flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
     size_t hash = flo_html_hashString(string.buf) % set->arrayLen;
 
     while (set->array[hash].string.buf != NULL) {
-        if (flo_html_StringEquals(set->array[hash].string, string)) {
+        if (flo_html_stringEquals(set->array[hash].string, string)) {
             return HASH_SUCCESS;
         }
         hash = (hash + 1) % set->arrayLen;
@@ -87,7 +87,7 @@ bool flo_html_containsStringWithDataHashSet(
     size_t probes = 0;
     while (set->array[index].string.buf != NULL) {
         flo_html_HashEntry entry = set->array[index];
-        if (flo_html_StringEquals(entry.string, string)) {
+        if (flo_html_stringEquals(entry.string, string)) {
             hashElement->offset = probes;
             *flo_html_indexID = entry.flo_html_indexID;
             return true;

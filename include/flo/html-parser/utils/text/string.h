@@ -11,16 +11,20 @@ extern "C" {
 #include <stddef.h>
 
 #define FLO_HTML_EMPTY_STRING                                                  \
-    (flo_html_String) { NULL, 0 }
+    (flo_html_String) { 0, NULL }
 #define FLO_HTML_S(s)                                                          \
-    (flo_html_String) { (unsigned char *)(s), sizeof(s) - 1 }
+    (flo_html_String) { sizeof(s) - 1, (unsigned char *)(s) }
+#define FLO_HTML_S_LEN(s, len)                                                 \
+    (flo_html_String) { len, (unsigned char *)(s) }
+#define FLO_HTML_S_PTRS(begin, end)                                            \
+    (flo_html_String) { ((end) - (begin)), (unsigned char *)(begin) }
 
 typedef struct {
-    unsigned char *buf;
     ptrdiff_t len;
+    unsigned char *buf;
 } flo_html_String;
 
-bool flo_html_StringEquals(flo_html_String a, flo_html_String b) {
+bool flo_html_stringEquals(flo_html_String a, flo_html_String b) {
     if (a.len != b.len) {
         return false;
     }
