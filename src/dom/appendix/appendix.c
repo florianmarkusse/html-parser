@@ -24,48 +24,49 @@
         if (queryResult != QUERY_SUCCESS) {                                    \
             FLO_HTML_PRINT_ERROR(                                              \
                 "Could not find element using query selector: %s\n",           \
-                cssQuery);                                                     \
+                (cssQuery).buf);                                               \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
         return appendFunction(parentNodeID, nodeData, dom, textStore);         \
     } while (0)
 
 flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
-    const char *cssQuery, const flo_html_DocumentNode *docNode,
+    const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
     flo_html_Dom *dom, flo_html_TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
                                flo_html_appendDocumentNode);
 }
 
 flo_html_DomStatus
-flo_html_appendTextNodeWithQuery(const char *cssQuery, const char *text,
-                                 flo_html_Dom *dom,
+flo_html_appendTextNodeWithQuery(const flo_html_String cssQuery,
+                                 const flo_html_String text, flo_html_Dom *dom,
                                  flo_html_TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
                                flo_html_appendTextNode);
 }
 
 flo_html_DomStatus flo_html_appendHTMLFromStringWithQuery(
-    const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
-    flo_html_TextStore *textStore) {
+    const flo_html_String cssQuery, const flo_html_String htmlString,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
                                flo_html_appendHTMLFromString);
 }
 
 flo_html_DomStatus flo_html_appendHTMLFromFileWithQuery(
-    const char *cssQuery, const char *fileLocation, flo_html_Dom *dom,
-    flo_html_TextStore *textStore) {
+    const flo_html_String cssQuery, const flo_html_String fileLocation,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     char *buffer = NULL;
-    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &buffer);
+    flo_html_FileStatus fileStatus =
+        flo_html_readFile(fileLocation.buf, &buffer);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
-                                        fileLocation);
+                                        fileLocation.buf);
         return DOM_ERROR_MEMORY;
     }
 
-    APPEND_USING_QUERYSELECTOR(cssQuery, buffer, dom, textStore,
-                               flo_html_appendHTMLFromString);
+    APPEND_USING_QUERYSELECTOR(cssQuery, FLO_HTML_S_LEN(buffer, strlen(buffer)),
+                               dom, textStore, flo_html_appendHTMLFromString);
 }
 
 static flo_html_DomStatus updateReferences(const flo_html_node_id parentID,
@@ -147,7 +148,8 @@ flo_html_appendDocumentNode(const flo_html_node_id parentID,
 }
 
 flo_html_DomStatus flo_html_appendTextNode(const flo_html_node_id parentID,
-                                           const char *text, flo_html_Dom *dom,
+                                           const flo_html_String text,
+                                           flo_html_Dom *dom,
                                            flo_html_TextStore *textStore) {
     flo_html_node_id newNodeID = 0;
     flo_html_DomStatus domStatus =
@@ -177,10 +179,9 @@ flo_html_DomStatus flo_html_appendTextNode(const flo_html_node_id parentID,
     return updateReferences(parentID, newNodeID, dom);
 }
 
-flo_html_DomStatus
-flo_html_appendHTMLFromString(const flo_html_node_id parentID,
-                              const char *htmlString, flo_html_Dom *dom,
-                              flo_html_TextStore *textStore) {
+flo_html_DomStatus flo_html_appendHTMLFromString(
+    const flo_html_node_id parentID, const flo_html_String htmlString,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     flo_html_node_id firstNewAddedNode = dom->nodeLen;
     flo_html_DomStatus domStatus = flo_html_parse(htmlString, dom, textStore);
     if (domStatus != DOM_SUCCESS) {

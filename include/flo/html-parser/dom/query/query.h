@@ -31,7 +31,8 @@ extern "C" {
  *          'results' when no longer needed.
  */
 flo_html_QueryStatus
-flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
+flo_html_querySelectorAll(const flo_html_String cssQuery,
+                          const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore,
                           flo_html_node_id **results, size_t *resultsLen);
 
@@ -58,7 +59,8 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
  *          'results' when no longer needed.
  */
 flo_html_QueryStatus
-flo_html_getElementsByClassName(const char *className, const flo_html_Dom *dom,
+flo_html_getElementsByClassName(const flo_html_String className,
+                                const flo_html_Dom *dom,
                                 const flo_html_TextStore *textStore,
                                 flo_html_node_id **results, size_t *resultsLen);
 
@@ -85,7 +87,8 @@ flo_html_getElementsByClassName(const char *className, const flo_html_Dom *dom,
  *          'results' when no longer needed.
  */
 flo_html_QueryStatus
-flo_html_getElementsByTagName(const char *tag, const flo_html_Dom *dom,
+flo_html_getElementsByTagName(const flo_html_String tag,
+                              const flo_html_Dom *dom,
                               const flo_html_TextStore *textStore,
                               flo_html_node_id **results, size_t *resultsLen);
 
@@ -105,7 +108,7 @@ flo_html_getElementsByTagName(const char *tag, const flo_html_Dom *dom,
  *          otherwise). See @ref
  *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
-flo_html_QueryStatus flo_html_querySelector(const char *cssQuery,
+flo_html_QueryStatus flo_html_querySelector(const flo_html_String cssQuery,
                                             const flo_html_Dom *dom,
                                             const flo_html_TextStore *textStore,
                                             flo_html_node_id *result);
@@ -127,7 +130,7 @@ flo_html_QueryStatus flo_html_querySelector(const char *cssQuery,
  *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
 flo_html_QueryStatus
-flo_html_getElementByID(const char *id, const flo_html_Dom *dom,
+flo_html_getElementByID(const flo_html_String id, const flo_html_Dom *dom,
                         const flo_html_TextStore *textStore,
                         flo_html_node_id *result);
 

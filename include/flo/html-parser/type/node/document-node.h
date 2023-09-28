@@ -8,15 +8,17 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "flo/html-parser/utils/text/string.h"
+
 #define FLO_HTML_MAX_PROPS_LEN_APPENDIX (1U << 4U)
 
 typedef struct {
-    const char *tag;
+    const flo_html_String tag;
     const bool isPaired;
-    const char *boolProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
+    const flo_html_String boolProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
     const size_t boolPropsLen;
-    const char *keyProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
-    const char *valueProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
+    const flo_html_String keyProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
+    const flo_html_String valueProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
     const size_t propsLen;
 } flo_html_DocumentNode;
 

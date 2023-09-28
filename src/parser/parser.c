@@ -25,16 +25,18 @@ typedef enum {
     ROGUE_OPEN_TAG
 } TextParsing;
 
-const char *const voidElementTags[] = {
-    "area",  "base", "br",   "col",    "embed", "hr", "img",
-    "input", "link", "meta", "source", "track", "wbr"};
+const flo_html_String voidElementTags[] = {
+    FLO_HTML_S("area"), FLO_HTML_S("base"),   FLO_HTML_S("br"),
+    FLO_HTML_S("col"),  FLO_HTML_S("embed"),  FLO_HTML_S("hr"),
+    FLO_HTML_S("img"),  FLO_HTML_S("input"),  FLO_HTML_S("link"),
+    FLO_HTML_S("meta"), FLO_HTML_S("source"), FLO_HTML_S("track"),
+    FLO_HTML_S("wbr")};
 
-bool isVoidElement(const char *str, size_t len) {
+bool isVoidElement(const flo_html_String str) {
     for (size_t i = 0; i < sizeof(voidElementTags) / sizeof(voidElementTags[0]);
          i++) {
-        if (strncmp(str, voidElementTags[i], len) == 0 &&
-            strlen(voidElementTags[i]) == len) {
-            return true; // Match found
+        if (flo_html_stringEquals(str, voidElementTags[i])) {
+            return true;
         }
     }
     return false; // No match found
@@ -85,14 +87,14 @@ updateReferences(const flo_html_node_id newNodeID,
 }
 
 flo_html_DomStatus
-parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
+parseflo_html_DomNode(const flo_html_String htmlString, size_t *currentPosition,
                       flo_html_node_id *prevNodeID, flo_html_node_id *newNodeID,
-                      unsigned char *isSingle, TextParsing *context,
+                      bool *isSingle, TextParsing *context,
                       unsigned char exclamStart, flo_html_Dom *dom,
                       flo_html_TextStore *textStore) {
     flo_html_ElementStatus elementStatus = ELEMENT_SUCCESS;
     flo_html_DomStatus documentStatus = DOM_SUCCESS;
-    char ch = htmlString[++(*currentPosition)];
+    unsigned char ch = flo_html_getChar(htmlString, ++(*currentPosition));
 
     if ((documentStatus = getNewNodeID(newNodeID, NODE_TYPE_DOCUMENT,
                                        prevNodeID, dom)) != DOM_SUCCESS) {
@@ -103,7 +105,7 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
     size_t elementStartIndex = *currentPosition;
     while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '>' &&
            ch != '\0') {
-        ch = htmlString[++(*currentPosition)];
+        ch = flo_html_getChar(htmlString, ++(*currentPosition));
     }
     size_t elementLen = *currentPosition - elementStartIndex;
     if (ch == '\0') {
@@ -112,10 +114,11 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
 
     *isSingle = exclamStart;
     if (ch == '>' && *currentPosition > 0 &&
-        htmlString[*currentPosition - 1] == '/') {
+        htmlString.buf[*currentPosition - 1] == '/') {
         *isSingle = true;
         elementLen--;
-    } else if (isVoidElement(&htmlString[elementStartIndex], elementLen)) {
+    } else if (isVoidElement(FLO_HTML_S_LEN(&htmlString.buf[elementStartIndex],
+                                            elementLen))) {
         // For the funny <br> tags...
         *isSingle = true;
     }
@@ -123,7 +126,7 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
     // Collect attributes here.
     while (ch != '>' && ch != '/' && ch != '\0') {
         while (ch == ' ' || flo_html_isSpecialSpace(ch)) {
-            ch = htmlString[++(*currentPosition)];
+            ch = flo_html_getChar(htmlString, ++(*currentPosition));
         }
         if (ch == '/' || ch == '>') {
             break;
@@ -132,20 +135,21 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
         size_t attrKeyStartIndex = *currentPosition;
 
         if (ch == '\'' || ch == '"') {
-            char quote = ch;
-            ch = htmlString[++(*currentPosition)]; // Skip start quote.
+            unsigned char quote = ch;
+            ch = flo_html_getChar(htmlString,
+                                  ++(*currentPosition)); // Skip start quote.
             while (ch != quote && ch != '\0') {
-                ch = htmlString[++(*currentPosition)];
+                ch = flo_html_getChar(htmlString, ++(*currentPosition));
             }
-            ch = htmlString[++(*currentPosition)]; // Skip end quote.
+            ch = htmlString.buf[++(*currentPosition)]; // Skip end quote.
         } else {
             while (ch != ' ' && ch != '>' && ch != '=') {
-                ch = htmlString[++(*currentPosition)];
+                ch = flo_html_getChar(htmlString, ++(*currentPosition));
             }
         }
         size_t attrKeyLen = *currentPosition - attrKeyStartIndex;
         if (ch == '>' && *currentPosition > 0 &&
-            htmlString[*currentPosition - 1] == '/') {
+            htmlString.buf[*currentPosition - 1] == '/') {
             *isSingle = 1;
             attrKeyLen--;
         }
@@ -156,29 +160,35 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
             // Expected syntax: key=value (This is invalid html, but will still
             // support it) We can do some more interesting stuff but currently
             // not required.
-            ch = htmlString[++(*currentPosition)];
+            ch = flo_html_getChar(htmlString, ++(*currentPosition));
 
             size_t attrValueStartIndex = *currentPosition;
             if (ch == '\'' || ch == '"') {
                 attrValueStartIndex++;
-                char quote = ch;
-                ch = htmlString[++(*currentPosition)];
+                unsigned char quote = ch;
+                ch = flo_html_getChar(htmlString, ++(*currentPosition));
 
                 while (ch != quote && ch != '\0') {
-                    ch = htmlString[++(*currentPosition)];
+                    ch = flo_html_getChar(htmlString, ++(*currentPosition));
                 }
             } else {
                 while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '>' &&
                        ch != '\0') {
-                    ch = htmlString[++(*currentPosition)];
+                    ch = flo_html_getChar(htmlString, ++(*currentPosition));
                 }
             }
 
             size_t attrValueLen = *currentPosition - attrValueStartIndex;
 
-            elementStatus = flo_html_addPropertyToNodeStringsWithLength(
-                *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen,
-                &htmlString[attrValueStartIndex], attrValueLen, dom, textStore);
+            elementStatus = flo_html_addPropertyToNode(
+                *newNodeID,
+                FLO_HTML_S_LEN(
+                    flo_html_getCharPtr(htmlString, attrKeyStartIndex),
+                    attrKeyLen),
+                FLO_HTML_S_LEN(
+                    flo_html_getCharPtr(htmlString, attrValueStartIndex),
+                    attrValueLen),
+                dom, textStore);
             if (elementStatus != ELEMENT_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
                     flo_html_elementStatusToString(elementStatus),
@@ -187,11 +197,14 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
             }
 
             // Move past '"'
-            ch = htmlString[++(*currentPosition)];
+            ch = flo_html_getChar(htmlString, ++(*currentPosition));
         } else {
-            elementStatus = flo_html_addBooleanPropertyToNodeStringWithLength(
-                *newNodeID, &htmlString[attrKeyStartIndex], attrKeyLen, dom,
-                textStore);
+            elementStatus = flo_html_addBooleanPropertyToNode(
+                *newNodeID,
+                FLO_HTML_S_LEN(
+                    flo_html_getCharPtr(htmlString, attrKeyStartIndex),
+                    attrKeyLen),
+                dom, textStore);
 
             if (elementStatus != ELEMENT_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
@@ -205,85 +218,92 @@ parseflo_html_DomNode(const char *htmlString, size_t *currentPosition,
         *isSingle = 1;
     }
 
-    char tagName[elementLen + 1];
-    strncpy(tagName, &htmlString[elementStartIndex], elementLen);
-    tagName[elementLen] = '\0';
+    unsigned char tagBuffer[elementLen + 1];
+    flo_html_String tagName = {elementLen, tagBuffer};
+    tagName = flo_html_strcpy(
+        tagName,
+        FLO_HTML_S_LEN(flo_html_getCharPtr(htmlString, elementStartIndex),
+                       elementLen));
+
     *context = BASIC_CONTEXT;
-    if (strcmp(tagName, "script") == 0) {
+    if (flo_html_stringEquals(tagName, FLO_HTML_S("script"))) {
         *context = SCRIPT_CONTEXT;
     }
 
-    if (strcmp(tagName, "style") == 0) {
+    if (flo_html_stringEquals(tagName, FLO_HTML_S("style"))) {
         *context = STYLE_CONTEXT;
     }
 
     if ((documentStatus = flo_html_setTagOnDocumentNode(
-             &htmlString[elementStartIndex], elementLen, *newNodeID,
-             !(*isSingle), dom, textStore)) != DOM_SUCCESS) {
+             FLO_HTML_S_LEN(flo_html_getCharPtr(htmlString, elementStartIndex),
+                            elementLen),
+             *newNodeID, !(*isSingle), dom, textStore)) != DOM_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Failed to add tag to node ID.\n");
         return documentStatus;
     }
 
     while (ch != '>' && ch != '\0') {
-        ch = htmlString[++(*currentPosition)];
+        ch = flo_html_getChar(htmlString, ++(*currentPosition));
     }
     if (ch != '\0') {
-        ch = htmlString[++(*currentPosition)];
+        ch = flo_html_getChar(htmlString, ++(*currentPosition));
     }
 
     return documentStatus;
 }
 
 flo_html_DomStatus
-parseBasicdomNode(const char *htmlString, size_t *currentPosition,
+parseBasicdomNode(const flo_html_String htmlString, size_t *currentPosition,
                   flo_html_node_id *prevNodeID, flo_html_node_id *newNodeID,
-                  unsigned char *isSingle, TextParsing *context,
-                  flo_html_Dom *dom, flo_html_TextStore *textStore) {
+                  bool *isSingle, TextParsing *context, flo_html_Dom *dom,
+                  flo_html_TextStore *textStore) {
     return parseflo_html_DomNode(htmlString, currentPosition, prevNodeID,
-                                 newNodeID, isSingle, context, 0, dom,
+                                 newNodeID, isSingle, context, false, dom,
                                  textStore);
 }
 
 flo_html_DomStatus
-parseExclamdomNode(const char *htmlString, size_t *currentPosition,
+parseExclamdomNode(const flo_html_String htmlString, size_t *currentPosition,
                    flo_html_node_id *prevNodeID, flo_html_node_id *newNodeID,
                    flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    unsigned char ignore = 0;
+    bool ignore = 0;
     TextParsing ignore2 = BASIC_CONTEXT;
     return parseflo_html_DomNode(htmlString, currentPosition, prevNodeID,
                                  newNodeID, &ignore, &ignore2, 1, dom,
                                  textStore);
 }
 
-unsigned char textNodeAtBasicEnd(const char ch, const char *htmlString,
-                                 const size_t currentPosition) {
+unsigned char textNodeContinue(const char ch, const flo_html_String htmlString,
+                               const size_t currentPosition) {
     return (ch != '\0' && !flo_html_isSpecialSpace(ch) &&
             (ch != ' ' ||
-             (currentPosition > 0 && htmlString[currentPosition - 1] != ' ')));
+             (currentPosition > 0 &&
+              flo_html_getChar(htmlString, currentPosition - 1) != ' ')));
 }
 
 flo_html_DomStatus
-parseTextNode(const char *htmlString, size_t *currentPosition,
+parseTextNode(const flo_html_String htmlString, size_t *currentPosition,
               flo_html_node_id *prevNodeID, flo_html_node_id *lastParsedNodeID,
-              TextParsing *context, unsigned char *isMerge, flo_html_Dom *dom,
+              TextParsing *context, bool *isMerge, flo_html_Dom *dom,
               flo_html_TextStore *textStore) {
     flo_html_ElementStatus elementStatus = ELEMENT_SUCCESS;
     flo_html_DomStatus documentStatus = DOM_SUCCESS;
     size_t elementStartIndex = *currentPosition;
-    char ch = htmlString[*currentPosition];
+    unsigned char ch = flo_html_getChar(htmlString, *currentPosition);
     size_t elementLen = 0;
 
     // Continue until we encounter extra space or the end of the text
     // node.
     switch (*context) {
     case BASIC_CONTEXT: {
-        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
+        while (textNodeContinue(ch, htmlString, *currentPosition) &&
                ch != '<') {
-            ch = htmlString[++(*currentPosition)];
+            ch = flo_html_getChar(htmlString, ++(*currentPosition));
         }
 
         elementLen = *currentPosition - elementStartIndex;
-        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+        if (*currentPosition > 0 &&
+            flo_html_getChar(htmlString, (*currentPosition) - 1) == ' ') {
             if (elementLen > 0) {
                 elementLen--;
             }
@@ -291,21 +311,31 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
         break;
     }
     case STYLE_CONTEXT: {
-        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
-               strncmp(&htmlString[*currentPosition], "</style",
-                       strlen("</style")) != 0) {
-            ch = htmlString[++(*currentPosition)];
+        const flo_html_String styleTag = FLO_HTML_S("</style");
+        while (textNodeContinue(ch, htmlString, *currentPosition) &&
+               (*currentPosition + styleTag.len <= htmlString.len ||
+                !flo_html_stringEquals(
+                    FLO_HTML_S_LEN(
+                        flo_html_getCharPtr(htmlString, *currentPosition),
+                        styleTag.len),
+                    styleTag))) {
+            ch = flo_html_getChar(htmlString, ++(*currentPosition));
         }
 
         elementLen = *currentPosition - elementStartIndex;
-        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+        if (*currentPosition > 0 &&
+            flo_html_getChar(htmlString, *currentPosition - 1) == ' ') {
             if (elementLen > 0) {
                 elementLen--;
             }
         }
 
-        if (strncmp(&htmlString[*currentPosition], "</style",
-                    strlen("</style")) == 0) {
+        if (*currentPosition + styleTag.len >= htmlString.len &&
+            flo_html_stringEquals(
+                FLO_HTML_S_LEN(
+                    flo_html_getCharPtr(htmlString, *currentPosition),
+                    styleTag.len),
+                styleTag)) {
             *context = BASIC_CONTEXT;
             if (elementLen < 1) {
                 return documentStatus;
@@ -315,10 +345,17 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
         break;
     }
     case SCRIPT_CONTEXT: {
-        char isInString = 0;
-        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
-               (isInString || strncmp(&htmlString[*currentPosition], "</script",
-                                      strlen("</script")) != 0)) {
+        unsigned char isInString = 0;
+        const flo_html_String scriptTag = FLO_HTML_S("</script");
+        while (textNodeContinue(ch, htmlString, *currentPosition) &&
+               (isInString ||
+
+                (*currentPosition + scriptTag.len <= htmlString.len ||
+                 !flo_html_stringEquals(
+                     FLO_HTML_S_LEN(
+                         flo_html_getCharPtr(htmlString, *currentPosition),
+                         scriptTag.len),
+                     scriptTag)))) {
             if (ch == '\'' || ch == '"' || ch == '`') {
                 if (isInString == ch) {
                     isInString = 0;
@@ -326,18 +363,24 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
                     isInString = ch;
                 }
             }
-            ch = htmlString[++(*currentPosition)];
+            ch = flo_html_getChar(htmlString, ++(*currentPosition));
         }
 
         elementLen = *currentPosition - elementStartIndex;
 
-        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+        if (*currentPosition > 0 &&
+            flo_html_getChar(htmlString, (*currentPosition) - 1) == ' ') {
             if (elementLen > 0) {
                 elementLen--;
             }
         }
-        if (strncmp(&htmlString[*currentPosition], "</script",
-                    strlen("</script")) == 0) {
+
+        if (*currentPosition + scriptTag.len >= htmlString.len &&
+            flo_html_stringEquals(
+                FLO_HTML_S_LEN(
+                    flo_html_getCharPtr(htmlString, *currentPosition),
+                    scriptTag.len),
+                scriptTag)) {
             *context = BASIC_CONTEXT;
             if (elementLen < 1) {
                 return documentStatus;
@@ -348,14 +391,15 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
     }
     case ROGUE_OPEN_TAG: {
         // Always consume the rogue opening tag.
-        ch = htmlString[++(*currentPosition)];
-        while (textNodeAtBasicEnd(ch, htmlString, *currentPosition) &&
+        ch = flo_html_getChar(htmlString, ++(*currentPosition));
+        while (textNodeContinue(ch, htmlString, *currentPosition) &&
                ch != '<') {
-            ch = htmlString[++(*currentPosition)];
+            ch = flo_html_getChar(htmlString, ++(*currentPosition));
         }
 
         elementLen = *currentPosition - elementStartIndex;
-        if (*currentPosition > 0 && htmlString[(*currentPosition) - 1] == ' ') {
+        if (*currentPosition > 0 &&
+            flo_html_getChar(htmlString, (*currentPosition) - 1) == ' ') {
             if (elementLen > 0) {
                 elementLen--;
             }
@@ -370,9 +414,11 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
     flo_html_Node *prevNode = &dom->nodes[*lastParsedNodeID];
     if (prevNode->nodeType == NODE_TYPE_TEXT) {
         *isMerge = 1;
-        elementStatus =
-            flo_html_addTextToTextNode(prevNode, &htmlString[elementStartIndex],
-                                       elementLen, dom, textStore, true);
+        elementStatus = flo_html_addTextToTextNode(
+            prevNode,
+            FLO_HTML_S_LEN(flo_html_getCharPtr(htmlString, elementStartIndex),
+                           elementLen),
+            dom, textStore, true);
         if (elementStatus != ELEMENT_CREATED) {
             FLO_HTML_ERROR_WITH_CODE_ONLY(
                 flo_html_elementStatusToString(elementStatus),
@@ -387,9 +433,11 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
         }
 
         char *dataLocation = NULL;
-        elementStatus = flo_html_insertElement(&textStore->text,
-                                               &htmlString[elementStartIndex],
-                                               elementLen, &dataLocation);
+        elementStatus = flo_html_insertElement(
+            &textStore->text,
+            FLO_HTML_S_LEN(flo_html_getCharPtr(htmlString, elementStartIndex),
+                           elementLen),
+            &dataLocation);
         if (elementStatus != ELEMENT_CREATED) {
             FLO_HTML_ERROR_WITH_CODE_ONLY(
                 flo_html_elementStatusToString(elementStatus),
@@ -397,13 +445,15 @@ parseTextNode(const char *htmlString, size_t *currentPosition,
             return DOM_NO_ELEMENT;
         }
 
-        flo_html_setNodeText(*lastParsedNodeID, dataLocation, dom);
+        flo_html_setNodeText(*lastParsedNodeID,
+                             FLO_HTML_S_LEN(dataLocation, elementLen), dom);
     }
 
     return documentStatus;
 }
 
-flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
+flo_html_DomStatus flo_html_parse(const flo_html_String htmlString,
+                                  flo_html_Dom *dom,
                                   flo_html_TextStore *textStore) {
     flo_html_DomStatus documentStatus = DOM_SUCCESS;
 
@@ -416,12 +466,12 @@ flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
 
     flo_html_node_id prevNodeID = 0;
     flo_html_node_id lastParsedNodeID = 0;
-    char ch = htmlString[currentPosition];
+    unsigned char ch = flo_html_getChar(htmlString, currentPosition);
 
     while (ch != '\0') {
-        ch = htmlString[currentPosition];
+        ch = flo_html_getChar(htmlString, currentPosition);
         while (ch == ' ' || flo_html_isSpecialSpace(ch)) {
-            ch = htmlString[++currentPosition];
+            ch = flo_html_getChar(htmlString, ++currentPosition);
         }
         if (ch == '\0') {
             break;
@@ -430,14 +480,16 @@ flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
         // Text node.
         if (context != BASIC_CONTEXT || ch != '<' ||
             (ch == '<' &&
-             (htmlString[currentPosition + 1] == ' ' ||
-              flo_html_isSpecialSpace(htmlString[currentPosition + 1])))) {
+             (flo_html_getChar(htmlString, currentPosition + 1) == ' ' ||
+              flo_html_isSpecialSpace(
+                  flo_html_getChar(htmlString, currentPosition + 1))))) {
             if (context == BASIC_CONTEXT && ch == '<' &&
-                (htmlString[currentPosition + 1] == ' ' ||
-                 flo_html_isSpecialSpace(htmlString[currentPosition + 1]))) {
+                (flo_html_getChar(htmlString, currentPosition + 1) == ' ' ||
+                 flo_html_isSpecialSpace(
+                     flo_html_getChar(htmlString, currentPosition + 1)))) {
                 context = ROGUE_OPEN_TAG;
             }
-            unsigned char isMerge = 0;
+            bool isMerge = 0;
 
             if ((documentStatus =
                      parseTextNode(htmlString, &currentPosition, &prevNodeID,
@@ -461,12 +513,12 @@ flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
         // dom node.
         else {
             // Closing tags.
-            if (htmlString[currentPosition + 1] == '/') {
+            if (flo_html_getChar(htmlString, currentPosition + 1) == '/') {
                 while (ch != '\0' && ch != '>') {
-                    ch = htmlString[++currentPosition];
+                    ch = flo_html_getChar(htmlString, ++currentPosition);
                 }
                 if (ch != '\0') {
-                    ch = htmlString[++currentPosition];
+                    ch = flo_html_getChar(htmlString, ++currentPosition);
                 }
 
                 if (nodeStack.len > 0) {
@@ -476,20 +528,22 @@ flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
                 context = BASIC_CONTEXT;
             }
             // Comments or <!DOCTYPE>.
-            else if (htmlString[currentPosition + 1] == '!') {
+            else if (flo_html_getChar(htmlString, currentPosition + 1) == '!') {
                 // Skip comments.
-                if (htmlString[currentPosition + 2] == '-' &&
-                    htmlString[currentPosition + 3] == '-') {
+                if (flo_html_getChar(htmlString, currentPosition + 2) == '-' &&
+                    flo_html_getChar(htmlString, currentPosition + 3) == '-') {
                     while (ch != '\0' &&
                            (ch != '>' ||
                             (currentPosition >= 1 &&
-                             htmlString[currentPosition - 1] != '-') ||
+                             flo_html_getChar(htmlString,
+                                              currentPosition - 1) != '-') ||
                             (currentPosition >= 2 &&
-                             htmlString[currentPosition - 2] != '-'))) {
-                        ch = htmlString[++currentPosition];
+                             flo_html_getChar(htmlString,
+                                              currentPosition - 2) != '-'))) {
+                        ch = flo_html_getChar(htmlString, ++currentPosition);
                     }
                     if (ch != '\0') {
-                        ch = htmlString[++currentPosition];
+                        ch = flo_html_getChar(htmlString, ++currentPosition);
                     }
 
                 }
@@ -511,7 +565,7 @@ flo_html_DomStatus flo_html_parse(const char *htmlString, flo_html_Dom *dom,
             }
             // basic dom node.
             else {
-                unsigned char isSingle = 0;
+                bool isSingle = 0;
                 if ((documentStatus = parseBasicdomNode(
                          htmlString, &currentPosition, &prevNodeID,
                          &lastParsedNodeID, &isSingle, &context, dom,
@@ -551,18 +605,17 @@ flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
     }
 
     domStatus = flo_html_setTagOnDocumentNode(
-        documentNode->tag, strlen(documentNode->tag), *newNodeID,
-        documentNode->isPaired, dom, textStore);
+        documentNode->tag, *newNodeID, documentNode->isPaired, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Failed to add tag to new node ID!\n");
         return domStatus;
     }
 
     for (size_t i = 0; i < documentNode->boolPropsLen; i++) {
-        const char *boolProp = documentNode->boolProps[i];
+        const flo_html_String boolProp = documentNode->boolProps[i];
         flo_html_ElementStatus elementStatus =
-            flo_html_addBooleanPropertyToNodeString(*newNodeID, boolProp, dom,
-                                                    textStore);
+            flo_html_addBooleanPropertyToNode(*newNodeID, boolProp, dom,
+                                              textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             FLO_HTML_PRINT_ERROR(
                 "Failed to boolean property to new node ID!\n");
@@ -571,11 +624,10 @@ flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
     }
 
     for (size_t i = 0; i < documentNode->propsLen; i++) {
-        const char *keyProp = documentNode->keyProps[i];
-        const char *valueProp = documentNode->valueProps[i];
-        flo_html_ElementStatus elementStatus =
-            flo_html_addPropertyToNodeStrings(*newNodeID, keyProp, valueProp,
-                                              dom, textStore);
+        const flo_html_String keyProp = documentNode->keyProps[i];
+        const flo_html_String valueProp = documentNode->valueProps[i];
+        flo_html_ElementStatus elementStatus = flo_html_addPropertyToNode(
+            *newNodeID, keyProp, valueProp, dom, textStore);
         if (elementStatus != ELEMENT_SUCCESS) {
             FLO_HTML_PRINT_ERROR("Failed to property to new node ID!\n");
             return DOM_NO_ELEMENT;
@@ -597,8 +649,8 @@ flo_html_DomStatus flo_html_parseTextElement(const flo_html_String text,
     }
 
     char *dataLocation = NULL;
-    flo_html_ElementStatus elementStatus = flo_html_insertElement(
-        &textStore->text, text, strlen(text), &dataLocation);
+    flo_html_ElementStatus elementStatus =
+        flo_html_insertElement(&textStore->text, text, &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(
             flo_html_elementStatusToString(elementStatus),
@@ -606,7 +658,8 @@ flo_html_DomStatus flo_html_parseTextElement(const flo_html_String text,
         return DOM_NO_ELEMENT;
     }
 
-    flo_html_setNodeText(*newNodeID, dataLocation, dom);
+    flo_html_setNodeText(*newNodeID, FLO_HTML_S_LEN(dataLocation, text.len),
+                         dom);
 
     return domStatus;
 }

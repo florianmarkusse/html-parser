@@ -21,15 +21,16 @@ typedef enum {
     NODE_TYPE_NUM
 } flo_html_NodeType;
 
-static const char *const nodeTypeStrings[NODE_TYPE_NUM] = {"Document", "Text",
-                                                           "Removed", "Error"};
+static const flo_html_String nodeTypeStrings[NODE_TYPE_NUM] = {
+    FLO_HTML_S("Document"), FLO_HTML_S("Text"), FLO_HTML_S("Removed"),
+    FLO_HTML_S("Error")};
 
-__attribute__((unused)) static const char *
+__attribute__((unused)) static const flo_html_String
 flo_html_nodeTypeToString(flo_html_NodeType type) {
     if (type >= 0 && type < NODE_TYPE_NUM) {
         return nodeTypeStrings[type];
     }
-    return "Unknown node type!";
+    return FLO_HTML_S("Unknown node type!");
 }
 
 typedef struct {

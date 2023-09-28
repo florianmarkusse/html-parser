@@ -29,7 +29,7 @@ extern "C" {
  *          an error code otherwise).
  */
 flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
-    const char *cssQuery, const flo_html_DocumentNode *docNode,
+    const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
     flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
@@ -48,8 +48,8 @@ flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
  *          an error code otherwise).
  */
 flo_html_DomStatus
-flo_html_appendTextNodeWithQuery(const char *cssQuery, const char *text,
-                                 flo_html_Dom *dom,
+flo_html_appendTextNodeWithQuery(const flo_html_String cssQuery,
+                                 const flo_html_String text, flo_html_Dom *dom,
                                  flo_html_TextStore *textStore);
 
 /**
@@ -68,8 +68,8 @@ flo_html_appendTextNodeWithQuery(const char *cssQuery, const char *text,
  *          an error code otherwise).
  */
 flo_html_DomStatus flo_html_appendHTMLFromStringWithQuery(
-    const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
-    flo_html_TextStore *textStore);
+    const flo_html_String cssQuery, const flo_html_String htmlString,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Append HTML content from a file to the DOM using a CSS query.
@@ -87,8 +87,8 @@ flo_html_DomStatus flo_html_appendHTMLFromStringWithQuery(
  *          an error code otherwise).
  */
 flo_html_DomStatus flo_html_appendHTMLFromFileWithQuery(
-    const char *cssQuery, const char *fileLocation, flo_html_Dom *dom,
-    flo_html_TextStore *textStore);
+    const flo_html_String cssQuery, const flo_html_String fileLocation,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Append a DocumentNode to the DOM.
@@ -126,7 +126,8 @@ flo_html_appendDocumentNode(flo_html_node_id parentID,
  *          an error code otherwise).
  */
 flo_html_DomStatus flo_html_appendTextNode(flo_html_node_id parentID,
-                                           const char *text, flo_html_Dom *dom,
+                                           const flo_html_String text,
+                                           flo_html_Dom *dom,
                                            flo_html_TextStore *textStore);
 
 /**
@@ -144,10 +145,10 @@ flo_html_DomStatus flo_html_appendTextNode(flo_html_node_id parentID,
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_appendHTMLFromString(flo_html_node_id parentID,
-                                                 const char *htmlString,
-                                                 flo_html_Dom *dom,
-                                                 flo_html_TextStore *textStore);
+flo_html_DomStatus
+flo_html_appendHTMLFromString(flo_html_node_id parentID,
+                              const flo_html_String htmlString,
+                              flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 #ifdef __cplusplus
 }
