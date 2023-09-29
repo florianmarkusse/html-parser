@@ -6,41 +6,41 @@
 #include "test.h"
 
 TestStatus initComparisonTest(ComparisonTest *comparisonTest,
-                              const char *startFileLocation,
-                              const char *expectedFileLocation) {
+                              const flo_html_String startFileLocation,
+                              const flo_html_String expectedFileLocation) {
     flo_html_ElementStatus initStatus =
         flo_html_createTextStore(&comparisonTest->startTextStore);
     if (initStatus != ELEMENT_SUCCESS) {
         return failWithMessageAndCode(
-            "Failed to initialize start text store!\n",
+            FLO_HTML_S("Failed to initialize start text store!\n"),
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
     if (flo_html_createDomFromFile(
             startFileLocation, &comparisonTest->startflo_html_Dom,
             &comparisonTest->startTextStore) != DOM_SUCCESS) {
-        return failWithMessageAndCode("Failed to create start DOM from file!\n",
-                                      TEST_ERROR_INITIALIZATION,
-                                      comparisonTest);
+        return failWithMessageAndCode(
+            FLO_HTML_S("Failed to create start DOM from file!\n"),
+            TEST_ERROR_INITIALIZATION, comparisonTest);
     }
 
     initStatus = flo_html_createTextStore(&comparisonTest->expectedTextStore);
     if (initStatus != ELEMENT_SUCCESS) {
         return failWithMessageAndCode(
-            "Failed to initialize expected text store!\n",
+            FLO_HTML_S("Failed to initialize expected text store!\n"),
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
     if (flo_html_createDomFromFile(
             expectedFileLocation, &comparisonTest->expectedflo_html_Dom,
             &comparisonTest->expectedTextStore) != DOM_SUCCESS) {
         return failWithMessageAndCode(
-            "Failed to create expected DOM from file!\n",
+            FLO_HTML_S("Failed to create expected DOM from file!\n"),
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
 
     return TEST_SUCCESS;
 }
 
-TestStatus getNodeFromQuerySelector(const char *cssQuery,
+TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
                                     ComparisonTest *comparisonTest,
                                     flo_html_node_id *foundNode) {
     flo_html_QueryStatus queryStatus =
@@ -63,14 +63,14 @@ TestStatus getNodeFromQuerySelector(const char *cssQuery,
     return TEST_SUCCESS;
 }
 
-TestStatus failWithMessageAndCode(const char *failureMessage,
+TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
                                   const TestStatus failureStatus,
                                   ComparisonTest *comparisonTest) {
     destroyComparisonTest(comparisonTest);
 
     printTestFailure();
     printTestDemarcation();
-    printf("%s", failureMessage);
+    printf("%s", failureMessage.buf);
     printTestDemarcation();
 
     if (failureStatus == TEST_SUCCESS) {
@@ -80,7 +80,7 @@ TestStatus failWithMessageAndCode(const char *failureMessage,
     return failureStatus;
 }
 
-TestStatus failWithMessage(const char *failureMessage,
+TestStatus failWithMessage(const flo_html_String failureMessage,
                            ComparisonTest *comparisonTest) {
     return failWithMessageAndCode(failureMessage, TEST_FAILURE, comparisonTest);
 }

@@ -26,48 +26,49 @@
         if (queryResult != QUERY_SUCCESS) {                                    \
             FLO_HTML_PRINT_ERROR(                                              \
                 "Could not find element using query selector: %s\n",           \
-                cssQuery);                                                     \
+                (cssQuery).buf);                                               \
             return DOM_NO_ELEMENT;                                             \
         }                                                                      \
         return replaceWithFunction(parentNodeID, nodeData, dom, textStore);    \
     } while (0)
 
 flo_html_DomStatus flo_html_replaceWithDocumentNodeWithQuery(
-    const char *cssQuery, const flo_html_DocumentNode *docNode,
+    const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
     flo_html_Dom *dom, flo_html_TextStore *textStore) {
     REPLACE_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
                                 flo_html_replaceWithDocumentNode);
 }
 
-flo_html_DomStatus
-flo_html_replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
-                                      flo_html_Dom *dom,
-                                      flo_html_TextStore *textStore) {
+flo_html_DomStatus flo_html_replaceWithTextNodeWithQuery(
+    const flo_html_String cssQuery, const flo_html_String text,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     REPLACE_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
                                 flo_html_replaceWithTextNode);
 }
 
 flo_html_DomStatus flo_html_replaceWithHTMLFromStringWithQuery(
-    const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
-    flo_html_TextStore *textStore) {
+    const flo_html_String cssQuery, const flo_html_String htmlString,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     REPLACE_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
                                 flo_html_replaceWithHTMLFromString);
 }
 
 flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
-    const char *cssQuery, const char *fileLocation, flo_html_Dom *dom,
-    flo_html_TextStore *textStore) {
+    const flo_html_String cssQuery, const flo_html_String fileLocation,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     char *buffer = NULL;
-    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &buffer);
+    flo_html_FileStatus fileStatus =
+        flo_html_readFile(fileLocation.buf, &buffer);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
-                                        fileLocation);
+                                        fileLocation.buf);
         return DOM_ERROR_MEMORY;
     }
 
-    REPLACE_USING_QUERYSELECTOR(cssQuery, buffer, dom, textStore,
-                                flo_html_replaceWithHTMLFromString);
+    REPLACE_USING_QUERYSELECTOR(cssQuery,
+                                FLO_HTML_S_LEN(buffer, strlen(buffer)), dom,
+                                textStore, flo_html_replaceWithHTMLFromString);
 }
 
 static flo_html_DomStatus
@@ -177,8 +178,9 @@ flo_html_MergeResult tryMergeBothSides(const flo_html_node_id toReplaceNodeID,
 }
 
 flo_html_DomStatus
-flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID, const char *text,
-                             flo_html_Dom *dom, flo_html_TextStore *textStore) {
+flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
+                             const flo_html_String text, flo_html_Dom *dom,
+                             flo_html_TextStore *textStore) {
     flo_html_node_id newNodeID = 0;
     flo_html_DomStatus domStatus =
         flo_html_parseTextElement(text, dom, textStore, &newNodeID);
@@ -202,10 +204,9 @@ flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID, const char *text,
     return updateReferences(toReplaceNodeID, newNodeID, dom);
 }
 
-flo_html_DomStatus
-flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
-                                   const char *htmlString, flo_html_Dom *dom,
-                                   flo_html_TextStore *textStore) {
+flo_html_DomStatus flo_html_replaceWithHTMLFromString(
+    flo_html_node_id toReplaceNodeID, const flo_html_String htmlString,
+    flo_html_Dom *dom, flo_html_TextStore *textStore) {
     flo_html_node_id firstNewAddedNode = dom->nodeLen;
     flo_html_DomStatus domStatus = flo_html_parse(htmlString, dom, textStore);
     if (domStatus != DOM_SUCCESS) {

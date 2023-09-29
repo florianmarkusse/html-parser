@@ -11,7 +11,7 @@
 #define INPUTS_DIR "tests/src/dom/parsing/inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
-unsigned char parseFile(const char *fileLocation) {
+unsigned char parseFile(const flo_html_String fileLocation) {
     flo_html_TextStore textStore;
     flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
@@ -49,7 +49,7 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
                  ent->d_name);
         printTestStart(fileLocation);
-        if (!parseFile(fileLocation)) {
+        if (!parseFile(FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)))) {
             (*localFailures)++;
             printTestFailure();
             printTestDemarcation();

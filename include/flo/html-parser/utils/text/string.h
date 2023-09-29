@@ -72,6 +72,37 @@ inline unsigned char *flo_html_getCharPtr(flo_html_String str,
     return &str.buf[index];
 }
 
+inline bool flo_html_containsChar(flo_html_String s, unsigned char ch) {
+    for (ptrdiff_t i = 0; i < s.len; i++) {
+        if (s.buf[i] == ch) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline ptrdiff_t flo_html_firstOccurenceOfFrom(flo_html_String s,
+                                               unsigned char ch,
+                                               ptrdiff_t from) {
+#ifdef DEBUG
+    // Debug mode: Perform bounds checking
+    assert(from >= 0 && from < s.len);
+    printf("I AM GETTING A FIRST OCC OF IN DEBUG MODE\n");
+#endif
+
+    for (ptrdiff_t i = from; i < s.len; i++) {
+        if (s.buf[i] == ch) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+inline ptrdiff_t flo_html_firstOccurenceOf(flo_html_String s,
+                                           unsigned char ch) {
+    return flo_html_firstOccurenceOfFrom(s, ch, 0);
+}
+
 #ifdef __cplusplus
 }
 #endif

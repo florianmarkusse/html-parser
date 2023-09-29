@@ -105,7 +105,8 @@ typedef struct {
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-flo_html_DomStatus flo_html_createDom(const char *htmlString, flo_html_Dom *dom,
+flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
+                                      flo_html_Dom *dom,
                                       flo_html_TextStore *textStore);
 
 /**
@@ -123,9 +124,9 @@ flo_html_DomStatus flo_html_createDom(const char *htmlString, flo_html_Dom *dom,
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-flo_html_DomStatus flo_html_createDomFromFile(const char *fileLocation,
-                                              flo_html_Dom *dom,
-                                              flo_html_TextStore *textStore);
+flo_html_DomStatus
+flo_html_createDomFromFile(const flo_html_String fileLocation,
+                           flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Destroy a DOM structure and release associated memory.

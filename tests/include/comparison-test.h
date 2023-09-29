@@ -15,21 +15,21 @@ typedef struct {
 } ComparisonTest;
 
 TestStatus initComparisonTest(ComparisonTest *comparisonTest,
-                              const char *startFileLocation,
-                              const char *expectedFileLocation);
+                              const flo_html_String startFileLocation,
+                              const flo_html_String expectedFileLocation);
 
 TestStatus compareAndEndTest(ComparisonTest *comparisonTest);
 TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
                                      flo_html_ComparisonStatus expectedStatus);
 
-TestStatus getNodeFromQuerySelector(const char *cssQuery,
+TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
                                     ComparisonTest *comparisonTest,
                                     flo_html_node_id *foundNode);
-TestStatus failWithMessageAndCode(const char *failureMessage,
+TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
                                   TestStatus failureStatus,
                                   ComparisonTest *comparisonTest);
 
-TestStatus failWithMessage(const char *failureMessage,
+TestStatus failWithMessage(const flo_html_String failureMessage,
                            ComparisonTest *comparisonTest);
 void destroyComparisonTest(ComparisonTest *comparisonTest);
 

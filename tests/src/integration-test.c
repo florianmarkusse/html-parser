@@ -15,8 +15,9 @@ static TestStatus parseQueryModify() {
     TestStatus result = TEST_FAILURE;
 
     ComparisonTest comparisonTest;
-    result = initComparisonTest(&comparisonTest, PARSE_QUERY_MODIFY_BEFORE,
-                                PARSE_QUERY_MODIFY_AFTER);
+    result = initComparisonTest(&comparisonTest,
+                                FLO_HTML_S(PARSE_QUERY_MODIFY_BEFORE),
+                                FLO_HTML_S(PARSE_QUERY_MODIFY_AFTER));
     if (result != TEST_SUCCESS) {
         return result;
     }
@@ -24,7 +25,7 @@ static TestStatus parseQueryModify() {
     flo_html_node_id *results = NULL;
     size_t resultsLen = 0;
     flo_html_QueryStatus actual = flo_html_querySelectorAll(
-        "title", &comparisonTest.startflo_html_Dom,
+        FLO_HTML_S("title"), &comparisonTest.startflo_html_Dom,
         &comparisonTest.startTextStore, &results, &resultsLen);
 
     if (actual != QUERY_SUCCESS) {
@@ -49,21 +50,21 @@ static TestStatus parseQueryModify() {
         FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
-    flo_html_setTextContent(results[0], "FOURTH",
+    flo_html_setTextContent(results[0], FLO_HTML_S("FOURTH"),
                             &comparisonTest.startflo_html_Dom,
                             &comparisonTest.startTextStore);
-    flo_html_addBooleanPropertyToNodeString(results[0], "the-fourth",
-                                            &comparisonTest.startflo_html_Dom,
-                                            &comparisonTest.startTextStore);
-    flo_html_addPropertyToNodeStrings(results[0], "the-property", "my value",
+    flo_html_addBooleanPropertyToNode(results[0], FLO_HTML_S("the-fourth"),
                                       &comparisonTest.startflo_html_Dom,
                                       &comparisonTest.startTextStore);
+    flo_html_addPropertyToNode(
+        results[0], FLO_HTML_S("the-property"), FLO_HTML_S("my value"),
+        &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
     FLO_HTML_FREE_TO_NULL(results);
 
     flo_html_node_id currentNodeID = 0;
-    actual =
-        flo_html_querySelector("head", &comparisonTest.startflo_html_Dom,
-                               &comparisonTest.startTextStore, &currentNodeID);
+    actual = flo_html_querySelector(
+        FLO_HTML_S("head"), &comparisonTest.startflo_html_Dom,
+        &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
@@ -76,13 +77,13 @@ static TestStatus parseQueryModify() {
 
     flo_html_prependHTMLFromString(
         currentNodeID,
-        "<title "
-        "id=\"first-title-tag\"></title><title>FIRST</"
-        "title><title>SECOND</title><title>THIRD</title>",
+        FLO_HTML_S("<title "
+                   "id=\"first-title-tag\"></title><title>FIRST</"
+                   "title><title>SECOND</title><title>THIRD</title>"),
         &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
 
     actual = flo_html_querySelectorAll(
-        "title", &comparisonTest.startflo_html_Dom,
+        FLO_HTML_S("title"), &comparisonTest.startflo_html_Dom,
         &comparisonTest.startTextStore, &results, &resultsLen);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
@@ -111,7 +112,7 @@ static TestStatus parseQueryModify() {
     FLO_HTML_FREE_TO_NULL(results);
 
     actual = flo_html_querySelector(
-        "#first-title-tag", &comparisonTest.startflo_html_Dom,
+        FLO_HTML_S("#first-title-tag"), &comparisonTest.startflo_html_Dom,
         &comparisonTest.startTextStore, &currentNodeID);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
@@ -127,7 +128,7 @@ static TestStatus parseQueryModify() {
     flo_html_removeNode(currentNodeID, &comparisonTest.startflo_html_Dom);
 
     actual = flo_html_querySelectorAll(
-        "title", &comparisonTest.startflo_html_Dom,
+        FLO_HTML_S("title"), &comparisonTest.startflo_html_Dom,
         &comparisonTest.startTextStore, &results, &resultsLen);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();

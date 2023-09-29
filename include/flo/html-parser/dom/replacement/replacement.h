@@ -23,13 +23,13 @@ extern "C" {
  * @param[in]   cssQuery        The CSS query to select the element to replace.
  * @param[in]   docNode         The `DocumentNode` to replace with.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 flo_html_DomStatus flo_html_replaceWithDocumentNodeWithQuery(
-    const char *cssQuery, const flo_html_DocumentNode *docNode,
+    const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
     flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
@@ -42,15 +42,14 @@ flo_html_DomStatus flo_html_replaceWithDocumentNodeWithQuery(
  * @param[in]   cssQuery        The CSS query to select the element to replace.
  * @param[in]   text            The text content for the replacement text node.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
-flo_html_replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
-                                      flo_html_Dom *dom,
-                                      flo_html_TextStore *textStore);
+flo_html_DomStatus flo_html_replaceWithTextNodeWithQuery(
+    const flo_html_String cssQuery, const flo_html_String text,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with HTML content from a string using a CSS
@@ -63,14 +62,14 @@ flo_html_replaceWithTextNodeWithQuery(const char *cssQuery, const char *text,
  * @param[in]   cssQuery        The CSS query to select the element to replace.
  * @param[in]   htmlString      The HTML content as a string for replacement.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 flo_html_DomStatus flo_html_replaceWithHTMLFromStringWithQuery(
-    const char *cssQuery, const char *htmlString, flo_html_Dom *dom,
-    flo_html_TextStore *textStore);
+    const flo_html_String cssQuery, const flo_html_String htmlString,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with HTML content from a file using a CSS
@@ -84,14 +83,14 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromStringWithQuery(
  * @param[in]   fileLocation    The file location of the HTML content for
  *                              replacement.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
-    const char *cssQuery, const char *fileLocation, flo_html_Dom *dom,
-    flo_html_TextStore *textStore);
+    const flo_html_String cssQuery, const flo_html_String fileLocation,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with a DocumentNode.
@@ -103,7 +102,7 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
  * @param[in]   toReplaceNodeID The ID of the HTML element to replace.
  * @param[in]   docNode         The `DocumentNode` to replace with.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
@@ -122,14 +121,15 @@ flo_html_DomStatus flo_html_replaceWithDocumentNode(
  * @param[in]   toReplaceNodeID The ID of the HTML element to replace.
  * @param[in]   text            The text content for the replacement text node.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
 flo_html_DomStatus
-flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID, const char *text,
-                             flo_html_Dom *dom, flo_html_TextStore *textStore);
+flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
+                             const flo_html_String text, flo_html_Dom *dom,
+                             flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with HTML content from a string.
@@ -141,15 +141,14 @@ flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID, const char *text,
  * @param[in]   toReplaceNodeID The ID of the HTML element to replace.
  * @param[in]   htmlString      The HTML content as a string for replacement.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   textStore       The text store.
  *
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
-flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
-                                   const char *htmlString, flo_html_Dom *dom,
-                                   flo_html_TextStore *textStore);
+flo_html_DomStatus flo_html_replaceWithHTMLFromString(
+    flo_html_node_id toReplaceNodeID, const flo_html_String htmlString,
+    flo_html_Dom *dom, flo_html_TextStore *textStore);
 
 #ifdef __cplusplus
 }

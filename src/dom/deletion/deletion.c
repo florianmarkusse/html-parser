@@ -76,7 +76,8 @@ void flo_html_removeChildren(const flo_html_node_id nodeID, flo_html_Dom *dom) {
 }
 
 void flo_html_removeBooleanProperty(const flo_html_node_id nodeID,
-                                    const char *boolProp, flo_html_Dom *dom,
+                                    const flo_html_String boolProp,
+                                    flo_html_Dom *dom,
                                     const flo_html_TextStore *textStore) {
     flo_html_indexID boolPropID = flo_html_getBoolPropID(boolProp, textStore);
     if (boolPropID > 0) {
@@ -89,8 +90,8 @@ void flo_html_removeBooleanProperty(const flo_html_node_id nodeID,
     }
 }
 
-void flo_html_removeProperty(const flo_html_node_id nodeID, const char *keyProp,
-                             flo_html_Dom *dom,
+void flo_html_removeProperty(const flo_html_node_id nodeID,
+                             const flo_html_String keyProp, flo_html_Dom *dom,
                              const flo_html_TextStore *textStore) {
     flo_html_indexID keyPropID = flo_html_getPropKeyID(keyProp, textStore);
     if (keyPropID > 0) {

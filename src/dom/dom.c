@@ -2,6 +2,7 @@
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/memory/memory.h"
+#include <string.h>
 
 void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
                                 const flo_html_Registration *initRegistration) {
@@ -12,25 +13,26 @@ void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
     basicRegistry->cap = FLO_HTML_PROP_REGISTRATIONS_PER_PAGE;
 }
 
-flo_html_DomStatus flo_html_createDomFromFile(const char *fileLocation,
-                                              flo_html_Dom *dom,
-                                              flo_html_TextStore *textStore) {
+flo_html_DomStatus
+flo_html_createDomFromFile(const flo_html_String fileLocation,
+                           flo_html_Dom *dom, flo_html_TextStore *textStore) {
     char *buffer = NULL;
-    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &buffer);
+    flo_html_FileStatus fileStatus =
+        flo_html_readFile(fileLocation.buf, &buffer);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
-                                        fileLocation);
+                                        fileLocation.buf);
         return DOM_ERROR_MEMORY;
     }
 
-    flo_html_DomStatus documentStatus =
-        flo_html_createDom(buffer, dom, textStore);
+    flo_html_DomStatus documentStatus = flo_html_createDom(
+        FLO_HTML_S_LEN(buffer, strlen(buffer)), dom, textStore);
     if (documentStatus != DOM_SUCCESS) {
         FLO_HTML_FREE_TO_NULL(buffer);
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
             documentStatusToString(documentStatus),
-            "Failed to create document from file \"%s\"", fileLocation);
+            "Failed to create document from file \"%s\"", fileLocation.buf);
         return documentStatus;
     }
     FLO_HTML_FREE_TO_NULL(buffer);
@@ -38,7 +40,8 @@ flo_html_DomStatus flo_html_createDomFromFile(const char *fileLocation,
     return DOM_SUCCESS;
 }
 
-flo_html_DomStatus flo_html_createDom(const char *htmlString, flo_html_Dom *dom,
+flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
+                                      flo_html_Dom *dom,
                                       flo_html_TextStore *textStore) {
     dom->firstNodeID = 0;
 

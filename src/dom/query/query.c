@@ -54,7 +54,7 @@ bool endOfCurrentFilter(const char ch) {
            ch == '[' || ch == '.' || ch == '#';
 }
 
-flo_html_QueryStatus getQueryResults(const char *cssQuery,
+flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
                                      const flo_html_Dom *dom,
                                      const flo_html_TextStore *textStore,
                                      flo_html_Uint16HashSet *set) {
@@ -71,29 +71,31 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
     flo_html_element_id tokenID = 0;
 
     size_t currentPosition = 0;
-    char ch = cssQuery[currentPosition];
+    char ch = flo_html_getChar(cssQuery, currentPosition);
 
     // Skip ahead until an element is found.
     while (!isElementStartChar(ch) && ch != '[' && ch != '*' && ch != '\0') {
-        ch = cssQuery[++currentPosition];
+        ch = flo_html_getChar(cssQuery, ++currentPosition);
     }
 
     while (ch != '\0') {
-        ch = cssQuery[currentPosition];
+        ch = flo_html_getChar(cssQuery, currentPosition);
 
         if (isPropStartChar(ch)) {
             tokenStart = currentPosition;
             while (!endOfCurrentFilter(ch) && ch != '\0') {
-                ch = cssQuery[++currentPosition];
+                ch = flo_html_getChar(cssQuery, ++currentPosition);
             }
             tokenLength =
                 currentPosition - tokenStart + 1; // Add 1 for the holy spirit.
 
-            char buffer[tokenLength];
-            strncpy(buffer, &cssQuery[tokenStart], tokenLength);
-            buffer[tokenLength - 1] = '\0';
+            unsigned char buffer[tokenLength];
+            flo_html_String token = {tokenLength, buffer};
+            flo_html_strcpy(
+                token, FLO_HTML_S_LEN(flo_html_getCharPtr(cssQuery, tokenStart),
+                                      tokenLength));
 
-            tokenID = flo_html_getTagID(buffer, textStore);
+            tokenID = flo_html_getTagID(token, textStore);
             if (tokenID == 0) {
                 return QUERY_NOT_SEEN_BEFORE;
             }
@@ -104,7 +106,7 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
             filtersLen++;
         } else if (ch == '*') {
             while (!endOfCurrentFilter(ch) && ch != '\0') {
-                ch = cssQuery[++currentPosition];
+                ch = flo_html_getChar(cssQuery, ++currentPosition);
             }
 
             CHECK_FILTERS_LIMIT(filtersLen);
@@ -134,28 +136,29 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
             }
 
             while (!isPropStartChar(ch) && ch != '\0') {
-                ch = cssQuery[++currentPosition];
+                ch = flo_html_getChar(cssQuery, ++currentPosition);
             }
 
             tokenStart = currentPosition;
             while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != '=' &&
                    ch != ']' && ch != '\0') {
-                ch = cssQuery[++currentPosition];
+                ch = flo_html_getChar(cssQuery, ++currentPosition);
             }
             tokenLength =
                 currentPosition - tokenStart + 1; // Add 1 for the holy spirit.
 
             while (ch != '=' && ch != ']' && ch != '.' && ch != '#' &&
                    ch != '\0') {
-                ch = cssQuery[++currentPosition];
+                ch = flo_html_getChar(cssQuery, ++currentPosition);
             }
 
             // If ch == '.' or ch == '#', it means we had to have had '.' or '#'
             // at the beginnging. This is a bit of a funky inference to make,
             // but it is correct (I think).
             if (currentSelector == CLASS || currentSelector == ID) {
-                const char *keyBuffer =
-                    currentSelector == CLASS ? "class" : "id";
+                const flo_html_String keyBuffer = currentSelector == CLASS
+                                                      ? FLO_HTML_S("class")
+                                                      : FLO_HTML_S("id");
                 tokenID = flo_html_getPropKeyID(keyBuffer, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
@@ -165,11 +168,13 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
                 filters[filtersLen].attributeSelector = PROPERTY;
                 filters[filtersLen].data.keyValuePair.keyID = tokenID;
 
-                char valueBuffer[tokenLength];
-                strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
-                valueBuffer[tokenLength - 1] = '\0';
+                unsigned char valueBuffer[tokenLength];
+                flo_html_String token = {tokenLength, valueBuffer};
+                flo_html_strcpy(token, FLO_HTML_S_LEN(flo_html_getCharPtr(
+                                                          cssQuery, tokenStart),
+                                                      tokenLength));
 
-                tokenID = flo_html_getPropValueID(valueBuffer, textStore);
+                tokenID = flo_html_getPropValueID(token, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -177,11 +182,13 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
                 filters[filtersLen].data.keyValuePair.valueID = tokenID;
                 filtersLen++;
             } else if (ch == ']') {
-                char boolBuffer[tokenLength];
-                strncpy(boolBuffer, &cssQuery[tokenStart], tokenLength);
-                boolBuffer[tokenLength - 1] = '\0';
+                unsigned char boolBuffer[tokenLength];
+                flo_html_String token = {tokenLength, boolBuffer};
+                flo_html_strcpy(token, FLO_HTML_S_LEN(flo_html_getCharPtr(
+                                                          cssQuery, tokenStart),
+                                                      tokenLength));
 
-                tokenID = flo_html_getBoolPropID(boolBuffer, textStore);
+                tokenID = flo_html_getBoolPropID(token, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -191,11 +198,15 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
                 filters[filtersLen].data.propID = tokenID;
                 filtersLen++;
             } else if (ch == '=') {
-                char keyBuffer[tokenLength];
-                strncpy(keyBuffer, &cssQuery[tokenStart], tokenLength);
-                keyBuffer[tokenLength - 1] = '\0';
+                unsigned char keyBuffer[tokenLength];
 
-                tokenID = flo_html_getPropKeyID(keyBuffer, textStore);
+                flo_html_String keyToken = {tokenLength, keyBuffer};
+                flo_html_strcpy(
+                    keyToken,
+                    FLO_HTML_S_LEN(flo_html_getCharPtr(cssQuery, tokenStart),
+                                   tokenLength));
+
+                tokenID = flo_html_getPropKeyID(keyToken, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -206,27 +217,31 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
                 filters[filtersLen].data.keyValuePair.keyID = tokenID;
 
                 // Skip the '='
-                ch = cssQuery[++currentPosition];
+                ch = flo_html_getChar(cssQuery, ++currentPosition);
 
                 while (!isElementStartChar(ch) && ch != '\0') {
-                    ch = cssQuery[++currentPosition];
+                    ch = flo_html_getChar(cssQuery, ++currentPosition);
                 }
                 tokenStart = currentPosition;
                 while (ch != ' ' && !flo_html_isSpecialSpace(ch) && ch != ']' &&
                        ch != '\0') {
-                    ch = cssQuery[++currentPosition];
+                    ch = flo_html_getChar(cssQuery, ++currentPosition);
                 }
                 tokenLength = currentPosition - tokenStart +
                               1; // Add 1 for the holy spirit.
                 while (ch != ']' && ch != '\0') {
-                    ch = cssQuery[++currentPosition];
+                    ch = flo_html_getChar(cssQuery, ++currentPosition);
                 }
 
-                char valueBuffer[tokenLength];
-                strncpy(valueBuffer, &cssQuery[tokenStart], tokenLength);
-                valueBuffer[tokenLength - 1] = '\0';
+                unsigned char valueBuffer[tokenLength];
 
-                tokenID = flo_html_getPropValueID(valueBuffer, textStore);
+                flo_html_String valueToken = {tokenLength, valueBuffer};
+                flo_html_strcpy(
+                    valueToken,
+                    FLO_HTML_S_LEN(flo_html_getCharPtr(cssQuery, tokenStart),
+                                   tokenLength));
+
+                tokenID = flo_html_getPropValueID(valueToken, textStore);
                 if (tokenID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -235,7 +250,7 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
                 filtersLen++;
             }
             if (ch == ']') {
-                ch = cssQuery[++currentPosition];
+                ch = flo_html_getChar(cssQuery, ++currentPosition);
             }
         }
 
@@ -302,7 +317,7 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
             if (isSpecifiedflo_html_Combinator(ch)) {
                 combinator = ch;
             }
-            ch = cssQuery[++currentPosition];
+            ch = flo_html_getChar(cssQuery, ++currentPosition);
         }
 
         switch (combinator) {
@@ -333,7 +348,8 @@ flo_html_QueryStatus getQueryResults(const char *cssQuery,
 }
 
 flo_html_QueryStatus
-flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
+flo_html_querySelectorAll(const flo_html_String cssQuery,
+                          const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore,
                           flo_html_node_id **results, size_t *resultsLen) {
     flo_html_Uint16HashSet resultsSet;
@@ -346,34 +362,27 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
 
     flo_html_QueryStatus result = QUERY_SUCCESS;
 
-    char *comma = strchr(cssQuery, ',');
-
-    if (comma != NULL) {
-        char *queryCopy = strdup(cssQuery);
-        if (queryCopy == NULL) {
-            FLO_HTML_PRINT_ERROR("Failed to copy query for tokenizing\n");
-            flo_html_destroyUint16HashSet(&resultsSet);
-            return QUERY_MEMORY_ERROR;
-        }
-
+    if (flo_html_containsChar(cssQuery, ',')) {
         flo_html_Uint16HashSet set;
         if (flo_html_initUint16HashSet(&set, FLO_HTML_INITIAL_QUERY_CAP) !=
             HASH_SUCCESS) {
-            FLO_HTML_FREE_TO_NULL(queryCopy);
             FLO_HTML_PRINT_ERROR(
                 "Failed to allocate memory initializating querySelectorAll\n");
             return QUERY_MEMORY_ERROR;
         }
 
-        char *toFree = queryCopy;
-        char *rest = NULL;
-        char *token = NULL;
-        while (token = strtok_r(queryCopy, ",", &rest)) {
-            if ((result = getQueryResults(token, dom, textStore, &set)) !=
-                QUERY_SUCCESS) {
+        ptrdiff_t currentIndex = 0;
+        ptrdiff_t commaIndex =
+            flo_html_firstOccurenceOfFrom(cssQuery, ',', currentIndex);
+        currentIndex = commaIndex;
+        while (commaIndex > 0) {
+            flo_html_String singularQuery =
+                FLO_HTML_S_LEN(cssQuery.buf + commaIndex, commaIndex);
+
+            if ((result = getQueryResults(singularQuery, dom, textStore,
+                                          &set)) != QUERY_SUCCESS) {
                 flo_html_destroyUint16HashSet(&resultsSet);
                 flo_html_destroyUint16HashSet(&set);
-                FLO_HTML_FREE_TO_NULL(toFree);
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
                     flo_html_queryingStatusToString(result),
                     "Unable get query results!\n");
@@ -388,7 +397,6 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
                 if (insertStatus != HASH_SUCCESS) {
                     flo_html_destroyUint16HashSet(&resultsSet);
                     flo_html_destroyUint16HashSet(&set);
-                    FLO_HTML_FREE_TO_NULL(toFree);
                     FLO_HTML_ERROR_WITH_CODE_ONLY(
                         flo_html_hashStatusToString(insertStatus),
                         "Failed to save intermediate results!\n");
@@ -398,10 +406,12 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
             }
 
             flo_html_resetUint16HashSet(&set);
-            queryCopy = rest;
+
+            commaIndex =
+                flo_html_firstOccurenceOfFrom(cssQuery, ',', currentIndex);
+            currentIndex = commaIndex;
         }
 
-        FLO_HTML_FREE_TO_NULL(toFree);
         flo_html_destroyUint16HashSet(&set);
     } else {
         if ((result = getQueryResults(cssQuery, dom, textStore, &resultsSet)) !=
@@ -428,27 +438,32 @@ flo_html_querySelectorAll(const char *cssQuery, const flo_html_Dom *dom,
     return result;
 }
 
-flo_html_QueryStatus
-flo_html_getElementsByClassName(const char *className, const flo_html_Dom *dom,
-                                const flo_html_TextStore *textStore,
-                                flo_html_node_id **results,
-                                size_t *resultsLen) {
-    size_t cssQueryLen = strlen(className) + 2;
-    char cssQuery[cssQueryLen];
-    snprintf(cssQuery, cssQueryLen, ".%s", className);
+flo_html_QueryStatus flo_html_getElementsByClassName(
+    const flo_html_String className, const flo_html_Dom *dom,
+    const flo_html_TextStore *textStore, flo_html_node_id **results,
+    size_t *resultsLen) {
+    ptrdiff_t cssQueryLen = className.len + 2;
+    unsigned char cssQueryBuffer[cssQueryLen];
+    flo_html_String cssQuery;
+    cssQuery.buf = cssQueryBuffer;
+
+    cssQuery.buf[0] = '.';
+    memcpy(cssQuery.buf, className.buf, className.len);
+    cssQuery.buf[cssQueryLen] = '\0';
 
     return flo_html_querySelectorAll(cssQuery, dom, textStore, results,
                                      resultsLen);
 }
 
 flo_html_QueryStatus
-flo_html_getElementsByTagName(const char *tag, const flo_html_Dom *dom,
+flo_html_getElementsByTagName(const flo_html_String tag,
+                              const flo_html_Dom *dom,
                               const flo_html_TextStore *textStore,
                               flo_html_node_id **results, size_t *resultsLen) {
     return flo_html_querySelectorAll(tag, dom, textStore, results, resultsLen);
 }
 
-flo_html_QueryStatus flo_html_querySelector(const char *cssQuery,
+flo_html_QueryStatus flo_html_querySelector(const flo_html_String cssQuery,
                                             const flo_html_Dom *dom,
                                             const flo_html_TextStore *textStore,
                                             flo_html_node_id *result) {
@@ -484,12 +499,17 @@ flo_html_QueryStatus flo_html_querySelector(const char *cssQuery,
 }
 
 flo_html_QueryStatus
-flo_html_getElementByID(const char *id, const flo_html_Dom *dom,
+flo_html_getElementByID(const flo_html_String id, const flo_html_Dom *dom,
                         const flo_html_TextStore *textStore,
                         flo_html_node_id *result) {
-    size_t cssQueryLen = strlen(id) + 2;
-    char cssQuery[cssQueryLen];
-    snprintf(cssQuery, cssQueryLen, "#%s", id);
+    ptrdiff_t cssQueryLen = id.len + 2;
+    unsigned char cssQueryBuffer[cssQueryLen];
+    flo_html_String cssQuery;
+    cssQuery.buf = cssQueryBuffer;
+
+    cssQuery.buf[0] = '.';
+    memcpy(cssQuery.buf, id.buf, id.len);
+    cssQuery.buf[cssQueryLen] = '\0';
 
     return flo_html_querySelector(cssQuery, dom, textStore, result);
 }
