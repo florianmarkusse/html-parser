@@ -14,6 +14,7 @@ extern "C" {
 typedef uint16_t flo_html_node_id;
 
 typedef enum {
+    NODE_TYPE_ROOT,
     NODE_TYPE_DOCUMENT,
     NODE_TYPE_TEXT,
     NODE_TYPE_REMOVED,
@@ -22,8 +23,8 @@ typedef enum {
 } flo_html_NodeType;
 
 static const flo_html_String nodeTypeStrings[NODE_TYPE_NUM] = {
-    FLO_HTML_S("Document"), FLO_HTML_S("Text"), FLO_HTML_S("Removed"),
-    FLO_HTML_S("Error")};
+    FLO_HTML_S("Root"), FLO_HTML_S("Document"), FLO_HTML_S("Text"),
+    FLO_HTML_S("Removed"), FLO_HTML_S("Error")};
 
 __attribute__((unused)) static const flo_html_String
 flo_html_nodeTypeToString(flo_html_NodeType type) {

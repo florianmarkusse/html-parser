@@ -104,6 +104,15 @@ static inline ptrdiff_t flo_html_firstOccurenceOf(flo_html_String s,
     return flo_html_firstOccurenceOfFrom(s, ch, 0);
 }
 
+static flo_html_String flo_html_convertNulls(flo_html_String html) {
+    for (ptrdiff_t i = 0; i < html.len; i++) {
+        // Set all possible null characters to ' '.
+        html.buf[i] += ((!html.buf[i]) * ' ');
+    }
+
+    return html;
+}
+
 #ifdef __cplusplus
 }
 #endif

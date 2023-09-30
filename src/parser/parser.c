@@ -452,6 +452,151 @@ parseTextNode(const flo_html_String htmlString, size_t *currentPosition,
     return documentStatus;
 }
 
+// typedef enum {
+//     FLO_HTML_PARSE_EMPTY,
+//     FLO_HTML_PARSE_RUNE_TYPES,
+// } flo_html_ParseType;
+//
+
+ptrdiff_t parseEmptyContent(flo_html_String html, ptrdiff_t start) {
+    ptrdiff_t end = start;
+    unsigned char ch = flo_html_getChar(html, end);
+    while (end < html.len && (ch == ' ' || flo_html_isSpecialSpace(ch))) {
+        ch = flo_html_getChar(html, ++end);
+    }
+
+    return end;
+}
+
+typedef struct {
+    flo_html_DomStatus status;
+    bool canHaveChildren;
+    flo_html_node_id nodeID;
+    ptrdiff_t nextPosition;
+} flo_html_ParseDocumentOpen;
+
+flo_html_DomStatus parseDocumentNodeNew(const flo_html_String html,
+                                        ptrdiff_t tagStart, bool exclamTag,
+                                        flo_html_Dom *dom,
+                                        flo_html_TextStore *textStore) {
+    flo_html_DomStatus documentStatus = DOM_SUCCESS;
+
+    flo_html_node_id nodeID;
+    if ((documentStatus = flo_html_createNode(&nodeID, NODE_TYPE_DOCUMENT,
+                                              dom)) != DOM_SUCCESS) {
+        FLO_HTML_PRINT_ERROR("Failed to create node.\n");
+        return documentStatus;
+    }
+
+    ptrdiff_t parsedChars = tagStart;
+    unsigned char ch = flo_html_getChar(html, parsedChars);
+    // Read until end of tag (mostly, we may do some correcting afterwards)
+    while (parsedChars < html.len && ch != '>' && ch != ' ' &&
+           !flo_html_isSpecialSpace(ch)) {
+        ch = flo_html_getChar(html, ++(parsedChars));
+    }
+    ptrdiff_t tagSize = parsedChars - tagStart;
+
+    bool canHaveChildren = !exclamTag;
+
+    // For example <input/>.
+    if (ch == '>' && flo_html_getChar(html, parsedChars - 1) == '/') {
+        canHaveChildren = false;
+        tagSize--;
+    }
+
+    flo_html_String documentTag =
+        FLO_HTML_S_LEN(flo_html_getCharPtr(html, tagStart), tagSize);
+    // For example <br>.
+    if (isVoidElement(documentTag)) {
+        canHaveChildren = false;
+    }
+
+    while (parsedChars < html.len && ch != '>') {
+        if (ch == ' ' || flo_html_isSpecialSpace(ch)) {
+            parsedChars = parseEmptyContent(html, parsedChars);
+            ch = flo_html_getChar(html, parsedChars);
+        } else {
+            if (ch == '/') {
+                canHaveChildren = false;
+            }
+            // Found a property.
+            // Not sure yet if it is a boolean or key-value property.
+            // Accepted values:
+            // 'property' / "property" / property
+            else {
+                ptrdiff_t propKeyStart = parsedChars;
+
+                if (ch == '\'' || ch == '"') {
+                    unsigned char quote = ch;
+
+                    ptrdiff_t quoteCount = 0;
+                    while (parsedChars < html.len && quoteCount < 2) {
+                        quoteCount += (ch == quote); // Be gone branches.
+                        ch = flo_html_getChar(html, ++parsedChars);
+                    }
+                } else {
+                    while (parsedChars < html.len && ch != ' ' && ch != '>' &&
+                           ch != '=') {
+                        ch = flo_html_getChar(html, ++parsedChars);
+                    }
+                }
+                // TODO: Continue here.
+                // we now have the size of the prop key.
+            }
+        }
+    }
+
+    if (ch == '>' && *currentPosition > 0 &&
+        htmlString.buf[*currentPosition - 1] == '/') {
+        *isSingle = true;
+        elementLen--;
+    } else if (isVoidElement(FLO_HTML_S_LEN(&htmlString.buf[elementStartIndex],
+                                            elementLen))) {
+        // For the funny <br> tags...
+        *isSingle = true;
+    }
+}
+
+flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
+                                     flo_html_TextStore *textStore) {
+    html = flo_html_convertNulls(html);
+
+    flo_html_DomStatus documentStatus = DOM_SUCCESS;
+
+    flo_html_NodeDepth nodeStack;
+    nodeStack.stack[0] = dom->nodes[1].nodeID;
+    nodeStack.len = 1;
+
+    ptrdiff_t currentPosition = 0;
+
+    unsigned char ch;
+    while (currentPosition < html.len) {
+        ch = flo_html_getChar(html, currentPosition);
+
+        if (ch == ' ' || flo_html_isSpecialSpace(ch)) {
+            currentPosition = parseEmptyContent(html, currentPosition);
+        } else if (ch == '<') {
+            // Open document node.
+            if (currentPosition < html.len - 1) {
+                unsigned char nextCh =
+                    flo_html_getChar(html, currentPosition + 1);
+                if (flo_html_isAlphaBetical(nextCh)) {
+                    // standard opening tag.
+                } else if (nextCh == '!') {
+                    // !DOCTYPE and friends.
+                } else {
+                    // Rogue open tag -> Text node.
+                }
+            } else {
+                // Text node.
+            }
+        }
+    }
+
+    return documentStatus;
+}
+
 flo_html_DomStatus flo_html_parse(const flo_html_String htmlString,
                                   flo_html_Dom *dom,
                                   flo_html_TextStore *textStore) {
@@ -597,6 +742,7 @@ flo_html_DomStatus
 flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
                               flo_html_Dom *dom, flo_html_TextStore *textStore,
                               flo_html_node_id *newNodeID) {
+    // TODO: Prprocess bby converting nulls?
     flo_html_DomStatus domStatus =
         flo_html_createNode(newNodeID, NODE_TYPE_DOCUMENT, dom);
     if (domStatus != DOM_SUCCESS) {
@@ -641,6 +787,7 @@ flo_html_DomStatus flo_html_parseTextElement(const flo_html_String text,
                                              flo_html_Dom *dom,
                                              flo_html_TextStore *textStore,
                                              flo_html_node_id *newNodeID) {
+    // TODO: preprocess by removing nulls?
     flo_html_DomStatus domStatus =
         flo_html_createNode(newNodeID, NODE_TYPE_TEXT, dom);
     if (domStatus != DOM_SUCCESS) {

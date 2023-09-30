@@ -8,8 +8,10 @@ extern "C" {
 #include <stddef.h>
 
 #include "file-status.h"
+#include "flo/html-parser/utils/text/string.h"
 
-flo_html_FileStatus flo_html_readFile(const char *srcPath, char **buffer);
+flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
+                                      flo_html_String *buffer);
 
 #ifdef __cplusplus
 }

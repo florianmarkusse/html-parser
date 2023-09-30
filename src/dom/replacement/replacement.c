@@ -56,9 +56,8 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromStringWithQuery(
 flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
     const flo_html_String cssQuery, const flo_html_String fileLocation,
     flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    char *buffer = NULL;
-    flo_html_FileStatus fileStatus =
-        flo_html_readFile(fileLocation.buf, &buffer);
+    flo_html_String content;
+    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &content);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
@@ -66,9 +65,8 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
         return DOM_ERROR_MEMORY;
     }
 
-    REPLACE_USING_QUERYSELECTOR(cssQuery,
-                                FLO_HTML_S_LEN(buffer, strlen(buffer)), dom,
-                                textStore, flo_html_replaceWithHTMLFromString);
+    REPLACE_USING_QUERYSELECTOR(cssQuery, content, dom, textStore,
+                                flo_html_replaceWithHTMLFromString);
 }
 
 static flo_html_DomStatus

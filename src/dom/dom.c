@@ -2,7 +2,6 @@
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/utils/file/read.h"
 #include "flo/html-parser/utils/memory/memory.h"
-#include <string.h>
 
 void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
                                 const flo_html_Registration *initRegistration) {
@@ -16,9 +15,8 @@ void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
 flo_html_DomStatus
 flo_html_createDomFromFile(const flo_html_String fileLocation,
                            flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    char *buffer = NULL;
-    flo_html_FileStatus fileStatus =
-        flo_html_readFile(fileLocation.buf, &buffer);
+    flo_html_String content;
+    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &content);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
@@ -26,16 +24,16 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
         return DOM_ERROR_MEMORY;
     }
 
-    flo_html_DomStatus documentStatus = flo_html_createDom(
-        FLO_HTML_S_LEN(buffer, strlen(buffer)), dom, textStore);
+    flo_html_DomStatus documentStatus =
+        flo_html_createDom(content, dom, textStore);
     if (documentStatus != DOM_SUCCESS) {
-        FLO_HTML_FREE_TO_NULL(buffer);
+        FLO_HTML_FREE_TO_NULL(content.buf);
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
             documentStatusToString(documentStatus),
             "Failed to create document from file \"%s\"", fileLocation.buf);
         return documentStatus;
     }
-    FLO_HTML_FREE_TO_NULL(buffer);
+    FLO_HTML_FREE_TO_NULL(content.buf);
 
     return DOM_SUCCESS;
 }
@@ -45,16 +43,8 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
                                       flo_html_TextStore *textStore) {
     dom->firstNodeID = 0;
 
-    flo_html_TagRegistration initTag;
-    initTag.tagID = 0;
-    initTag.isPaired = false;
-    initTag.hashElement.hash = 0;
-    initTag.hashElement.offset = 0;
-
-    flo_html_Registration initRegistration;
-    initRegistration.flo_html_indexID = 0;
-    initRegistration.hashElement.hash = 0;
-    initRegistration.hashElement.offset = 0;
+    flo_html_TagRegistration initTag = {0};
+    flo_html_Registration initRegistration = {0};
 
     dom->tagRegistry = malloc(FLO_HTML_TAG_REGISTRY_PAGE_SIZE);
     dom->tagRegistry[0] = initTag;
@@ -72,8 +62,15 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
     errorNode.nodeType = NODE_TYPE_ERROR;
     errorNode.tagID = 0;
     dom->nodes[0] = errorNode;
-    dom->nodeLen = 1; // We start at 1 because 0 is used as error id, and
-                      // otherwise we have to do [nodeID - 1] every time.
+
+    flo_html_Node rootNode;
+    rootNode.nodeID = 1;
+    rootNode.nodeType = NODE_TYPE_ROOT;
+    rootNode.tagID = 0;
+    dom->nodes[1] = rootNode;
+
+    dom->nodeLen = 2; // We start at 2 because 0 is used as error id, and
+                      // 1 is used as the root node.
     dom->nodeCap = FLO_HTML_NODES_PER_PAGE;
 
     dom->parentFirstChilds = malloc(FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE);
