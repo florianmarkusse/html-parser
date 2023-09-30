@@ -49,7 +49,8 @@ static const TestFile testFiles[] = {
 // Calculate the number of test files
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
+static TestStatus testQuery(const flo_html_String fileLocation,
+                            const flo_html_String cssQuery,
                             const flo_html_QueryStatus expectedStatus,
                             const size_t expectedNumberOfNodes) {
     flo_html_TextStore textStore;
@@ -114,9 +115,12 @@ unsigned char testQuerySelectorAll(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testQuery(testFile.fileLocation, testFile.cssQuery,
-                      testFile.expectedStatus,
-                      testFile.expectedResult) != TEST_SUCCESS) {
+        if (testQuery(
+                FLO_HTML_S_LEN(testFile.fileLocation,
+                               strlen(testFile.fileLocation)),
+                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                testFile.expectedStatus,
+                testFile.expectedResult) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

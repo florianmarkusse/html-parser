@@ -27,7 +27,7 @@ typedef struct {
     unsigned char *buf;
 } flo_html_String;
 
-bool flo_html_stringEquals(flo_html_String a, flo_html_String b) {
+static bool flo_html_stringEquals(flo_html_String a, flo_html_String b) {
     if (a.len != b.len) {
         return false;
     }
@@ -40,7 +40,8 @@ bool flo_html_stringEquals(flo_html_String a, flo_html_String b) {
     return true;
 }
 
-flo_html_String flo_html_strcpy(flo_html_String dest, flo_html_String src) {
+static flo_html_String flo_html_strcpy(flo_html_String dest,
+                                       flo_html_String src) {
 #ifdef DEBUG
     assert(dest.len >= src.len) printf("I AM COPYING IN DEBUG MODE\n");
 #endif
@@ -50,8 +51,8 @@ flo_html_String flo_html_strcpy(flo_html_String dest, flo_html_String src) {
     return dest;
 }
 
-inline unsigned char flo_html_getChar(flo_html_String str,
-                                      const ptrdiff_t index) {
+static inline unsigned char flo_html_getChar(flo_html_String str,
+                                             const ptrdiff_t index) {
 #ifdef DEBUG
     // Debug mode: Perform bounds checking
     assert(index >= 0 && index < str.len);
@@ -72,7 +73,7 @@ inline unsigned char *flo_html_getCharPtr(flo_html_String str,
     return &str.buf[index];
 }
 
-inline bool flo_html_containsChar(flo_html_String s, unsigned char ch) {
+static inline bool flo_html_containsChar(flo_html_String s, unsigned char ch) {
     for (ptrdiff_t i = 0; i < s.len; i++) {
         if (s.buf[i] == ch) {
             return true;
@@ -81,9 +82,9 @@ inline bool flo_html_containsChar(flo_html_String s, unsigned char ch) {
     return false;
 }
 
-inline ptrdiff_t flo_html_firstOccurenceOfFrom(flo_html_String s,
-                                               unsigned char ch,
-                                               ptrdiff_t from) {
+static inline ptrdiff_t flo_html_firstOccurenceOfFrom(flo_html_String s,
+                                                      unsigned char ch,
+                                                      ptrdiff_t from) {
 #ifdef DEBUG
     // Debug mode: Perform bounds checking
     assert(from >= 0 && from < s.len);
@@ -98,8 +99,8 @@ inline ptrdiff_t flo_html_firstOccurenceOfFrom(flo_html_String s,
     return -1;
 }
 
-inline ptrdiff_t flo_html_firstOccurenceOf(flo_html_String s,
-                                           unsigned char ch) {
+static inline ptrdiff_t flo_html_firstOccurenceOf(flo_html_String s,
+                                                  unsigned char ch) {
     return flo_html_firstOccurenceOfFrom(s, ch, 0);
 }
 

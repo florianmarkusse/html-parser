@@ -18,10 +18,10 @@ typedef enum {
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 typedef union {
-    const char *attribute;
+    const flo_html_String attribute;
     struct {
-        const char *key;
-        const char *value;
+        const flo_html_String key;
+        const flo_html_String value;
     } __attribute__((aligned(16)));
 } StringUnion;
 
@@ -37,49 +37,49 @@ typedef struct {
 static const TestFile testFiles[] = {
     {TEST_FILE_1,
      "section",
-     {.attribute = "a"},
+     {.attribute = FLO_HTML_S("a")},
      true,
      HAS_BOOL_PROP,
      "has bool prop"},
     {TEST_FILE_1,
      "section",
-     {.attribute = "x"},
+     {.attribute = FLO_HTML_S("x")},
      false,
      HAS_BOOL_PROP,
      "does not have bool prop"},
     {TEST_FILE_1,
      "body",
-     {.attribute = "style"},
+     {.attribute = FLO_HTML_S("style")},
      true,
      HAS_PROP_KEY,
      "has prop key"},
     {TEST_FILE_1,
      "body",
-     {.attribute = "lang"},
+     {.attribute = FLO_HTML_S("lang")},
      false,
      HAS_PROP_KEY,
      "does not have prop key"},
     {TEST_FILE_1,
      "body",
-     {.attribute = "class"},
+     {.attribute = FLO_HTML_S("class")},
      true,
      HAS_PROP_VALUE,
      "has prop value"},
     {TEST_FILE_1,
      "body",
-     {.attribute = "big"},
+     {.attribute = FLO_HTML_S("big")},
      false,
      HAS_PROP_VALUE,
      "does not have prop value"},
     {TEST_FILE_1,
      "body",
-     {.key = "style", .value = "class"},
+     {.key = FLO_HTML_S("style"), .value = FLO_HTML_S("class")},
      true,
      HAS_PROPERTY,
      "has property"},
     {TEST_FILE_1,
      "body",
-     {.key = "style", .value = "clazz"},
+     {.key = FLO_HTML_S("style"), .value = FLO_HTML_S("clazz")},
      false,
      HAS_PROPERTY,
      "does not have property"},
@@ -87,7 +87,8 @@ static const TestFile testFiles[] = {
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
+static TestStatus testQuery(const flo_html_String fileLocation,
+                            const flo_html_String cssQuery,
                             const StringUnion stringUnion,
                             const BoolFunctionType boolFunctionType,
                             const bool expectedResult) {
@@ -180,9 +181,12 @@ bool testBoolNodeQueries(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testQuery(testFile.fileLocation, testFile.cssQuery,
-                      testFile.stringUnion, testFile.boolFunctionType,
-                      testFile.expectedResult) != TEST_SUCCESS) {
+        if (testQuery(
+                FLO_HTML_S_LEN(testFile.fileLocation,
+                               strlen(testFile.fileLocation)),
+                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                testFile.stringUnion, testFile.boolFunctionType,
+                testFile.expectedResult) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

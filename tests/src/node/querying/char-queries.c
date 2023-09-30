@@ -30,10 +30,11 @@ static const TestFile testFiles[] = {
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
-                            const char *input,
+static TestStatus testQuery(const flo_html_String fileLocation,
+                            const flo_html_String cssQuery,
+                            const flo_html_String input,
                             const CharFunctionType functionType,
-                            const char *expectedResult) {
+                            const flo_html_String expectedResult) {
     flo_html_TextStore textStore;
     flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
@@ -63,7 +64,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
             queryStatus, flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
-        const char *actualResult = NULL;
+        flo_html_String actualResult = FLO_HTML_EMPTY_STRING;
         switch (functionType) {
         case GET_VALUE: {
             actualResult =
@@ -79,15 +80,16 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         }
         }
 
-        if ((expectedResult == NULL && actualResult == NULL) ||
-            (expectedResult != NULL &&
-             strcmp(actualResult, expectedResult) == 0)) {
+        if ((expectedResult.len == 0 && actualResult.len == 0) ||
+            (expectedResult.len > 0 &&
+             flo_html_stringEquals(actualResult, expectedResult))) {
             printTestSuccess();
             result = TEST_SUCCESS;
         } else {
             printTestFailure();
             printTestDemarcation();
-            printTestResultDifferenceString(expectedResult, actualResult);
+            printTestResultDifferenceString(expectedResult.buf,
+                                            actualResult.buf);
             printTestDemarcation();
         }
     }
@@ -109,9 +111,15 @@ bool testCharNodeQueries(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testQuery(testFile.fileLocation, testFile.cssQuery, testFile.input,
-                      testFile.functionType,
-                      testFile.expectedResult) != TEST_SUCCESS) {
+        if (testQuery(
+                FLO_HTML_S_LEN(testFile.fileLocation,
+                               strlen(testFile.fileLocation)),
+                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                FLO_HTML_S_LEN(testFile.input, strlen(testFile.input)),
+                testFile.functionType,
+                FLO_HTML_S_LEN(testFile.expectedResult,
+                               strlen(testFile.expectedResult))) !=
+            TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

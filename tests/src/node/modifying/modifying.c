@@ -20,24 +20,26 @@ typedef struct {
     const char *fileLocation2;
     const char *cssQuery;
     const char *propKey;
-    const char *newPropValue;
+    const flo_html_String newPropValue;
     const char *testName;
 } TestFile;
 
 static const TestFile testFiles[] = {
-    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "body", "style", "newstyle",
-     "change property value"},
+    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "body", "style",
+     FLO_HTML_S("newstyle"), "change property value"},
     {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "#text-content-test", "id",
-     "id-changed", "change id value"},
+     FLO_HTML_S("id-changed"), "change id value"},
     {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "#text-content-test",
-     "I am the new text content, bow for me!", NULL, "setting text content"},
+     "I am the new text content, bow for me!", FLO_HTML_EMPTY_STRING,
+     "setting text content"},
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testModification(const char *fileLocation1,
-                                   const char *fileLocation2,
-                                   const char *cssQuery, const char *propKey,
-                                   const char *newPropValue) {
+static TestStatus testModification(const flo_html_String fileLocation1,
+                                   const flo_html_String fileLocation2,
+                                   const flo_html_String cssQuery,
+                                   const flo_html_String propKey,
+                                   const flo_html_String newPropValue) {
     TestStatus result = TEST_FAILURE;
 
     ComparisonTest comparisonTest;
@@ -52,12 +54,12 @@ static TestStatus testModification(const char *fileLocation1,
         return result;
     }
 
-    if (newPropValue == NULL) {
+    if (newPropValue.len > 0) {
         flo_html_DomStatus domStatus = flo_html_setTextContent(
             foundNode, propKey, &comparisonTest.startflo_html_Dom,
             &comparisonTest.startTextStore);
         if (domStatus != DOM_SUCCESS) {
-            return failWithMessage("Failed to set text content!\n",
+            return failWithMessage(FLO_HTML_S("Failed to set text content!\n"),
                                    &comparisonTest);
         }
     } else {
@@ -65,8 +67,8 @@ static TestStatus testModification(const char *fileLocation1,
             foundNode, propKey, newPropValue, &comparisonTest.startflo_html_Dom,
             &comparisonTest.startTextStore);
         if (elementStatus != ELEMENT_SUCCESS) {
-            return failWithMessage("Failed to set property value!\n",
-                                   &comparisonTest);
+            return failWithMessage(
+                FLO_HTML_S("Failed to set property value!\n"), &comparisonTest);
         }
     }
     return compareAndEndTest(&comparisonTest);
@@ -83,9 +85,14 @@ bool testNodeModifications(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testModification(testFile.fileLocation1, testFile.fileLocation2,
-                             testFile.cssQuery, testFile.propKey,
-                             testFile.newPropValue) != TEST_SUCCESS) {
+        if (testModification(
+                FLO_HTML_S_LEN(testFile.fileLocation1,
+                               strlen(testFile.fileLocation1)),
+                FLO_HTML_S_LEN(testFile.fileLocation2,
+                               strlen(testFile.fileLocation2)),
+                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                FLO_HTML_S_LEN(testFile.propKey, strlen(testFile.propKey)),
+                testFile.newPropValue) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

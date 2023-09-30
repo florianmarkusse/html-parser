@@ -40,9 +40,10 @@ static const TestFile testFiles[] = {
 };
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testDeletion(const char *fileLocation1,
-                               const char *fileLocation2, const char *cssQuery,
-                               const char *propToDelete,
+static TestStatus testDeletion(const flo_html_String fileLocation1,
+                               const flo_html_String fileLocation2,
+                               const flo_html_String cssQuery,
+                               const flo_html_String propToDelete,
                                const DeletionType deletionType) {
     TestStatus result = TEST_FAILURE;
 
@@ -72,8 +73,9 @@ static TestStatus testDeletion(const char *fileLocation1,
         break;
     }
     default: {
-        return failWithMessage("No suitable DeletionType was supplied!\n",
-                               &comparisonTest);
+        return failWithMessage(
+            FLO_HTML_S("No suitable DeletionType was supplied!\n"),
+            &comparisonTest);
     }
     }
 
@@ -90,9 +92,15 @@ bool testNodeDeletions(size_t *successes, size_t *failures) {
         TestFile testFile = testFiles[i];
         printTestStart(testFile.testName);
 
-        if (testDeletion(testFile.fileLocation1, testFile.fileLocation2,
-                         testFile.cssQuery, testFile.propToDelete,
-                         testFile.deletionType) != TEST_SUCCESS) {
+        if (testDeletion(
+                FLO_HTML_S_LEN(testFile.fileLocation1,
+                               strlen(testFile.fileLocation1)),
+                FLO_HTML_S_LEN(testFile.fileLocation2,
+                               strlen(testFile.fileLocation2)),
+                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                FLO_HTML_S_LEN(testFile.propToDelete,
+                               strlen(testFile.propToDelete)),
+                testFile.deletionType) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

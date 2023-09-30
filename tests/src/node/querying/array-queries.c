@@ -31,7 +31,8 @@ static const TestFile testFiles[] = {
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
+static TestStatus testQuery(const flo_html_String fileLocation,
+                            const flo_html_String cssQuery,
                             const ArrayFunctionType functionType,
                             const size_t expectedResult) {
     flo_html_TextStore textStore;
@@ -66,7 +67,7 @@ static TestStatus testQuery(const char *fileLocation, const char *cssQuery,
         size_t actualResult = 0;
         switch (functionType) {
         case TEXT_CONTENT: {
-            const char **results = NULL;
+            flo_html_String *results = NULL;
             queryStatus = flo_html_getTextContent(foundNode, &dom, &results,
                                                   &actualResult);
             FLO_HTML_FREE_TO_NULL(results);
@@ -115,9 +116,12 @@ bool testArrayNodeQueries(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testQuery(testFile.fileLocation, testFile.cssQuery,
-                      testFile.functionType,
-                      testFile.expectedResult) != TEST_SUCCESS) {
+        if (testQuery(
+                FLO_HTML_S_LEN(testFile.fileLocation,
+                               strlen(testFile.fileLocation)),
+                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                testFile.functionType,
+                testFile.expectedResult) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

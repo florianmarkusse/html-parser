@@ -76,7 +76,8 @@ static const TestFile testFiles[] = {
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-TestStatus compareFiles(const char *fileLocation1, const char *fileLocation2,
+TestStatus compareFiles(const flo_html_String fileLocation1,
+                        const flo_html_String fileLocation2,
                         const flo_html_ComparisonStatus expectedResult) {
     TestStatus result = TEST_FAILURE;
 
@@ -99,7 +100,10 @@ bool testflo_html_DomComparisons(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (compareFiles(testFile.fileLocation1, testFile.fileLocation2,
+        if (compareFiles(FLO_HTML_S_LEN(testFile.fileLocation1,
+                                        strlen(testFile.fileLocation1)),
+                         FLO_HTML_S_LEN(testFile.fileLocation2,
+                                        strlen(testFile.fileLocation2)),
                          testFile.expectedStatus) != TEST_SUCCESS) {
             localFailures++;
         } else {
