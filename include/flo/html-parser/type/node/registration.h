@@ -12,7 +12,7 @@ extern "C" {
 #include "node.h"
 
 typedef struct {
-    flo_html_indexID flo_html_indexID;
+    // flo_html_indexID flo_html_indexID;
     flo_html_HashElement hashElement;
 } flo_html_Registration;
 

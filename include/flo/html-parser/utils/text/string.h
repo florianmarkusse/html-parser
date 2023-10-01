@@ -22,6 +22,8 @@ extern "C" {
 #define FLO_HTML_S_PTRS(begin, end)                                            \
     (flo_html_String) { ((end) - (begin)), (unsigned char *)(begin) }
 
+#define FLO_HTML_S_P(string) (int)(string).len, (string).buf
+
 typedef struct {
     ptrdiff_t len;
     unsigned char *buf;
@@ -62,8 +64,8 @@ static inline unsigned char flo_html_getChar(flo_html_String str,
     return str.buf[index];
 }
 
-inline unsigned char *flo_html_getCharPtr(flo_html_String str,
-                                          const ptrdiff_t index) {
+static inline unsigned char *flo_html_getCharPtr(flo_html_String str,
+                                                 const ptrdiff_t index) {
 #ifdef DEBUG
     // Debug mode: Perform bounds checking
     assert(index >= 0 && index < str.len);

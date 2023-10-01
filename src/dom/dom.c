@@ -106,7 +106,7 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
     }
 
     flo_html_DomStatus domumentStatus =
-        flo_html_parse(htmlString, dom, textStore);
+        flo_html_parseNew(htmlString, dom, textStore);
     if (domumentStatus != DOM_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Failed to parse domument.\n");
     }

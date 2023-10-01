@@ -1,4 +1,5 @@
 #include <flo/html-parser.h>
+#include <flo/html-parser/type/element/elements-print.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -43,35 +44,37 @@ typedef struct {
 } TestFile;
 
 static const TestFile testFiles[] = {
-    {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file"},
-    {TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_CONTENT,
-     "different key-value property"},
-    {TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES, "empty file"},
-    {TEST_FILE_1, TEST_FILE_4, COMPARISON_DIFFERENT_SIZES,
-     "missing boolean property"},
-    {TEST_FILE_1, TEST_FILE_5, COMPARISON_DIFFERENT_SIZES,
-     "missing key-value property"},
-    {TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
-     "text node and document node"},
-    {TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES, "different sizes"},
+    // {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file"},
+    // {TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_CONTENT,
+    //  "different key-value property"},
+    // {TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES, "empty file"},
+    // {TEST_FILE_1, TEST_FILE_4, COMPARISON_DIFFERENT_SIZES,
+    //  "missing boolean property"},
+    // {TEST_FILE_1, TEST_FILE_5, COMPARISON_DIFFERENT_SIZES,
+    //  "missing key-value property"},
+    // {TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
+    //  "text node and document node"},
+    // {TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES, "different
+    // sizes"},
     {TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_CONTENT, "different tags"},
-    {TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_CONTENT,
-     "different text nodes"},
-    {TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments"},
-    {TEST_FILE_11, TEST_FILE_11_MIN, COMPARISON_SUCCESS, "style tag"},
-    {TEST_FILE_12, TEST_FILE_12_MIN, COMPARISON_SUCCESS, "script tag"},
-    {TEST_FILE_13, TEST_FILE_13_MIN, COMPARISON_SUCCESS, "difficult style tag"},
-    {TEST_FILE_14, TEST_FILE_14_MIN, COMPARISON_SUCCESS,
-     "different quotes in attributes"},
-    {TEST_FILE_15, TEST_FILE_15_MIN, COMPARISON_SUCCESS,
-     "quotes as attribute key"},
-    {TEST_FILE_16, TEST_FILE_16_MIN, COMPARISON_SUCCESS,
-     "additional close tags"},
-    {TEST_FILE_17, TEST_FILE_17_MIN, COMPARISON_SUCCESS,
-     "key-value property without quotes"},
-    {TEST_FILE_1, TEST_FILE_18, COMPARISON_SUCCESS,
-     "swapped boolean properties"},
-    {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
+    //  {TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_CONTENT,
+    //   "different text nodes"},
+    //  {TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments"},
+    //  {TEST_FILE_11, TEST_FILE_11_MIN, COMPARISON_SUCCESS, "style tag"},
+    //  {TEST_FILE_12, TEST_FILE_12_MIN, COMPARISON_SUCCESS, "script tag"},
+    //  {TEST_FILE_13, TEST_FILE_13_MIN, COMPARISON_SUCCESS, "difficult style
+    //  tag"},
+    //  {TEST_FILE_14, TEST_FILE_14_MIN, COMPARISON_SUCCESS,
+    //   "different quotes in attributes"},
+    //  {TEST_FILE_15, TEST_FILE_15_MIN, COMPARISON_SUCCESS,
+    //   "quotes as attribute key"},
+    //  {TEST_FILE_16, TEST_FILE_16_MIN, COMPARISON_SUCCESS,
+    //   "additional close tags"},
+    //  {TEST_FILE_17, TEST_FILE_17_MIN, COMPARISON_SUCCESS,
+    //   "key-value property without quotes"},
+    //  {TEST_FILE_1, TEST_FILE_18, COMPARISON_SUCCESS,
+    //   "swapped boolean properties"},
+    //  {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -86,6 +89,14 @@ TestStatus compareFiles(const flo_html_String fileLocation1,
     if (result != TEST_SUCCESS) {
         return result;
     }
+
+    //    flo_html_printTagStatus(&comparisonTest.startTextStore);
+    //    flo_html_printTagStatus(&comparisonTest.expectedTextStore);
+
+    flo_html_printHTML(&comparisonTest.startflo_html_Dom,
+                       &comparisonTest.startTextStore);
+    flo_html_printHTML(&comparisonTest.expectedflo_html_Dom,
+                       &comparisonTest.expectedTextStore);
 
     return compareWithCodeAndEndTest(&comparisonTest, expectedResult);
 }

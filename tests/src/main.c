@@ -22,11 +22,11 @@ int main() {
     size_t successes = 0;
     size_t failures = 0;
 
-    testflo_html_DomParsings(&successes, &failures);
-    printf("\n");
-
-    //    testflo_html_DomComparisons(&successes, &failures);
+    //    testflo_html_DomParsings(&successes, &failures);
     //    printf("\n");
+
+    testflo_html_DomComparisons(&successes, &failures);
+    printf("\n");
     //
     //    testflo_html_DomQueries(&successes, &failures);
     //    printf("\n");

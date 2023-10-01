@@ -27,7 +27,7 @@ flo_html_DataPageStatus flo_html_insertIntoSuitablePage(
     flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;
     size_t index = container->pageLen;
     for (size_t i = 0; i < container->pageLen; ++i) {
-        if (container->pages[i].spaceLeft >= data.len + 1) {
+        if (container->pages[i].spaceLeft >= data.len) {
             index = i;
             break;
         }
@@ -50,10 +50,10 @@ flo_html_DataPageStatus flo_html_insertIntoSuitablePage(
         }
     }
 
-    memcpy(container->pages[index].freeSpace, data.buf, data.len + 1);
+    memcpy(container->pages[index].freeSpace, data.buf, data.len);
     *dataLocation = container->pages[index].freeSpace;
-    container->pages[index].freeSpace += data.len + 1;
-    container->pages[index].spaceLeft -= data.len + 1;
+    container->pages[index].freeSpace += data.len;
+    container->pages[index].spaceLeft -= data.len;
 
     return status;
 }
@@ -71,12 +71,14 @@ flo_html_DataPageStatus flo_html_insertIntoPageWithHash(
         DATA_PAGE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
             flo_html_dataPageStatusToString(status),
-            "Failed to insert data in suitable page %s\n", data.buf);
+            "Failed to insert data in suitable page %.*s\n",
+            FLO_HTML_S_P(data));
         return status;
     }
 
-    flo_html_insertStringAtHash(&stringRegistry->set, data, hashElement,
-                                flo_html_indexID);
+    flo_html_insertStringAtHash(&stringRegistry->set,
+                                FLO_HTML_S_LEN(dataLocation, data.len),
+                                hashElement, flo_html_indexID);
 
     return status;
 }

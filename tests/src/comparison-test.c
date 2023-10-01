@@ -1,4 +1,5 @@
 #include <flo/html-parser.h>
+#include <flo/html-parser/type/element/elements-print.h>
 #include <flo/html-parser/utils/memory/memory.h>
 
 #include "comparison-test.h"
@@ -22,6 +23,7 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
             FLO_HTML_S("Failed to create start DOM from file!\n"),
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
+    flo_html_printTagStatus(&comparisonTest->startTextStore);
 
     initStatus = flo_html_createTextStore(&comparisonTest->expectedTextStore);
     if (initStatus != ELEMENT_SUCCESS) {
@@ -36,6 +38,8 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
             FLO_HTML_S("Failed to create expected DOM from file!\n"),
             TEST_ERROR_INITIALIZATION, comparisonTest);
     }
+
+    // flo_html_printTagStatus(&comparisonTest->startTextStore);
 
     return TEST_SUCCESS;
 }
@@ -105,9 +109,8 @@ compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
-            COMPARISON_SUCCESS,
-            flo_html_comparisonStatusToString(COMPARISON_SUCCESS), comp,
-            flo_html_comparisonStatusToString(comp));
+            expectedStatus, flo_html_comparisonStatusToString(expectedStatus),
+            comp, flo_html_comparisonStatusToString(comp));
         flo_html_printFirstDifference(nodeID1,
                                       &comparisonTest->startflo_html_Dom,
                                       &comparisonTest->startTextStore, nodeID2,

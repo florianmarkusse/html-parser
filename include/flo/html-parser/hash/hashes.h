@@ -5,19 +5,19 @@
 extern "C" {
 #endif
 
+#include <stddef.h>
 #include <stdio.h>
 
 #include "flo/html-parser/type/element/elements-container.h"
+#include "flo/html-parser/utils/text/string.h"
 
 // http://www.cse.yorku.ca/~oz/hash.html
 // djb2 hash
-// NOLINTNEXTLINE(clang-diagnostic-identifier)
 __attribute__((unused)) static size_t
-flo_html_hashString(const unsigned char *string) {
+flo_html_hashString(const flo_html_String string) {
     size_t hash = 5381;
-    int c = 0;
-
-    while (c = *string++) {
+    for (ptrdiff_t i = 0; i < string.len; i++) {
+        int c = (string.buf[i]);
         hash =
             ((hash << 5) + hash) ^
             c; // hash << 5 + hash because that is way cooler than hash * 33 :D

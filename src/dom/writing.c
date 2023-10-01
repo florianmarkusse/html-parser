@@ -18,12 +18,12 @@ void printNode(const flo_html_node_id nodeID, const size_t indentation,
     }
 
     if (node.nodeType == NODE_TYPE_TEXT) {
-        fprintf(output, "%s", node.text.buf);
+        fprintf(output, "%.*s", FLO_HTML_S_P(node.text));
         return;
     }
 
     const flo_html_String tag = flo_html_getTag(node.tagID, dom, textStore);
-    fprintf(output, "<%s", tag.buf);
+    fprintf(output, "<%.*s", FLO_HTML_S_P(tag));
 
     for (size_t i = 0; i < dom->boolPropsLen; i++) {
         flo_html_BooleanProperty boolProp = dom->boolProps[i];
@@ -31,7 +31,7 @@ void printNode(const flo_html_node_id nodeID, const size_t indentation,
         if (boolProp.nodeID == node.nodeID) {
             const flo_html_String prop =
                 flo_html_getBoolProp(boolProp.propID, dom, textStore);
-            fprintf(output, " %s", prop.buf);
+            fprintf(output, " %.*s", FLO_HTML_S_P(prop));
         }
     }
 
@@ -43,7 +43,8 @@ void printNode(const flo_html_node_id nodeID, const size_t indentation,
                 flo_html_getPropKey(prop.keyID, dom, textStore);
             const flo_html_String value =
                 flo_html_getPropValue(prop.valueID, dom, textStore);
-            fprintf(output, " %s=\"%s\"", key.buf, value.buf);
+            fprintf(output, " %.*s=\"%.*s\"", FLO_HTML_S_P(key),
+                    FLO_HTML_S_P(value));
         }
     }
 
@@ -63,7 +64,7 @@ void printNode(const flo_html_node_id nodeID, const size_t indentation,
         printNode(childNode, indentation + 1, dom, textStore, output);
         childNode = flo_html_getNext(childNode, dom);
     }
-    fprintf(output, "</%s>", tag.buf);
+    fprintf(output, "</%.*s>", FLO_HTML_S_P(tag));
 }
 
 void flo_html_printHTML(const flo_html_Dom *dom,
@@ -84,7 +85,8 @@ flo_html_writeHTMLToFile(const flo_html_Dom *dom,
     flo_html_createPath(filePath.buf);
     FILE *file = fopen(filePath.buf, "wbe");
     if (file == NULL) {
-        printf("Failed to open file for writing: %s\n", filePath.buf);
+        printf("Failed to open file for writing: %.*s\n",
+               FLO_HTML_S_P(filePath));
         return FILE_CANT_OPEN;
     }
 
@@ -102,15 +104,16 @@ flo_html_writeHTMLToFile(const flo_html_Dom *dom,
 void printflo_html_BasicRegistry(const flo_html_String registryName,
                                  const flo_html_BasicRegistry *basicRegistry,
                                  const flo_html_StringHashSet *set) {
-    printf("%-20s registration nodes inside DOM...\n", registryName.buf);
+    printf("%-20.*s\nregistration nodes inside DOM...\n",
+           FLO_HTML_S_P(registryName));
     printf("total number of nodes: %zu\n", basicRegistry->len);
     for (size_t i = 0; i < basicRegistry->len; i++) {
         flo_html_Registration registration = basicRegistry->registry[i];
         const flo_html_String value =
             flo_html_getStringFromHashSet(set, &registration.hashElement);
-        printf("index ID: %-5u value: %-20s hash: %zu offset: %u\n",
-               registration.flo_html_indexID, value.buf,
-               registration.hashElement.hash, registration.hashElement.offset);
+        printf("ID: %zu value: %-20.*s hash: %zu offset: %u\n", i,
+               FLO_HTML_S_P(value), registration.hashElement.hash,
+               registration.hashElement.offset);
     }
     printf("\n");
 }
@@ -132,13 +135,14 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
     for (size_t i = 0; i < dom->nodeLen; i++) {
         flo_html_Node node = dom->nodes[i];
 
-        if (node.nodeType == NODE_TYPE_TEXT) {
-            printf("node ID: %-5u node type: %-10s containing text\n",
-                   node.nodeID, flo_html_nodeTypeToString(node.nodeType));
-        } else {
-            printf("node ID: %-5u node type: %-10s with tag ID: %-5u\n",
-                   node.nodeID, flo_html_nodeTypeToString(node.nodeType),
+        if (node.nodeType == NODE_TYPE_DOCUMENT) {
+            printf("node ID: %-5u node type: %-10.*s with tag ID: %-5u\n",
+                   node.nodeID,
+                   FLO_HTML_S_P(flo_html_nodeTypeToString(node.nodeType)),
                    node.tagID);
+        } else {
+            printf("node ID: %-5u node type: %-10.*s\n", node.nodeID,
+                   FLO_HTML_S_P(flo_html_nodeTypeToString(node.nodeType)));
         }
     }
     printf("\n");
@@ -150,9 +154,9 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
         flo_html_TagRegistration tagRegistration = dom->tagRegistry[i];
         const flo_html_String tag = flo_html_getStringFromHashSet(
             &textStore->tags.set, &tagRegistration.hashElement);
-        printf("tag ID: %-5u tag: %-20s isPaired: %d hash: %zu offset: %u\n",
-               tagRegistration.tagID, tag.buf, tagRegistration.isPaired,
-               tagRegistration.hashElement.hash,
+        printf("tag ID: %-5u tag: %-20.*s isPaired: %d hash: %zu offset: %u\n",
+               tagRegistration.tagID, FLO_HTML_S_P(tag),
+               tagRegistration.isPaired, tagRegistration.hashElement.hash,
                tagRegistration.hashElement.offset);
     }
     printf("\n");

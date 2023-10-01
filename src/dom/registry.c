@@ -36,7 +36,7 @@ flo_html_addRegistration(const flo_html_indexID flo_html_indexID,
 
     flo_html_Registration *registration =
         &(basicRegistry->registry[basicRegistry->len]);
-    registration->flo_html_indexID = flo_html_indexID;
+    // registration->flo_html_indexID = flo_html_indexID;
     registration->hashElement.hash = hashElement->hash;
     registration->hashElement.offset = hashElement->offset;
     basicRegistry->len++;

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include "flo/html-parser/hash/hashes.h"
@@ -53,7 +54,7 @@ flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         return HASH_ERROR_CAPACITY;
     }
 
-    size_t hash = flo_html_hashString(string.buf) % set->arrayLen;
+    size_t hash = flo_html_hashString(string) % set->arrayLen;
 
     while (set->array[hash].string.buf != NULL) {
         if (flo_html_stringEquals(set->array[hash].string, string)) {
@@ -81,7 +82,7 @@ bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
 bool flo_html_containsStringWithDataHashSet(
     const flo_html_StringHashSet *set, const flo_html_String string,
     flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID) {
-    size_t index = flo_html_hashString(string.buf) % set->arrayLen;
+    size_t index = flo_html_hashString(string) % set->arrayLen;
     hashElement->hash = index;
 
     size_t probes = 0;
@@ -157,7 +158,11 @@ flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator) {
     const flo_html_StringHashSet *set = iterator->set;
 
     while (iterator->index < set->arrayLen) {
-        if (set->array[iterator->index].string.buf != NULL) {
+        if (set->array[iterator->index].flo_html_indexID > 0) {
+            printf("Returining a string...");
+            printf("index is %zu\n", iterator->index);
+            flo_html_String string = set->array[iterator->index].string;
+            printf("string is %.*s\n", FLO_HTML_S_P(string));
             return set->array[iterator->index++].string;
         }
         iterator->index++;
@@ -170,7 +175,7 @@ bool flo_html_hasNextStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator) {
     const flo_html_StringHashSet *set = iterator->set;
     while (iterator->index < set->arrayLen) {
-        if (set->array[iterator->index].string.buf != NULL) {
+        if (set->array[iterator->index].flo_html_indexID > 0) {
             return true;
         }
         iterator->index++;

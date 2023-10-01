@@ -5,6 +5,7 @@
 #include "flo/html-parser/dom/dom-utils.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/parser/parser.h"
+#include "flo/html-parser/type/element/elements-print.h"
 #include "flo/html-parser/utils/print/error.h"
 
 void printAttributes(

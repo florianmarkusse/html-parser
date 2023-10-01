@@ -10,6 +10,7 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification/modification.h"
 #include "flo/html-parser/dom/registry.h"
+#include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/data/definitions.h"
 #include "flo/html-parser/type/element/elements-print.h"
@@ -262,6 +263,27 @@ parseBasicdomNode(const flo_html_String htmlString, size_t *currentPosition,
                                  textStore);
 }
 
+#define UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack, dom)             \
+    do {                                                                       \
+        if ((documentStatus =                                                  \
+                 updateReferences((parseResult).nodeID, (prevNodeID),          \
+                                  &(nodeStack), (dom))) != DOM_SUCCESS) {      \
+            FLO_HTML_PRINT_ERROR("Failed to update references.\n");            \
+            return documentStatus;                                             \
+        }                                                                      \
+    } while (0)
+
+#define PARSE_TEXT_NODE(parseResult, html, currentPosition, context, dom,      \
+                        textStore)                                             \
+    do {                                                                       \
+        (parseResult) = parseTextNodeNew((html), (currentPosition), (context), \
+                                         (dom), (textStore));                  \
+        if ((parseResult).status != DOM_SUCCESS) {                             \
+            FLO_HTML_PRINT_ERROR("Failed to parse text node.\n");              \
+            return (parseResult).status;                                       \
+        }                                                                      \
+    } while (0)
+
 flo_html_DomStatus
 parseExclamdomNode(const flo_html_String htmlString, size_t *currentPosition,
                    flo_html_node_id *prevNodeID, flo_html_node_id *newNodeID,
@@ -275,7 +297,7 @@ parseExclamdomNode(const flo_html_String htmlString, size_t *currentPosition,
 
 unsigned char textNodeContinue(const char ch, const flo_html_String htmlString,
                                const size_t currentPosition) {
-    return (ch != '\0' && !flo_html_isSpecialSpace(ch) &&
+    return (!flo_html_isSpecialSpace(ch) &&
             (ch != ' ' ||
              (currentPosition > 0 &&
               flo_html_getChar(htmlString, currentPosition - 1) != ' ')));
@@ -458,6 +480,30 @@ parseTextNode(const flo_html_String htmlString, size_t *currentPosition,
 // } flo_html_ParseType;
 //
 
+typedef struct {
+    flo_html_DomStatus status;
+    bool canHaveChildren;
+    flo_html_node_id nodeID;
+    ptrdiff_t nextPosition;
+} flo_html_NodeParseResult;
+
+flo_html_NodeParseResult parseCloseTag(flo_html_String html, ptrdiff_t start) {
+    flo_html_NodeParseResult result;
+    ptrdiff_t end = start;
+    unsigned char ch = flo_html_getChar(html, end);
+    while (end < html.len && ch != '>') {
+        ch = flo_html_getChar(html, ++end);
+    }
+
+    result.status = DOM_SUCCESS;
+    if (end < html.len) {
+        end++;
+    }
+    result.nextPosition = end;
+
+    return result;
+}
+
 ptrdiff_t parseEmptyContent(flo_html_String html, ptrdiff_t start) {
     ptrdiff_t end = start;
     unsigned char ch = flo_html_getChar(html, end);
@@ -468,24 +514,231 @@ ptrdiff_t parseEmptyContent(flo_html_String html, ptrdiff_t start) {
     return end;
 }
 
-typedef struct {
+flo_html_NodeParseResult parseComment(flo_html_String html, ptrdiff_t start) {
+    flo_html_NodeParseResult result;
+    ptrdiff_t end = start;
+    unsigned char ch = flo_html_getChar(html, end);
+    while (end < html.len &&
+           (ch != '>' ||
+            flo_html_stringEquals(
+                FLO_HTML_S("--"),
+                FLO_HTML_S_LEN(flo_html_getCharPtr(html, end - 2), 2)))) {
+        ch = flo_html_getChar(html, ++end);
+    }
+
+    result.status = DOM_SUCCESS;
+    if (end < html.len) {
+        end++;
+    }
+    result.nextPosition = end;
+
+    return result;
+}
+
+typedef enum {
+    CONTEXT_TEXT,
+    CONTEXT_STYLE,
+    CONTEXT_SCRIPT,
+} flo_html_TextContext;
+
+bool isEndOfTextNode(const flo_html_String html, ptrdiff_t currentIndex,
+                     flo_html_String closeToken) {
+    unsigned char ch = flo_html_getChar(html, currentIndex);
+    if (ch != '<') {
+        return false;
+    }
+
+    if (closeToken.len == 0) {
+        return true;
+    }
+
+    // "/script" or "/style"
+    if (currentIndex + closeToken.len <= html.len) {
+        flo_html_String possibleCloseToken = FLO_HTML_S_LEN(
+            flo_html_getCharPtr(html, currentIndex + 1), closeToken.len);
+        return flo_html_stringEquals(possibleCloseToken, closeToken);
+    }
+
+    return false;
+}
+
+flo_html_NodeParseResult parseTextNodeNew(const flo_html_String html,
+                                          ptrdiff_t textStart,
+                                          flo_html_TextContext textContext,
+                                          flo_html_Dom *dom,
+                                          flo_html_TextStore *textStore) {
+    flo_html_NodeParseResult result;
+    flo_html_DomStatus documentStatus;
+    flo_html_node_id nodeID;
+
+    if ((documentStatus = flo_html_createNode(&nodeID, NODE_TYPE_TEXT, dom)) !=
+        DOM_SUCCESS) {
+        FLO_HTML_PRINT_ERROR("Failed to create node.\n");
+        result.status = documentStatus;
+        return result;
+    }
+
+    ptrdiff_t textEnd =
+        textStart + 1; // Always consume at least a single character, otherwise
+                       // problematic if we have a roque opening tag.
+    unsigned char ch = flo_html_getChar(html, textEnd);
+
+    ptrdiff_t totalTextLen = 0;
+    ptrdiff_t maxTextSize = 1U << 14U;
+    // TODO: transform into scratch arena allocator.
+    unsigned char *textBuffer = malloc(maxTextSize);
+    if (textBuffer == NULL) {
+        FLO_HTML_PRINT_ERROR("Failed to allocate memory for text buffer.\n");
+        result.status = DOM_ERROR_MEMORY;
+        return result;
+    }
+    flo_html_String textString;
+    textString.buf = textBuffer;
+
+    flo_html_String closeToken;
+    switch (textContext) {
+    case CONTEXT_TEXT: {
+        closeToken = FLO_HTML_EMPTY_STRING;
+        break;
+    }
+    case CONTEXT_STYLE: {
+        closeToken = FLO_HTML_S("/style");
+        break;
+    }
+    case CONTEXT_SCRIPT: {
+        closeToken = FLO_HTML_S("/script");
+        break;
+    }
+    }
+
+    // Continue until the end of the text node.
+    while (textEnd < html.len && !isEndOfTextNode(html, textEnd, closeToken)) {
+        // Continue until we encounter extra space or the end of the text
+        // node.
+        while (textEnd < html.len && textNodeContinue(ch, html, textEnd) &&
+               ch != '<' && !isEndOfTextNode(html, textEnd, closeToken)) {
+            ch = flo_html_getChar(html, ++(textEnd));
+        }
+
+        ptrdiff_t textLen = textEnd - textStart;
+        if (flo_html_getChar(html, textEnd - 1) == ' ') {
+            textLen--;
+        }
+
+        if (textLen + totalTextLen + 1 > maxTextSize) {
+            free(textBuffer);
+            FLO_HTML_PRINT_ERROR(
+                "Text node is too large to fit into text buffer.\n");
+            result.status = DOM_ERROR_MEMORY;
+            return result;
+        }
+
+        textBuffer[totalTextLen] = ' ';
+        memcpy(&textBuffer[totalTextLen + (totalTextLen > 0)],
+               flo_html_getCharPtr(html, textStart), textLen);
+        totalTextLen += textLen;
+
+        textStart = parseEmptyContent(html, textEnd);
+        textEnd = textStart;
+        ch = flo_html_getChar(html, textEnd);
+    }
+    textString.len = totalTextLen;
+
+    printf("TEXT I AM GOING TO INSERT IS %.*s\n", FLO_HTML_S_P(textString));
+
+    char *dataLocation = NULL;
+    flo_html_ElementStatus status =
+        flo_html_insertElement(&textStore->text, textString, &dataLocation);
+    if (status != ELEMENT_CREATED) {
+        free(textBuffer);
+        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(status),
+                                      "Failed to index text!\n");
+        result.status = DOM_NO_ELEMENT;
+        return result;
+    }
+    free(textBuffer);
+
+    flo_html_setNodeText(nodeID, FLO_HTML_S_LEN(dataLocation, textString.len),
+                         dom);
+
+    result.nodeID = nodeID;
+    result.status = DOM_SUCCESS;
+    result.canHaveChildren = false;
+    result.nextPosition = textEnd;
+
+    return result;
+}
+
+ptrdiff_t parseEmbeddedContent(const flo_html_String html,
+                               ptrdiff_t embeddedContentStart,
+                               flo_html_node_id embeddedNodeID,
+                               flo_html_TextContext textContext,
+                               flo_html_Dom *dom,
+                               flo_html_TextStore *textStore) {
+    flo_html_NodeParseResult parseResult;
+    PARSE_TEXT_NODE(parseResult, html, embeddedContentStart, textContext, dom,
+                    textStore);
+
     flo_html_DomStatus status;
-    bool canHaveChildren;
-    flo_html_node_id nodeID;
-    ptrdiff_t nextPosition;
-} flo_html_ParseDocumentOpen;
+    if ((status = flo_html_addParentChild(embeddedNodeID, parseResult.nodeID,
+                                          dom)) != DOM_SUCCESS) {
+        FLO_HTML_PRINT_ERROR("Failed to add parent-child from embedded.\n");
+        return status;
+    }
+    if ((status = flo_html_addParentFirstChild(
+             embeddedNodeID, parseResult.nodeID, dom)) != DOM_SUCCESS) {
+        FLO_HTML_PRINT_ERROR(
+            "Failed to add parent-first-child from embedded.\n");
+        return status;
+    }
 
-flo_html_DomStatus parseDocumentNodeNew(const flo_html_String html,
-                                        ptrdiff_t tagStart, bool exclamTag,
-                                        flo_html_Dom *dom,
-                                        flo_html_TextStore *textStore) {
-    flo_html_DomStatus documentStatus = DOM_SUCCESS;
+    return parseResult.nextPosition;
+}
 
+ptrdiff_t parseProp(const flo_html_String html, ptrdiff_t propStart,
+                    flo_html_String *prop) {
+    ptrdiff_t propEnd = propStart;
+    ptrdiff_t nextChar = propStart;
+    unsigned ch = flo_html_getChar(html, propEnd);
+
+    if (ch == '\'' || ch == '"') {
+        unsigned char quote = ch;
+
+        ptrdiff_t quoteCount = 0;
+        while (propEnd < html.len && quoteCount < 2) {
+            quoteCount += (ch == quote); // Be gone branches.
+            ch = flo_html_getChar(html, ++nextChar);
+        }
+
+        propStart++;
+        propEnd = nextChar - 1;
+    } else {
+        while (propEnd < html.len && ch != ' ' &&
+               !flo_html_isSpecialSpace(ch) && ch != '/' && ch != '>' &&
+               ch != '=') {
+            ch = flo_html_getChar(html, ++nextChar);
+        }
+        propEnd = nextChar;
+    }
+    ptrdiff_t propLen = propEnd - propStart;
+    *prop = FLO_HTML_S_LEN(flo_html_getCharPtr(html, propStart), propLen);
+
+    return nextChar;
+}
+
+flo_html_NodeParseResult parseDocumentNodeNew(const flo_html_String html,
+                                              ptrdiff_t tagStart,
+                                              bool exclamTag, flo_html_Dom *dom,
+                                              flo_html_TextStore *textStore) {
+    flo_html_NodeParseResult result;
+    flo_html_DomStatus documentStatus;
     flo_html_node_id nodeID;
+
     if ((documentStatus = flo_html_createNode(&nodeID, NODE_TYPE_DOCUMENT,
                                               dom)) != DOM_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Failed to create node.\n");
-        return documentStatus;
+        result.status = documentStatus;
+        return result;
     }
 
     ptrdiff_t parsedChars = tagStart;
@@ -507,55 +760,93 @@ flo_html_DomStatus parseDocumentNodeNew(const flo_html_String html,
 
     flo_html_String documentTag =
         FLO_HTML_S_LEN(flo_html_getCharPtr(html, tagStart), tagSize);
+    printf("the parsed document tag %.*s\n", FLO_HTML_S_P(documentTag));
     // For example <br>.
     if (isVoidElement(documentTag)) {
         canHaveChildren = false;
     }
 
+    parsedChars = parseEmptyContent(html, parsedChars);
+    ch = flo_html_getChar(html, parsedChars);
     while (parsedChars < html.len && ch != '>') {
-        if (ch == ' ' || flo_html_isSpecialSpace(ch)) {
-            parsedChars = parseEmptyContent(html, parsedChars);
+        printf("current char is %c\n", ch);
+        if (ch == '/') {
+            canHaveChildren = false;
+            parsedChars++;
+        }
+        // Found a property.
+        // Not sure yet if it is a boolean or key-value property.
+        // Accepted values:
+        // 'property' / "property" / property
+        else {
+            flo_html_String propKey;
+            parsedChars = parseProp(html, parsedChars, &propKey);
+            printf("prop key is %.*s\n", FLO_HTML_S_P(propKey));
             ch = flo_html_getChar(html, parsedChars);
-        } else {
-            if (ch == '/') {
-                canHaveChildren = false;
-            }
-            // Found a property.
-            // Not sure yet if it is a boolean or key-value property.
-            // Accepted values:
-            // 'property' / "property" / property
-            else {
-                ptrdiff_t propKeyStart = parsedChars;
+            printf("char is after %c\n", ch);
+            // Check for key-value property
+            if (ch == '=') {
+                // Expected syntax: key="value" OR
+                // Expected syntax: key='value' OR
+                // Expected syntax: key=value (This is invalid html, but
+                // will still support it) We can do some more interesting
+                // stuff but currently not required.
+                flo_html_String propValue;
+                parsedChars =
+                    parseProp(html, parsedChars + 1, &propValue); // skip '='
+                ch = flo_html_getChar(html, parsedChars);
 
-                if (ch == '\'' || ch == '"') {
-                    unsigned char quote = ch;
-
-                    ptrdiff_t quoteCount = 0;
-                    while (parsedChars < html.len && quoteCount < 2) {
-                        quoteCount += (ch == quote); // Be gone branches.
-                        ch = flo_html_getChar(html, ++parsedChars);
-                    }
-                } else {
-                    while (parsedChars < html.len && ch != ' ' && ch != '>' &&
-                           ch != '=') {
-                        ch = flo_html_getChar(html, ++parsedChars);
-                    }
+                flo_html_ElementStatus status = flo_html_addPropertyToNode(
+                    nodeID, propKey, propValue, dom, textStore);
+                if (status != ELEMENT_SUCCESS) {
+                    FLO_HTML_ERROR_WITH_CODE_ONLY(
+                        flo_html_elementStatusToString(status),
+                        "Failed to add key-value property!\n");
+                    result.status = DOM_NO_ELEMENT;
+                    return result;
                 }
-                // TODO: Continue here.
-                // we now have the size of the prop key.
+            } else {
+                printf("adding as boolean prop %.*s\n", FLO_HTML_S_P(propKey));
+                flo_html_ElementStatus status =
+                    flo_html_addBooleanPropertyToNode(nodeID, propKey, dom,
+                                                      textStore);
+                if (status != ELEMENT_SUCCESS) {
+                    FLO_HTML_ERROR_WITH_CODE_ONLY(
+                        flo_html_elementStatusToString(status),
+                        "Failed to add boolean property!\n");
+                    result.status = DOM_NO_ELEMENT;
+                    return result;
+                }
             }
         }
+        parsedChars = parseEmptyContent(html, parsedChars);
+        ch = flo_html_getChar(html, parsedChars);
     }
 
-    if (ch == '>' && *currentPosition > 0 &&
-        htmlString.buf[*currentPosition - 1] == '/') {
-        *isSingle = true;
-        elementLen--;
-    } else if (isVoidElement(FLO_HTML_S_LEN(&htmlString.buf[elementStartIndex],
-                                            elementLen))) {
-        // For the funny <br> tags...
-        *isSingle = true;
+    if (flo_html_stringEquals(documentTag, FLO_HTML_S("script"))) {
+        result.nextPosition = parseEmbeddedContent(
+            html, parsedChars, nodeID, CONTEXT_SCRIPT, dom, textStore);
+    } else if (flo_html_stringEquals(documentTag, FLO_HTML_S("style"))) {
+        result.nextPosition = parseEmbeddedContent(
+            html, parsedChars, nodeID, CONTEXT_STYLE, dom, textStore);
     }
+
+    if ((documentStatus =
+             flo_html_setTagOnDocumentNode(documentTag, nodeID, canHaveChildren,
+                                           dom, textStore)) != DOM_SUCCESS) {
+        FLO_HTML_PRINT_ERROR("Failed to add tag to node ID.\n");
+        result.status = documentStatus;
+        return result;
+    }
+
+    result.nodeID = nodeID;
+    result.status = DOM_SUCCESS;
+    result.canHaveChildren = canHaveChildren;
+    result.nextPosition =
+        parsedChars + 1; // Skip '>', we basically already parsed it by adding
+                         // the tag to the node ID.
+
+    return result;
 }
 
 flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
@@ -568,31 +859,101 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
     nodeStack.stack[0] = dom->nodes[1].nodeID;
     nodeStack.len = 1;
 
+    flo_html_node_id prevNodeID = dom->nodes[1].nodeID;
+
     ptrdiff_t currentPosition = 0;
 
-    unsigned char ch;
+    currentPosition = parseEmptyContent(html, currentPosition);
+    unsigned char ch = flo_html_getChar(html, currentPosition);
     while (currentPosition < html.len) {
-        ch = flo_html_getChar(html, currentPosition);
+        // flo_html_printDomStatus(dom, textStore);
+        printf("in here with character: %c\n", ch);
 
-        if (ch == ' ' || flo_html_isSpecialSpace(ch)) {
-            currentPosition = parseEmptyContent(html, currentPosition);
-        } else if (ch == '<') {
-            // Open document node.
-            if (currentPosition < html.len - 1) {
+        flo_html_NodeParseResult parseResult;
+        // Open document node.
+        if (ch == '<' && currentPosition < html.len - 1) {
+            if (currentPosition < html.len - 3 &&
+                flo_html_stringEquals(
+                    FLO_HTML_S("!--"),
+                    FLO_HTML_S_LEN(
+                        flo_html_getCharPtr(html, currentPosition + 1), 3))) {
+                printf("parsing comments\n");
+                parseResult = parseComment(html, currentPosition + 4);
+                parseResult.nodeID = prevNodeID;
+            } else {
                 unsigned char nextCh =
                     flo_html_getChar(html, currentPosition + 1);
-                if (flo_html_isAlphaBetical(nextCh)) {
-                    // standard opening tag.
-                } else if (nextCh == '!') {
-                    // !DOCTYPE and friends.
+
+                if (flo_html_isAlphaBetical(nextCh) || nextCh == '!') {
+                    printf("parsing doc node\n");
+                    printf("Node stack len: %zu\n", nodeStack.len);
+                    for (ptrdiff_t i = 0; i < nodeStack.len; i++) {
+                        printf("Node id: %u\n", nodeStack.stack[i]);
+                    }
+                    printf("prev node iD: %hu\n", prevNodeID);
+                    // standard opening tag or !DOCTYPE and friends
+                    parseResult =
+                        parseDocumentNodeNew(html, currentPosition + 1,
+                                             nextCh == '!', dom, textStore);
+                    if (parseResult.status != DOM_SUCCESS) {
+                        FLO_HTML_PRINT_ERROR(
+                            "Failed to parse document node.\n");
+                        return parseResult.status;
+                    }
+
+                    UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack, dom);
+
+                    if (parseResult.canHaveChildren) {
+                        if (nodeStack.len >= FLO_HTML_MAX_NODE_DEPTH) {
+                            FLO_HTML_PRINT_ERROR(
+                                "Reached max node depth, aborting\n");
+                            return DOM_TOO_DEEP;
+                        }
+                        nodeStack.stack[nodeStack.len] = parseResult.nodeID;
+                        nodeStack.len++;
+                    }
                 } else {
-                    // Rogue open tag -> Text node.
+                    if (nextCh == '/') {
+                        printf("parsing close tag\n");
+                        if (nodeStack.len > 1) {
+                            nodeStack.len--;
+                            prevNodeID = nodeStack.stack[nodeStack.len];
+                        } else {
+                            FLO_HTML_PRINT_ERROR("Tried to pop off the root "
+                                                 "node from the node stack!\n");
+                            return DOM_NO_ELEMENT;
+                        }
+                        parseResult = parseCloseTag(html, currentPosition + 2);
+                        parseResult.nodeID = prevNodeID;
+                    } else {
+                        // Rogue open tag -> Text node.
+                        printf("parsing rogue open tag\n");
+                        PARSE_TEXT_NODE(parseResult, html, currentPosition,
+                                        CONTEXT_TEXT, dom, textStore);
+                        UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack,
+                                          dom);
+                    }
                 }
-            } else {
-                // Text node.
             }
         }
+        // Text node.
+        else {
+            printf("parsing text node\n");
+            PARSE_TEXT_NODE(parseResult, html, currentPosition, CONTEXT_TEXT,
+                            dom, textStore);
+            UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack, dom);
+        }
+
+        prevNodeID = parseResult.nodeID;
+        currentPosition = parseResult.nextPosition;
+
+        currentPosition = parseEmptyContent(html, currentPosition);
+        ch = flo_html_getChar(html, currentPosition);
     }
+
+    // flo_html_printDomStatus(dom, textStore);
+    flo_html_printHTML(dom, textStore);
+    flo_html_printTagStatus(textStore);
 
     return documentStatus;
 }
