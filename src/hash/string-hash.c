@@ -159,10 +159,6 @@ flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator) {
 
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index].flo_html_indexID > 0) {
-            printf("Returining a string...");
-            printf("index is %zu\n", iterator->index);
-            flo_html_String string = set->array[iterator->index].string;
-            printf("string is %.*s\n", FLO_HTML_S_P(string));
             return set->array[iterator->index++].string;
         }
         iterator->index++;

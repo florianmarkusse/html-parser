@@ -16,6 +16,7 @@
 #include "flo/html-parser/type/element/elements-print.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/type/node/node.h"
+#include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/print/error.h"
 #include "flo/html-parser/utils/text/text.h"
 
@@ -65,7 +66,7 @@ updateReferences(const flo_html_node_id newNodeID,
             }
         } else {
             const unsigned int parentNodeID =
-                depthStack->stack[depthStack->len - 1];
+                depthStack->stack[depthStack->len - 1].nodeID;
             if ((documentStatus = flo_html_addParentChild(
                      parentNodeID, newNodeID, dom)) != DOM_SUCCESS) {
                 return documentStatus;
@@ -273,11 +274,11 @@ parseBasicdomNode(const flo_html_String htmlString, size_t *currentPosition,
         }                                                                      \
     } while (0)
 
-#define PARSE_TEXT_NODE(parseResult, html, currentPosition, context, dom,      \
+#define PARSE_TEXT_NODE(parseResult, html, currentPosition, parentTag, dom,    \
                         textStore)                                             \
     do {                                                                       \
-        (parseResult) = parseTextNodeNew((html), (currentPosition), (context), \
-                                         (dom), (textStore));                  \
+        (parseResult) = parseTextNodeNew((html), (currentPosition),            \
+                                         (parentTag), (dom), (textStore));     \
         if ((parseResult).status != DOM_SUCCESS) {                             \
             FLO_HTML_PRINT_ERROR("Failed to parse text node.\n");              \
             return (parseResult).status;                                       \
@@ -483,6 +484,7 @@ parseTextNode(const flo_html_String htmlString, size_t *currentPosition,
 typedef struct {
     flo_html_DomStatus status;
     bool canHaveChildren;
+    flo_html_String tag;
     flo_html_node_id nodeID;
     ptrdiff_t nextPosition;
 } flo_html_NodeParseResult;
@@ -519,10 +521,10 @@ flo_html_NodeParseResult parseComment(flo_html_String html, ptrdiff_t start) {
     ptrdiff_t end = start;
     unsigned char ch = flo_html_getChar(html, end);
     while (end < html.len &&
-           (ch != '>' ||
-            flo_html_stringEquals(
-                FLO_HTML_S("--"),
-                FLO_HTML_S_LEN(flo_html_getCharPtr(html, end - 2), 2)))) {
+           !(ch == '>' &&
+             flo_html_stringEquals(
+                 FLO_HTML_S("--"),
+                 FLO_HTML_S_LEN(flo_html_getCharPtr(html, end - 2), 2)))) {
         ch = flo_html_getChar(html, ++end);
     }
 
@@ -535,25 +537,20 @@ flo_html_NodeParseResult parseComment(flo_html_String html, ptrdiff_t start) {
     return result;
 }
 
-typedef enum {
-    CONTEXT_TEXT,
-    CONTEXT_STYLE,
-    CONTEXT_SCRIPT,
-} flo_html_TextContext;
+bool isCommentTag(const flo_html_String html, ptrdiff_t currentPosition) {
+    return currentPosition < html.len - 3 &&
+           flo_html_stringEquals(
+               FLO_HTML_S("!--"),
+               FLO_HTML_S_LEN(flo_html_getCharPtr(html, currentPosition + 1),
+                              3));
+}
 
 bool isEndOfTextNode(const flo_html_String html, ptrdiff_t currentIndex,
                      flo_html_String closeToken) {
-    unsigned char ch = flo_html_getChar(html, currentIndex);
-    if (ch != '<') {
-        return false;
-    }
+    unsigned char nextCh = flo_html_getChar(html, currentIndex + 1);
 
-    if (closeToken.len == 0) {
-        return true;
-    }
-
-    // "/script" or "/style"
-    if (currentIndex + closeToken.len <= html.len) {
+    if ((flo_html_isAlphaBetical(nextCh) || nextCh == '!' || nextCh == '/') &&
+        currentIndex + closeToken.len <= html.len) {
         flo_html_String possibleCloseToken = FLO_HTML_S_LEN(
             flo_html_getCharPtr(html, currentIndex + 1), closeToken.len);
         return flo_html_stringEquals(possibleCloseToken, closeToken);
@@ -564,7 +561,7 @@ bool isEndOfTextNode(const flo_html_String html, ptrdiff_t currentIndex,
 
 flo_html_NodeParseResult parseTextNodeNew(const flo_html_String html,
                                           ptrdiff_t textStart,
-                                          flo_html_TextContext textContext,
+                                          flo_html_String parentTag,
                                           flo_html_Dom *dom,
                                           flo_html_TextStore *textStore) {
     flo_html_NodeParseResult result;
@@ -595,50 +592,57 @@ flo_html_NodeParseResult parseTextNodeNew(const flo_html_String html,
     flo_html_String textString;
     textString.buf = textBuffer;
 
-    flo_html_String closeToken;
-    switch (textContext) {
-    case CONTEXT_TEXT: {
-        closeToken = FLO_HTML_EMPTY_STRING;
-        break;
-    }
-    case CONTEXT_STYLE: {
+    flo_html_String closeToken = FLO_HTML_EMPTY_STRING;
+    if (flo_html_stringEquals(parentTag, FLO_HTML_S("style"))) {
         closeToken = FLO_HTML_S("/style");
-        break;
     }
-    case CONTEXT_SCRIPT: {
+    if (flo_html_stringEquals(parentTag, FLO_HTML_S("script"))) {
         closeToken = FLO_HTML_S("/script");
-        break;
-    }
     }
 
+    flo_html_NodeParseResult commentNode;
     // Continue until the end of the text node.
-    while (textEnd < html.len && !isEndOfTextNode(html, textEnd, closeToken)) {
-        // Continue until we encounter extra space or the end of the text
-        // node.
-        while (textEnd < html.len && textNodeContinue(ch, html, textEnd) &&
-               ch != '<' && !isEndOfTextNode(html, textEnd, closeToken)) {
-            ch = flo_html_getChar(html, ++(textEnd));
+    while (textEnd < html.len &&
+           !(ch == '<' && isEndOfTextNode(html, textEnd, closeToken) &&
+             !isCommentTag(html, textEnd))) {
+        printf("start ch = %c\n", ch);
+        if (ch == '<' && isCommentTag(html, textEnd)) {
+            printf("Parsing comment tag inside text node\n");
+            commentNode = parseComment(html, textEnd + 4);
+            textStart = parseEmptyContent(html, commentNode.nextPosition);
+        } else {
+            // Continue until we encounter extra space or the end of the text
+            // node.
+            while (textEnd < html.len && textNodeContinue(ch, html, textEnd) &&
+                   !(ch == '<' && isEndOfTextNode(html, textEnd, closeToken))) {
+                ch = flo_html_getChar(html, ++(textEnd));
+                printf("current ch = %c\n", ch);
+            }
+
+            ptrdiff_t textLen = textEnd - textStart;
+            if (flo_html_getChar(html, textEnd - 1) == ' ') {
+                textLen--;
+            }
+
+            if (textLen + totalTextLen + 1 > maxTextSize) {
+                FLO_HTML_FREE_TO_NULL(textBuffer);
+                FLO_HTML_PRINT_ERROR(
+                    "Text node is too large to fit into text buffer.\n");
+                result.status = DOM_ERROR_MEMORY;
+                return result;
+            }
+
+            printf("adding the following: %.*s\n", (int)textLen,
+                   flo_html_getCharPtr(html, textStart));
+            textBuffer[totalTextLen] = ' ';
+            memcpy(&textBuffer[totalTextLen + (totalTextLen > 0)],
+                   flo_html_getCharPtr(html, textStart), textLen);
+            totalTextLen += textLen + (totalTextLen > 0);
+
+            printf("now contains: %.*s\n", (int)totalTextLen, textBuffer);
+
+            textStart = parseEmptyContent(html, textEnd);
         }
-
-        ptrdiff_t textLen = textEnd - textStart;
-        if (flo_html_getChar(html, textEnd - 1) == ' ') {
-            textLen--;
-        }
-
-        if (textLen + totalTextLen + 1 > maxTextSize) {
-            free(textBuffer);
-            FLO_HTML_PRINT_ERROR(
-                "Text node is too large to fit into text buffer.\n");
-            result.status = DOM_ERROR_MEMORY;
-            return result;
-        }
-
-        textBuffer[totalTextLen] = ' ';
-        memcpy(&textBuffer[totalTextLen + (totalTextLen > 0)],
-               flo_html_getCharPtr(html, textStart), textLen);
-        totalTextLen += textLen;
-
-        textStart = parseEmptyContent(html, textEnd);
         textEnd = textStart;
         ch = flo_html_getChar(html, textEnd);
     }
@@ -650,13 +654,13 @@ flo_html_NodeParseResult parseTextNodeNew(const flo_html_String html,
     flo_html_ElementStatus status =
         flo_html_insertElement(&textStore->text, textString, &dataLocation);
     if (status != ELEMENT_CREATED) {
-        free(textBuffer);
+        FLO_HTML_FREE_TO_NULL(textBuffer);
         FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_elementStatusToString(status),
                                       "Failed to index text!\n");
         result.status = DOM_NO_ELEMENT;
         return result;
     }
-    free(textBuffer);
+    FLO_HTML_FREE_TO_NULL(textBuffer);
 
     flo_html_setNodeText(nodeID, FLO_HTML_S_LEN(dataLocation, textString.len),
                          dom);
@@ -667,32 +671,6 @@ flo_html_NodeParseResult parseTextNodeNew(const flo_html_String html,
     result.nextPosition = textEnd;
 
     return result;
-}
-
-ptrdiff_t parseEmbeddedContent(const flo_html_String html,
-                               ptrdiff_t embeddedContentStart,
-                               flo_html_node_id embeddedNodeID,
-                               flo_html_TextContext textContext,
-                               flo_html_Dom *dom,
-                               flo_html_TextStore *textStore) {
-    flo_html_NodeParseResult parseResult;
-    PARSE_TEXT_NODE(parseResult, html, embeddedContentStart, textContext, dom,
-                    textStore);
-
-    flo_html_DomStatus status;
-    if ((status = flo_html_addParentChild(embeddedNodeID, parseResult.nodeID,
-                                          dom)) != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to add parent-child from embedded.\n");
-        return status;
-    }
-    if ((status = flo_html_addParentFirstChild(
-             embeddedNodeID, parseResult.nodeID, dom)) != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to add parent-first-child from embedded.\n");
-        return status;
-    }
-
-    return parseResult.nextPosition;
 }
 
 ptrdiff_t parseProp(const flo_html_String html, ptrdiff_t propStart,
@@ -714,8 +692,7 @@ ptrdiff_t parseProp(const flo_html_String html, ptrdiff_t propStart,
         propEnd = nextChar - 1;
     } else {
         while (propEnd < html.len && ch != ' ' &&
-               !flo_html_isSpecialSpace(ch) && ch != '/' && ch != '>' &&
-               ch != '=') {
+               !flo_html_isSpecialSpace(ch) && ch != '>' && ch != '=') {
             ch = flo_html_getChar(html, ++nextChar);
         }
         propEnd = nextChar;
@@ -823,14 +800,6 @@ flo_html_NodeParseResult parseDocumentNodeNew(const flo_html_String html,
         ch = flo_html_getChar(html, parsedChars);
     }
 
-    if (flo_html_stringEquals(documentTag, FLO_HTML_S("script"))) {
-        result.nextPosition = parseEmbeddedContent(
-            html, parsedChars, nodeID, CONTEXT_SCRIPT, dom, textStore);
-    } else if (flo_html_stringEquals(documentTag, FLO_HTML_S("style"))) {
-        result.nextPosition = parseEmbeddedContent(
-            html, parsedChars, nodeID, CONTEXT_STYLE, dom, textStore);
-    }
-
     if ((documentStatus =
              flo_html_setTagOnDocumentNode(documentTag, nodeID, canHaveChildren,
                                            dom, textStore)) != DOM_SUCCESS) {
@@ -842,6 +811,7 @@ flo_html_NodeParseResult parseDocumentNodeNew(const flo_html_String html,
     result.nodeID = nodeID;
     result.status = DOM_SUCCESS;
     result.canHaveChildren = canHaveChildren;
+    result.tag = documentTag;
     result.nextPosition =
         parsedChars + 1; // Skip '>', we basically already parsed it by adding
                          // the tag to the node ID.
@@ -856,7 +826,8 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
     flo_html_DomStatus documentStatus = DOM_SUCCESS;
 
     flo_html_NodeDepth nodeStack;
-    nodeStack.stack[0] = dom->nodes[1].nodeID;
+    nodeStack.stack[0].nodeID = dom->nodes[1].nodeID;
+    nodeStack.stack[0].tag = FLO_HTML_EMPTY_STRING;
     nodeStack.len = 1;
 
     flo_html_node_id prevNodeID = dom->nodes[1].nodeID;
@@ -868,15 +839,15 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
     while (currentPosition < html.len) {
         // flo_html_printDomStatus(dom, textStore);
         printf("in here with character: %c\n", ch);
+        printf("in here with character + 1: %c\n",
+               flo_html_getChar(html, currentPosition + 1));
+        printf("in here with character + 2: %c\n",
+               flo_html_getChar(html, currentPosition + 2));
 
         flo_html_NodeParseResult parseResult;
         // Open document node.
         if (ch == '<' && currentPosition < html.len - 1) {
-            if (currentPosition < html.len - 3 &&
-                flo_html_stringEquals(
-                    FLO_HTML_S("!--"),
-                    FLO_HTML_S_LEN(
-                        flo_html_getCharPtr(html, currentPosition + 1), 3))) {
+            if (isCommentTag(html, currentPosition)) {
                 printf("parsing comments\n");
                 parseResult = parseComment(html, currentPosition + 4);
                 parseResult.nodeID = prevNodeID;
@@ -888,7 +859,7 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
                     printf("parsing doc node\n");
                     printf("Node stack len: %zu\n", nodeStack.len);
                     for (ptrdiff_t i = 0; i < nodeStack.len; i++) {
-                        printf("Node id: %u\n", nodeStack.stack[i]);
+                        printf("Node id: %u\n", nodeStack.stack[i].nodeID);
                     }
                     printf("prev node iD: %hu\n", prevNodeID);
                     // standard opening tag or !DOCTYPE and friends
@@ -909,7 +880,9 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
                                 "Reached max node depth, aborting\n");
                             return DOM_TOO_DEEP;
                         }
-                        nodeStack.stack[nodeStack.len] = parseResult.nodeID;
+                        nodeStack.stack[nodeStack.len].nodeID =
+                            parseResult.nodeID;
+                        nodeStack.stack[nodeStack.len].tag = parseResult.tag;
                         nodeStack.len++;
                     }
                 } else {
@@ -917,11 +890,7 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
                         printf("parsing close tag\n");
                         if (nodeStack.len > 1) {
                             nodeStack.len--;
-                            prevNodeID = nodeStack.stack[nodeStack.len];
-                        } else {
-                            FLO_HTML_PRINT_ERROR("Tried to pop off the root "
-                                                 "node from the node stack!\n");
-                            return DOM_NO_ELEMENT;
+                            prevNodeID = nodeStack.stack[nodeStack.len].nodeID;
                         }
                         parseResult = parseCloseTag(html, currentPosition + 2);
                         parseResult.nodeID = prevNodeID;
@@ -929,7 +898,8 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
                         // Rogue open tag -> Text node.
                         printf("parsing rogue open tag\n");
                         PARSE_TEXT_NODE(parseResult, html, currentPosition,
-                                        CONTEXT_TEXT, dom, textStore);
+                                        nodeStack.stack[nodeStack.len - 1].tag,
+                                        dom, textStore);
                         UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack,
                                           dom);
                     }
@@ -939,13 +909,24 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
         // Text node.
         else {
             printf("parsing text node\n");
-            PARSE_TEXT_NODE(parseResult, html, currentPosition, CONTEXT_TEXT,
-                            dom, textStore);
+            PARSE_TEXT_NODE(parseResult, html, currentPosition,
+                            nodeStack.stack[nodeStack.len - 1].tag, dom,
+                            textStore);
             UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack, dom);
         }
 
         prevNodeID = parseResult.nodeID;
         currentPosition = parseResult.nextPosition;
+
+        printf("curr poss is %td\n", currentPosition);
+        printf("out here with character + 1: %c\n",
+               flo_html_getChar(html, currentPosition));
+        printf("out here with character + 1: %c\n",
+               flo_html_getChar(html, currentPosition + 1));
+        printf("out here with character + 2: %c\n",
+               flo_html_getChar(html, currentPosition + 2));
+        printf("out here with character + 3: %c\n",
+               flo_html_getChar(html, currentPosition + 3));
 
         currentPosition = parseEmptyContent(html, currentPosition);
         ch = flo_html_getChar(html, currentPosition);
@@ -953,7 +934,9 @@ flo_html_DomStatus flo_html_parseNew(flo_html_String html, flo_html_Dom *dom,
 
     // flo_html_printDomStatus(dom, textStore);
     flo_html_printHTML(dom, textStore);
-    flo_html_printTagStatus(textStore);
+    // flo_html_printTagStatus(textStore);
+
+    printf("\n\n\n");
 
     return documentStatus;
 }
@@ -1029,7 +1012,7 @@ flo_html_DomStatus flo_html_parse(const flo_html_String htmlString,
 
                 if (nodeStack.len > 0) {
                     nodeStack.len--;
-                    lastParsedNodeID = nodeStack.stack[nodeStack.len];
+                    lastParsedNodeID = nodeStack.stack[nodeStack.len].nodeID;
                 }
                 context = BASIC_CONTEXT;
             }
@@ -1089,7 +1072,7 @@ flo_html_DomStatus flo_html_parse(const flo_html_String htmlString,
                             "Reached max node depth, aborting\n");
                         return DOM_TOO_DEEP;
                     }
-                    nodeStack.stack[nodeStack.len] = lastParsedNodeID;
+                    nodeStack.stack[nodeStack.len].nodeID = lastParsedNodeID;
                     nodeStack.len++;
                 }
             }

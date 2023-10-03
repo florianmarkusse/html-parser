@@ -14,8 +14,9 @@ void printAttributes(
     const flo_html_indexID tagID2, const flo_html_StringHashSet *set2,
     const flo_html_Dom *dom2, const flo_html_TextStore *textStore2) {
     const flo_html_String tag1 = flo_html_getTag(tagID1, dom1, textStore1);
-    FLO_HTML_PRINT_ERROR("Printing certain attributes of node 1 with tag %s:\n",
-                         tag1.buf);
+    FLO_HTML_PRINT_ERROR(
+        "Printing certain attributes of node 1 with tag %.*s:\n",
+        FLO_HTML_S_P(tag1));
 
     flo_html_StringHashSetIterator iterator;
     flo_html_initStringHashSetIterator(&iterator, set1);
@@ -23,19 +24,20 @@ void printAttributes(
     while (flo_html_hasNextStringHashSetIterator(&iterator)) {
         const flo_html_String attribute =
             flo_html_nextStringHashSetIterator(&iterator);
-        FLO_HTML_PRINT_ERROR("%s\n", attribute.buf);
+        FLO_HTML_PRINT_ERROR("%.*s\n", FLO_HTML_S_P(attribute));
     }
 
     const flo_html_String tag2 = flo_html_getTag(tagID2, dom2, textStore2);
-    FLO_HTML_PRINT_ERROR("Printing certain attributes of node 2 with tag %s:\n",
-                         tag2.buf);
+    FLO_HTML_PRINT_ERROR(
+        "Printing certain attributes of node 2 with tag %.*s:\n",
+        FLO_HTML_S_P(tag2));
 
     flo_html_initStringHashSetIterator(&iterator, set2);
 
     while (flo_html_hasNextStringHashSetIterator(&iterator)) {
         const flo_html_String attribute =
             flo_html_nextStringHashSetIterator(&iterator);
-        FLO_HTML_PRINT_ERROR("%s\n", attribute.buf);
+        FLO_HTML_PRINT_ERROR("%.*s\n", FLO_HTML_S_P(attribute));
     }
 }
 
@@ -68,7 +70,8 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
                 HASH_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_FORMAT(
                     flo_html_hashStatusToString(status),
-                    "Failed to insert %s into key hash set", propKey.buf);
+                    "Failed to insert %.*s into key hash set",
+                    FLO_HTML_S_P(propKey));
                 flo_html_destroyStringHashSet(keySet);
                 flo_html_destroyStringHashSet(valueSet);
                 return status;
@@ -81,7 +84,8 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
                 HASH_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_FORMAT(
                     flo_html_hashStatusToString(status),
-                    "Failed to insert %s into value hash set", propValue.buf);
+                    "Failed to insert %.*s into value hash set",
+                    FLO_HTML_S_P(propValue));
                 flo_html_destroyStringHashSet(keySet);
                 flo_html_destroyStringHashSet(valueSet);
                 return status;
@@ -183,7 +187,8 @@ flo_html_HashStatus createBoolPropsSet(const flo_html_node_id nodeID,
                 HASH_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_FORMAT(
                     flo_html_hashStatusToString(status),
-                    "Failed to insert %s into hash set", boolProp.buf);
+                    "Failed to insert %.*s into hash set",
+                    FLO_HTML_S_P(boolProp));
                 flo_html_destroyStringHashSet(set);
                 return status;
             }
@@ -256,9 +261,10 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
             const flo_html_String nodeType2 =
                 flo_html_nodeTypeToString(node2->nodeType);
             FLO_HTML_PRINT_ERROR("Uncomparable nodes:\n"
-                                 "node 1 type: %s\n"
-                                 "node 2 type: %s\n",
-                                 nodeType1.buf, nodeType2.buf);
+                                 "node 1 type: %.*s\n"
+                                 "node 2 type: %.*s\n",
+                                 FLO_HTML_S_P(nodeType1),
+                                 FLO_HTML_S_P(nodeType2));
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
@@ -274,8 +280,8 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
 
         if (printDifferences) {
             FLO_HTML_PRINT_ERROR(
-                "Different text nodes\nnode 1: %s\nnode 2: %s\n", text1.buf,
-                text2.buf);
+                "Different text nodes\nnode 1: %.*s\nnode 2: %.*s\n",
+                FLO_HTML_S_P(text1), FLO_HTML_S_P(text2));
         }
         return COMPARISON_DIFFERENT_CONTENT;
     }
@@ -299,8 +305,8 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
                 FLO_HTML_PRINT_ERROR(
                     "Uncomparable nodes: single node and paired node.\nFound "
                     "single node in node %c.\n"
-                    "node 1 tag: %s\nnode 2 tag: %s\n",
-                    singleNode, tag1.buf, tag2.buf);
+                    "node 1 tag: %.*s\nnode 2 tag: %.*s\n",
+                    singleNode, FLO_HTML_S_P(tag1), FLO_HTML_S_P(tag2));
             }
             return COMPARISON_DIFFERENT_NODE_TYPE;
         }
@@ -313,9 +319,9 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
                 const flo_html_String tag2 =
                     flo_html_getTag(node2->nodeID, dom2, textStore2);
                 FLO_HTML_PRINT_ERROR(
-                    "Nodes have different tags.\nnode 1 tag: %s\nnode "
-                    "2 tag: %s\n",
-                    tag1.buf, tag2.buf);
+                    "Nodes have different tags.\nnode 1 tag: %.*s\nnode "
+                    "2 tag: %.*s\n",
+                    FLO_HTML_S_P(tag1), FLO_HTML_S_P(tag2));
             }
             return COMPARISON_DIFFERENT_CONTENT;
         }
@@ -328,8 +334,8 @@ compareTags(const flo_html_Node *node1, const flo_html_Dom *dom1,
                 flo_html_nodeTypeToString(node1->nodeType);
             FLO_HTML_PRINT_ERROR(
                 "Comparison not implemented for this node type:"
-                "node type: %s\n",
-                nodeType1.buf);
+                "node type: %.*s\n",
+                FLO_HTML_S_P(nodeType1));
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }

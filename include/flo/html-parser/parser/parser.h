@@ -12,7 +12,12 @@ extern "C" {
 #define FLO_HTML_MAX_PROPERTIES 1U << 7U
 
 typedef struct {
-    flo_html_node_id stack[FLO_HTML_MAX_NODE_DEPTH];
+    flo_html_node_id nodeID;
+    flo_html_String tag;
+} flo_html_TagAndNodeID;
+
+typedef struct {
+    flo_html_TagAndNodeID stack[FLO_HTML_MAX_NODE_DEPTH];
     size_t len;
 } flo_html_NodeDepth;
 
