@@ -31,7 +31,6 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
             documentStatusToString(documentStatus),
             "Failed to create document from file \"%s\"", fileLocation.buf);
-        printf(" in hereffjdfd\n");
         return documentStatus;
     }
     FLO_HTML_FREE_TO_NULL(content.buf);
@@ -107,7 +106,7 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
     }
 
     flo_html_DomStatus domumentStatus =
-        flo_html_parseNew(htmlString, dom, textStore);
+        flo_html_parse(htmlString, dom, textStore);
     if (domumentStatus != DOM_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Failed to parse document.\n");
     }

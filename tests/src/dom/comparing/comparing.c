@@ -87,14 +87,6 @@ TestStatus compareFiles(const flo_html_String fileLocation1,
         return result;
     }
 
-    //    flo_html_printTagStatus(&comparisonTest.startTextStore);
-    //    flo_html_printTagStatus(&comparisonTest.expectedTextStore);
-
-    flo_html_printHTML(&comparisonTest.startflo_html_Dom,
-                       &comparisonTest.startTextStore);
-    flo_html_printHTML(&comparisonTest.expectedflo_html_Dom,
-                       &comparisonTest.expectedTextStore);
-
     return compareWithCodeAndEndTest(&comparisonTest, expectedResult);
 }
 

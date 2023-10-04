@@ -14,8 +14,9 @@ unsigned char parseFile(const char *fileLocation) {
         return 0;
     }
     flo_html_Dom dom1;
-    if (flo_html_createDomFromFile(fileLocation, &dom1, &textStore) !=
-        DOM_SUCCESS) {
+    if (flo_html_createDomFromFile(
+            FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)), &dom1,
+            &textStore) != DOM_SUCCESS) {
         flo_html_destroyTextStore(&textStore);
         return 0;
     }

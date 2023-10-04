@@ -19,7 +19,6 @@ TestStatus initComparisonTest(ComparisonTest *comparisonTest,
     if (flo_html_createDomFromFile(
             startFileLocation, &comparisonTest->startflo_html_Dom,
             &comparisonTest->startTextStore) != DOM_SUCCESS) {
-        printf("IN HERE\n");
         return failWithMessageAndCode(
             FLO_HTML_S("Failed to create start DOM from file!\n"),
             TEST_ERROR_INITIALIZATION, comparisonTest);
