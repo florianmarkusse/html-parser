@@ -415,7 +415,7 @@ build/benchmarks/html-parser-benchmarks-Release
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/florianmarkusse/html-parser-demo-c/blob/main/LICENSE) file for details.
+This project is licensed under the GNU-V2.1 License. See the [LICENSE](https://github.com/florianmarkusse/html-parser-demo-c/blob/main/LICENSE) file for details.
 
 ---
 **NB**: Since this parser is lenient, it can probably also be used to parse XML, or similar markup languages. Be advised, this has not been tested and is not the goal of this project.
