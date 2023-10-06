@@ -5,7 +5,9 @@
 extern "C" {
 #endif
 
-void flo_html_createPath(const char *fileLocation);
+#include "flo/html-parser/utils/text/string.h"
+
+void flo_html_createPath(const flo_html_String fileLocation);
 
 #ifdef __cplusplus
 }

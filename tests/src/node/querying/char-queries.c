@@ -14,18 +14,18 @@ typedef enum { GET_VALUE, NUM_CHAR_FUNCTION_TYPES } CharFunctionType;
 
 typedef struct {
     const char *fileLocation;
-    const char *cssQuery;
-    const char *input;
-    const char *expectedResult;
+    const flo_html_String cssQuery;
+    const flo_html_String input;
+    const flo_html_String expectedResult;
     const CharFunctionType functionType;
     const char *testName;
 } TestFile;
 
 static const TestFile testFiles[] = {
-    {TEST_FILE_1, "body", "style", "class", GET_VALUE,
-     "flo_html_getValue when having key"},
-    {TEST_FILE_1, "html", "langg", NULL, GET_VALUE,
-     "flo_html_getValue when not having key"},
+    {TEST_FILE_1, FLO_HTML_S("body"), FLO_HTML_S("style"), FLO_HTML_S("class"),
+     GET_VALUE, "flo_html_getValue when having key"},
+    {TEST_FILE_1, FLO_HTML_S("html"), FLO_HTML_S("langg"),
+     FLO_HTML_EMPTY_STRING, GET_VALUE, "flo_html_getValue when not having key"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -88,8 +88,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         } else {
             printTestFailure();
             printTestDemarcation();
-            printTestResultDifferenceString(expectedResult.buf,
-                                            actualResult.buf);
+            printTestResultDifferenceString(expectedResult, actualResult);
             printTestDemarcation();
         }
     }
@@ -111,15 +110,10 @@ bool testCharNodeQueries(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testQuery(
-                FLO_HTML_S_LEN(testFile.fileLocation,
-                               strlen(testFile.fileLocation)),
-                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                FLO_HTML_S_LEN(testFile.input, strlen(testFile.input)),
-                testFile.functionType,
-                FLO_HTML_S_LEN(testFile.expectedResult,
-                               strlen(testFile.expectedResult))) !=
-            TEST_SUCCESS) {
+        if (testQuery(FLO_HTML_S_LEN(testFile.fileLocation,
+                                     strlen(testFile.fileLocation)),
+                      testFile.cssQuery, testFile.input, testFile.functionType,
+                      testFile.expectedResult) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

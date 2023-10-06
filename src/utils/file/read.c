@@ -7,7 +7,9 @@
 
 flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
                                       flo_html_String *buffer) {
-    FILE *srcFile = fopen(srcPath.buf, "rbe");
+    // casting to char* here because a srcpath should not contain any weird
+    // chars.
+    FILE *srcFile = fopen((char *)srcPath.buf, "rbe");
     if (srcFile == NULL) {
         FLO_HTML_PRINT_ERROR("Failed to open source file: %s\n", srcPath.buf);
         return FILE_CANT_OPEN;

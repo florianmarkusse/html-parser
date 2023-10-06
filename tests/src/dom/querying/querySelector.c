@@ -11,12 +11,14 @@
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 static const TestFile testFiles[] = {
-    {TEST_FILE_1, "body div p h1 lalalal input", QUERY_NOT_SEEN_BEFORE, 0,
-     "unknown tag"},
-    {TEST_FILE_1, "[html-new]", QUERY_NOT_SEEN_BEFORE, 0, "unknown attribute"},
-    {TEST_FILE_1, "[html]", QUERY_SUCCESS, 1, "with html attribute"},
-    {TEST_FILE_1, "body", QUERY_SUCCESS, 6, "single tag selector"},
-    {TEST_FILE_1, "body head", QUERY_SUCCESS, 0, "no nodes found"},
+    {TEST_FILE_1, FLO_HTML_S("body div p h1 lalalal input"),
+     QUERY_NOT_SEEN_BEFORE, 0, "unknown tag"},
+    {TEST_FILE_1, FLO_HTML_S("[html-new]"), QUERY_NOT_SEEN_BEFORE, 0,
+     "unknown attribute"},
+    {TEST_FILE_1, FLO_HTML_S("[html]"), QUERY_SUCCESS, 2,
+     "with html attribute"},
+    {TEST_FILE_1, FLO_HTML_S("body"), QUERY_SUCCESS, 7, "single tag selector"},
+    {TEST_FILE_1, FLO_HTML_S("body head"), QUERY_SUCCESS, 0, "no nodes found"},
 };
 
 static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -81,12 +83,10 @@ unsigned char testQuerySelector(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testQuery(
-                FLO_HTML_S_LEN(testFile.fileLocation,
-                               strlen(testFile.fileLocation)),
-                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                testFile.expectedStatus,
-                testFile.expectedResult) != TEST_SUCCESS) {
+        if (testQuery(FLO_HTML_S_LEN(testFile.fileLocation,
+                                     strlen(testFile.fileLocation)),
+                      testFile.cssQuery, testFile.expectedStatus,
+                      testFile.expectedResult) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

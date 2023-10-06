@@ -159,7 +159,14 @@ flo_html_DomStatus flo_html_setTextContent(const flo_html_node_id nodeID,
         return domStatus;
     }
 
-    return flo_html_addParentFirstChild(nodeID, newNodeID, dom);
+    domStatus = flo_html_addParentFirstChild(nodeID, newNodeID, dom);
+    if (domStatus != DOM_SUCCESS) {
+        return domStatus;
+    }
+
+    domStatus = flo_html_addParentChild(nodeID, newNodeID, dom);
+
+    return domStatus;
 }
 
 flo_html_ElementStatus flo_html_addTextToTextNode(flo_html_Node *node,
@@ -173,24 +180,14 @@ flo_html_ElementStatus flo_html_addTextToTextNode(flo_html_Node *node,
 
     unsigned char buffer[mergedLen + 1];
     if (isAppend) {
-        for (ptrdiff_t i = 0; i < prevText.len; i++) {
-            buffer[i] = prevText.buf[i];
-        }
+        memcpy(buffer, prevText.buf, prevText.len);
         buffer[prevText.len] = ' ';
-        for (ptrdiff_t i = 0; i < text.len; i++) {
-            buffer[prevText.len + 1 + i] = text.buf[i];
-        }
+        memcpy(buffer + prevText.len + 1, text.buf, text.len);
     } else {
-        for (ptrdiff_t i = 0; i < text.len; i++) {
-            buffer[i] = text.buf[i];
-        }
+        memcpy(buffer, text.buf, text.len);
         buffer[text.len] = ' ';
-        for (ptrdiff_t i = 0; i < prevText.len; i++) {
-            buffer[text.len + 1 + i] = prevText.buf[i];
-        }
+        memcpy(buffer + text.len + 1, prevText.buf, prevText.len);
     }
-    buffer[mergedLen] = '\0';
-    buffer[mergedLen - 1] = '\0';
 
     char *dataLocation = NULL;
     flo_html_ElementStatus elementStatus = flo_html_insertElement(

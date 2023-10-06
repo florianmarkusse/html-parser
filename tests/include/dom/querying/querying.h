@@ -2,11 +2,12 @@
 #define DOM_QUERYING_QUERYING_H
 
 #include <flo/html-parser/dom/query/query-status.h>
+#include <flo/html-parser/utils/text/string.h>
 #include <stddef.h>
 
 typedef struct {
     const char *fileLocation;
-    const char *cssQuery;
+    const flo_html_String cssQuery;
     flo_html_QueryStatus expectedStatus;
     size_t expectedResult;
     const char *testName;

@@ -196,7 +196,8 @@ flo_html_DomStatus flo_html_prependHTMLFromString(
     const flo_html_node_id parentID, const flo_html_String htmlString,
     flo_html_Dom *dom, flo_html_TextStore *textStore) {
     flo_html_node_id firstNewAddedNode = dom->nodeLen;
-    flo_html_DomStatus domStatus = flo_html_parse(htmlString, dom, textStore);
+    flo_html_DomStatus domStatus =
+        flo_html_parseExtra(htmlString, dom, textStore);
     if (domStatus != DOM_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Failed to parse string!\n");
         return domStatus;

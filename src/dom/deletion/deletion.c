@@ -24,8 +24,8 @@ void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {
         return;
     }
 
-    flo_html_node_id parentID = flo_html_getParent(node->nodeID, dom);
-
+    flo_html_ParentChild *parentChildNode =
+        flo_html_getParentNode(node->nodeID, dom);
     // Order of modifications is important here.
     // getPreviousNode makes use of the parent node to get the previous node.
     flo_html_NextNode *previousNode =
@@ -39,9 +39,14 @@ void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {
         }
     }
 
-    if (parentID > 0) {
-        flo_html_ParentChild *parentChildNode =
-            flo_html_getFirstChildNode(parentID, dom);
+    if (parentChildNode != NULL) {
+        flo_html_node_id parentID = parentChildNode->parentID;
+
+        parentChildNode->parentID = 0;
+        parentChildNode->childID = 0;
+
+        parentChildNode = flo_html_getFirstChildNode(parentID, dom);
+
         if (parentChildNode->childID == nodeID) {
             if (nextNode == NULL) {
                 parentChildNode->parentID = 0;
@@ -50,10 +55,6 @@ void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {
                 parentChildNode->childID = nextNode->nextNodeID;
             }
         }
-
-        parentChildNode = flo_html_getParentNode(node->nodeID, dom);
-        parentChildNode->parentID = 0;
-        parentChildNode->childID = 0;
     }
 
     if (nextNode != NULL) {

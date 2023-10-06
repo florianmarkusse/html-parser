@@ -30,30 +30,30 @@ int main() {
 
     testflo_html_DomQueries(&successes, &failures);
     printf("\n");
-    //
-    //    testNodeQueries(&successes, &failures);
-    //    printf("\n");
-    //
-    //    testflo_html_DomDeletions(&successes, &failures);
-    //    printf("\n");
-    //
-    //    testNodeModifications(&successes, &failures);
-    //    printf("\n");
-    //
-    //    testNodeDeletions(&successes, &failures);
-    //    printf("\n");
-    //
-    //    testflo_html_DomAppendices(&successes, &failures);
-    //    printf("\n");
-    //
-    //    testflo_html_DomPrependices(&successes, &failures);
-    //    printf("\n");
-    //
-    //    testflo_html_DomReplacements(&successes, &failures);
-    //    printf("\n");
-    //
-    //    testIntegrations(&successes, &failures);
-    //    printf("\n");
+
+    testNodeQueries(&successes, &failures);
+    printf("\n");
+
+    testflo_html_DomDeletions(&successes, &failures);
+    printf("\n");
+
+    testNodeModifications(&successes, &failures);
+    printf("\n");
+
+    testNodeDeletions(&successes, &failures);
+    printf("\n");
+
+    testflo_html_DomAppendices(&successes, &failures);
+    printf("\n");
+
+    testflo_html_DomPrependices(&successes, &failures);
+    printf("\n");
+
+    testflo_html_DomReplacements(&successes, &failures);
+    printf("\n");
+
+    testIntegrations(&successes, &failures);
+    printf("\n");
 
     printTestScore(successes, failures);
     if (failures > 0) {

@@ -134,7 +134,7 @@ flo_html_NodeParseResult parseCloseTag(flo_html_String html, ptrdiff_t start) {
     return result;
 }
 
-ptrdiff_t parseEmptyContent(flo_html_String html, ptrdiff_t start) {
+static ptrdiff_t parseEmptyContent(flo_html_String html, ptrdiff_t start) {
     ptrdiff_t end = start;
     unsigned char ch = flo_html_getChar(html, end);
     while (end < html.len && (ch == ' ' || flo_html_isSpecialSpace(ch))) {
@@ -443,22 +443,15 @@ flo_html_NodeParseResult parseDocumentNode(const flo_html_String html,
     return result;
 }
 
-flo_html_DomStatus flo_html_parse(flo_html_String html, flo_html_Dom *dom,
-                                  flo_html_TextStore *textStore) {
-    html = flo_html_convertNulls(html);
-
+flo_html_DomStatus flo_html_parse(const flo_html_String html, flo_html_Dom *dom,
+                                  flo_html_TextStore *textStore,
+                                  flo_html_NodeDepth *nodeStack) {
     flo_html_DomStatus documentStatus = DOM_SUCCESS;
 
-    flo_html_NodeDepth nodeStack;
-    nodeStack.stack[0].nodeID = dom->nodes[1].nodeID;
-    nodeStack.stack[0].tag = FLO_HTML_EMPTY_STRING;
-    nodeStack.len = 1;
-
     flo_html_node_id prevNodeID = dom->nodes[1].nodeID;
+    ptrdiff_t nodeStartLen = nodeStack->len;
 
-    ptrdiff_t currentPosition = 0;
-
-    currentPosition = parseEmptyContent(html, currentPosition);
+    ptrdiff_t currentPosition = parseEmptyContent(html, 0);
     unsigned char ch = flo_html_getChar(html, currentPosition);
     while (currentPosition < html.len) {
         flo_html_NodeParseResult parseResult;
@@ -482,33 +475,35 @@ flo_html_DomStatus flo_html_parse(flo_html_String html, flo_html_Dom *dom,
                         return parseResult.status;
                     }
 
-                    UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack, dom);
+                    UPDATE_REFERENCES(parseResult, prevNodeID, *nodeStack, dom);
 
                     if (parseResult.canHaveChildren) {
-                        if (nodeStack.len >= FLO_HTML_MAX_NODE_DEPTH) {
+                        if (nodeStack->len >= FLO_HTML_MAX_NODE_DEPTH) {
                             FLO_HTML_PRINT_ERROR(
                                 "Reached max node depth, aborting\n");
                             return DOM_TOO_DEEP;
                         }
-                        nodeStack.stack[nodeStack.len].nodeID =
+                        nodeStack->stack[nodeStack->len].nodeID =
                             parseResult.nodeID;
-                        nodeStack.stack[nodeStack.len].tag = parseResult.tag;
-                        nodeStack.len++;
+                        nodeStack->stack[nodeStack->len].tag = parseResult.tag;
+                        nodeStack->len++;
                     }
                 } else {
                     if (nextCh == '/') {
-                        if (nodeStack.len > 1) {
-                            nodeStack.len--;
-                            prevNodeID = nodeStack.stack[nodeStack.len].nodeID;
+                        if (nodeStack->len > nodeStartLen) {
+                            nodeStack->len--;
+                            prevNodeID =
+                                nodeStack->stack[nodeStack->len].nodeID;
                         }
                         parseResult = parseCloseTag(html, currentPosition + 2);
                         parseResult.nodeID = prevNodeID;
                     } else {
                         // Rogue open tag -> Text node.
-                        PARSE_TEXT_NODE(parseResult, html, currentPosition,
-                                        nodeStack.stack[nodeStack.len - 1].tag,
-                                        dom, textStore);
-                        UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack,
+                        PARSE_TEXT_NODE(
+                            parseResult, html, currentPosition,
+                            nodeStack->stack[nodeStack->len - 1].tag, dom,
+                            textStore);
+                        UPDATE_REFERENCES(parseResult, prevNodeID, *nodeStack,
                                           dom);
                     }
                 }
@@ -517,9 +512,9 @@ flo_html_DomStatus flo_html_parse(flo_html_String html, flo_html_Dom *dom,
         // Text node.
         else {
             PARSE_TEXT_NODE(parseResult, html, currentPosition,
-                            nodeStack.stack[nodeStack.len - 1].tag, dom,
+                            nodeStack->stack[nodeStack->len - 1].tag, dom,
                             textStore);
-            UPDATE_REFERENCES(parseResult, prevNodeID, nodeStack, dom);
+            UPDATE_REFERENCES(parseResult, prevNodeID, *nodeStack, dom);
         }
 
         prevNodeID = parseResult.nodeID;
@@ -530,6 +525,26 @@ flo_html_DomStatus flo_html_parse(flo_html_String html, flo_html_Dom *dom,
     }
 
     return documentStatus;
+}
+
+flo_html_DomStatus flo_html_parseRoot(const flo_html_String html,
+                                      flo_html_Dom *dom,
+                                      flo_html_TextStore *textStore) {
+    flo_html_NodeDepth nodeStack;
+    nodeStack.stack[0].nodeID = dom->nodes[1].nodeID;
+    nodeStack.stack[0].tag = FLO_HTML_EMPTY_STRING;
+    nodeStack.len = 1;
+
+    return flo_html_parse(html, dom, textStore, &nodeStack);
+}
+
+flo_html_DomStatus flo_html_parseExtra(const flo_html_String html,
+                                       flo_html_Dom *dom,
+                                       flo_html_TextStore *textStore) {
+    flo_html_NodeDepth nodeStack;
+    nodeStack.len = 0;
+
+    return flo_html_parse(html, dom, textStore, &nodeStack);
 }
 
 flo_html_DomStatus
@@ -580,8 +595,6 @@ flo_html_DomStatus flo_html_parseTextElement(flo_html_String text,
                                              flo_html_Dom *dom,
                                              flo_html_TextStore *textStore,
                                              flo_html_node_id *newNodeID) {
-    text = flo_html_convertNulls(text);
-
     flo_html_DomStatus domStatus =
         flo_html_createNode(newNodeID, NODE_TYPE_TEXT, dom);
     if (domStatus != DOM_SUCCESS) {
@@ -589,7 +602,7 @@ flo_html_DomStatus flo_html_parseTextElement(flo_html_String text,
         return domStatus;
     }
 
-    char *dataLocation = NULL;
+    char *dataLocation;
     flo_html_ElementStatus elementStatus =
         flo_html_insertElement(&textStore->text, text, &dataLocation);
     if (elementStatus != ELEMENT_CREATED) {

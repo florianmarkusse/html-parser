@@ -21,9 +21,13 @@ typedef struct {
     size_t len;
 } flo_html_NodeDepth;
 
-flo_html_DomStatus flo_html_parse(const flo_html_String htmlString,
-                                  flo_html_Dom *dom,
-                                  flo_html_TextStore *textStore);
+flo_html_DomStatus flo_html_parseRoot(const flo_html_String html,
+                                      flo_html_Dom *dom,
+                                      flo_html_TextStore *textStore);
+flo_html_DomStatus flo_html_parseExtra(const flo_html_String html,
+                                       flo_html_Dom *dom,
+                                       flo_html_TextStore *textStore);
+
 flo_html_DomStatus
 flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
                               flo_html_Dom *dom, flo_html_TextStore *textStore,

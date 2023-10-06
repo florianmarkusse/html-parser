@@ -11,39 +11,45 @@
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 static const TestFile testFiles[] = {
-    {TEST_FILE_1, "body div p h1 lalalal input", QUERY_NOT_SEEN_BEFORE, 0,
-     "unknown tag"},
-    {TEST_FILE_1, "[html-new]", QUERY_NOT_SEEN_BEFORE, 0, "unknown attribute"},
-    {TEST_FILE_1, "[html]", QUERY_SUCCESS, 2, "with html attribute"},
-    {TEST_FILE_1, "body", QUERY_SUCCESS, 1, "single tag selector"},
-    {TEST_FILE_1, "body head", QUERY_SUCCESS, 0, "no nodes found"},
-    {TEST_FILE_1, "html[lang=en] > body > div", QUERY_SUCCESS, 7,
+    {TEST_FILE_1, FLO_HTML_S("[html]"), QUERY_SUCCESS, 2,
+     "with html attribute"},
+    {TEST_FILE_1, FLO_HTML_S("body div p h1 lalalal input"),
+     QUERY_NOT_SEEN_BEFORE, 0, "unknown tag"},
+    {TEST_FILE_1, FLO_HTML_S("[html-new]"), QUERY_NOT_SEEN_BEFORE, 0,
+     "unknown attribute"},
+    {TEST_FILE_1, FLO_HTML_S("body"), QUERY_SUCCESS, 1, "single tag selector"},
+    {TEST_FILE_1, FLO_HTML_S("body head"), QUERY_SUCCESS, 0, "no nodes found"},
+    {TEST_FILE_1, FLO_HTML_S("html[lang=en] > body > div"), QUERY_SUCCESS, 7,
      "multiple child tag selector"},
-    {TEST_FILE_1, "body div", QUERY_SUCCESS, 8,
+    {TEST_FILE_1, FLO_HTML_S("body div"), QUERY_SUCCESS, 8,
      "descendant attribute selector"},
-    {TEST_FILE_1, "body [required]", QUERY_SUCCESS, 2,
+    {TEST_FILE_1, FLO_HTML_S("body [required]"), QUERY_SUCCESS, 2,
      "descendant only attribute selector"},
-    {TEST_FILE_1, "body>[required]", QUERY_SUCCESS, 1,
+    {TEST_FILE_1, FLO_HTML_S("body>[required]"), QUERY_SUCCESS, 1,
      "child only attribute selector"},
-    {TEST_FILE_1, "body>[required][a][b][c][d][e][f][g]", QUERY_SUCCESS, 0,
-     "maximum filters"},
-    {TEST_FILE_1, "body>[required][a][b][c][d][e][f][g][h]",
+    {TEST_FILE_1, FLO_HTML_S("body>[required][a][b][c][d][e][f][g]"),
+     QUERY_SUCCESS, 0, "maximum filters"},
+    {TEST_FILE_1, FLO_HTML_S("body>[required][a][b][c][d][e][f][g][h]"),
      QUERY_TOO_MANY_ELEMENT_FILTERS, 0, "1 more than maximum filters"},
-    {TEST_FILE_1, "body   >\t\t  [   required]", QUERY_SUCCESS, 1,
+    {TEST_FILE_1, FLO_HTML_S("body   >\t\t  [   required]"), QUERY_SUCCESS, 1,
      "child only attribute selector, dumb css query"},
-    {TEST_FILE_1, "[id=my-first-div] + div", QUERY_SUCCESS, 1,
+    {TEST_FILE_1, FLO_HTML_S("[id=my-first-div] + div"), QUERY_SUCCESS, 1,
      "single adjacent sibling"},
-    {TEST_FILE_1, "div + div", QUERY_SUCCESS, 5, "multiple adjacent sibling"},
-    {TEST_FILE_1, "div ~ div", QUERY_SUCCESS, 6, "general sibling"},
-    {TEST_FILE_1, ".big", QUERY_SUCCESS, 4, "using '.' to select by class"},
-    {TEST_FILE_1, "p.big", QUERY_SUCCESS, 1,
+    {TEST_FILE_1, FLO_HTML_S("div + div"), QUERY_SUCCESS, 5,
+     "multiple adjacent sibling"},
+    {TEST_FILE_1, FLO_HTML_S("div ~ div"), QUERY_SUCCESS, 6, "general sibling"},
+    {TEST_FILE_1, FLO_HTML_S(".big"), QUERY_SUCCESS, 4,
+     "using '.' to select by class"},
+    {TEST_FILE_1, FLO_HTML_S("p.big"), QUERY_SUCCESS, 1,
      "using '.' to select by class after tag selector"},
-    {TEST_FILE_1, "div[special-one].big", QUERY_SUCCESS, 1,
+    {TEST_FILE_1, FLO_HTML_S("div[special-one].big"), QUERY_SUCCESS, 1,
      "more difficult query with '.'"},
-    {TEST_FILE_1, "#test", QUERY_SUCCESS, 1, "using '#' to select by id"},
-    {TEST_FILE_1, "div > div > span,    \t   \tp, title", QUERY_SUCCESS, 7,
-     "using ',' to perform multiple queries"},
-    {TEST_FILE_1, "body *[special-one]", QUERY_SUCCESS, 2, "using *"},
+    {TEST_FILE_1, FLO_HTML_S("#test"), QUERY_SUCCESS, 1,
+     "using '#' to select by id"},
+    {TEST_FILE_1, FLO_HTML_S("div > div > span,    \t   \tp, title"),
+     QUERY_SUCCESS, 7, "using ',' to perform multiple queries"},
+    {TEST_FILE_1, FLO_HTML_S("body *[special-one]"), QUERY_SUCCESS, 2,
+     "using *"},
 };
 
 // Calculate the number of test files
@@ -115,12 +121,10 @@ unsigned char testQuerySelectorAll(size_t *successes, size_t *failures) {
 
         printTestStart(testFile.testName);
 
-        if (testQuery(
-                FLO_HTML_S_LEN(testFile.fileLocation,
-                               strlen(testFile.fileLocation)),
-                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                testFile.expectedStatus,
-                testFile.expectedResult) != TEST_SUCCESS) {
+        if (testQuery(FLO_HTML_S_LEN(testFile.fileLocation,
+                                     strlen(testFile.fileLocation)),
+                      testFile.cssQuery, testFile.expectedStatus,
+                      testFile.expectedResult) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

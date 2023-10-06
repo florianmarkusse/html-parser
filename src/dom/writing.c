@@ -82,8 +82,9 @@ flo_html_FileStatus
 flo_html_writeHTMLToFile(const flo_html_Dom *dom,
                          const flo_html_TextStore *textStore,
                          const flo_html_String filePath) {
-    flo_html_createPath(filePath.buf);
-    FILE *file = fopen(filePath.buf, "wbe");
+    flo_html_createPath(filePath);
+    // casting here because filePath should not contain any funny characters.
+    FILE *file = fopen((char *)filePath.buf, "wbe");
     if (file == NULL) {
         printf("Failed to open file for writing: %.*s\n",
                FLO_HTML_S_P(filePath));

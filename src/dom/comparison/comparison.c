@@ -96,6 +96,9 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
     return status;
 }
 
+// TODO: this function does not correct compare properties
+// e.g. <a thing="a", foo="bar" /> IS NOT EQUAL TO
+//      <a foo="a", thing="bar" />
 flo_html_ComparisonStatus
 compareProps(const flo_html_Node *node1, const flo_html_Dom *dom1,
              const flo_html_TextStore *textStore1, const flo_html_Node *node2,

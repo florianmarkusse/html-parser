@@ -48,10 +48,11 @@ inline void printTestResultDifferenceErrorCode(const size_t expected,
     printf("%-10s: %-4zu - %s\n", "Actual", actual, actualString);
 }
 
-inline void printTestResultDifferenceString(const char *expectedString,
-                                            const char *actualString) {
-    printf("%-20s: %s\n", "Expected string", expectedString);
-    printf("%-20s: %s\n", "Actual string", actualString);
+inline void
+printTestResultDifferenceString(const flo_html_String expectedString,
+                                const flo_html_String actualString) {
+    printf("%-20s: %.*s\n", "Expected string", FLO_HTML_S_P(expectedString));
+    printf("%-20s: %.*s\n", "Actual string", FLO_HTML_S_P(actualString));
 }
 
 inline void printTestResultDifferenceNumber(const size_t expectedNumber,

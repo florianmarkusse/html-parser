@@ -55,14 +55,6 @@ static TestStatus testModification(const flo_html_String fileLocation1,
     }
 
     if (newPropValue.len > 0) {
-        flo_html_DomStatus domStatus = flo_html_setTextContent(
-            foundNode, propKey, &comparisonTest.startflo_html_Dom,
-            &comparisonTest.startTextStore);
-        if (domStatus != DOM_SUCCESS) {
-            return failWithMessage(FLO_HTML_S("Failed to set text content!\n"),
-                                   &comparisonTest);
-        }
-    } else {
         flo_html_ElementStatus elementStatus = flo_html_setPropertyValue(
             foundNode, propKey, newPropValue, &comparisonTest.startflo_html_Dom,
             &comparisonTest.startTextStore);
@@ -70,7 +62,16 @@ static TestStatus testModification(const flo_html_String fileLocation1,
             return failWithMessage(
                 FLO_HTML_S("Failed to set property value!\n"), &comparisonTest);
         }
+    } else {
+        flo_html_DomStatus domStatus = flo_html_setTextContent(
+            foundNode, propKey, &comparisonTest.startflo_html_Dom,
+            &comparisonTest.startTextStore);
+        if (domStatus != DOM_SUCCESS) {
+            return failWithMessage(FLO_HTML_S("Failed to set text content!\n"),
+                                   &comparisonTest);
+        }
     }
+
     return compareAndEndTest(&comparisonTest);
 }
 
