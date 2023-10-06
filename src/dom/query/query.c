@@ -21,7 +21,6 @@
  * A css query must start and end with an element. flo_html_Combinators connect
  * the elements with a relationship.
  */
-
 typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
 
 #define CHECK_FILTERS_LIMIT(filtersLen)                                        \
