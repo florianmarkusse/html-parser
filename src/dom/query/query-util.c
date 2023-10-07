@@ -54,11 +54,6 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
             }
             break;
         }
-        default: {
-            FLO_HTML_PRINT_ERROR(
-                "Unknown attribute selector in filter function\n");
-            return false;
-        }
         }
     }
 

@@ -6,6 +6,7 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/traversal.h"
+#include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/utils/memory/memory.h"
 #include "flo/html-parser/utils/text/string.h"
 #include "flo/html-parser/utils/text/text.h"
@@ -33,25 +34,25 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
         }                                                                      \
     } while (0)
 
-bool isPropStartChar(const char ch) {
+bool isTagStartChar(const char ch) {
     return flo_html_isAlphaBetical(ch) || ch == '!';
 }
 
 bool isElementStartChar(const char ch) {
-    return isPropStartChar(ch) || ch == '.' || ch == '#';
+    return isTagStartChar(ch) || ch == '.' || ch == '#';
 }
 
-bool isSpecifiedflo_html_Combinator(const char ch) {
+bool isSpecifiedCombinator(const char ch) {
     return ch == '>' || ch == '+' || ch == '~';
 }
 
-bool isflo_html_Combinator(const char ch) {
-    return ch == ' ' || isSpecifiedflo_html_Combinator(ch);
+bool isCombinator(const char ch) {
+    return ch == ' ' || isSpecifiedCombinator(ch);
 }
 
 bool endOfCurrentFilter(const char ch) {
-    return isflo_html_Combinator(ch) || flo_html_isSpecialSpace(ch) ||
-           ch == '[' || ch == '.' || ch == '#';
+    return isCombinator(ch) || flo_html_isSpecialSpace(ch) || ch == '[' ||
+           ch == '.' || ch == '#';
 }
 
 static ptrdiff_t parseEmptyContent(flo_html_String css, ptrdiff_t start) {
@@ -65,7 +66,28 @@ static ptrdiff_t parseEmptyContent(flo_html_String css, ptrdiff_t start) {
     return end;
 }
 
-flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
+ptrdiff_t parseToken(const flo_html_String css, ptrdiff_t currentPosition,
+                     flo_html_String *token) {
+    ptrdiff_t tokenStart = currentPosition;
+    unsigned char ch = flo_html_getChar(css, currentPosition);
+    while (currentPosition < css.len && ch != ' ' &&
+           !flo_html_isSpecialSpace(ch) && ch != '=' && ch != ']') {
+        ch = flo_html_getChar(css, ++currentPosition);
+    }
+    ptrdiff_t tokenLength = currentPosition - tokenStart;
+
+    (*token).buf = flo_html_getCharPtr(css, tokenStart);
+    (*token).len = tokenLength;
+
+    while (currentPosition < css.len && ch != '=' && ch != ']' && ch != '.' &&
+           ch != '#') {
+        ch = flo_html_getChar(css, ++currentPosition);
+    }
+
+    return currentPosition;
+}
+
+flo_html_QueryStatus getQueryResults(const flo_html_String css,
                                      const flo_html_Dom *dom,
                                      const flo_html_TextStore *textStore,
                                      flo_html_Uint16HashSet *set) {
@@ -77,50 +99,46 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
     flo_html_Combinator currentflo_html_Combinator = NO_COMBINATOR;
     Selector currentSelector = NORMAL;
 
-    ptrdiff_t tokenStart = 0;
-    ptrdiff_t tokenLength = 0;
-    flo_html_element_id tokenID = 0;
-
     ptrdiff_t currentPosition = 0;
-    currentPosition = parseEmptyContent(cssQuery, currentPosition);
+    currentPosition = parseEmptyContent(css, currentPosition);
 
     unsigned char ch;
-    while (currentPosition < cssQuery.len) {
-        ch = flo_html_getChar(cssQuery, currentPosition);
+    while (currentPosition < css.len) {
+        ch = flo_html_getChar(css, currentPosition);
 
-        if (isPropStartChar(ch)) {
-            tokenStart = currentPosition;
-            while (currentPosition < cssQuery.len && !endOfCurrentFilter(ch)) {
-                ch = flo_html_getChar(cssQuery, ++currentPosition);
+        if (isTagStartChar(ch)) {
+            CHECK_FILTERS_LIMIT(filtersLen);
+
+            ptrdiff_t tagStart = currentPosition;
+            while (currentPosition < css.len && !endOfCurrentFilter(ch)) {
+                ch = flo_html_getChar(css, ++currentPosition);
             }
-            tokenLength = currentPosition - tokenStart;
+            ptrdiff_t tagLen = currentPosition - tagStart;
 
-            unsigned char buffer[tokenLength];
-            flo_html_String token = {buffer, tokenLength};
-            flo_html_strcpy(
-                token, FLO_HTML_S_LEN(flo_html_getCharPtr(cssQuery, tokenStart),
-                                      tokenLength));
-
-            tokenID = flo_html_getTagID(token, textStore);
-            if (tokenID == 0) {
+            flo_html_element_id tagID = flo_html_getTagID(
+                FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen),
+                textStore);
+            if (tagID == 0) {
                 return QUERY_NOT_SEEN_BEFORE;
             }
 
-            CHECK_FILTERS_LIMIT(filtersLen);
             filters[filtersLen].attributeSelector = TAG;
-            filters[filtersLen].data.tagID = tokenID;
+            filters[filtersLen].data.tagID = tagID;
             filtersLen++;
         } else if (ch == '*') {
-            while (currentPosition < cssQuery.len && !endOfCurrentFilter(ch)) {
-                ch = flo_html_getChar(cssQuery, ++currentPosition);
+            CHECK_FILTERS_LIMIT(filtersLen);
+
+            while (currentPosition < css.len && !endOfCurrentFilter(ch)) {
+                ch = flo_html_getChar(css, ++currentPosition);
             }
 
-            CHECK_FILTERS_LIMIT(filtersLen);
             filters[filtersLen].attributeSelector = ALL_NODES;
             filtersLen++;
         }
 
         while (ch == '[' || ch == '.' || ch == '#') {
+            CHECK_FILTERS_LIMIT(filtersLen);
+
             switch (ch) {
             case '.': {
                 currentSelector = CLASS;
@@ -134,28 +152,15 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
                 currentSelector = NORMAL;
                 break;
             }
-            default: {
-                FLO_HTML_PRINT_ERROR("Unable to select selector!\n");
-                currentSelector = NORMAL;
-                break;
-            }
             }
 
-            while (currentPosition < cssQuery.len && !isPropStartChar(ch)) {
-                ch = flo_html_getChar(cssQuery, ++currentPosition);
+            while (currentPosition < css.len && !isTagStartChar(ch)) {
+                ch = flo_html_getChar(css, ++currentPosition);
             }
 
-            tokenStart = currentPosition;
-            while (currentPosition < cssQuery.len && ch != ' ' &&
-                   !flo_html_isSpecialSpace(ch) && ch != '=' && ch != ']') {
-                ch = flo_html_getChar(cssQuery, ++currentPosition);
-            }
-            tokenLength = currentPosition - tokenStart;
-
-            while (currentPosition < cssQuery.len && ch != '=' && ch != ']' &&
-                   ch != '.' && ch != '#') {
-                ch = flo_html_getChar(cssQuery, ++currentPosition);
-            }
+            flo_html_String token;
+            currentPosition = parseToken(css, currentPosition, &token);
+            ch = flo_html_getChar(css, currentPosition);
 
             // If ch == '.' or ch == '#', it means we had to have had '.' or '#'
             // at the beginnging. This is a bit of a funky inference to make,
@@ -164,98 +169,66 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
                 const flo_html_String keyBuffer = currentSelector == CLASS
                                                       ? FLO_HTML_S("class")
                                                       : FLO_HTML_S("id");
-                tokenID = flo_html_getPropKeyID(keyBuffer, textStore);
-                if (tokenID == 0) {
+                flo_html_element_id propKeyID =
+                    flo_html_getPropKeyID(keyBuffer, textStore);
+                if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
-                CHECK_FILTERS_LIMIT(filtersLen);
+                flo_html_element_id propValueID =
+                    flo_html_getPropValueID(token, textStore);
+                if (propValueID == 0) {
+                    return QUERY_NOT_SEEN_BEFORE;
+                }
+
                 filters[filtersLen].attributeSelector = PROPERTY;
-                filters[filtersLen].data.keyValuePair.keyID = tokenID;
-
-                unsigned char valueBuffer[tokenLength];
-                flo_html_String token = {valueBuffer, tokenLength};
-                flo_html_strcpy(token, FLO_HTML_S_LEN(flo_html_getCharPtr(
-                                                          cssQuery, tokenStart),
-                                                      tokenLength));
-
-                tokenID = flo_html_getPropValueID(token, textStore);
-                if (tokenID == 0) {
-                    return QUERY_NOT_SEEN_BEFORE;
-                }
-
-                filters[filtersLen].data.keyValuePair.valueID = tokenID;
+                filters[filtersLen].data.keyValuePair.keyID = propKeyID;
+                filters[filtersLen].data.keyValuePair.valueID = propValueID;
                 filtersLen++;
             } else if (ch == ']') {
-                unsigned char boolBuffer[tokenLength];
-                flo_html_String token = {boolBuffer, tokenLength};
-                flo_html_strcpy(token, FLO_HTML_S_LEN(flo_html_getCharPtr(
-                                                          cssQuery, tokenStart),
-                                                      tokenLength));
-
-                tokenID = flo_html_getBoolPropID(token, textStore);
-                if (tokenID == 0) {
+                flo_html_element_id boolPropID =
+                    flo_html_getBoolPropID(token, textStore);
+                if (boolPropID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
-                CHECK_FILTERS_LIMIT(filtersLen);
                 filters[filtersLen].attributeSelector = BOOLEAN_PROPERTY;
-                filters[filtersLen].data.propID = tokenID;
+                filters[filtersLen].data.propID = boolPropID;
                 filtersLen++;
             } else if (ch == '=') {
-                unsigned char keyBuffer[tokenLength];
-
-                flo_html_String keyToken = {keyBuffer, tokenLength};
-                flo_html_strcpy(
-                    keyToken,
-                    FLO_HTML_S_LEN(flo_html_getCharPtr(cssQuery, tokenStart),
-                                   tokenLength));
-
-                tokenID = flo_html_getPropKeyID(keyToken, textStore);
-                if (tokenID == 0) {
+                flo_html_element_id propKeyID =
+                    flo_html_getPropKeyID(token, textStore);
+                if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
-                // Adding to filter already because I want to reuse tokenID
-                // :)
-                CHECK_FILTERS_LIMIT(filtersLen);
-                filters[filtersLen].attributeSelector = PROPERTY;
-                filters[filtersLen].data.keyValuePair.keyID = tokenID;
 
                 // Skip the '='
-                ch = flo_html_getChar(cssQuery, ++currentPosition);
-
-                while (currentPosition < cssQuery.len &&
-                       !isElementStartChar(ch)) {
-                    ch = flo_html_getChar(cssQuery, ++currentPosition);
-                }
-                tokenStart = currentPosition;
-                while (currentPosition < cssQuery.len && ch != ' ' &&
-                       !flo_html_isSpecialSpace(ch) && ch != ']') {
-                    ch = flo_html_getChar(cssQuery, ++currentPosition);
-                }
-                tokenLength = currentPosition - tokenStart;
-                while (currentPosition < cssQuery.len && ch != ']') {
-                    ch = flo_html_getChar(cssQuery, ++currentPosition);
+                ch = flo_html_getChar(css, ++currentPosition);
+                while (currentPosition < css.len && !isTagStartChar(ch)) {
+                    ch = flo_html_getChar(css, ++currentPosition);
                 }
 
-                unsigned char valueBuffer[tokenLength];
+                flo_html_String propValue;
+                currentPosition = parseToken(css, currentPosition, &propValue);
+                ch = flo_html_getChar(css, currentPosition);
 
-                flo_html_String valueToken = {valueBuffer, tokenLength};
-                flo_html_strcpy(
-                    valueToken,
-                    FLO_HTML_S_LEN(flo_html_getCharPtr(cssQuery, tokenStart),
-                                   tokenLength));
-
-                tokenID = flo_html_getPropValueID(valueToken, textStore);
-                if (tokenID == 0) {
+                flo_html_element_id propValueID =
+                    flo_html_getPropValueID(propValue, textStore);
+                if (propValueID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
-                filters[filtersLen].data.keyValuePair.valueID = tokenID;
+                filters[filtersLen].attributeSelector = PROPERTY;
+                filters[filtersLen].data.keyValuePair.keyID = propKeyID;
+                filters[filtersLen].data.keyValuePair.valueID = propValueID;
                 filtersLen++;
+            } else {
+                FLO_HTML_PRINT_ERROR("Unrecognized character in filtering "
+                                     "function. Dropping a token!\n");
             }
+
             if (ch == ']') {
-                ch = flo_html_getChar(cssQuery, ++currentPosition);
+                ch = flo_html_getChar(css, ++currentPosition);
             }
         }
 
@@ -306,11 +279,6 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
             }
             break;
         }
-        default: {
-            FLO_HTML_PRINT_ERROR(
-                "Unknown current combinator, aborting css query!\n");
-            return QUERY_INVALID_COMBINATOR;
-        }
         }
 
         filtersLen = 0;
@@ -318,12 +286,12 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
         // Swoop up any possible next combinator and move on to a potentially
         // next element.
         char combinator = ' ';
-        while (currentPosition < cssQuery.len && !isElementStartChar(ch) &&
+        while (currentPosition < css.len && !isElementStartChar(ch) &&
                ch != '[') {
-            if (isSpecifiedflo_html_Combinator(ch)) {
+            if (isSpecifiedCombinator(ch)) {
                 combinator = ch;
             }
-            ch = flo_html_getChar(cssQuery, ++currentPosition);
+            ch = flo_html_getChar(css, ++currentPosition);
         }
 
         switch (combinator) {
@@ -343,10 +311,6 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
             currentflo_html_Combinator = GENERAL_SIBLING;
             break;
         }
-        default: {
-            FLO_HTML_PRINT_ERROR("Could not determine combinator!\n");
-            return QUERY_INVALID_COMBINATOR;
-        }
         }
     }
 
@@ -354,8 +318,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
 }
 
 flo_html_QueryStatus
-flo_html_querySelectorAll(const flo_html_String cssQuery,
-                          const flo_html_Dom *dom,
+flo_html_querySelectorAll(const flo_html_String css, const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore,
                           flo_html_node_id **results, ptrdiff_t *resultsLen) {
     flo_html_Uint16HashSet resultsSet;
@@ -369,7 +332,7 @@ flo_html_querySelectorAll(const flo_html_String cssQuery,
     flo_html_QueryStatus result = QUERY_SUCCESS;
     ptrdiff_t currentQueryStart = 0;
     ptrdiff_t currentQueryEnd =
-        flo_html_firstOccurenceOfFrom(cssQuery, ',', currentQueryStart);
+        flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
 
     if (currentQueryEnd > 0) {
         flo_html_Uint16HashSet set;
@@ -382,7 +345,7 @@ flo_html_querySelectorAll(const flo_html_String cssQuery,
 
         while (currentQueryEnd >= 0) {
             flo_html_String singularQuery =
-                FLO_HTML_S_LEN(cssQuery.buf + currentQueryStart,
+                FLO_HTML_S_LEN(css.buf + currentQueryStart,
                                currentQueryEnd - currentQueryStart);
 
             if ((result = getQueryResults(singularQuery, dom, textStore,
@@ -415,10 +378,10 @@ flo_html_querySelectorAll(const flo_html_String cssQuery,
 
             currentQueryStart = currentQueryEnd + 1; // skip ','
             currentQueryEnd =
-                flo_html_firstOccurenceOfFrom(cssQuery, ',', currentQueryStart);
+                flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
         }
         flo_html_String singularQuery = FLO_HTML_S_LEN(
-            cssQuery.buf + currentQueryStart, cssQuery.len - currentQueryStart);
+            css.buf + currentQueryStart, css.len - currentQueryStart);
 
         if ((result = getQueryResults(singularQuery, dom, textStore, &set)) !=
             QUERY_SUCCESS) {
@@ -448,7 +411,7 @@ flo_html_querySelectorAll(const flo_html_String cssQuery,
 
         flo_html_destroyUint16HashSet(&set);
     } else {
-        if ((result = getQueryResults(cssQuery, dom, textStore, &resultsSet)) !=
+        if ((result = getQueryResults(css, dom, textStore, &resultsSet)) !=
             QUERY_SUCCESS) {
             flo_html_destroyUint16HashSet(&resultsSet);
             FLO_HTML_ERROR_WITH_CODE_ONLY(
@@ -476,16 +439,15 @@ flo_html_QueryStatus flo_html_getElementsByClassName(
     const flo_html_String className, const flo_html_Dom *dom,
     const flo_html_TextStore *textStore, flo_html_node_id **results,
     ptrdiff_t *resultsLen) {
-    ptrdiff_t cssQueryLen = className.len + 1;
-    unsigned char cssQueryBuffer[cssQueryLen];
-    flo_html_String cssQuery;
-    cssQuery.buf = cssQueryBuffer;
+    ptrdiff_t cssLen = className.len + 1;
+    unsigned char cssBuffer[cssLen];
+    flo_html_String css;
+    css.buf = cssBuffer;
 
-    cssQuery.buf[0] = '.';
-    memcpy(cssQuery.buf, className.buf, className.len);
+    css.buf[0] = '.';
+    memcpy(css.buf, className.buf, className.len);
 
-    return flo_html_querySelectorAll(cssQuery, dom, textStore, results,
-                                     resultsLen);
+    return flo_html_querySelectorAll(css, dom, textStore, results, resultsLen);
 }
 
 flo_html_QueryStatus flo_html_getElementsByTagName(
@@ -495,15 +457,15 @@ flo_html_QueryStatus flo_html_getElementsByTagName(
     return flo_html_querySelectorAll(tag, dom, textStore, results, resultsLen);
 }
 
-flo_html_QueryStatus flo_html_querySelector(const flo_html_String cssQuery,
+flo_html_QueryStatus flo_html_querySelector(const flo_html_String css,
                                             const flo_html_Dom *dom,
                                             const flo_html_TextStore *textStore,
                                             flo_html_node_id *result) {
     flo_html_node_id *results = NULL;
     ptrdiff_t resultsLen = 0;
 
-    flo_html_QueryStatus status = flo_html_querySelectorAll(
-        cssQuery, dom, textStore, &results, &resultsLen);
+    flo_html_QueryStatus status =
+        flo_html_querySelectorAll(css, dom, textStore, &results, &resultsLen);
     if (status != QUERY_SUCCESS) {
         FLO_HTML_FREE_TO_NULL(results);
         return status;
@@ -534,13 +496,13 @@ flo_html_QueryStatus
 flo_html_getElementByID(const flo_html_String id, const flo_html_Dom *dom,
                         const flo_html_TextStore *textStore,
                         flo_html_node_id *result) {
-    ptrdiff_t cssQueryLen = id.len + 1;
-    unsigned char cssQueryBuffer[cssQueryLen];
-    flo_html_String cssQuery;
-    cssQuery.buf = cssQueryBuffer;
+    ptrdiff_t cssLen = id.len + 1;
+    unsigned char cssBuffer[cssLen];
+    flo_html_String css;
+    css.buf = cssBuffer;
 
-    cssQuery.buf[0] = '.';
-    memcpy(cssQuery.buf, id.buf, id.len);
+    css.buf[0] = '.';
+    memcpy(css.buf, id.buf, id.len);
 
-    return flo_html_querySelector(cssQuery, dom, textStore, result);
+    return flo_html_querySelector(css, dom, textStore, result);
 }

@@ -31,7 +31,6 @@ typedef enum {
     CHILD,           // '>'
     GENERAL_SIBLING, // '~'
     DESCENDANT,      // ' ', Default combinator
-    NUM_COMBINATORS,
 } flo_html_Combinator;
 
 typedef struct {

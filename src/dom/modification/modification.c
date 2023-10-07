@@ -17,7 +17,6 @@ typedef enum {
     PROPERTY_TYPE_BOOL,
     PROPERTY_TYPE_KEY,
     PROPERTY_TYPE_VALUE,
-    NUM_PROPERTY_TYPES
 } PropertyType;
 
 flo_html_ElementStatus
@@ -52,10 +51,6 @@ getCreatedPropIDFromString(const PropertyType propertyType,
             domStatus =
                 flo_html_addPropValueRegistration(*propID, &hashKey, dom);
             break;
-        }
-        default: {
-            FLO_HTML_PRINT_ERROR("Failed to specify prop type.\n");
-            return ELEMENT_NOT_FOUND_OR_CREATED;
         }
         }
 
