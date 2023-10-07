@@ -250,19 +250,16 @@ flo_html_NodeParseResult parseTextNode(const flo_html_String html,
             }
 
             if (textLen + totalTextLen + 1 > maxTextSize) {
-                FLO_HTML_PRINT_ERROR("current size %td\n", totalTextLen);
-                FLO_HTML_PRINT_ERROR("want to add %ld\n", textLen + 1);
-                FLO_HTML_PRINT_ERROR("max text sizee is %ld\n", maxTextSize);
                 FLO_HTML_PRINT_ERROR(
-                    "want to add %.*s\n",
+                    "Text node is too large to fit into text buffer.\n");
+                FLO_HTML_PRINT_ERROR(
+                    "want to add \n%.*s\n",
                     FLO_HTML_S_P(FLO_HTML_S_LEN(
                         flo_html_getCharPtr(html, textStart), textLen)));
                 FLO_HTML_PRINT_ERROR(
-                    "current text is %.*s\n",
+                    "current text is \n%.*s\n",
                     FLO_HTML_S_P(FLO_HTML_S_LEN(textBuffer, totalTextLen)));
                 FLO_HTML_FREE_TO_NULL(textBuffer);
-                FLO_HTML_PRINT_ERROR(
-                    "Text node is too large to fit into text buffer.\n");
                 result.status = DOM_ERROR_MEMORY;
                 return result;
             }
