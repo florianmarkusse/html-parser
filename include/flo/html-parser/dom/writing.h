@@ -53,7 +53,7 @@ void flo_html_printHTML(const flo_html_Dom *dom,
 flo_html_FileStatus
 flo_html_writeHTMLToFile(const flo_html_Dom *dom,
                          const flo_html_TextStore *textStore,
-                         const char *filePath);
+                         const flo_html_String filePath);
 
 #ifdef __cplusplus
 }

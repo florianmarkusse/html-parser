@@ -156,6 +156,10 @@ static TestStatus parseQueryModify() {
 
     FLO_HTML_FREE_TO_NULL(results);
 
+    flo_html_writeHTMLToFile(
+        &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore,
+        FLO_HTML_S("boing-boing/bang-bang/boop/boop/result.html"));
+
     return compareAndEndTest(&comparisonTest);
 }
 
