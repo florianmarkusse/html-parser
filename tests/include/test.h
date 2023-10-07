@@ -1,7 +1,11 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include <flo/html-parser/utils/text/string.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <flo/html-parser/util/text/string.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -21,5 +25,9 @@ void printTestResultDifferenceString(const flo_html_String expectedString,
 void printTestResultDifferenceBool(bool expectedBool, bool actualBool);
 void printTestResultDifferenceNumber(ptrdiff_t expectedNumber,
                                      ptrdiff_t actualNumber);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

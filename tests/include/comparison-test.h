@@ -1,6 +1,10 @@
 #ifndef COMPARISON_TEST_H
 #define COMPARISON_TEST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <flo/html-parser/dom/dom.h>
 #include <flo/html-parser/type/element/elements.h>
 
@@ -32,5 +36,9 @@ TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
 TestStatus failWithMessage(const flo_html_String failureMessage,
                            ComparisonTest *comparisonTest);
 void destroyComparisonTest(ComparisonTest *comparisonTest);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

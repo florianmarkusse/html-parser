@@ -1,8 +1,12 @@
 #ifndef DOM_QUERYING_QUERYING_H
 #define DOM_QUERYING_QUERYING_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <flo/html-parser/dom/query/query-status.h>
-#include <flo/html-parser/utils/text/string.h>
+#include <flo/html-parser/util/text/string.h>
 #include <stddef.h>
 
 typedef struct {
@@ -17,5 +21,9 @@ unsigned char testflo_html_DomQueries(ptrdiff_t *successes,
                                       ptrdiff_t *failures);
 unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures);
 unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -9,14 +9,14 @@ extern "C" {
 #include "flo/html-parser/dom/reading/reading.h"
 
 // Node modification functions
-#include "flo/html-parser/dom/appendix/appendix.h"
-#include "flo/html-parser/dom/deletion/deletion.h"
-#include "flo/html-parser/dom/modification/modification.h"
-#include "flo/html-parser/dom/prependix/prependix.h"
-#include "flo/html-parser/dom/replacement/replacement.h"
+#include "flo/html-parser/dom/appendix.h"
+#include "flo/html-parser/dom/deletion.h"
+#include "flo/html-parser/dom/modification.h"
+#include "flo/html-parser/dom/prependix.h"
+#include "flo/html-parser/dom/replacement.h"
 
 // HTML document comparison
-#include "flo/html-parser/dom/comparison/comparison.h"
+#include "flo/html-parser/dom/comparison.h"
 
 // HTML document traversing
 #include "flo/html-parser/dom/traversal.h"

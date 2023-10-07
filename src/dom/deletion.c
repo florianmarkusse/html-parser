@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "flo/html-parser/dom/deletion/deletion.h"
+#include "flo/html-parser/dom/deletion.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/dom/traversal.h"

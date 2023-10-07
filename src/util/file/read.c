@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "flo/html-parser/utils/file/read.h"
-#include "flo/html-parser/utils/memory/memory.h"
-#include "flo/html-parser/utils/print/error.h"
+#include "flo/html-parser/util//file/read.h"
+#include "flo/html-parser/util//memory.h"
+#include "flo/html-parser/util//error.h"
 
 flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
                                       flo_html_String *buffer) {

@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/type/element/elements-print.h"
 #include "flo/html-parser/type/node/text-node.h"
-#include "flo/html-parser/utils/file/path.h"
+#include "flo/html-parser/util//file/path.h"
 
 void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
                const flo_html_Dom *dom, const flo_html_TextStore *textStore,

@@ -1,6 +1,10 @@
 #ifndef PRETTY_PRINT_H
 #define PRETTY_PRINT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 
@@ -26,5 +30,9 @@ static inline unsigned char supportsAnsiEscapeCodes() {
 #define ANSI_COLOR_MAGENTA (supportsAnsiEscapeCodes() ? "\x1b[35m" : "")
 #define ANSI_COLOR_CYAN (supportsAnsiEscapeCodes() ? "\x1b[36m" : "")
 #define ANSI_COLOR_RESET (supportsAnsiEscapeCodes() ? "\x1b[0m" : "")
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

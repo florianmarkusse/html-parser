@@ -7,9 +7,9 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"
-#include "flo/html-parser/utils/memory/memory.h"
-#include "flo/html-parser/utils/text/string.h"
-#include "flo/html-parser/utils/text/text.h"
+#include "flo/html-parser/util//memory.h"
+#include "flo/html-parser/util//text/char.h"
+#include "flo/html-parser/util//text/string.h"
 
 /**
  * Css queries are built up of 2 parts:
@@ -421,6 +421,7 @@ flo_html_querySelectorAll(const flo_html_String css, const flo_html_Dom *dom,
         }
     }
 
+    // TODO: what to do with custom allocators?
     flo_html_HashStatus conversionResult =
         flo_html_uint16HashSetToArray(&resultsSet, results, resultsLen);
     if (conversionResult != HASH_SUCCESS) {

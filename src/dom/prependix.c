@@ -1,10 +1,10 @@
 #include <string.h>
 
-#include "flo/html-parser/dom/deletion/deletion.h"
-#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/deletion.h"
+#include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/dom/modification/modification.h"
-#include "flo/html-parser/dom/prependix/prependix.h"
+#include "flo/html-parser/dom/modification.h"
+#include "flo/html-parser/dom/prependix.h"
 #include "flo/html-parser/dom/query/query-status.h"
 #include "flo/html-parser/dom/query/query.h"
 #include "flo/html-parser/dom/registry.h"
@@ -13,8 +13,8 @@
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/node/node.h"
 #include "flo/html-parser/type/node/parent-child.h"
-#include "flo/html-parser/utils/file/read.h"
-#include "flo/html-parser/utils/print/error.h"
+#include "flo/html-parser/util//file/read.h"
+#include "flo/html-parser/util//error.h"
 
 #define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,        \
                                     prependFunction)                           \

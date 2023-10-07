@@ -6,8 +6,8 @@
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/type/node/node.h"
-#include "flo/html-parser/utils/print/error.h"
-#include "flo/html-parser/utils/text/string.h"
+#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/util//text/string.h"
 
 flo_html_ElementStatus
 flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,

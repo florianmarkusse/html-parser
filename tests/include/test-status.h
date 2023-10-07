@@ -1,6 +1,10 @@
 #ifndef TEST_STATUS_H
 #define TEST_STATUS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     TEST_SUCCESS,
     TEST_ERROR_INITIALIZATION,
@@ -20,5 +24,9 @@ testStatusToString(TestStatus status) {
     }
     return "Unknown test status code!";
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

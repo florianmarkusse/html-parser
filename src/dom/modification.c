@@ -1,7 +1,7 @@
-#include "flo/html-parser/dom/modification/modification.h"
-#include "flo/html-parser/dom/deletion/deletion.h"
+#include "flo/html-parser/dom/modification.h"
+#include "flo/html-parser/dom/deletion.h"
 #include "flo/html-parser/dom/dom-status.h"
-#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
@@ -9,7 +9,7 @@
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
-#include "flo/html-parser/utils/print/error.h"
+#include "flo/html-parser/util//error.h"
 #include <stdbool.h>
 #include <string.h>
 

@@ -9,7 +9,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "flo/html-parser/type/data/definitions.h"
-#include "flo/html-parser/utils/text/string.h"
+#include "flo/html-parser/util//text/string.h"
 
 typedef uint16_t flo_html_node_id;
 

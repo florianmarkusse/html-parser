@@ -1,13 +1,14 @@
-#ifndef FLO_HTML_PARSER_UTILS_MEMORY_MEMORY_H
-#define FLO_HTML_PARSER_UTILS_MEMORY_MEMORY_H
+#ifndef FLO_HTML_PARSER_UTILS_MEMORY_H
+#define FLO_HTML_PARSER_UTILS_MEMORY_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <stddef.h>
 #include <stdlib.h>
 
-#include "flo/html-parser/utils/print/error.h"
+#include "flo/html-parser/util//error.h"
 
 /**
  * @brief Free a pointer and set it to NULL.
@@ -41,10 +42,9 @@ extern "C" {
  *
  * @return  A pointer to the resized array, or NULL if reallocation fails.
  */
-static inline void *flo_html_resizeArray(void *array, ptrdiff_t currentLen,
-                                         ptrdiff_t *currentCap,
-                                         ptrdiff_t elementSize,
-                                         ptrdiff_t extraElements) {
+__attribute__((unused)) static inline void *
+flo_html_resizeArray(void *array, ptrdiff_t currentLen, ptrdiff_t *currentCap,
+                     ptrdiff_t elementSize, ptrdiff_t extraElements) {
     if (currentLen < *currentCap) {
         return array;
     }

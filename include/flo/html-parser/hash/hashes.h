@@ -9,7 +9,7 @@ extern "C" {
 #include <stdio.h>
 
 #include "flo/html-parser/type/element/elements-container.h"
-#include "flo/html-parser/utils/text/string.h"
+#include "flo/html-parser/util//text/string.h"
 
 // http://www.cse.yorku.ca/~oz/hash.html
 // djb2 hash

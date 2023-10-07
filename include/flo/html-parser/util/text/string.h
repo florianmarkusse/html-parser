@@ -9,6 +9,7 @@ extern "C" {
 #include <memory.h>
 #include <stdbool.h>
 #include <stddef.h>
+
 #ifdef DEBUG
 #include <assert.h>
 #endif
@@ -29,8 +30,8 @@ typedef struct {
     ptrdiff_t len;
 } flo_html_String;
 
-__attribute__((unused)) static bool flo_html_stringEquals(flo_html_String a,
-                                                          flo_html_String b) {
+__attribute__((unused)) static inline bool
+flo_html_stringEquals(flo_html_String a, flo_html_String b) {
     if (a.len != b.len) {
         return false;
     }
@@ -42,7 +43,7 @@ __attribute__((unused)) static bool flo_html_stringEquals(flo_html_String a,
     }
     return true;
 }
-__attribute__((unused)) static flo_html_String
+__attribute__((unused)) static inline flo_html_String
 flo_html_strcpy(flo_html_String dest, flo_html_String src) {
 #ifdef DEBUG
     assert(dest.len >= src.len) printf("I AM COPYING IN DEBUG MODE\n");

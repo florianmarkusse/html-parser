@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/appendix/appendix.h"
-#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/appendix.h"
+#include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/dom/modification/modification.h"
+#include "flo/html-parser/dom/modification.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/parser/parser.h"
@@ -16,9 +16,9 @@
 #include "flo/html-parser/type/element/elements-print.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/type/node/node.h"
-#include "flo/html-parser/utils/memory/memory.h"
-#include "flo/html-parser/utils/print/error.h"
-#include "flo/html-parser/utils/text/text.h"
+#include "flo/html-parser/util//memory.h"
+#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/util//text/char.h"
 
 typedef enum {
     BASIC_CONTEXT,

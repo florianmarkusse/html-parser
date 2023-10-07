@@ -5,11 +5,13 @@
 extern "C" {
 #endif
 
-static inline unsigned char flo_html_isAlphaBetical(const char ch) {
+__attribute__((unused)) static inline unsigned char
+flo_html_isAlphaBetical(const char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
 }
 
-static inline unsigned char flo_html_isSpecialSpace(char ch) {
+__attribute__((unused)) static inline unsigned char
+flo_html_isSpecialSpace(char ch) {
     return ch == '\t' || ch == '\n' || ch == '\r';
 }
 

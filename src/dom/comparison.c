@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/dom/dom-utils.h"
+#include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/parser/parser.h"
 #include "flo/html-parser/type/element/elements-print.h"
-#include "flo/html-parser/utils/print/error.h"
+#include "flo/html-parser/util//error.h"
 
 void printAttributes(
     const flo_html_indexID tagID1, const flo_html_StringHashSet *set1,

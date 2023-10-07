@@ -1,9 +1,17 @@
 #ifndef NODE_DELETING_DELETING_H
 #define NODE_DELETING_DELETING_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

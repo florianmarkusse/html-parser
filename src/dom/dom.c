@@ -1,7 +1,7 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/parser/parser.h"
-#include "flo/html-parser/utils/file/read.h"
-#include "flo/html-parser/utils/memory/memory.h"
+#include "flo/html-parser/util//file/read.h"
+#include "flo/html-parser/util//memory.h"
 
 void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
                                 const flo_html_Registration *initRegistration) {

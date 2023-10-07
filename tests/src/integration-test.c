@@ -1,5 +1,5 @@
 #include <flo/html-parser.h>
-#include <flo/html-parser/utils/memory/memory.h>
+#include <flo/html-parser/util//memory.h>
 
 #include "comparison-test.h"
 #include "integration-test.h"
