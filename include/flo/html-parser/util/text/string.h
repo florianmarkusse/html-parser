@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_UTILS_TEXT_STRING_H
-#define FLO_HTML_PARSER_UTILS_TEXT_STRING_H
+#ifndef FLO_HTML_PARSER_UTIL_TEXT_STRING_H
+#define FLO_HTML_PARSER_UTIL_TEXT_STRING_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,16 +32,7 @@ typedef struct {
 
 __attribute__((unused)) static inline bool
 flo_html_stringEquals(flo_html_String a, flo_html_String b) {
-    if (a.len != b.len) {
-        return false;
-    }
-    for (ptrdiff_t i = 0; i < a.len; i++) {
-        int d = a.buf[i] - b.buf[i];
-        if (d) {
-            return false;
-        }
-    }
-    return true;
+    return a.len == b.len && !memcmp(a.buf, b.buf, a.len);
 }
 __attribute__((unused)) static inline flo_html_String
 flo_html_strcpy(flo_html_String dest, flo_html_String src) {
