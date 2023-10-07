@@ -202,7 +202,7 @@ flo_html_DomStatus flo_html_appendHTMLFromString(
                     flo_html_tryMerge(&dom->nodes[lastNext], firstAddedNode,
                                       dom, textStore, true);
                 if (mergeResult == COMPLETED_MERGE) {
-                    size_t secondNewAddedNode =
+                    ptrdiff_t secondNewAddedNode =
                         flo_html_getNext(firstNewAddedNode, dom);
                     flo_html_removeNode(firstNewAddedNode, dom);
                     firstNewAddedNode = secondNewAddedNode;

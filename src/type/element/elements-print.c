@@ -2,11 +2,11 @@
 
 #include "flo/html-parser/type/element/elements-print.h"
 
-void printElements(const size_t currentLen,
+void printElements(const ptrdiff_t currentLen,
                    char *const elements[FLO_HTML_TOTAL_ELEMENTS],
-                   const size_t offsetMask) {
+                   const ptrdiff_t offsetMask) {
     printf("capacity: %zu/%u\n", currentLen, FLO_HTML_POSSIBLE_ELEMENTS);
-    for (size_t i = offsetMask; i < (offsetMask | currentLen); i++) {
+    for (ptrdiff_t i = offsetMask; i < (offsetMask | currentLen); i++) {
         printf("element ID: %-7zuelement: %-20s\n", i, elements[i]);
     }
     printf("\n\n");
@@ -15,7 +15,7 @@ void printElements(const size_t currentLen,
 void printElementPages(const flo_html_ElementsContainer *container) {
     printf("element pages...\n");
     printf("%-15s: %zu\n", "pages length", container->pageLen);
-    for (size_t i = 0; i < container->pageLen; i++) {
+    for (ptrdiff_t i = 0; i < container->pageLen; i++) {
         printf("%-15s: %lu\n", "space left", container->pages[i].spaceLeft);
 
         int printedChars = 0;

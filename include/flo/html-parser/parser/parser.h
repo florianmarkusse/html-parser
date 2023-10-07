@@ -18,7 +18,7 @@ typedef struct {
 
 typedef struct {
     flo_html_TagAndNodeID stack[FLO_HTML_MAX_NODE_DEPTH];
-    size_t len;
+    ptrdiff_t len;
 } flo_html_NodeDepth;
 
 flo_html_DomStatus flo_html_parseRoot(const flo_html_String html,

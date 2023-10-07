@@ -19,7 +19,7 @@ typedef struct {
 
 flo_html_ElementStatus
 flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
-                            size_t stringsCapacity, size_t pageSize);
+                            ptrdiff_t stringsCapacity, ptrdiff_t pageSize);
 void flo_html_destroyStringRegistry(flo_html_StringRegistry *stringRegistry);
 
 typedef struct {

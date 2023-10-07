@@ -137,7 +137,7 @@ const flo_html_String flo_html_getValue(flo_html_node_id nodeID,
 flo_html_QueryStatus flo_html_getTextContent(flo_html_node_id nodeID,
                                              const flo_html_Dom *dom,
                                              flo_html_String **results,
-                                             size_t *resultsLen);
+                                             ptrdiff_t *resultsLen);
 
 #ifdef __cplusplus
 }

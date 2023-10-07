@@ -23,7 +23,7 @@ bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
         return false;
     }
 
-    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
         flo_html_BooleanProperty *booleanProperty = &dom->boolProps[i];
         if (booleanProperty->nodeID == nodeID &&
             booleanProperty->propID == boolPropID) {
@@ -41,7 +41,7 @@ bool flo_html_hasPropKey(const flo_html_node_id nodeID,
         return false;
     }
 
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
             return true;
@@ -60,7 +60,7 @@ bool flo_html_hasPropValue(const flo_html_node_id nodeID,
         return false;
     }
 
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->valueID == propValueID) {
             return true;
@@ -85,7 +85,7 @@ bool flo_html_hasProperty(flo_html_node_id nodeID,
         return false;
     }
 
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID &&
             property->valueID == propValueID) {
@@ -98,9 +98,9 @@ bool flo_html_hasProperty(flo_html_node_id nodeID,
 flo_html_QueryStatus flo_html_getTextContent(const flo_html_node_id nodeID,
                                              const flo_html_Dom *dom,
                                              flo_html_String **results,
-                                             size_t *reusultsLen) {
+                                             ptrdiff_t *reusultsLen) {
     flo_html_node_id currentNodeID = nodeID;
-    size_t currentCap = 0;
+    ptrdiff_t currentCap = 0;
     while ((currentNodeID =
                 flo_html_traverseNode(currentNodeID, nodeID, dom)) != 0) {
         flo_html_Node node = dom->nodes[currentNodeID];
@@ -131,7 +131,7 @@ const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
         return FLO_HTML_EMPTY_STRING;
     }
 
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         flo_html_Property *property = &dom->props[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
             return flo_html_getPropValue(property->valueID, dom, textStore);

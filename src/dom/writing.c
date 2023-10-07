@@ -8,7 +8,7 @@
 #include "flo/html-parser/type/node/text-node.h"
 #include "flo/html-parser/utils/file/path.h"
 
-void printNode(const flo_html_node_id nodeID, const size_t indentation,
+void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
                const flo_html_Dom *dom, const flo_html_TextStore *textStore,
                FILE *output) {
     flo_html_Node node = dom->nodes[nodeID];
@@ -25,7 +25,7 @@ void printNode(const flo_html_node_id nodeID, const size_t indentation,
     const flo_html_String tag = flo_html_getTag(node.tagID, dom, textStore);
     fprintf(output, "<%.*s", FLO_HTML_S_P(tag));
 
-    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
         flo_html_BooleanProperty boolProp = dom->boolProps[i];
 
         if (boolProp.nodeID == node.nodeID) {
@@ -35,7 +35,7 @@ void printNode(const flo_html_node_id nodeID, const size_t indentation,
         }
     }
 
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         flo_html_Property prop = dom->props[i];
 
         if (prop.nodeID == node.nodeID) {
@@ -108,7 +108,7 @@ void printflo_html_BasicRegistry(const flo_html_String registryName,
     printf("%-20.*s\nregistration nodes inside DOM...\n",
            FLO_HTML_S_P(registryName));
     printf("total number of nodes: %zu\n", basicRegistry->len);
-    for (size_t i = 0; i < basicRegistry->len; i++) {
+    for (ptrdiff_t i = 0; i < basicRegistry->len; i++) {
         flo_html_Registration registration = basicRegistry->registry[i];
         const flo_html_String value =
             flo_html_getStringFromHashSet(set, &registration.hashElement);
@@ -133,7 +133,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
 
     printf("nodes inside DOM...\n");
     printf("total number of nodes: %zu\n", dom->nodeLen);
-    for (size_t i = 0; i < dom->nodeLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->nodeLen; i++) {
         flo_html_Node node = dom->nodes[i];
 
         if (node.nodeType == NODE_TYPE_DOCUMENT) {
@@ -151,7 +151,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
     printf("tag registration nodes inside DOM...\n");
     printf("total number of tag registration nodes: %zu\n",
            dom->tagRegistryLen);
-    for (size_t i = 0; i < dom->tagRegistryLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->tagRegistryLen; i++) {
         flo_html_TagRegistration tagRegistration = dom->tagRegistry[i];
         const flo_html_String tag = flo_html_getStringFromHashSet(
             &textStore->tags.set, &tagRegistration.hashElement);
@@ -173,7 +173,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
 
     printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolPropsLen);
-    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
         flo_html_BooleanProperty boolProps = dom->boolProps[i];
         printf("node ID: %-5u prop ID: %-5u\n", boolProps.nodeID,
                boolProps.propID);
@@ -182,7 +182,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
 
     printf("key-value property nodes inside DOM...\n");
     printf("total number of key-value properties: %zu\n", dom->propsLen);
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         flo_html_Property property = dom->props[i];
         printf("node ID: %-5u key ID: %-5u value ID: %-5u\n", property.nodeID,
                property.keyID, property.valueID);
@@ -192,7 +192,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
     printf("parent-first-child inside DOM...\n");
     printf("total number of parent-first-child: %zu\n",
            dom->parentFirstChildLen);
-    for (size_t i = 0; i < dom->parentFirstChildLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->parentFirstChildLen; i++) {
         printf("parent node ID: %-5u first child node ID: %-5u\n",
                dom->parentFirstChilds[i].parentID,
                dom->parentFirstChilds[i].childID);
@@ -201,7 +201,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
 
     printf("parent-child inside DOM...\n");
     printf("total number of parent-child: %zu\n", dom->parentChildLen);
-    for (size_t i = 0; i < dom->parentChildLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->parentChildLen; i++) {
         printf("parent: %-5u child: %-5u\n", dom->parentChilds[i].parentID,
                dom->parentChilds[i].childID);
     }
@@ -209,7 +209,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
 
     printf("next nodes inside DOM...\n");
     printf("total number of next nodes: %zu\n", dom->nextNodeLen);
-    for (size_t i = 0; i < dom->nextNodeLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->nextNodeLen; i++) {
         printf("current node: %-5u next node: %-5u\n",
                dom->nextNodes[i].currentNodeID, dom->nextNodes[i].nextNodeID);
     }

@@ -71,7 +71,7 @@ static const TestFile testFiles[] = {
      DELETE_CHILDREN, "remove body's children"},
 };
 
-static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testDeletions(const flo_html_String fileLocation1,
                                 const flo_html_String fileLocation2,
@@ -110,13 +110,13 @@ static TestStatus testDeletions(const flo_html_String fileLocation1,
     return compareAndEndTest(&comparisonTest);
 }
 
-bool testflo_html_DomDeletions(size_t *successes, size_t *failures) {
+bool testflo_html_DomDeletions(ptrdiff_t *successes, ptrdiff_t *failures) {
     printTestTopicStart("DOM deletions");
 
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
-    for (size_t i = 0; i < numTestFiles; i++) {
+    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
 
         printTestStart(testFile.testName);

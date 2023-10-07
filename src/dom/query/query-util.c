@@ -8,8 +8,8 @@
 
 bool flo_html_filterNode(const flo_html_node_id nodeID,
                          const flo_html_FilterType *filters,
-                         const size_t filterslen, const flo_html_Dom *dom) {
-    for (size_t i = 0; i < filterslen; i++) {
+                         const ptrdiff_t filterslen, const flo_html_Dom *dom) {
+    for (ptrdiff_t i = 0; i < filterslen; i++) {
         flo_html_FilterType filterType = filters[i];
         switch (filterType.attributeSelector) {
         case ALL_NODES: {
@@ -25,7 +25,7 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
         case BOOLEAN_PROPERTY: {
             bool flo_html_hasBoolProp = false;
             // TODO(florian): find way to improve this.
-            for (size_t j = 0; j < dom->boolPropsLen; j++) {
+            for (ptrdiff_t j = 0; j < dom->boolPropsLen; j++) {
                 if (dom->boolProps[j].nodeID == nodeID &&
                     dom->boolProps[j].propID == filterType.data.propID) {
                     flo_html_hasBoolProp = true;
@@ -40,7 +40,7 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
         case PROPERTY: {
             bool hasProp = false;
             // TODO(florian): find way to improve this.
-            for (size_t j = 0; j < dom->propsLen; j++) {
+            for (ptrdiff_t j = 0; j < dom->propsLen; j++) {
                 if (dom->props[j].nodeID == nodeID &&
                     dom->props[j].keyID == filterType.data.keyValuePair.keyID &&
                     dom->props[j].valueID ==
@@ -103,9 +103,9 @@ flo_html_indexID flo_html_getPropValueID(const flo_html_String valueProp,
 
 flo_html_QueryStatus flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    const size_t filtersLen, const flo_html_Dom *dom,
+    const ptrdiff_t filtersLen, const flo_html_Dom *dom,
     flo_html_Uint16HashSet *set) {
-    for (size_t i = 0; i < dom->nodeLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->nodeLen; i++) {
         if (flo_html_filterNode(dom->nodes[i].nodeID, filters, filtersLen,
                                 dom)) {
             flo_html_HashStatus status =
@@ -125,9 +125,9 @@ flo_html_QueryStatus flo_html_getNodesWithoutflo_html_Combinator(
 flo_html_QueryStatus flo_html_filterByTagID(const flo_html_element_id tagID,
                                             const flo_html_Dom *dom,
                                             flo_html_node_id *results,
-                                            size_t *len) {
-    size_t nextFreeSpot = 0;
-    for (size_t i = 0; i < *len; i++) {
+                                            ptrdiff_t *len) {
+    ptrdiff_t nextFreeSpot = 0;
+    for (ptrdiff_t i = 0; i < *len; i++) {
         if (dom->nodes[results[i]].tagID == tagID) {
             results[nextFreeSpot++] = results[i];
         }
@@ -141,8 +141,8 @@ flo_html_QueryStatus flo_html_filterByTagID(const flo_html_element_id tagID,
 // hash or something.
 unsigned char isPresentIn(const flo_html_node_id nodeID,
                           const flo_html_node_id *array,
-                          const size_t arrayLen) {
-    for (size_t j = 0; j < arrayLen; j++) {
+                          const ptrdiff_t arrayLen) {
+    for (ptrdiff_t j = 0; j < arrayLen; j++) {
         if (nodeID == array[j]) {
             return 1;
         }
@@ -153,8 +153,8 @@ unsigned char isPresentIn(const flo_html_node_id nodeID,
 
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    const size_t filtersLen, const flo_html_Dom *dom,
-    const size_t numberOfSiblings, flo_html_Uint16HashSet *set) {
+    const ptrdiff_t filtersLen, const flo_html_Dom *dom,
+    const ptrdiff_t numberOfSiblings, flo_html_Uint16HashSet *set) {
     flo_html_Uint16HashSet filteredAdjacents;
     if (flo_html_initUint16HashSet(&filteredAdjacents, set->arrayLen) !=
         HASH_SUCCESS) {
@@ -169,7 +169,7 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
     while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
         flo_html_node_id inSet = flo_html_nextUint16HashSetIterator(&iterator);
         flo_html_node_id nextNodeID = flo_html_getNext(inSet, dom);
-        size_t siblingsNumberCopy = numberOfSiblings;
+        ptrdiff_t siblingsNumberCopy = numberOfSiblings;
 
         while (siblingsNumberCopy > 0 && nextNodeID > 0) {
             if (flo_html_filterNode(nextNodeID, filters, filtersLen, dom)) {
@@ -199,7 +199,7 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
 
 flo_html_QueryStatus flo_html_getFilteredDescendants(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    const size_t filtersLen, const flo_html_Dom *dom, size_t depth,
+    const ptrdiff_t filtersLen, const flo_html_Dom *dom, ptrdiff_t depth,
     flo_html_Uint16HashSet *set) {
     flo_html_Uint16HashSet firstDescendants;
     if (flo_html_copyUint16HashSet(set, &firstDescendants) != HASH_SUCCESS) {
@@ -224,7 +224,7 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
     flo_html_Uint16HashSet *filledSet = &firstDescendants;
 
     while (depth > 0 && filledSet->entries > 0) {
-        for (size_t i = 0; i < dom->parentChildLen; i++) {
+        for (ptrdiff_t i = 0; i < dom->parentChildLen; i++) {
             flo_html_ParentChild parentChildNode = dom->parentChilds[i];
             if (dom->nodes[parentChildNode.childID].nodeType ==
                     NODE_TYPE_DOCUMENT &&

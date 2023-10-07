@@ -15,7 +15,7 @@ typedef enum { TEXT_CONTENT, NUM_CHAR_FUNCTION_TYPES } ArrayFunctionType;
 typedef struct {
     const char *fileLocation;
     const char *cssQuery;
-    const size_t expectedResult;
+    const ptrdiff_t expectedResult;
     const ArrayFunctionType functionType;
     const char *testName;
 } TestFile;
@@ -29,12 +29,12 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, "body", 7, TEXT_CONTENT, "multiple text nodes 2"},
 };
 
-static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testQuery(const flo_html_String fileLocation,
                             const flo_html_String cssQuery,
                             const ArrayFunctionType functionType,
-                            const size_t expectedResult) {
+                            const ptrdiff_t expectedResult) {
     flo_html_TextStore textStore;
     flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
@@ -64,7 +64,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
             queryStatus, flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
-        size_t actualResult = 0;
+        ptrdiff_t actualResult = 0;
         switch (functionType) {
         case TEXT_CONTENT: {
             flo_html_String *results = NULL;
@@ -106,12 +106,12 @@ freeMemory:
     return result;
 }
 
-bool testArrayNodeQueries(size_t *successes, size_t *failures) {
+bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures) {
     printTestTopicStart("array queries");
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
-    for (size_t i = 0; i < numTestFiles; i++) {
+    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
 
         printTestStart(testFile.testName);

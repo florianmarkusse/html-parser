@@ -21,17 +21,17 @@ typedef struct {
 } flo_html_HashEntry;
 
 /**
- * Hashing with linear probing for natural values > 0 up until size_t max
+ * Hashing with linear probing for natural values > 0 up until ptrdiff_t max
  * size.
  */
 typedef struct {
     flo_html_HashEntry *array;
-    size_t arrayLen;
-    size_t entries;
+    ptrdiff_t arrayLen;
+    ptrdiff_t entries;
 } flo_html_StringHashSet;
 
 flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
-                                               size_t capacity);
+                                               ptrdiff_t capacity);
 
 flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                                  const flo_html_String string);
@@ -60,7 +60,7 @@ void flo_html_destroyStringHashSet(flo_html_StringHashSet *set);
 
 typedef struct {
     const flo_html_StringHashSet *set;
-    size_t index;
+    ptrdiff_t index;
 } flo_html_StringHashSetIterator;
 
 void flo_html_initStringHashSetIterator(

@@ -19,8 +19,8 @@
 int main() {
     printf("Starting test suite...\n\n");
 
-    size_t successes = 0;
-    size_t failures = 0;
+    ptrdiff_t successes = 0;
+    ptrdiff_t failures = 0;
 
     testflo_html_DomParsings(&successes, &failures);
     printf("\n");

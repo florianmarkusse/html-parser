@@ -3,11 +3,11 @@
 #include "node/querying/querying.h"
 #include "test.h"
 
-bool testNodeQueries(size_t *successes, size_t *failures) {
+bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures) {
     printTestTopicStart("node queries");
 
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
     testBoolNodeQueries(&localSuccesses, &localFailures);
     testCharNodeQueries(&localSuccesses, &localFailures);

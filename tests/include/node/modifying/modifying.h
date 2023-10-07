@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-bool testNodeModifications(size_t *successes, size_t *failures);
+bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures);
 
 #endif

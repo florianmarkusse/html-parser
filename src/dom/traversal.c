@@ -52,7 +52,7 @@ flo_html_node_id flo_html_getNext(const flo_html_node_id currentNodeID,
 flo_html_ParentChild *
 flo_html_getParentNode(const flo_html_node_id currentNodeID,
                        const flo_html_Dom *dom) {
-    for (size_t i = 0; i < dom->parentChildLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->parentChildLen; i++) {
         flo_html_ParentChild *node = &dom->parentChilds[i];
         if (node->childID == currentNodeID) {
             return node;

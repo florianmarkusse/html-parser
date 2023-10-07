@@ -35,8 +35,8 @@ const flo_html_String voidElementTags[] = {
     FLO_HTML_S("wbr")};
 
 bool isVoidElement(const flo_html_String str) {
-    for (size_t i = 0; i < sizeof(voidElementTags) / sizeof(voidElementTags[0]);
-         i++) {
+    for (ptrdiff_t i = 0;
+         i < sizeof(voidElementTags) / sizeof(voidElementTags[0]); i++) {
         if (flo_html_stringEquals(str, voidElementTags[i])) {
             return true;
         }
@@ -102,7 +102,7 @@ updateReferences(const flo_html_node_id newNodeID,
     } while (0)
 
 unsigned char textNodeContinue(const char ch, const flo_html_String htmlString,
-                               const size_t currentPosition) {
+                               const ptrdiff_t currentPosition) {
     return (!flo_html_isSpecialSpace(ch) &&
             (ch != ' ' ||
              (currentPosition > 0 &&
@@ -562,7 +562,7 @@ flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
         return domStatus;
     }
 
-    for (size_t i = 0; i < documentNode->boolPropsLen; i++) {
+    for (ptrdiff_t i = 0; i < documentNode->boolPropsLen; i++) {
         const flo_html_String boolProp = documentNode->boolProps[i];
         flo_html_ElementStatus elementStatus =
             flo_html_addBooleanPropertyToNode(*newNodeID, boolProp, dom,
@@ -574,7 +574,7 @@ flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
         }
     }
 
-    for (size_t i = 0; i < documentNode->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < documentNode->propsLen; i++) {
         const flo_html_String keyProp = documentNode->keyProps[i];
         const flo_html_String valueProp = documentNode->valueProps[i];
         flo_html_ElementStatus elementStatus = flo_html_addPropertyToNode(

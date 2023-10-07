@@ -74,7 +74,7 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
 };
 
-static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 TestStatus compareFiles(const flo_html_String fileLocation1,
                         const flo_html_String fileLocation2,
@@ -90,12 +90,12 @@ TestStatus compareFiles(const flo_html_String fileLocation1,
     return compareWithCodeAndEndTest(&comparisonTest, expectedResult);
 }
 
-bool testflo_html_DomComparisons(size_t *successes, size_t *failures) {
+bool testflo_html_DomComparisons(ptrdiff_t *successes, ptrdiff_t *failures) {
     printTestTopicStart("DOM comparisons");
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
-    for (size_t i = 0; i < numTestFiles; i++) {
+    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
 
         printTestStart(testFile.testName);

@@ -61,7 +61,7 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
         return status;
     }
     // TODO(florian): make faster. (BTREE)
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         if (dom->props[i].nodeID == nodeID) {
             flo_html_indexID keyID = dom->props[i].keyID;
             const flo_html_String propKey =
@@ -181,7 +181,7 @@ flo_html_HashStatus createBoolPropsSet(const flo_html_node_id nodeID,
         return status;
     }
     // TODO(florian): make faster. (BTREE)
-    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
         if (dom->boolProps[i].nodeID == nodeID) {
             flo_html_indexID propID = dom->boolProps[i].propID;
             const flo_html_String boolProp =

@@ -47,8 +47,8 @@ typedef struct {
 } flo_html_FilterType;
 
 bool flo_html_filterNode(flo_html_node_id nodeID,
-                         const flo_html_FilterType *filters, size_t filterslen,
-                         const flo_html_Dom *dom);
+                         const flo_html_FilterType *filters,
+                         ptrdiff_t filterslen, const flo_html_Dom *dom);
 flo_html_indexID flo_html_getTagID(const flo_html_String tag,
                                    const flo_html_TextStore *textStore);
 flo_html_indexID flo_html_getBoolPropID(const flo_html_String boolProp,
@@ -61,18 +61,18 @@ flo_html_indexID flo_html_getPropValueID(const flo_html_String valueProp,
 flo_html_QueryStatus flo_html_filterByTagID(flo_html_element_id tagID,
                                             const flo_html_Dom *dom,
                                             flo_html_node_id *results,
-                                            size_t *len);
+                                            ptrdiff_t *len);
 flo_html_QueryStatus flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    size_t filtersLen, const flo_html_Dom *dom, flo_html_Uint16HashSet *set);
+    ptrdiff_t filtersLen, const flo_html_Dom *dom, flo_html_Uint16HashSet *set);
 
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    size_t filtersLen, const flo_html_Dom *dom, size_t numberOfSiblings,
+    ptrdiff_t filtersLen, const flo_html_Dom *dom, ptrdiff_t numberOfSiblings,
     flo_html_Uint16HashSet *set);
 flo_html_QueryStatus flo_html_getFilteredDescendants(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    size_t filtersLen, const flo_html_Dom *dom, size_t depth,
+    ptrdiff_t filtersLen, const flo_html_Dom *dom, ptrdiff_t depth,
     flo_html_Uint16HashSet *set);
 
 #ifdef __cplusplus

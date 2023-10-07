@@ -16,10 +16,10 @@ typedef struct {
     const flo_html_String tag;
     const bool isPaired;
     const flo_html_String boolProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
-    const size_t boolPropsLen;
+    const ptrdiff_t boolPropsLen;
     const flo_html_String keyProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
     const flo_html_String valueProps[FLO_HTML_MAX_PROPS_LEN_APPENDIX];
-    const size_t propsLen;
+    const ptrdiff_t propsLen;
 } flo_html_DocumentNode;
 
 #ifdef __cplusplus

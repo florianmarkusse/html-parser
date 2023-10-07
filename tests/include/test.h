@@ -6,20 +6,20 @@
 #include <stddef.h>
 
 void printTabs();
-void printTestScore(size_t successes, size_t failures);
+void printTestScore(ptrdiff_t successes, ptrdiff_t failures);
 void printTestTopicStart(const char *testTopic);
 void printTestStart(const char *testName);
 void printTestSuccess();
 void printTestFailure();
 void printTestDemarcation();
-void printTestResultDifferenceErrorCode(size_t expected,
+void printTestResultDifferenceErrorCode(ptrdiff_t expected,
                                         const char *expectedString,
-                                        size_t actual,
+                                        ptrdiff_t actual,
                                         const char *actualString);
 void printTestResultDifferenceString(const flo_html_String expectedString,
                                      const flo_html_String actualString);
 void printTestResultDifferenceBool(bool expectedBool, bool actualBool);
-void printTestResultDifferenceNumber(size_t expectedNumber,
-                                     size_t actualNumber);
+void printTestResultDifferenceNumber(ptrdiff_t expectedNumber,
+                                     ptrdiff_t actualNumber);
 
 #endif

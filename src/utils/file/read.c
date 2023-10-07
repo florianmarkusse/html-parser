@@ -16,7 +16,7 @@ flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
     }
 
     fseek(srcFile, 0, SEEK_END);
-    size_t dataLen = ftell(srcFile);
+    ptrdiff_t dataLen = ftell(srcFile);
     rewind(srcFile);
 
     (*buffer).buf = (unsigned char *)malloc(dataLen + 1);
@@ -26,7 +26,7 @@ flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
         return FILE_CANT_ALLOCATE;
     }
 
-    size_t result = fread((*buffer).buf, 1, dataLen, srcFile);
+    ptrdiff_t result = fread((*buffer).buf, 1, dataLen, srcFile);
     if (result != dataLen) {
         FLO_HTML_PRINT_ERROR("Failed to read the file.\n");
         fclose(srcFile);

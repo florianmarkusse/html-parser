@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-bool testIntegrations(size_t *successes, size_t *failures);
+bool testIntegrations(ptrdiff_t *successes, ptrdiff_t *failures);
 
 #endif

@@ -11,8 +11,8 @@
 
 flo_html_ElementStatus
 flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
-                            const size_t stringsCapacity,
-                            const size_t pageSize) {
+                            const ptrdiff_t stringsCapacity,
+                            const ptrdiff_t pageSize) {
     if (flo_html_initStringHashSet(&stringRegistry->set, stringsCapacity) !=
         HASH_SUCCESS) {
         FLO_HTML_PRINT_ERROR("Failure initing hash set!\n");
@@ -99,7 +99,7 @@ void flo_html_destroyTextStore(flo_html_TextStore *textStore) {
 }
 
 flo_html_ElementStatus elementSizeCheck(unsigned char *buffer,
-                                        const size_t bufferLen,
+                                        const ptrdiff_t bufferLen,
                                         const flo_html_String element) {
     if (element.len >= bufferLen) {
         FLO_HTML_PRINT_ERROR(

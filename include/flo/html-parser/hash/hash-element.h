@@ -8,7 +8,7 @@ extern "C" {
 #include <stddef.h>
 
 typedef struct {
-    size_t hash;
+    ptrdiff_t hash;
     unsigned char
         offset; // This offset is based on the linear probing tactic used. if
                 // this changes, this will likely go very wrong.

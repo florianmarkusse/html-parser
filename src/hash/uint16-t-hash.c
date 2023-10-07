@@ -23,7 +23,7 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
                                                  const uint16_t id) {
     uint16_t hash = flo_html_hash16_xm3(id); // Calculate the hash once
 
-    size_t index = hash % set->arrayLen;
+    ptrdiff_t index = hash % set->arrayLen;
 
     while (set->array[index].value != 0) {
         if (set->array[index].value == id) {
@@ -43,9 +43,9 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
             return HASH_ERROR_CAPACITY;
         }
 
-        size_t newCapacity = (set->arrayLen * 2 <= MAX_CAPACITY)
-                                 ? set->arrayLen * 2
-                                 : MAX_CAPACITY;
+        ptrdiff_t newCapacity = (set->arrayLen * 2 <= MAX_CAPACITY)
+                                    ? set->arrayLen * 2
+                                    : MAX_CAPACITY;
         flo_html_Uint16Entry *newArray =
             calloc(newCapacity, sizeof(flo_html_Uint16Entry));
         if (newArray == NULL) {
@@ -54,9 +54,9 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
             return HASH_ERROR_MEMORY;
         }
 
-        for (size_t i = 0; i < set->arrayLen; i++) {
+        for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
             if (set->array[i].value != 0) {
-                size_t newIndex = set->array[i].hash % newCapacity;
+                ptrdiff_t newIndex = set->array[i].hash % newCapacity;
                 while (newArray[newIndex].value != 0) {
                     newIndex = (newIndex + 1) % newCapacity;
                 }
@@ -89,7 +89,7 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
 
 flo_html_HashStatus
 flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
-                              uint16_t **results, size_t *resultsLen) {
+                              uint16_t **results, ptrdiff_t *resultsLen) {
     *resultsLen = set->entries;
     *results = (uint16_t *)malloc(*resultsLen * sizeof(uint16_t));
     if (*results == NULL) {
@@ -98,8 +98,8 @@ flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
         return HASH_ERROR_MEMORY;
     }
 
-    size_t resultIndex = 0;
-    for (size_t i = 0; i < set->arrayLen; i++) {
+    ptrdiff_t resultIndex = 0;
+    for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
         if (set->array[i].value != 0) {
             (*results)[resultIndex++] = set->array[i].value;
         }
@@ -110,7 +110,7 @@ flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
 
 bool flo_html_containsUint16HashSet(const flo_html_Uint16HashSet *set,
                                     const uint16_t id) {
-    size_t index = flo_html_hash16_xm3(id) % set->arrayLen;
+    ptrdiff_t index = flo_html_hash16_xm3(id) % set->arrayLen;
 
     while (set->array[index].value != 0) {
         if (set->array[index].value == id) {
@@ -137,7 +137,7 @@ flo_html_copyUint16HashSet(const flo_html_Uint16HashSet *originalSet,
         return status;
     }
 
-    size_t arraySize = originalSet->arrayLen * sizeof(flo_html_Uint16Entry);
+    ptrdiff_t arraySize = originalSet->arrayLen * sizeof(flo_html_Uint16Entry);
     memcpy(copy->array, originalSet->array, arraySize);
 
     copy->entries = originalSet->entries;

@@ -2,11 +2,11 @@
 #define NODE_QUERYING_QUERYING_H
 
 #include <stdbool.h>
-#include <stdlib.h>
+#include <stddef.h>
 
-bool testNodeQueries(size_t *successes, size_t *failures);
-bool testBoolNodeQueries(size_t *successes, size_t *failures);
-bool testCharNodeQueries(size_t *successes, size_t *failures);
-bool testArrayNodeQueries(size_t *successes, size_t *failures);
+bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures);
+bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures);
+bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures);
+bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures);
 
 #endif

@@ -30,13 +30,13 @@ typedef uint16_t flo_html_element_id;
 // having fixed pagesize?
 typedef struct {
     flo_html_DataPage *pages;
-    size_t pageLen;
-    size_t pageSize;
+    ptrdiff_t pageLen;
+    ptrdiff_t pageSize;
 } flo_html_ElementsContainer;
 
 flo_html_ElementStatus
 initflo_html_ElementsContainer(flo_html_ElementsContainer *elementsContainer,
-                               size_t pageSize);
+                               ptrdiff_t pageSize);
 void destroyflo_html_ElementsContainer(
     flo_html_ElementsContainer *elementsContainer);
 

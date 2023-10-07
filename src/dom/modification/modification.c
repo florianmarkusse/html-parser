@@ -175,7 +175,7 @@ flo_html_ElementStatus flo_html_addTextToTextNode(flo_html_Node *node,
                                                   flo_html_TextStore *textStore,
                                                   bool isAppend) {
     const flo_html_String prevText = node->text;
-    const size_t mergedLen =
+    const ptrdiff_t mergedLen =
         prevText.len + text.len + 1; // Adding a whitespace in between.
 
     unsigned char buffer[mergedLen + 1];

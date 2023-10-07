@@ -9,12 +9,13 @@ typedef struct {
     const char *fileLocation;
     const flo_html_String cssQuery;
     flo_html_QueryStatus expectedStatus;
-    size_t expectedResult;
+    ptrdiff_t expectedResult;
     const char *testName;
 } TestFile;
 
-unsigned char testflo_html_DomQueries(size_t *successes, size_t *failures);
-unsigned char testQuerySelectorAll(size_t *successes, size_t *failures);
-unsigned char testQuerySelector(size_t *successes, size_t *failures);
+unsigned char testflo_html_DomQueries(ptrdiff_t *successes,
+                                      ptrdiff_t *failures);
+unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures);
+unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures);
 
 #endif

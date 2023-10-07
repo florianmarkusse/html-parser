@@ -23,7 +23,7 @@ static TestStatus parseQueryModify() {
     }
 
     flo_html_node_id *results = NULL;
-    size_t resultsLen = 0;
+    ptrdiff_t resultsLen = 0;
     flo_html_QueryStatus actual = flo_html_querySelectorAll(
         FLO_HTML_S("title"), &comparisonTest.startflo_html_Dom,
         &comparisonTest.startTextStore, &results, &resultsLen);
@@ -43,7 +43,7 @@ static TestStatus parseQueryModify() {
         printTestDemarcation();
         printTestResultDifferenceNumber(1, resultsLen);
         printf("Node IDs received...\n");
-        for (size_t i = 0; i < resultsLen; i++) {
+        for (ptrdiff_t i = 0; i < resultsLen; i++) {
             printf("%u\n", results[i]);
         }
         printTestDemarcation();
@@ -101,7 +101,7 @@ static TestStatus parseQueryModify() {
         printTestDemarcation();
         printTestResultDifferenceNumber(5, resultsLen);
         printf("Node IDs received...\n");
-        for (size_t i = 0; i < resultsLen; i++) {
+        for (ptrdiff_t i = 0; i < resultsLen; i++) {
             printf("%u\n", results[i]);
         }
         printTestDemarcation();
@@ -146,7 +146,7 @@ static TestStatus parseQueryModify() {
         printTestDemarcation();
         printTestResultDifferenceNumber(4, resultsLen);
         printf("Node IDs received...\n");
-        for (size_t i = 0; i < resultsLen; i++) {
+        for (ptrdiff_t i = 0; i < resultsLen; i++) {
             printf("%u\n", results[i]);
         }
         printTestDemarcation();
@@ -159,11 +159,11 @@ static TestStatus parseQueryModify() {
     return compareAndEndTest(&comparisonTest);
 }
 
-bool testIntegrations(size_t *successes, size_t *failures) {
+bool testIntegrations(ptrdiff_t *successes, ptrdiff_t *failures) {
     printTestTopicStart("Integration tests");
 
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
     if (parseQueryModify() != TEST_SUCCESS) {
         localFailures++;

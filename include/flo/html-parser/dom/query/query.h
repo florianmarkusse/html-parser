@@ -34,7 +34,7 @@ flo_html_QueryStatus
 flo_html_querySelectorAll(const flo_html_String cssQuery,
                           const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore,
-                          flo_html_node_id **results, size_t *resultsLen);
+                          flo_html_node_id **results, ptrdiff_t *resultsLen);
 
 /**
  * @brief Get elements by their class name in the DOM.
@@ -58,11 +58,10 @@ flo_html_querySelectorAll(const flo_html_String cssQuery,
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-flo_html_QueryStatus
-flo_html_getElementsByClassName(const flo_html_String className,
-                                const flo_html_Dom *dom,
-                                const flo_html_TextStore *textStore,
-                                flo_html_node_id **results, size_t *resultsLen);
+flo_html_QueryStatus flo_html_getElementsByClassName(
+    const flo_html_String className, const flo_html_Dom *dom,
+    const flo_html_TextStore *textStore, flo_html_node_id **results,
+    ptrdiff_t *resultsLen);
 
 /**
  * @brief Get elements by their tag name in the DOM.
@@ -86,11 +85,10 @@ flo_html_getElementsByClassName(const flo_html_String className,
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-flo_html_QueryStatus
-flo_html_getElementsByTagName(const flo_html_String tag,
-                              const flo_html_Dom *dom,
-                              const flo_html_TextStore *textStore,
-                              flo_html_node_id **results, size_t *resultsLen);
+flo_html_QueryStatus flo_html_getElementsByTagName(
+    const flo_html_String tag, const flo_html_Dom *dom,
+    const flo_html_TextStore *textStore, flo_html_node_id **results,
+    ptrdiff_t *resultsLen);
 
 /**
  * @brief Query for the first element matching a CSS selector in the DOM.

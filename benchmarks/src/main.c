@@ -36,7 +36,7 @@ void benchmark() {
     }
 
     // Traverse the directory and parse all the HTML files
-    size_t files = 0;
+    ptrdiff_t files = 0;
     while ((ent = readdir(dir)) != NULL) {
         if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
             continue;

@@ -53,12 +53,12 @@ static const TestFile testFiles[] = {
 };
 
 // Calculate the number of test files
-static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testQuery(const flo_html_String fileLocation,
                             const flo_html_String cssQuery,
                             const flo_html_QueryStatus expectedStatus,
-                            const size_t expectedNumberOfNodes) {
+                            const ptrdiff_t expectedNumberOfNodes) {
     flo_html_TextStore textStore;
     flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
     if (initStatus != ELEMENT_SUCCESS) {
@@ -76,7 +76,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
     }
 
     flo_html_node_id *results = NULL;
-    size_t resultsLen = 0;
+    ptrdiff_t resultsLen = 0;
     flo_html_QueryStatus actual = flo_html_querySelectorAll(
         cssQuery, &dom, &textStore, &results, &resultsLen);
 
@@ -96,7 +96,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         } else {
             printTestResultDifferenceNumber(expectedNumberOfNodes, resultsLen);
             printf("Node IDs received...\n");
-            for (size_t i = 0; i < resultsLen; i++) {
+            for (ptrdiff_t i = 0; i < resultsLen; i++) {
                 printf("%u\n", results[i]);
             }
         }
@@ -111,12 +111,12 @@ static TestStatus testQuery(const flo_html_String fileLocation,
     return result;
 }
 
-unsigned char testQuerySelectorAll(size_t *successes, size_t *failures) {
+unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures) {
     printTestTopicStart("querySelectorAll");
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
-    for (size_t i = 0; i < numTestFiles; i++) {
+    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
 
         printTestStart(testFile.testName);

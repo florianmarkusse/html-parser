@@ -49,40 +49,40 @@ extern "C" {
 
 typedef struct {
     flo_html_Registration *registry;
-    size_t len;
-    size_t cap;
+    ptrdiff_t len;
+    ptrdiff_t cap;
 } flo_html_BasicRegistry;
 
 typedef struct {
     flo_html_node_id firstNodeID;
 
     flo_html_Node *nodes;
-    size_t nodeLen;
-    size_t nodeCap;
+    ptrdiff_t nodeLen;
+    ptrdiff_t nodeCap;
 
     flo_html_ParentChild *parentFirstChilds;
-    size_t parentFirstChildLen;
-    size_t parentFirstChildCap;
+    ptrdiff_t parentFirstChildLen;
+    ptrdiff_t parentFirstChildCap;
 
     flo_html_ParentChild *parentChilds;
-    size_t parentChildLen;
-    size_t parentChildCap;
+    ptrdiff_t parentChildLen;
+    ptrdiff_t parentChildCap;
 
     flo_html_NextNode *nextNodes;
-    size_t nextNodeLen;
-    size_t nextNodeCap;
+    ptrdiff_t nextNodeLen;
+    ptrdiff_t nextNodeCap;
 
     flo_html_BooleanProperty *boolProps;
-    size_t boolPropsLen;
-    size_t boolPropsCap;
+    ptrdiff_t boolPropsLen;
+    ptrdiff_t boolPropsCap;
 
     flo_html_Property *props;
-    size_t propsLen;
-    size_t propsCap;
+    ptrdiff_t propsLen;
+    ptrdiff_t propsCap;
 
     flo_html_TagRegistration *tagRegistry;
-    size_t tagRegistryLen;
-    size_t tagRegistryCap;
+    ptrdiff_t tagRegistryLen;
+    ptrdiff_t tagRegistryCap;
 
     flo_html_BasicRegistry boolPropRegistry;
     flo_html_BasicRegistry propKeyRegistry;

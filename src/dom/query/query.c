@@ -72,13 +72,13 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
     flo_html_QueryStatus result = QUERY_SUCCESS;
 
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT];
-    size_t filtersLen = 0;
+    ptrdiff_t filtersLen = 0;
 
     flo_html_Combinator currentflo_html_Combinator = NO_COMBINATOR;
     Selector currentSelector = NORMAL;
 
-    size_t tokenStart = 0;
-    size_t tokenLength = 0;
+    ptrdiff_t tokenStart = 0;
+    ptrdiff_t tokenLength = 0;
     flo_html_element_id tokenID = 0;
 
     ptrdiff_t currentPosition = 0;
@@ -291,8 +291,8 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
             break;
         }
         case GENERAL_SIBLING: {
-            if ((result = flo_html_getFilteredAdjacents(filters, filtersLen,
-                                                        dom, SIZE_MAX, set)) !=
+            if ((result = flo_html_getFilteredAdjacents(
+                     filters, filtersLen, dom, PTRDIFF_MAX, set)) !=
                 QUERY_SUCCESS) {
                 return result;
             }
@@ -300,7 +300,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String cssQuery,
         }
         case DESCENDANT: {
             if ((result = flo_html_getFilteredDescendants(
-                     filters, filtersLen, dom, SIZE_MAX, set)) !=
+                     filters, filtersLen, dom, PTRDIFF_MAX, set)) !=
                 QUERY_SUCCESS) {
                 return result;
             }
@@ -357,7 +357,7 @@ flo_html_QueryStatus
 flo_html_querySelectorAll(const flo_html_String cssQuery,
                           const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore,
-                          flo_html_node_id **results, size_t *resultsLen) {
+                          flo_html_node_id **results, ptrdiff_t *resultsLen) {
     flo_html_Uint16HashSet resultsSet;
     if (flo_html_initUint16HashSet(&resultsSet, FLO_HTML_INITIAL_QUERY_CAP) !=
         HASH_SUCCESS) {
@@ -475,7 +475,7 @@ flo_html_querySelectorAll(const flo_html_String cssQuery,
 flo_html_QueryStatus flo_html_getElementsByClassName(
     const flo_html_String className, const flo_html_Dom *dom,
     const flo_html_TextStore *textStore, flo_html_node_id **results,
-    size_t *resultsLen) {
+    ptrdiff_t *resultsLen) {
     ptrdiff_t cssQueryLen = className.len + 1;
     unsigned char cssQueryBuffer[cssQueryLen];
     flo_html_String cssQuery;
@@ -488,11 +488,10 @@ flo_html_QueryStatus flo_html_getElementsByClassName(
                                      resultsLen);
 }
 
-flo_html_QueryStatus
-flo_html_getElementsByTagName(const flo_html_String tag,
-                              const flo_html_Dom *dom,
-                              const flo_html_TextStore *textStore,
-                              flo_html_node_id **results, size_t *resultsLen) {
+flo_html_QueryStatus flo_html_getElementsByTagName(
+    const flo_html_String tag, const flo_html_Dom *dom,
+    const flo_html_TextStore *textStore, flo_html_node_id **results,
+    ptrdiff_t *resultsLen) {
     return flo_html_querySelectorAll(tag, dom, textStore, results, resultsLen);
 }
 
@@ -501,7 +500,7 @@ flo_html_QueryStatus flo_html_querySelector(const flo_html_String cssQuery,
                                             const flo_html_TextStore *textStore,
                                             flo_html_node_id *result) {
     flo_html_node_id *results = NULL;
-    size_t resultsLen = 0;
+    ptrdiff_t resultsLen = 0;
 
     flo_html_QueryStatus status = flo_html_querySelectorAll(
         cssQuery, dom, textStore, &results, &resultsLen);
@@ -518,7 +517,7 @@ flo_html_QueryStatus flo_html_querySelector(const flo_html_String cssQuery,
 
     flo_html_node_id currentNode = dom->firstNodeID;
     while (currentNode) {
-        for (size_t i = 0; i < resultsLen; i++) {
+        for (ptrdiff_t i = 0; i < resultsLen; i++) {
             if (results[i] == currentNode) {
                 FLO_HTML_FREE_TO_NULL(results);
                 *result = currentNode;

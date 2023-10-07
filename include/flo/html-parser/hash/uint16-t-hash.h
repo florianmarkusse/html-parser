@@ -22,8 +22,8 @@ typedef struct {
  */
 typedef struct {
     flo_html_Uint16Entry *array;
-    size_t arrayLen;
-    size_t entries;
+    ptrdiff_t arrayLen;
+    ptrdiff_t entries;
 } flo_html_Uint16HashSet;
 
 flo_html_HashStatus flo_html_initUint16HashSet(flo_html_Uint16HashSet *set,
@@ -34,7 +34,7 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
 
 flo_html_HashStatus
 flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
-                              uint16_t **results, size_t *resultsLen);
+                              uint16_t **results, ptrdiff_t *resultsLen);
 
 bool flo_html_containsUint16HashSet(const flo_html_Uint16HashSet *set,
                                     uint16_t id);
@@ -47,7 +47,7 @@ void flo_html_resetUint16HashSet(flo_html_Uint16HashSet *set);
 
 typedef struct {
     const flo_html_Uint16HashSet *set;
-    size_t index;
+    ptrdiff_t index;
 } flo_html_Uint16HashSetIterator;
 
 void flo_html_initUint16HashSetIterator(

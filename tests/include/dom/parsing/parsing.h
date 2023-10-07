@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
-unsigned char testflo_html_DomParsings(size_t *successes, size_t *failures);
+unsigned char testflo_html_DomParsings(ptrdiff_t *successes,
+                                       ptrdiff_t *failures);
 
 #endif

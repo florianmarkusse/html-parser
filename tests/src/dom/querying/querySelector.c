@@ -21,7 +21,7 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, FLO_HTML_S("body head"), QUERY_SUCCESS, 0, "no nodes found"},
 };
 
-static const size_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testQuery(const flo_html_String fileLocation,
                             const flo_html_String cssQuery,
@@ -73,12 +73,12 @@ static TestStatus testQuery(const flo_html_String fileLocation,
     return result;
 }
 
-unsigned char testQuerySelector(size_t *successes, size_t *failures) {
+unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures) {
     printTestTopicStart("querySelector");
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
-    for (size_t i = 0; i < numTestFiles; i++) {
+    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
         TestFile testFile = testFiles[i];
 
         printTestStart(testFile.testName);

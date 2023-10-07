@@ -9,7 +9,7 @@
 #include "flo/html-parser/utils/print/error.h"
 
 flo_html_DataPageStatus createflo_html_DataPage(flo_html_DataPage *dataPage,
-                                                const size_t pageSize) {
+                                                const ptrdiff_t pageSize) {
     dataPage->start = malloc(pageSize);
     if (dataPage->start == NULL) {
         FLO_HTML_PRINT_ERROR("Failed to allocate memory for new tag page.\n");
@@ -22,11 +22,11 @@ flo_html_DataPageStatus createflo_html_DataPage(flo_html_DataPage *dataPage,
 }
 
 flo_html_DataPageStatus flo_html_insertIntoSuitablePage(
-    const flo_html_String data, const size_t totalPages,
+    const flo_html_String data, const ptrdiff_t totalPages,
     flo_html_ElementsContainer *container, char **dataLocation) {
     flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;
-    size_t index = container->pageLen;
-    for (size_t i = 0; i < container->pageLen; ++i) {
+    ptrdiff_t index = container->pageLen;
+    for (ptrdiff_t i = 0; i < container->pageLen; ++i) {
         if (container->pages[i].spaceLeft >= data.len) {
             index = i;
             break;
@@ -59,7 +59,7 @@ flo_html_DataPageStatus flo_html_insertIntoSuitablePage(
 }
 
 flo_html_DataPageStatus flo_html_insertIntoPageWithHash(
-    const flo_html_String data, const size_t totalPages,
+    const flo_html_String data, const ptrdiff_t totalPages,
     flo_html_StringRegistry *stringRegistry, flo_html_HashElement *hashElement,
     flo_html_indexID *flo_html_indexID) {
     flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;

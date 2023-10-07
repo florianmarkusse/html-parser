@@ -5,7 +5,7 @@
 
 flo_html_ElementStatus
 initflo_html_ElementsContainer(flo_html_ElementsContainer *elementsContainer,
-                               const size_t pageSize) {
+                               const ptrdiff_t pageSize) {
     elementsContainer->pages =
         malloc(sizeof(flo_html_DataPage) * FLO_HTML_TOTAL_PAGES);
 

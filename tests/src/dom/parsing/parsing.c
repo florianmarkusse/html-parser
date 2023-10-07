@@ -32,7 +32,8 @@ unsigned char parseFile(const flo_html_String fileLocation) {
     return 1;
 }
 
-static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
+static inline void testAndCount(ptrdiff_t *localSuccesses,
+                                ptrdiff_t *localFailures) {
     DIR *dir = NULL;
     struct dirent *ent = NULL;
     if ((dir = opendir(INPUTS_DIR)) == NULL) {
@@ -64,10 +65,11 @@ static inline void testAndCount(size_t *localSuccesses, size_t *localFailures) {
     closedir(dir);
 }
 
-unsigned char testflo_html_DomParsings(size_t *successes, size_t *failures) {
+unsigned char testflo_html_DomParsings(ptrdiff_t *successes,
+                                       ptrdiff_t *failures) {
     printTestTopicStart("DOM parsings");
-    size_t localSuccesses = 0;
-    size_t localFailures = 0;
+    ptrdiff_t localSuccesses = 0;
+    ptrdiff_t localFailures = 0;
 
     testAndCount(&localSuccesses, &localFailures);
 

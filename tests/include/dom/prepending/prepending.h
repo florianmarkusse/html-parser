@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-bool testflo_html_DomPrependices(size_t *successes, size_t *failures);
+bool testflo_html_DomPrependices(ptrdiff_t *successes, ptrdiff_t *failures);
 
 #endif

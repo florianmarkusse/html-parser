@@ -9,7 +9,7 @@
 #define MAX_PROBES (1U << 4U)
 
 flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
-                                               const size_t capacity) {
+                                               const ptrdiff_t capacity) {
     set->arrayLen = capacity;
     set->entries = 0;
     set->array = calloc(capacity, sizeof(flo_html_HashEntry));
@@ -35,7 +35,7 @@ flo_html_insertStringAtHash(flo_html_StringHashSet *set,
 
     set->entries++;
 
-    const size_t arrayIndex =
+    const ptrdiff_t arrayIndex =
         (hashElement->hash + hashElement->offset) % set->arrayLen;
     set->array[arrayIndex].string = string;
     set->array[arrayIndex].flo_html_indexID = set->entries;
@@ -54,7 +54,7 @@ flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         return HASH_ERROR_CAPACITY;
     }
 
-    size_t hash = flo_html_hashString(string) % set->arrayLen;
+    ptrdiff_t hash = flo_html_hashString(string) % set->arrayLen;
 
     while (set->array[hash].string.buf != NULL) {
         if (flo_html_stringEquals(set->array[hash].string, string)) {
@@ -82,10 +82,10 @@ bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
 bool flo_html_containsStringWithDataHashSet(
     const flo_html_StringHashSet *set, const flo_html_String string,
     flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID) {
-    size_t index = flo_html_hashString(string) % set->arrayLen;
+    ptrdiff_t index = flo_html_hashString(string) % set->arrayLen;
     hashElement->hash = index;
 
-    size_t probes = 0;
+    ptrdiff_t probes = 0;
     while (set->array[index].string.buf != NULL) {
         flo_html_HashEntry entry = set->array[index];
         if (flo_html_stringEquals(entry.string, string)) {

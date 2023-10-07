@@ -12,7 +12,7 @@ void flo_html_createPath(const flo_html_String fileLocation) {
     const char *lastSlash = strrchr(buffer, '/');
     if (lastSlash != NULL) {
         // Calculate the length of the directory path
-        size_t dirPathLength = lastSlash - buffer + 1;
+        ptrdiff_t dirPathLength = lastSlash - buffer + 1;
 
         // Create a temporary buffer to store the directory path
         char dirPath[dirPathLength + 1];

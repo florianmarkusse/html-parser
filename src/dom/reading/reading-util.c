@@ -4,7 +4,7 @@
 flo_html_Property *flo_html_getProperty(const flo_html_node_id nodeID,
                                         const flo_html_element_id propKeyID,
                                         const flo_html_Dom *dom) {
-    for (size_t i = 0; i < dom->propsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         flo_html_Property *prop = &dom->props[i];
 
         if (prop->nodeID == nodeID && prop->keyID == propKeyID) {
@@ -19,7 +19,7 @@ flo_html_BooleanProperty *
 flo_html_getBooleanProperty(flo_html_node_id nodeID,
                             flo_html_element_id boolPropID,
                             const flo_html_Dom *dom) {
-    for (size_t i = 0; i < dom->boolPropsLen; i++) {
+    for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
         flo_html_BooleanProperty *prop = &dom->boolProps[i];
 
         if (prop->nodeID == nodeID && prop->propID == boolPropID) {

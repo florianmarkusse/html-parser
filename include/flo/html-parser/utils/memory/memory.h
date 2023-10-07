@@ -41,13 +41,14 @@ extern "C" {
  *
  * @return  A pointer to the resized array, or NULL if reallocation fails.
  */
-static inline void *flo_html_resizeArray(void *array, size_t currentLen,
-                                         size_t *currentCap, size_t elementSize,
-                                         size_t extraElements) {
+static inline void *flo_html_resizeArray(void *array, ptrdiff_t currentLen,
+                                         ptrdiff_t *currentCap,
+                                         ptrdiff_t elementSize,
+                                         ptrdiff_t extraElements) {
     if (currentLen < *currentCap) {
         return array;
     }
-    size_t newCap = (currentLen + extraElements);
+    ptrdiff_t newCap = (currentLen + extraElements);
     void *newArray = realloc(array, newCap * elementSize);
     if (newArray == NULL) {
         FLO_HTML_PRINT_ERROR(
