@@ -9,9 +9,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "data-page-status.h"
-
-typedef uint64_t flo_html_page_space;
-typedef uint8_t flo_html_page_id;
+#include "flo/html-parser/definitions.h"
 
 typedef struct {
     void *start;

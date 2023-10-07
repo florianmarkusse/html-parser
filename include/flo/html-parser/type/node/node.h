@@ -8,10 +8,8 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#include "flo/html-parser/type/data/definitions.h"
-#include "flo/html-parser/util//text/string.h"
-
-typedef uint16_t flo_html_node_id;
+#include "flo/html-parser/definitions.h"
+#include "flo/html-parser/util/text/string.h"
 
 typedef enum {
     NODE_TYPE_ROOT,

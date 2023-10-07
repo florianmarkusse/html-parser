@@ -12,7 +12,7 @@
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/parser/parser.h"
-#include "flo/html-parser/type/data/definitions.h"
+#include "flo/html-parser/definitions.h"
 #include "flo/html-parser/type/element/elements-print.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/type/node/node.h"

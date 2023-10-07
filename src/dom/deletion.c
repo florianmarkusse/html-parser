@@ -4,7 +4,7 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/type/data/definitions.h"
+#include "flo/html-parser/definitions.h"
 #include "flo/html-parser/type/node/boolean-property.h"
 
 void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {

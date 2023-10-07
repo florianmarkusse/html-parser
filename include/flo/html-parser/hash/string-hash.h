@@ -9,7 +9,7 @@ extern "C" {
 #include <stdlib.h>
 
 #include "flo/html-parser/comparison-status.h"
-#include "flo/html-parser/type/data/definitions.h"
+#include "flo/html-parser/definitions.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/util//text/string.h"
 #include "hash-element.h"

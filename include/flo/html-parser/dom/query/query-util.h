@@ -9,7 +9,7 @@ extern "C" {
 
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/hash/uint16-t-hash.h"
-#include "flo/html-parser/type/data/definitions.h"
+#include "flo/html-parser/definitions.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
 #include "query-status.h"

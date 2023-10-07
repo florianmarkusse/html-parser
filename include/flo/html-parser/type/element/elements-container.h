@@ -9,9 +9,9 @@ extern "C" {
 #include <stdint.h>
 
 #include "element-status.h"
+#include "flo/html-parser/definitions.h"
 #include "flo/html-parser/type/data/data-page.h"
 
-typedef uint16_t flo_html_element_id;
 #define FLO_HTML_EXPONENT 16U
 #define FLO_HTML_TOTAL_ELEMENTS (1U << FLO_HTML_EXPONENT)
 #define FLO_HTML_POSSIBLE_ELEMENTS (1U << FLO_HTML_EXPONENT)
