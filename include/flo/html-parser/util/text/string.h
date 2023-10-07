@@ -10,9 +10,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
-#ifdef DEBUG
-#include <assert.h>
-#endif
+#include "flo/html-parser/util/assert.h"
 
 #define FLO_HTML_EMPTY_STRING                                                  \
     (flo_html_String) { NULL, 0 }
@@ -37,7 +35,7 @@ flo_html_stringEquals(flo_html_String a, flo_html_String b) {
 __attribute__((unused)) static inline flo_html_String
 flo_html_strcpy(flo_html_String dest, flo_html_String src) {
 #ifdef DEBUG
-    assert(dest.len >= src.len) printf("I AM COPYING IN DEBUG MODE\n");
+    ASSERT(dest.len >= src.len);
 #endif
     memcpy(dest.buf, src.buf, src.len);
     dest.buf[src.len] = '\0';
@@ -48,8 +46,7 @@ __attribute__((unused)) static inline unsigned char
 flo_html_getChar(flo_html_String str, const ptrdiff_t index) {
 #ifdef DEBUG
     // Debug mode: Perform bounds checking
-    assert(index >= 0 && index < str.len);
-    printf("I AM GETTING A CHAR AT INDEX IN DEBUG MODE\n");
+    ASSERT(index >= 0 && index <= str.len);
 #endif
 
     return str.buf[index];
@@ -58,8 +55,7 @@ __attribute__((unused)) static inline unsigned char *
 flo_html_getCharPtr(flo_html_String str, const ptrdiff_t index) {
 #ifdef DEBUG
     // Debug mode: Perform bounds checking
-    assert(index >= 0 && index < str.len);
-    printf("I AM GETTING A CHAR PTR AT INDEX IN DEBUG MODE\n");
+    ASSERT(index >= 0 && index <= str.len);
 #endif
 
     return &str.buf[index];
@@ -78,8 +74,7 @@ flo_html_firstOccurenceOfFrom(flo_html_String s, unsigned char ch,
                               ptrdiff_t from) {
 #ifdef DEBUG
     // Debug mode: Perform bounds checking
-    assert(from >= 0 && from < s.len);
-    printf("I AM GETTING A FIRST OCC OF IN DEBUG MODE\n");
+    ASSERT(from >= 0 && from <= s.len);
 #endif
 
     for (ptrdiff_t i = from; i < s.len; i++) {
