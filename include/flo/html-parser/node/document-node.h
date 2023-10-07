@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_TYPE_NODE_DOCUMENT_NODE_H
-#define FLO_HTML_PARSER_TYPE_NODE_DOCUMENT_NODE_H
+#ifndef FLO_HTML_PARSER_NODE_DOCUMENT_NODE_H
+#define FLO_HTML_PARSER_NODE_DOCUMENT_NODE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +8,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "flo/html-parser/util//text/string.h"
+#include "flo/html-parser/util/text/string.h"
 
 #define FLO_HTML_MAX_PROPS_LEN_APPENDIX (1U << 4U)
 

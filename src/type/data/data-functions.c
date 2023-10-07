@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "flo/html-parser/hash/string-hash.h"
 #include "flo/html-parser/type/data/data-functions.h"
 #include "flo/html-parser/type/data/data-page.h"
-#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/util/error.h"
+#include "flo/html-parser/util/hash/string-hash.h"
 
 flo_html_DataPageStatus createflo_html_DataPage(flo_html_DataPage *dataPage,
                                                 const ptrdiff_t pageSize) {

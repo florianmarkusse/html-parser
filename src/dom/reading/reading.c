@@ -6,7 +6,7 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/util//memory.h"
+#include "flo/html-parser/util/memory.h"
 
 flo_html_NodeType flo_html_getflo_html_NodeType(const flo_html_node_id nodeID,
                                                 const flo_html_Dom *dom) {

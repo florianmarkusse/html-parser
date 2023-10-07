@@ -7,11 +7,11 @@ extern "C" {
 
 #include <stdbool.h>
 
-#include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/hash/uint16-t-hash.h"
 #include "flo/html-parser/definitions.h"
+#include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/type/element/element-status.h"
 #include "flo/html-parser/type/element/elements-container.h"
+#include "flo/html-parser/util/hash/uint16-t-hash.h"
 #include "query-status.h"
 #include "query.h"
 

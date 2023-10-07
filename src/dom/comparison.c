@@ -2,11 +2,30 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/parser/parser.h"
+#include "flo/html-parser/parser.h"
 #include "flo/html-parser/type/element/elements-print.h"
-#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/util/error.h"
+
+flo_html_ComparisonStatus convertHashComparisonToComparison(
+    const flo_html_HashComparisonStatus hashComparisonStatus) {
+    switch (hashComparisonStatus) {
+    case HASH_COMPARISON_DIFFERENT_SIZES: {
+        return COMPARISON_DIFFERENT_SIZES;
+    }
+    case HASH_COMPARISON_DIFFERENT_CONTENT: {
+        return COMPARISON_DIFFERENT_CONTENT;
+    }
+    default: {
+        FLO_HTML_ERROR_WITH_CODE_ONLY(
+            flo_html_hashComparisonStatusToString(hashComparisonStatus),
+            "unhandled comparison hashComparisonStatus\n");
+        return COMPARISON_MEMORY;
+    }
+    }
+}
 
 void printAttributes(
     const flo_html_indexID tagID1, const flo_html_StringHashSet *set1,
@@ -132,11 +151,13 @@ compareProps(const flo_html_Node *node1, const flo_html_Dom *dom1,
         return COMPARISON_MEMORY;
     }
 
-    flo_html_ComparisonStatus result =
+    flo_html_HashComparisonStatus result =
         flo_html_equalsStringHashSet(&keySet1, &keySet2);
-    if (result != COMPARISON_SUCCESS) {
+    if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
-            FLO_HTML_PRINT_ERROR("Nodes contain different key props\n");
+            FLO_HTML_ERROR_WITH_CODE_ONLY(
+                flo_html_hashComparisonStatusToString(result),
+                "Nodes contain different key props\n");
             printAttributes(node1->tagID, &keySet1, dom1, textStore1,
                             node2->tagID, &keySet2, dom2, textStore2);
         }
@@ -144,13 +165,15 @@ compareProps(const flo_html_Node *node1, const flo_html_Dom *dom1,
         flo_html_destroyStringHashSet(&valueSet1);
         flo_html_destroyStringHashSet(&keySet2);
         flo_html_destroyStringHashSet(&valueSet2);
-        return result;
+        return convertHashComparisonToComparison(result);
     }
 
     result = flo_html_equalsStringHashSet(&valueSet1, &valueSet2);
-    if (result != COMPARISON_SUCCESS) {
+    if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
-            FLO_HTML_PRINT_ERROR("Nodes contain different value props\n");
+            FLO_HTML_ERROR_WITH_CODE_ONLY(
+                flo_html_hashComparisonStatusToString(result),
+                "Nodes contain different value props\n");
             printAttributes(node1->tagID, &valueSet1, dom1, textStore1,
                             node2->tagID, &valueSet2, dom2, textStore2);
         }
@@ -158,7 +181,8 @@ compareProps(const flo_html_Node *node1, const flo_html_Dom *dom1,
         flo_html_destroyStringHashSet(&valueSet1);
         flo_html_destroyStringHashSet(&keySet2);
         flo_html_destroyStringHashSet(&valueSet2);
-        return result;
+
+        return convertHashComparisonToComparison(result);
     }
 
     flo_html_destroyStringHashSet(&keySet1);
@@ -166,7 +190,7 @@ compareProps(const flo_html_Node *node1, const flo_html_Dom *dom1,
     flo_html_destroyStringHashSet(&keySet2);
     flo_html_destroyStringHashSet(&valueSet2);
 
-    return result;
+    return COMPARISON_SUCCESS;
 }
 
 flo_html_HashStatus createBoolPropsSet(const flo_html_node_id nodeID,
@@ -209,6 +233,7 @@ flo_html_ComparisonStatus compareBoolProps(const flo_html_Node *node1,
                                            const flo_html_TextStore *textStore2,
                                            const bool printDifferences) {
     flo_html_HashStatus hashStatus = HASH_SUCCESS;
+
     flo_html_StringHashSet set1;
     if ((hashStatus = createBoolPropsSet(node1->nodeID, dom1, textStore1,
                                          &set1)) != HASH_SUCCESS) {
@@ -226,19 +251,23 @@ flo_html_ComparisonStatus compareBoolProps(const flo_html_Node *node1,
         return COMPARISON_MEMORY;
     }
 
-    flo_html_ComparisonStatus result =
+    flo_html_HashComparisonStatus result =
         flo_html_equalsStringHashSet(&set1, &set2);
-
-    if (printDifferences && result != COMPARISON_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Nodes contain different bool props\n");
-        printAttributes(node1->tagID, &set1, dom1, textStore1, node2->tagID,
-                        &set2, dom2, textStore2);
+    if (result != HASH_COMPARISON_SUCCESS) {
+        flo_html_destroyStringHashSet(&set1);
+        flo_html_destroyStringHashSet(&set2);
+        if (printDifferences) {
+            FLO_HTML_PRINT_ERROR("Nodes contain different bool props\n");
+            printAttributes(node1->tagID, &set1, dom1, textStore1, node2->tagID,
+                            &set2, dom2, textStore2);
+        }
+        return convertHashComparisonToComparison(result);
     }
 
     flo_html_destroyStringHashSet(&set1);
     flo_html_destroyStringHashSet(&set2);
 
-    return result;
+    return COMPARISON_SUCCESS;
 }
 
 bool tagStringEquals(const flo_html_TagRegistration *tagRegistration1,

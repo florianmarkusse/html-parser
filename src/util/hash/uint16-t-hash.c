@@ -1,8 +1,8 @@
 #include <string.h>
 
-#include "flo/html-parser/hash/hashes.h"
-#include "flo/html-parser/hash/uint16-t-hash.h"
-#include "flo/html-parser/util//memory.h"
+#include "flo/html-parser/util/memory.h"
+#include "flo/html-parser/util/hash/hashes.h"
+#include "flo/html-parser/util/hash/uint16-t-hash.h"
 
 #define MAX_CAPACITY ((1U << 16U) - 1) // Maximum capacity for uint16_t
 

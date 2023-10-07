@@ -1,6 +1,6 @@
 
 #include "flo/html-parser/dom/registry.h"
-#include "flo/html-parser/util//memory.h"
+#include "flo/html-parser/util/memory.h"
 
 flo_html_DomStatus
 flo_html_addTagRegistration(const flo_html_indexID tagID, const bool isPaired,

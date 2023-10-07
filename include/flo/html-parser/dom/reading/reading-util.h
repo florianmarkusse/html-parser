@@ -6,9 +6,9 @@ extern "C" {
 #endif
 
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/node/boolean-property.h"
+#include "flo/html-parser/node/property.h"
 #include "flo/html-parser/type/element/elements-container.h"
-#include "flo/html-parser/type/node/boolean-property.h"
-#include "flo/html-parser/type/node/property.h"
 
 flo_html_Property *flo_html_getProperty(flo_html_node_id nodeID,
                                         flo_html_element_id propKeyID,

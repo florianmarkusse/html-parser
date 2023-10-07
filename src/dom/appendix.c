@@ -10,10 +10,10 @@
 #include "flo/html-parser/dom/query/query.h"
 #include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/parser/parser.h"
-#include "flo/html-parser/type/node/parent-child.h"
-#include "flo/html-parser/util//file/read.h"
-#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/node/parent-child.h"
+#include "flo/html-parser/parser.h"
+#include "flo/html-parser/util/error.h"
+#include "flo/html-parser/util/file/read.h"
 
 #define APPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,         \
                                    appendFunction)                             \

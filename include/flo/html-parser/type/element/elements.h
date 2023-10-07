@@ -10,7 +10,7 @@ extern "C" {
 
 #include "element-status.h"
 #include "elements-container.h"
-#include "flo/html-parser/hash/string-hash.h"
+#include "flo/html-parser/util/hash/string-hash.h"
 
 typedef struct {
     flo_html_ElementsContainer container;

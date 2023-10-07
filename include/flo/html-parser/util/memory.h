@@ -8,7 +8,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/util/error.h"
 
 /**
  * @brief Free a pointer and set it to NULL.

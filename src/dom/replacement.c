@@ -11,11 +11,11 @@
 #include "flo/html-parser/dom/replacement.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"
-#include "flo/html-parser/parser/parser.h"
-#include "flo/html-parser/type/node/node.h"
-#include "flo/html-parser/type/node/parent-child.h"
-#include "flo/html-parser/util//file/read.h"
-#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/node/node.h"
+#include "flo/html-parser/node/parent-child.h"
+#include "flo/html-parser/parser.h"
+#include "flo/html-parser/util/error.h"
+#include "flo/html-parser/util/file/read.h"
 
 #define REPLACE_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,        \
                                     replaceWithFunction)                       \

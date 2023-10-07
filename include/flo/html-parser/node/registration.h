@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_TYPE_NODE_REGISTRATION_H
-#define FLO_HTML_PARSER_TYPE_NODE_REGISTRATION_H
+#ifndef FLO_HTML_PARSER_NODE_REGISTRATION_H
+#define FLO_HTML_PARSER_NODE_REGISTRATION_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +8,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "flo/html-parser/hash/hash-element.h"
+#include "flo/html-parser/util/hash/hash-element.h"
 #include "node.h"
 
 typedef struct {

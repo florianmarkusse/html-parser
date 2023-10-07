@@ -1,11 +1,11 @@
 #include <stdio.h>
 
+#include "flo/html-parser/definitions.h"
 #include "flo/html-parser/dom/deletion.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/definitions.h"
-#include "flo/html-parser/type/node/boolean-property.h"
+#include "flo/html-parser/node/boolean-property.h"
 
 void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {
     flo_html_removeChildren(nodeID, dom);

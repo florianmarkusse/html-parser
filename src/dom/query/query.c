@@ -7,9 +7,9 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"
-#include "flo/html-parser/util//memory.h"
-#include "flo/html-parser/util//text/char.h"
-#include "flo/html-parser/util//text/string.h"
+#include "flo/html-parser/util/memory.h"
+#include "flo/html-parser/util/text/char.h"
+#include "flo/html-parser/util/text/string.h"
 
 /**
  * Css queries are built up of 2 parts:

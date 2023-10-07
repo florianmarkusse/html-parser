@@ -4,10 +4,10 @@
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/modification.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/parser/parser.h"
-#include "flo/html-parser/type/node/tag-registration.h"
-#include "flo/html-parser/util//memory.h"
-#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/node/tag-registration.h"
+#include "flo/html-parser/parser.h"
+#include "flo/html-parser/util/error.h"
+#include "flo/html-parser/util/memory.h"
 
 flo_html_DomStatus flo_html_createNode(flo_html_node_id *nodeID,
                                        const flo_html_NodeType nodeType,

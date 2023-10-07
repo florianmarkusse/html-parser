@@ -1,5 +1,5 @@
 #include "flo/html-parser/dom/reading/reading-util.h"
-#include "flo/html-parser/type/node/boolean-property.h"
+#include "flo/html-parser/node/boolean-property.h"
 
 flo_html_Property *flo_html_getProperty(const flo_html_node_id nodeID,
                                         const flo_html_element_id propKeyID,

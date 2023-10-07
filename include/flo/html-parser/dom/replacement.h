@@ -10,8 +10,8 @@ extern "C" {
 
 #include "flo/html-parser/dom/dom-status.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/type/node/document-node.h"
-#include "flo/html-parser/type/node/node.h"
+#include "flo/html-parser/node/document-node.h"
+#include "flo/html-parser/node/node.h"
 
 /**
  * @brief Replace an HTML element with a DocumentNode using a CSS query.

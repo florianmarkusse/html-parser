@@ -4,7 +4,7 @@
 
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/util//error.h"
+#include "flo/html-parser/util/error.h"
 
 bool flo_html_filterNode(const flo_html_node_id nodeID,
                          const flo_html_FilterType *filters,

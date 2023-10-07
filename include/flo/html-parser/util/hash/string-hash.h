@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_HASH_STRING_HASH_H
-#define FLO_HTML_PARSER_HASH_STRING_HASH_H
+#ifndef FLO_HTML_PARSER_UTIL_HASH_STRING_HASH_H
+#define FLO_HTML_PARSER_UTIL_HASH_STRING_HASH_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,15 +8,15 @@ extern "C" {
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/definitions.h"
 #include "flo/html-parser/type/element/elements-container.h"
-#include "flo/html-parser/util//text/string.h"
+#include "flo/html-parser/util/text/string.h"
+#include "hash-comparison-status.h"
 #include "hash-element.h"
 #include "hash-status.h"
 
 typedef struct {
-    flo_html_indexID flo_html_indexID;
+    flo_html_indexID indexID;
     flo_html_String string;
 } flo_html_HashEntry;
 
@@ -52,7 +52,7 @@ const flo_html_String
 flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
                               const flo_html_HashElement *hashElement);
 
-flo_html_ComparisonStatus
+flo_html_HashComparisonStatus
 flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
                              const flo_html_StringHashSet *set2);
 

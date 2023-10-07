@@ -7,7 +7,7 @@ extern "C" {
 
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-status.h"
-#include "flo/html-parser/type/node/node.h"
+#include "flo/html-parser/node/node.h"
 
 /**
  * @brief Get the type of a DOM node.
@@ -19,7 +19,7 @@ extern "C" {
  * @param[in]   dom             The DOM structure.
  *
  * @return  The type of the node (e.g., NODE_TYPE_DOCUMENT, NODE_TYPE_TEXT,
- * etc.). See @ref /flo/html-parser/type/node/node.h#flo_html_NodeType.
+ * etc.). See @ref /flo/html-parser/node/node.h#flo_html_NodeType.
  */
 flo_html_NodeType flo_html_getflo_html_NodeType(flo_html_node_id nodeID,
                                                 const flo_html_Dom *dom);

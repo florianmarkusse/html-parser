@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_TYPE_NODE_NODE_H
-#define FLO_HTML_PARSER_TYPE_NODE_NODE_H
+#ifndef FLO_HTML_PARSER_NODE_NODE_H
+#define FLO_HTML_PARSER_NODE_NODE_H
 
 #ifdef __cplusplus
 extern "C" {

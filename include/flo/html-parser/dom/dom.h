@@ -6,15 +6,15 @@ extern "C" {
 #endif
 
 #include "dom-status.h"
-#include "flo/html-parser/type/node/boolean-property.h"
-#include "flo/html-parser/type/node/next-node.h"
-#include "flo/html-parser/type/node/node.h"
-#include "flo/html-parser/type/node/parent-child.h"
-#include "flo/html-parser/type/node/property.h"
-#include "flo/html-parser/type/node/registration.h"
-#include "flo/html-parser/type/node/tag-registration.h"
-#include "flo/html-parser/type/node/text-node.h"
-#include "flo/html-parser/util//file/file-status.h"
+#include "flo/html-parser/node/boolean-property.h"
+#include "flo/html-parser/node/next-node.h"
+#include "flo/html-parser/node/node.h"
+#include "flo/html-parser/node/parent-child.h"
+#include "flo/html-parser/node/property.h"
+#include "flo/html-parser/node/registration.h"
+#include "flo/html-parser/node/tag-registration.h"
+#include "flo/html-parser/node/text-node.h"
+#include "flo/html-parser/util/file/file-status.h"
 
 #define FLO_HTML_NODES_PAGE_SIZE (1U << 10U)
 #define FLO_HTML_NODES_PER_PAGE                                                \
