@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/type/element/elements-container.h"
-#include "flo/html-parser/util/memory.h"
 #include "flo/html-parser/util/hash/hashes.h"
 #include "flo/html-parser/util/hash/string-hash.h"
+#include "flo/html-parser/util/memory.h"
 
 #define MAX_PROBES (1U << 4U)
 

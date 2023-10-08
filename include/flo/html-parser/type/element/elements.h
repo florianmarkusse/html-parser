@@ -9,11 +9,11 @@ extern "C" {
 #include <stdint.h>
 
 #include "element-status.h"
-#include "elements-container.h"
+#include "flo/html-parser/type/data/data-page.h"
 #include "flo/html-parser/util/hash/string-hash.h"
 
 typedef struct {
-    flo_html_ElementsContainer container;
+    flo_html_DataPage dataPage;
     flo_html_StringHashSet set;
 } flo_html_StringRegistry;
 
@@ -27,20 +27,15 @@ typedef struct {
     flo_html_StringRegistry boolProps;
     flo_html_StringRegistry propKeys;
     flo_html_StringRegistry propValues;
-    flo_html_ElementsContainer text;
+    flo_html_DataPage text;
 } flo_html_TextStore;
 
 flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore);
 void flo_html_destroyTextStore(flo_html_TextStore *textStore);
 
-flo_html_ElementStatus flo_html_createElement(
-    flo_html_ElementsContainer *container, const char *element,
-    flo_html_element_id *currentElementsLen, flo_html_element_id offset,
-    flo_html_element_id *elementID);
-
-flo_html_ElementStatus
-flo_html_insertElement(flo_html_ElementsContainer *elementsContainer,
-                       const flo_html_String element, char **dataLocation);
+flo_html_ElementStatus flo_html_insertElement(flo_html_DataPage *page,
+                                              const flo_html_String element,
+                                              char **dataLocation);
 
 flo_html_ElementStatus flo_html_elementToIndex(
     flo_html_StringRegistry *stringRegistry, const flo_html_String element,

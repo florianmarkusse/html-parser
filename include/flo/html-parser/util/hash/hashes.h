@@ -1,14 +1,14 @@
-#ifndef FLO_HTML_PARSER_HASH_HASHES_H
-#define FLO_HTML_PARSER_HASH_HASHES_H
+#ifndef FLO_HTML_PARSER_UTIL_HASH_HASHES_H
+#define FLO_HTML_PARSER_UTIL_HASH_HASHES_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 
-#include "flo/html-parser/type/element/elements-container.h"
 #include "flo/html-parser/util/text/string.h"
 
 // http://www.cse.yorku.ca/~oz/hash.html

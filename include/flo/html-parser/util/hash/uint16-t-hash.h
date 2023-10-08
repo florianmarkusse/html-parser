@@ -6,9 +6,10 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 
-#include "flo/html-parser/type/element/elements-container.h"
 #include "hash-status.h"
 
 typedef struct {

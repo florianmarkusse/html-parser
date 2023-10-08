@@ -3,8 +3,7 @@
 #include <string.h>
 
 #include "flo/html-parser/node/node.h"
-#include "flo/html-parser/type/data/data-functions.h"
-#include "flo/html-parser/type/element/elements-container.h"
+#include "flo/html-parser/type/data/data-page.h"
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/text/string.h"
@@ -19,18 +18,19 @@ flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
         return ELEMENT_MEMORY;
     }
 
-    flo_html_ElementStatus result = ELEMENT_SUCCESS;
-    if ((result = initflo_html_ElementsContainer(
-             &stringRegistry->container, pageSize)) != ELEMENT_SUCCESS) {
+    flo_html_DataPageStatus result = DATA_PAGE_SUCCESS;
+    if ((result = flo_html_initDataPage(&stringRegistry->dataPage, pageSize)) !=
+        ELEMENT_SUCCESS) {
         flo_html_destroyStringHashSet(&stringRegistry->set);
+        return ELEMENT_MEMORY;
     }
 
-    return result;
+    return ELEMENT_SUCCESS;
 }
 
 void flo_html_destroyStringRegistry(flo_html_StringRegistry *stringRegistry) {
     flo_html_destroyStringHashSet(&stringRegistry->set);
-    destroyflo_html_ElementsContainer(&stringRegistry->container);
+    flo_html_destroyDataPage(&stringRegistry->dataPage);
 }
 
 // TODO(florian): USE MORE SENSIBLE VALUES THAN FLO_HTML_TOTAL_ELEMENTS
@@ -74,9 +74,10 @@ flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore) {
         result = currentStatus;
     }
 
-    if ((currentStatus = initflo_html_ElementsContainer(
-                             &textStore->text, FLO_HTML_TEXT_PAGE_SIZE) !=
-                         ELEMENT_SUCCESS)) {
+    // TODO: this status is wrong, but will be refactored refardless.
+    if ((currentStatus =
+             flo_html_initDataPage(&textStore->text, FLO_HTML_TEXT_PAGE_SIZE) !=
+             DATA_PAGE_SUCCESS)) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(
             flo_html_elementStatusToString(currentStatus),
             "Failed to initialize text elements container!\n");
@@ -95,7 +96,7 @@ void flo_html_destroyTextStore(flo_html_TextStore *textStore) {
     flo_html_destroyStringRegistry(&textStore->boolProps);
     flo_html_destroyStringRegistry(&textStore->propKeys);
     flo_html_destroyStringRegistry(&textStore->propValues);
-    destroyflo_html_ElementsContainer(&textStore->text);
+    flo_html_destroyDataPage(&textStore->text);
 }
 
 flo_html_ElementStatus elementSizeCheck(unsigned char *buffer,
@@ -125,7 +126,7 @@ flo_html_ElementStatus createNewElement(flo_html_StringRegistry *stringRegistry,
                                         flo_html_indexID *flo_html_indexID) {
     // insert element into the has table.
     flo_html_DataPageStatus insertStatus = flo_html_insertIntoPageWithHash(
-        element, FLO_HTML_TOTAL_PAGES, stringRegistry, hashElement,
+        element, &stringRegistry->dataPage, &stringRegistry->set, hashElement,
         flo_html_indexID);
     if (insertStatus != DATA_PAGE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
@@ -144,9 +145,9 @@ flo_html_ElementStatus createNewElement(flo_html_StringRegistry *stringRegistry,
 flo_html_ElementStatus flo_html_elementToIndex(
     flo_html_StringRegistry *stringRegistry, const flo_html_String element,
     flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID) {
-    unsigned char buffer[stringRegistry->container.pageSize];
+    unsigned char buffer[stringRegistry->dataPage.spaceLeft];
     const flo_html_ElementStatus sizeCheck =
-        elementSizeCheck(buffer, stringRegistry->container.pageSize, element);
+        elementSizeCheck(buffer, stringRegistry->dataPage.spaceLeft, element);
     if (sizeCheck != ELEMENT_SUCCESS) {
         return sizeCheck;
     }
@@ -160,19 +161,18 @@ flo_html_ElementStatus flo_html_elementToIndex(
                             flo_html_indexID);
 }
 
-flo_html_ElementStatus
-flo_html_insertElement(flo_html_ElementsContainer *elementsContainer,
-                       const flo_html_String element, char **dataLocation) {
-    unsigned char buffer[elementsContainer->pageSize];
+flo_html_ElementStatus flo_html_insertElement(flo_html_DataPage *page,
+                                              const flo_html_String element,
+                                              char **dataLocation) {
+    unsigned char buffer[page->spaceLeft];
     const flo_html_ElementStatus sizeCheck =
-        elementSizeCheck(buffer, elementsContainer->pageSize, element);
+        elementSizeCheck(buffer, page->spaceLeft, element);
     if (sizeCheck != ELEMENT_SUCCESS) {
         return sizeCheck;
     }
 
     const flo_html_DataPageStatus dataPageStatus =
-        flo_html_insertIntoSuitablePage(element, FLO_HTML_TOTAL_PAGES,
-                                        elementsContainer, dataLocation);
+        flo_html_insertIntoPage(element, page, dataLocation);
     if (dataPageStatus != DATA_PAGE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_ONLY(
             flo_html_dataPageStatusToString(dataPageStatus),

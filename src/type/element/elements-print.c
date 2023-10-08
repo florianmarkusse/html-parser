@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 
 #include "flo/html-parser/type/element/elements-print.h"
@@ -12,25 +13,16 @@ void printElements(const ptrdiff_t currentLen,
     printf("\n\n");
 }
 
-void printElementPages(const flo_html_ElementsContainer *container) {
-    printf("element pages...\n");
-    printf("%-15s: %zu\n", "pages length", container->pageLen);
-    for (ptrdiff_t i = 0; i < container->pageLen; i++) {
-        printf("%-15s: %lu\n", "space left", container->pages[i].spaceLeft);
+void printPage(const flo_html_DataPage *page) {
+    printf("data page...\n");
 
-        int printedChars = 0;
-        char *copy = container->pages[i].start;
-        while (printedChars < container->pageSize) {
-            if (*copy == '\0') {
-                printf("~");
-            } else {
-                printf("%c", *copy);
-            }
-            copy++;
-            printedChars++;
-        }
-        printf("\n");
+    uintptr_t spaceUsed = page->freeSpace - page->start;
+
+    for (ptrdiff_t i = 0; i < spaceUsed; i++) {
+        printf("%c", ((unsigned char *)page->start)[i]);
     }
+    printf("\n");
+    printf("%-15s: %lu\n", "space left", page->spaceLeft);
 
     printf("\n\n");
 }
@@ -47,7 +39,7 @@ void printflo_html_StringRegistryStatus(
         printf("%.*s\n", FLO_HTML_S_P(string));
     }
 
-    printElementPages(&newElements->container);
+    printPage(&newElements->dataPage);
 }
 
 void flo_html_printPropertyStatus(const flo_html_TextStore *textStore) {
@@ -65,7 +57,7 @@ void flo_html_printBoolPropStatus(const flo_html_TextStore *textStore) {
 
 void flo_html_printTextStatus(const flo_html_TextStore *textStore) {
     printf("printing text status...\n\n");
-    printElementPages(&textStore->text);
+    printPage(&textStore->text);
 }
 
 void flo_html_printTagStatus(const flo_html_TextStore *textStore) {
