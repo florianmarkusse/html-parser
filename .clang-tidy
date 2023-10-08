@@ -15,10 +15,13 @@ Checks:
     bugprone-sizeof-expression,
     bugprone-branch-clone,
     llvm-header-guard,
+    -clang-diagnostic-gnu-alignof-expression,
+    -statement-expression,
     -altera-struct-pack-align,
     -clang-analyzer-security.insecureAPI.*,
     -misc-no-recursion,
     -llvmlibc-restrict-system-libc-headers'
+
 CheckOptions:
   - key: indentation.TabWidth
     value: '4'

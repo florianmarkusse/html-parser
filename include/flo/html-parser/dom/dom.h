@@ -14,14 +14,16 @@ extern "C" {
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
 #include "flo/html-parser/util/file/file-status.h"
+#include "flo/html-parser/util/memory.h"
+
+#define FLO_HTML_MAX_TAG_REGISTRATIONS (1U << 10U)
+#define FLO_HTML_MAX_PROP_REGISTRATIONS (1U << 14U)
+
+#define FLO_HTML_MAX_NODES (1U << 12U)
 
 #define FLO_HTML_NODES_PAGE_SIZE (1U << 10U)
 #define FLO_HTML_NODES_PER_PAGE                                                \
     (FLO_HTML_NODES_PAGE_SIZE / sizeof(flo_html_Node))
-
-#define FLO_HTML_TAG_REGISTRY_PAGE_SIZE (1U << 8U)
-#define FLO_HTML_TAG_REGISTRATIONS_PER_PAGE                                    \
-    (FLO_HTML_TAG_REGISTRY_PAGE_SIZE / sizeof(flo_html_TagRegistration))
 
 #define FLO_HTML_PROP_REGISTRY_PAGE_SIZE (1U << 8U)
 #define FLO_HTML_PROP_REGISTRATIONS_PER_PAGE                                   \
@@ -106,7 +108,8 @@ typedef struct {
  */
 flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
                                       flo_html_Dom *dom,
-                                      flo_html_TextStore *textStore);
+                                      flo_html_TextStore *textStore,
+                                      flo_html_Arena *perm);
 
 /**
  * @brief Create a DOM structure from an HTML file.
@@ -125,7 +128,8 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
  */
 flo_html_DomStatus
 flo_html_createDomFromFile(const flo_html_String fileLocation,
-                           flo_html_Dom *dom, flo_html_TextStore *textStore);
+                           flo_html_Dom *dom, flo_html_TextStore *textStore,
+                           flo_html_Arena *perm);
 
 /**
  * @brief Destroy a DOM structure and release associated memory.

@@ -7,17 +7,15 @@
 
 #define MAX_PROBES (1U << 4U)
 
-flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
-                                               const ptrdiff_t capacity) {
+void flo_html_initStringHashSet(flo_html_StringHashSet *set,
+                                const ptrdiff_t capacity,
+                                flo_html_Arena *perm) {
+    flo_html_String *thing = FLO_HTML_NEW(perm, thing);
+
     set->arrayLen = capacity;
     set->entries = 0;
-    set->array = calloc(capacity, sizeof(flo_html_HashEntry));
-    if (set->array == NULL) {
-        FLO_HTML_PRINT_ERROR(
-            "Could not allocate memory for string hash set!\n");
-        return HASH_ERROR_MEMORY;
-    }
-    return HASH_SUCCESS;
+    set->array =
+        FLO_HTML_NEW(perm, flo_html_HashEntry, capacity, FLO_HTML_ZERO_MEMORY);
 }
 
 // Sets the flo_html_indexID that is used in the DOM, starting at 1 because then

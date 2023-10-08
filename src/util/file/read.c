@@ -6,7 +6,8 @@
 #include "flo/html-parser/util/memory.h"
 
 flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
-                                      flo_html_String *buffer) {
+                                      flo_html_String *buffer,
+                                      flo_html_Arena *perm) {
     // casting to char* here because a srcpath should not contain any weird
     // chars.
     FILE *srcFile = fopen((char *)srcPath.buf, "rbe");
@@ -19,7 +20,8 @@ flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
     ptrdiff_t dataLen = ftell(srcFile);
     rewind(srcFile);
 
-    (*buffer).buf = (unsigned char *)malloc(dataLen + 1);
+    (*buffer).buf =
+        FLO_HTML_NEW(perm, unsigned char, dataLen, FLO_HTML_NULL_ON_FAIL);
     if ((*buffer).buf == NULL) {
         FLO_HTML_PRINT_ERROR("Failed to allocate memory.\n");
         fclose(srcFile);
@@ -34,7 +36,6 @@ flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
         return FILE_CANT_READ;
     }
 
-    (*buffer).buf[dataLen] = '\0';
     (*buffer).len = dataLen;
 
     fclose(srcFile);

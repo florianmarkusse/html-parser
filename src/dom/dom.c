@@ -4,19 +4,23 @@
 #include "flo/html-parser/util/memory.h"
 
 void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
-                                const flo_html_HashElement *initRegistration) {
-    basicRegistry->hashes = malloc(FLO_HTML_PROP_REGISTRY_PAGE_SIZE);
+                                const flo_html_HashElement *initRegistration,
+                                flo_html_Arena *perm) {
+    basicRegistry->hashes = FLO_HTML_NEW(perm, flo_html_HashElement,
+                                         FLO_HTML_MAX_PROP_REGISTRATIONS);
     basicRegistry->hashes[0] = *initRegistration;
     basicRegistry->len =
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
-    basicRegistry->cap = FLO_HTML_PROP_REGISTRATIONS_PER_PAGE;
+    basicRegistry->cap = FLO_HTML_MAX_PROP_REGISTRATIONS;
 }
 
 flo_html_DomStatus
 flo_html_createDomFromFile(const flo_html_String fileLocation,
-                           flo_html_Dom *dom, flo_html_TextStore *textStore) {
+                           flo_html_Dom *dom, flo_html_TextStore *textStore,
+                           flo_html_Arena *perm) {
     flo_html_String content;
-    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &content);
+    flo_html_FileStatus fileStatus =
+        flo_html_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
@@ -25,7 +29,7 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
     }
 
     flo_html_DomStatus documentStatus =
-        flo_html_createDom(content, dom, textStore);
+        flo_html_createDom(content, dom, textStore, perm);
     if (documentStatus != DOM_SUCCESS) {
         FLO_HTML_FREE_TO_NULL(content.buf);
         FLO_HTML_ERROR_WITH_CODE_FORMAT(
@@ -40,23 +44,24 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
 
 flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
                                       flo_html_Dom *dom,
-                                      flo_html_TextStore *textStore) {
+                                      flo_html_TextStore *textStore,
+                                      flo_html_Arena *perm) {
     dom->firstNodeID = 0;
 
     flo_html_TagRegistration initTag = {0};
     flo_html_HashElement initHash = {0};
 
-    dom->tagRegistry = malloc(FLO_HTML_TAG_REGISTRY_PAGE_SIZE);
+    dom->tagRegistry = FLO_HTML_NEW(perm, flo_html_TagRegistration, 1U << 10U);
     dom->tagRegistry[0] = initTag;
     dom->tagRegistryLen =
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
-    dom->tagRegistryCap = FLO_HTML_TAG_REGISTRATIONS_PER_PAGE;
+    dom->tagRegistryCap = FLO_HTML_MAX_TAG_REGISTRATIONS;
 
-    initflo_html_BasicRegistry(&dom->boolPropRegistry, &initHash);
-    initflo_html_BasicRegistry(&dom->propKeyRegistry, &initHash);
-    initflo_html_BasicRegistry(&dom->propValueRegistry, &initHash);
+    initflo_html_BasicRegistry(&dom->boolPropRegistry, &initHash, perm);
+    initflo_html_BasicRegistry(&dom->propKeyRegistry, &initHash, perm);
+    initflo_html_BasicRegistry(&dom->propValueRegistry, &initHash, perm);
 
-    dom->nodes = malloc(FLO_HTML_NODES_PAGE_SIZE);
+    dom->nodes = FLO_HTML_NEW(perm, flo_html_Node, FLO_HTML_MAX_NODES);
     flo_html_Node errorNode;
     errorNode.nodeID = 0;
     errorNode.nodeType = NODE_TYPE_ERROR;
@@ -71,7 +76,7 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
 
     dom->nodeLen = 2; // We start at 2 because 0 is used as error id, and
                       // 1 is used as the root node.
-    dom->nodeCap = FLO_HTML_NODES_PER_PAGE;
+    dom->nodeCap = FLO_HTML_MAX_NODES;
 
     dom->parentFirstChilds = malloc(FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE);
     dom->parentFirstChildLen = 0;

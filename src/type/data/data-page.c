@@ -4,17 +4,11 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/memory.h"
 
-flo_html_DataPageStatus flo_html_initDataPage(flo_html_DataPage *dataPage,
-                                              const ptrdiff_t pageSize) {
-    dataPage->start = malloc(pageSize);
-    if (dataPage->start == NULL) {
-        FLO_HTML_PRINT_ERROR("Failed to allocate memory for new tag page.\n");
-        return DATA_PAGE_ERROR_MEMORY;
-    }
+void flo_html_initDataPage(flo_html_DataPage *dataPage,
+                           const ptrdiff_t pageSize, flo_html_Arena *perm) {
+    dataPage->start = FLO_HTML_NEW(perm, char, pageSize);
     dataPage->freeSpace = dataPage->start;
     dataPage->spaceLeft = pageSize;
-
-    return DATA_PAGE_SUCCESS;
 }
 
 void flo_html_destroyDataPage(flo_html_DataPage *dataPage) {

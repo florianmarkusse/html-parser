@@ -15,6 +15,7 @@ extern "C" {
 #include "flo/html-parser/util/text/string.h"
 
 #define FLO_HTML_EXPONENT 16U
+#define FLO_HTML_MAX_ELEMENTS_PER_REGISTRY 1U << 13U
 #define FLO_HTML_TOTAL_ELEMENTS (1U << FLO_HTML_EXPONENT)
 #define FLO_HTML_POSSIBLE_ELEMENTS (1U << FLO_HTML_EXPONENT)
 
@@ -30,8 +31,8 @@ typedef struct {
     flo_html_page_space spaceLeft;
 } flo_html_DataPage;
 
-flo_html_DataPageStatus flo_html_initDataPage(flo_html_DataPage *dataPage,
-                                              const ptrdiff_t pageSize);
+void flo_html_initDataPage(flo_html_DataPage *dataPage,
+                           const ptrdiff_t pageSize, flo_html_Arena *perm);
 
 void flo_html_destroyDataPage(flo_html_DataPage *dataPage);
 

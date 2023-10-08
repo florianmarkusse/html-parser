@@ -8,24 +8,12 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/text/string.h"
 
-flo_html_ElementStatus
-flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
-                            const ptrdiff_t stringsCapacity,
-                            const ptrdiff_t pageSize) {
-    if (flo_html_initStringHashSet(&stringRegistry->set, stringsCapacity) !=
-        HASH_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failure initing hash set!\n");
-        return ELEMENT_MEMORY;
-    }
-
-    flo_html_DataPageStatus result = DATA_PAGE_SUCCESS;
-    if ((result = flo_html_initDataPage(&stringRegistry->dataPage, pageSize)) !=
-        ELEMENT_SUCCESS) {
-        flo_html_destroyStringHashSet(&stringRegistry->set);
-        return ELEMENT_MEMORY;
-    }
-
-    return ELEMENT_SUCCESS;
+void flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
+                                 const ptrdiff_t stringsCapacity,
+                                 const ptrdiff_t pageSize,
+                                 flo_html_Arena *perm) {
+    flo_html_initStringHashSet(&stringRegistry->set, stringsCapacity, perm);
+    flo_html_initDataPage(&stringRegistry->dataPage, pageSize, perm);
 }
 
 void flo_html_destroyStringRegistry(flo_html_StringRegistry *stringRegistry) {
@@ -34,61 +22,22 @@ void flo_html_destroyStringRegistry(flo_html_StringRegistry *stringRegistry) {
 }
 
 // TODO(florian): USE MORE SENSIBLE VALUES THAN FLO_HTML_TOTAL_ELEMENTS
-flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore) {
-    flo_html_ElementStatus result = ELEMENT_SUCCESS;
-    flo_html_ElementStatus currentStatus = ELEMENT_SUCCESS;
+void flo_html_createTextStore(flo_html_TextStore *textStore,
+                              flo_html_Arena *perm) {
+    flo_html_initStringRegistry(&textStore->tags,
+                                FLO_HTML_MAX_ELEMENTS_PER_REGISTRY,
+                                FLO_HTML_TAGS_PAGE_SIZE, perm);
+    flo_html_initStringRegistry(&textStore->boolProps,
+                                FLO_HTML_MAX_ELEMENTS_PER_REGISTRY,
+                                FLO_HTML_BOOL_PROPS_PAGE_SIZE, perm);
+    flo_html_initStringRegistry(&textStore->propKeys,
+                                FLO_HTML_MAX_ELEMENTS_PER_REGISTRY,
+                                FLO_HTML_PROP_KEYS_PAGE_SIZE, perm);
+    flo_html_initStringRegistry(&textStore->propValues,
+                                FLO_HTML_MAX_ELEMENTS_PER_REGISTRY,
+                                FLO_HTML_PROP_VALUES_PAGE_SIZE, perm);
 
-    if ((currentStatus = flo_html_initStringRegistry(
-             &textStore->tags, FLO_HTML_TOTAL_ELEMENTS,
-             FLO_HTML_TAGS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(currentStatus),
-            "Failed to initialize tags string registry!\n");
-        result = currentStatus;
-    }
-
-    if ((currentStatus = flo_html_initStringRegistry(
-             &textStore->boolProps, FLO_HTML_TOTAL_ELEMENTS,
-             FLO_HTML_BOOL_PROPS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(currentStatus),
-            "Failed to initialize bool props string registry!\n");
-        result = currentStatus;
-    }
-
-    if ((currentStatus = flo_html_initStringRegistry(
-             &textStore->propKeys, FLO_HTML_TOTAL_ELEMENTS,
-             FLO_HTML_PROP_KEYS_PAGE_SIZE)) != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(currentStatus),
-            "Failed to initialize prop keys string registry!\n");
-        result = currentStatus;
-    }
-
-    if ((currentStatus = flo_html_initStringRegistry(
-             &textStore->propValues, FLO_HTML_TOTAL_ELEMENTS,
-             FLO_HTML_PROP_VALUES_PAGE_SIZE)) != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(currentStatus),
-            "Failed to initialize prop values string registry!\n");
-        result = currentStatus;
-    }
-
-    // TODO: this status is wrong, but will be refactored refardless.
-    if ((currentStatus =
-             flo_html_initDataPage(&textStore->text, FLO_HTML_TEXT_PAGE_SIZE) !=
-             DATA_PAGE_SUCCESS)) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(currentStatus),
-            "Failed to initialize text elements container!\n");
-        result = currentStatus;
-    }
-
-    if (result != ELEMENT_SUCCESS) {
-        flo_html_destroyTextStore(textStore);
-    }
-
-    return result;
+    flo_html_initDataPage(&textStore->text, FLO_HTML_TEXT_PAGE_SIZE, perm);
 }
 
 void flo_html_destroyTextStore(flo_html_TextStore *textStore) {

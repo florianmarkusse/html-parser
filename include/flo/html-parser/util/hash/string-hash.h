@@ -1,6 +1,7 @@
 #ifndef FLO_HTML_PARSER_UTIL_HASH_STRING_HASH_H
 #define FLO_HTML_PARSER_UTIL_HASH_STRING_HASH_H
 
+#include "flo/html-parser/util/memory.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -29,8 +30,8 @@ typedef struct {
     ptrdiff_t entries;
 } flo_html_StringHashSet;
 
-flo_html_HashStatus flo_html_initStringHashSet(flo_html_StringHashSet *set,
-                                               ptrdiff_t capacity);
+void flo_html_initStringHashSet(flo_html_StringHashSet *set, ptrdiff_t capacity,
+                                flo_html_Arena *perm);
 
 flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                                  const flo_html_String string);

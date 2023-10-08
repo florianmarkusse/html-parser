@@ -11,15 +11,16 @@ extern "C" {
 #include "element-status.h"
 #include "flo/html-parser/type/data/data-page.h"
 #include "flo/html-parser/util/hash/string-hash.h"
+#include "flo/html-parser/util/memory.h"
 
 typedef struct {
     flo_html_DataPage dataPage;
     flo_html_StringHashSet set;
 } flo_html_StringRegistry;
 
-flo_html_ElementStatus
-flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
-                            ptrdiff_t stringsCapacity, ptrdiff_t pageSize);
+void flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
+                                 ptrdiff_t stringsCapacity, ptrdiff_t pageSize,
+                                 flo_html_Arena *perm);
 void flo_html_destroyStringRegistry(flo_html_StringRegistry *stringRegistry);
 
 typedef struct {
@@ -30,7 +31,8 @@ typedef struct {
     flo_html_DataPage text;
 } flo_html_TextStore;
 
-flo_html_ElementStatus flo_html_createTextStore(flo_html_TextStore *textStore);
+void flo_html_createTextStore(flo_html_TextStore *textStore,
+                              flo_html_Arena *perm);
 void flo_html_destroyTextStore(flo_html_TextStore *textStore);
 
 flo_html_ElementStatus flo_html_insertElement(flo_html_DataPage *page,
