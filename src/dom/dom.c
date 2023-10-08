@@ -4,9 +4,9 @@
 #include "flo/html-parser/util/memory.h"
 
 void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
-                                const flo_html_Registration *initRegistration) {
-    basicRegistry->registry = malloc(FLO_HTML_PROP_REGISTRY_PAGE_SIZE);
-    basicRegistry->registry[0] = *initRegistration;
+                                const flo_html_HashElement *initRegistration) {
+    basicRegistry->hashes = malloc(FLO_HTML_PROP_REGISTRY_PAGE_SIZE);
+    basicRegistry->hashes[0] = *initRegistration;
     basicRegistry->len =
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
     basicRegistry->cap = FLO_HTML_PROP_REGISTRATIONS_PER_PAGE;
@@ -44,7 +44,7 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
     dom->firstNodeID = 0;
 
     flo_html_TagRegistration initTag = {0};
-    flo_html_Registration initRegistration = {0};
+    flo_html_HashElement initHash = {0};
 
     dom->tagRegistry = malloc(FLO_HTML_TAG_REGISTRY_PAGE_SIZE);
     dom->tagRegistry[0] = initTag;
@@ -52,9 +52,9 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
     dom->tagRegistryCap = FLO_HTML_TAG_REGISTRATIONS_PER_PAGE;
 
-    initflo_html_BasicRegistry(&dom->boolPropRegistry, &initRegistration);
-    initflo_html_BasicRegistry(&dom->propKeyRegistry, &initRegistration);
-    initflo_html_BasicRegistry(&dom->propValueRegistry, &initRegistration);
+    initflo_html_BasicRegistry(&dom->boolPropRegistry, &initHash);
+    initflo_html_BasicRegistry(&dom->propKeyRegistry, &initHash);
+    initflo_html_BasicRegistry(&dom->propValueRegistry, &initHash);
 
     dom->nodes = malloc(FLO_HTML_NODES_PAGE_SIZE);
     flo_html_Node errorNode;
@@ -94,9 +94,9 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
     dom->propsCap = PROPERTIES_PER_PAGE;
 
     if (dom->nodes == NULL || dom->tagRegistry == NULL ||
-        dom->boolPropRegistry.registry == NULL ||
-        dom->propKeyRegistry.registry == NULL ||
-        dom->propValueRegistry.registry == NULL ||
+        dom->boolPropRegistry.hashes == NULL ||
+        dom->propKeyRegistry.hashes == NULL ||
+        dom->propValueRegistry.hashes == NULL ||
         dom->parentFirstChilds == NULL || dom->parentChilds == NULL ||
         dom->nextNodes == NULL || dom->boolProps == NULL ||
         dom->props == NULL) {
@@ -116,9 +116,9 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
 void flo_html_destroyDom(flo_html_Dom *dom) {
     FLO_HTML_FREE_TO_NULL(dom->nodes);
     FLO_HTML_FREE_TO_NULL(dom->tagRegistry);
-    FLO_HTML_FREE_TO_NULL(dom->boolPropRegistry.registry);
-    FLO_HTML_FREE_TO_NULL(dom->propKeyRegistry.registry);
-    FLO_HTML_FREE_TO_NULL(dom->propValueRegistry.registry);
+    FLO_HTML_FREE_TO_NULL(dom->boolPropRegistry.hashes);
+    FLO_HTML_FREE_TO_NULL(dom->propKeyRegistry.hashes);
+    FLO_HTML_FREE_TO_NULL(dom->propValueRegistry.hashes);
     FLO_HTML_FREE_TO_NULL(dom->parentFirstChilds);
     FLO_HTML_FREE_TO_NULL(dom->parentChilds);
     FLO_HTML_FREE_TO_NULL(dom->nextNodes);

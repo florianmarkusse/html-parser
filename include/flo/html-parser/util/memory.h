@@ -1,14 +1,79 @@
-#ifndef FLO_HTML_PARSER_UTILS_MEMORY_H
-#define FLO_HTML_PARSER_UTILS_MEMORY_H
+#ifndef FLO_HTML_PARSER_UTIL_MEMORY_H
+#define FLO_HTML_PARSER_UTIL_MEMORY_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
 
+#include "flo/html-parser/util/assert.h"
 #include "flo/html-parser/util/error.h"
+
+typedef struct {
+    char *beg;
+    char *end;
+    void **jmp_buf;
+} flo_html_Arena;
+
+__attribute__((unused)) static inline flo_html_Arena
+flo_html_newArena(ptrdiff_t cap) {
+    flo_html_Arena a;
+    a.beg = mmap(NULL, cap, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
+                 -1, 0);
+    if (a.beg == MAP_FAILED) {
+        a.beg = NULL;
+        a.end = NULL;
+    }
+    a.end = a.beg ? a.beg + cap : 0;
+    return a;
+}
+
+#define FLO_HTML_ZERO_MEMORY 0x01
+#define FLO_HTML_NULL_ON_FAIL 0x02
+
+__attribute((unused, malloc, alloc_size(2, 4),
+             alloc_align(3))) static inline void *
+flo_html_alloc(flo_html_Arena *a, ptrdiff_t size, ptrdiff_t align,
+               ptrdiff_t count, unsigned char flags) {
+    FLO_HTML_ASSERT(align > 0);
+    FLO_HTML_ASSERT((align & (align - 1)) == 0);
+
+    ptrdiff_t total = size * count;
+
+    char *newEnd = a->end;
+    newEnd -= total;
+    newEnd -= (uintptr_t)a->end & !(align - 1); // fix alignment.
+
+    if (newEnd < a->beg) {
+        if (flags & FLO_HTML_NULL_ON_FAIL) {
+            return NULL;
+        }
+        __builtin_longjmp(a->jmp_buf, 1);
+    }
+
+    a->end = newEnd;
+
+    return flags & FLO_HTML_ZERO_MEMORY ? memset(a->end, 0, total) : a->end;
+}
+
+#define FLO_HTML_SIZEOF(x) (ptrdiff_t) FLO_HTML_SIZEOF(x)
+#define FLO_HTML_COUNTOF(a) (FLO_HTML_SIZEOF(a) / FLO_HTML_SIZEOF(*(a)))
+#define FLO_HTML_LENGTHOF(s) (FLO_HTML_COUNTOF(s) - 1)
+
+#define FLO_HTML_NEW(...)                                                      \
+    FLO_HTML_NEWx(__VA_ARGS__, FLO_HTML_NEW4, FLO_HTML_NEW3,                   \
+                  FLO_HTML_NEW2)(__VA_ARGS__)
+#define FLO_HTML_NEWx(a, b, c, d, e, ...) e
+#define FLO_HTML_NEW2(a, t) (t *)flo_html_alloc(a, sizeof(t), alignof(t), 1, 0)
+#define FLO_HTML_NEW3(a, t, n)                                                 \
+    (t *)flo_html_alloc(a, sizeof(t), alignof(t), n, 0)
+#define FLO_HTML_NEW4(a, t, n, f)                                              \
+    (t *)flo_html_alloc(a, sizeof(t), alignof(t), n, f)
 
 /**
  * @brief Free a pointer and set it to NULL.

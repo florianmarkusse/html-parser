@@ -8,8 +8,7 @@ extern "C" {
 #include "dom.h"
 
 flo_html_DomStatus
-flo_html_addRegistration(flo_html_indexID flo_html_indexID,
-                         const flo_html_HashElement *hashElement,
+flo_html_addRegistration(const flo_html_HashElement *hashElement,
                          flo_html_BasicRegistry *basicRegistry);
 flo_html_DomStatus
 flo_html_addTagRegistration(flo_html_indexID tagID, bool isPaired,
@@ -17,18 +16,15 @@ flo_html_addTagRegistration(flo_html_indexID tagID, bool isPaired,
                             flo_html_Dom *dom);
 
 flo_html_DomStatus
-flo_html_addBoolPropRegistration(flo_html_indexID boolPropID,
-                                 const flo_html_HashElement *hashElement,
+flo_html_addBoolPropRegistration(const flo_html_HashElement *hashElement,
                                  flo_html_Dom *dom);
 
 flo_html_DomStatus
-flo_html_addPropKeyRegistration(flo_html_indexID propKeyID,
-                                const flo_html_HashElement *hashElement,
+flo_html_addPropKeyRegistration(const flo_html_HashElement *hashElement,
                                 flo_html_Dom *dom);
 
 flo_html_DomStatus
-flo_html_addPropValueRegistration(flo_html_indexID propValueID,
-                                  const flo_html_HashElement *hashElement,
+flo_html_addPropValueRegistration(const flo_html_HashElement *hashElement,
                                   flo_html_Dom *dom);
 
 #ifdef __cplusplus

@@ -39,17 +39,15 @@ getCreatedPropIDFromString(const PropertyType propertyType,
 
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
-            domStatus =
-                flo_html_addBoolPropRegistration(*propID, &hashKey, dom);
+            domStatus = flo_html_addBoolPropRegistration(&hashKey, dom);
             break;
         }
         case PROPERTY_TYPE_KEY: {
-            domStatus = flo_html_addPropKeyRegistration(*propID, &hashKey, dom);
+            domStatus = flo_html_addPropKeyRegistration(&hashKey, dom);
             break;
         }
         case PROPERTY_TYPE_VALUE: {
-            domStatus =
-                flo_html_addPropValueRegistration(*propID, &hashKey, dom);
+            domStatus = flo_html_addPropValueRegistration(&hashKey, dom);
             break;
         }
         }

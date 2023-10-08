@@ -149,29 +149,24 @@ void flo_html_getTagRegistration(flo_html_indexID tagID,
 const flo_html_String
 flo_html_getBoolProp(const flo_html_indexID boolPropID, const flo_html_Dom *dom,
                      const flo_html_TextStore *textStore) {
-    flo_html_Registration registration =
-        dom->boolPropRegistry.registry[boolPropID];
-    return flo_html_getStringFromHashSet(&textStore->boolProps.set,
-                                         &registration.hashElement);
+    return flo_html_getStringFromHashSet(
+        &textStore->boolProps.set, &dom->boolPropRegistry.hashes[boolPropID]);
 }
 
 const flo_html_String flo_html_getPropKey(const flo_html_indexID propKeyID,
                                           const flo_html_Dom *dom,
                                           const flo_html_TextStore *textStore) {
-    flo_html_Registration registration =
-        dom->propKeyRegistry.registry[propKeyID];
-    return flo_html_getStringFromHashSet(&textStore->propKeys.set,
-                                         &registration.hashElement);
+    return flo_html_getStringFromHashSet(
+        &textStore->propKeys.set, &dom->propKeyRegistry.hashes[propKeyID]);
 }
 
 const flo_html_String
 flo_html_getPropValue(const flo_html_indexID propValueID,
                       const flo_html_Dom *dom,
                       const flo_html_TextStore *textStore) {
-    flo_html_Registration registration =
-        dom->propValueRegistry.registry[propValueID];
-    return flo_html_getStringFromHashSet(&textStore->propValues.set,
-                                         &registration.hashElement);
+    return flo_html_getStringFromHashSet(
+        &textStore->propValues.set,
+        &dom->propValueRegistry.hashes[propValueID]);
 }
 
 flo_html_MergeResult flo_html_tryMerge(flo_html_Node *possibleMergeNode,

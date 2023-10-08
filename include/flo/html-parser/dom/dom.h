@@ -11,7 +11,6 @@ extern "C" {
 #include "flo/html-parser/node/node.h"
 #include "flo/html-parser/node/parent-child.h"
 #include "flo/html-parser/node/property.h"
-#include "flo/html-parser/node/registration.h"
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
 #include "flo/html-parser/util/file/file-status.h"
@@ -26,7 +25,7 @@ extern "C" {
 
 #define FLO_HTML_PROP_REGISTRY_PAGE_SIZE (1U << 8U)
 #define FLO_HTML_PROP_REGISTRATIONS_PER_PAGE                                   \
-    (FLO_HTML_PROP_REGISTRY_PAGE_SIZE / sizeof(flo_html_Registration))
+    (FLO_HTML_PROP_REGISTRY_PAGE_SIZE / sizeof(flo_html_HashElement))
 
 #define FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
 #define FLO_HTML_PARENT_FIRST_CHILDS_PER_PAGE                                  \
@@ -48,7 +47,7 @@ extern "C" {
 #define PROPERTIES_PER_PAGE (PROPERTIES_PAGE_SIZE / sizeof(flo_html_Property))
 
 typedef struct {
-    flo_html_Registration *registry;
+    flo_html_HashElement *hashes;
     ptrdiff_t len;
     ptrdiff_t cap;
 } flo_html_BasicRegistry;

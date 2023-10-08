@@ -109,12 +109,11 @@ void printflo_html_BasicRegistry(const flo_html_String registryName,
            FLO_HTML_S_P(registryName));
     printf("total number of nodes: %zu\n", basicRegistry->len);
     for (ptrdiff_t i = 0; i < basicRegistry->len; i++) {
-        flo_html_Registration registration = basicRegistry->registry[i];
+        flo_html_HashElement hashElement = basicRegistry->hashes[i];
         const flo_html_String value =
-            flo_html_getStringFromHashSet(set, &registration.hashElement);
+            flo_html_getStringFromHashSet(set, &hashElement);
         printf("ID: %zu value: %-20.*s hash: %zu offset: %u\n", i,
-               FLO_HTML_S_P(value), registration.hashElement.hash,
-               registration.hashElement.offset);
+               FLO_HTML_S_P(value), hashElement.hash, hashElement.offset);
     }
     printf("\n");
 }
