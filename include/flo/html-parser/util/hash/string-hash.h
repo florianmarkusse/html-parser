@@ -16,19 +16,29 @@ extern "C" {
 #include "hash-status.h"
 
 typedef struct {
-    flo_html_indexID indexID;
+    flo_html_index_id indexID;
     flo_html_String string;
-} flo_html_HashEntry;
+} flo_html_StringHashEntry;
 
 /**
  * Hashing with linear probing for natural values > 0 up until ptrdiff_t max
  * size.
  */
 typedef struct {
-    flo_html_HashEntry *array;
+    flo_html_StringHashEntry *array;
     ptrdiff_t arrayLen;
     ptrdiff_t entries;
 } flo_html_StringHashSet;
+
+typedef struct {
+    flo_html_HashElement hashElement;
+    flo_html_index_id entryID;
+} flo_html_HashEntry;
+
+typedef struct {
+    bool wasPresent;
+    flo_html_HashEntry hashEntry;
+} flo_html_Contains;
 
 void flo_html_initStringHashSet(flo_html_StringHashSet *set, ptrdiff_t capacity,
                                 flo_html_Arena *perm);
@@ -36,18 +46,17 @@ void flo_html_initStringHashSet(flo_html_StringHashSet *set, ptrdiff_t capacity,
 flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                                  const flo_html_String string);
 
-flo_html_HashStatus
+flo_html_index_id
 flo_html_insertStringAtHash(flo_html_StringHashSet *set,
                             const flo_html_String string,
-                            const flo_html_HashElement *hashElement,
-                            flo_html_indexID *flo_html_indexID);
+                            const flo_html_HashElement *hashElement);
 
 bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
                                     const flo_html_String string);
-bool flo_html_containsStringWithDataHashSet(const flo_html_StringHashSet *set,
-                                            const flo_html_String string,
-                                            flo_html_HashElement *hashElement,
-                                            flo_html_indexID *flo_html_indexID);
+flo_html_Contains
+flo_html_containsStringWithDataHashSet(const flo_html_StringHashSet *set,
+                                       const flo_html_String string);
+
 const flo_html_String
 flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
                               const flo_html_HashElement *hashElement);

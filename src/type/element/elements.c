@@ -48,86 +48,22 @@ void flo_html_destroyTextStore(flo_html_TextStore *textStore) {
     flo_html_destroyDataPage(&textStore->text);
 }
 
-flo_html_ElementStatus elementSizeCheck(unsigned char *buffer,
-                                        const ptrdiff_t bufferLen,
-                                        const flo_html_String element) {
-    if (element.len >= bufferLen) {
-        FLO_HTML_PRINT_ERROR(
-            "Element is too long, size=%zu, to fit into page.\n", element.len);
-        FLO_HTML_PRINT_ERROR("Printing first part of element:\n");
-
-        memcpy(buffer, element.buf, bufferLen - 1);
-        buffer[bufferLen - 1] = '\0';
-
-        FLO_HTML_PRINT_ERROR("%s\n", buffer);
-        FLO_HTML_PRINT_ERROR("max size is %zu (null terminator :))\n",
-                             bufferLen - 1);
-
-        return ELEMENT_TOO_LONG;
-    }
-
-    return ELEMENT_SUCCESS;
-}
-
-flo_html_ElementStatus createNewElement(flo_html_StringRegistry *stringRegistry,
-                                        const flo_html_String element,
-                                        flo_html_HashElement *hashElement,
-                                        flo_html_indexID *flo_html_indexID) {
-    // insert element into the has table.
-    flo_html_DataPageStatus insertStatus = flo_html_insertIntoPageWithHash(
-        element, &stringRegistry->dataPage, &stringRegistry->set, hashElement,
-        flo_html_indexID);
-    if (insertStatus != DATA_PAGE_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_FORMAT(
-            flo_html_dataPageStatusToString(insertStatus),
-            "Could not find or create element \"%s\"", element.buf);
-        return ELEMENT_NOT_FOUND_OR_CREATED;
-    }
-
-    return ELEMENT_CREATED;
-}
-
 /**
- * If the element is found, then  flo_html_indexID is set.
+ * If the element is found, then  flo_html_index_id is set.
  * flo_html_HashElement is always set.
  */
-flo_html_ElementStatus flo_html_elementToIndex(
-    flo_html_StringRegistry *stringRegistry, const flo_html_String element,
-    flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID) {
-    unsigned char buffer[stringRegistry->dataPage.spaceLeft];
-    const flo_html_ElementStatus sizeCheck =
-        elementSizeCheck(buffer, stringRegistry->dataPage.spaceLeft, element);
-    if (sizeCheck != ELEMENT_SUCCESS) {
-        return sizeCheck;
+flo_html_ElementIndex
+flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
+                        const flo_html_String element) {
+    flo_html_ElementIndex result =
+        flo_html_containsStringWithDataHashSet(&stringRegistry->set, element);
+    if (result.wasPresent) {
+        return result;
     }
 
-    if (flo_html_containsStringWithDataHashSet(&stringRegistry->set, element,
-                                               hashElement, flo_html_indexID)) {
-        return ELEMENT_FOUND;
-    }
+    result.hashEntry.entryID = flo_html_insertIntoPageWithHash(
+        element, &stringRegistry->dataPage, &stringRegistry->set,
+        &result.hashEntry.hashElement);
 
-    return createNewElement(stringRegistry, element, hashElement,
-                            flo_html_indexID);
-}
-
-flo_html_ElementStatus flo_html_insertElement(flo_html_DataPage *page,
-                                              const flo_html_String element,
-                                              char **dataLocation) {
-    unsigned char buffer[page->spaceLeft];
-    const flo_html_ElementStatus sizeCheck =
-        elementSizeCheck(buffer, page->spaceLeft, element);
-    if (sizeCheck != ELEMENT_SUCCESS) {
-        return sizeCheck;
-    }
-
-    const flo_html_DataPageStatus dataPageStatus =
-        flo_html_insertIntoPage(element, page, dataLocation);
-    if (dataPageStatus != DATA_PAGE_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_dataPageStatusToString(dataPageStatus),
-            "Failed to insert element\n");
-        return ELEMENT_NOT_FOUND_OR_CREATED;
-    }
-
-    return ELEMENT_CREATED;
+    return result;
 }

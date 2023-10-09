@@ -7,8 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
-typedef uint16_t flo_html_indexID;
-typedef uint16_t flo_html_element_id;
+typedef uint16_t flo_html_index_id;
 
 typedef uint64_t flo_html_page_space;
 typedef uint8_t flo_html_page_id;

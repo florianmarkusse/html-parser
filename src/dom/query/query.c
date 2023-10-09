@@ -115,7 +115,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
             }
             ptrdiff_t tagLen = currentPosition - tagStart;
 
-            flo_html_element_id tagID = flo_html_getTagID(
+            flo_html_index_id tagID = flo_html_getTagID(
                 FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen),
                 textStore);
             if (tagID == 0) {
@@ -169,13 +169,13 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                 const flo_html_String keyBuffer = currentSelector == CLASS
                                                       ? FLO_HTML_S("class")
                                                       : FLO_HTML_S("id");
-                flo_html_element_id propKeyID =
+                flo_html_index_id propKeyID =
                     flo_html_getPropKeyID(keyBuffer, textStore);
                 if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
-                flo_html_element_id propValueID =
+                flo_html_index_id propValueID =
                     flo_html_getPropValueID(token, textStore);
                 if (propValueID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
@@ -186,7 +186,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                 filters[filtersLen].data.keyValuePair.valueID = propValueID;
                 filtersLen++;
             } else if (ch == ']') {
-                flo_html_element_id boolPropID =
+                flo_html_index_id boolPropID =
                     flo_html_getBoolPropID(token, textStore);
                 if (boolPropID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
@@ -196,7 +196,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                 filters[filtersLen].data.propID = boolPropID;
                 filtersLen++;
             } else if (ch == '=') {
-                flo_html_element_id propKeyID =
+                flo_html_index_id propKeyID =
                     flo_html_getPropKeyID(token, textStore);
                 if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
@@ -212,7 +212,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                 currentPosition = parseToken(css, currentPosition, &propValue);
                 ch = flo_html_getChar(css, currentPosition);
 
-                flo_html_element_id propValueID =
+                flo_html_index_id propValueID =
                     flo_html_getPropValueID(propValue, textStore);
                 if (propValueID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;

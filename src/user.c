@@ -24,7 +24,8 @@ flo_html_UserStatus flo_html_fromFile(const flo_html_String fileLocation,
     }
 
     flo_html_createTextStore(&parsed->textStore, &parsed->arena);
-    flo_html_createDomFromFile(fileLocation, &parsed->dom, &parsed->textStore);
+    flo_html_createDomFromFile(fileLocation, &parsed->dom, &parsed->textStore,
+                               &parsed->arena);
 
     return USER_SUCCESS;
 }

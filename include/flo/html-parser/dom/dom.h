@@ -21,32 +21,11 @@ extern "C" {
 
 #define FLO_HTML_MAX_NODES (1U << 12U)
 
-#define FLO_HTML_NODES_PAGE_SIZE (1U << 10U)
-#define FLO_HTML_NODES_PER_PAGE                                                \
-    (FLO_HTML_NODES_PAGE_SIZE / sizeof(flo_html_Node))
-
-#define FLO_HTML_PROP_REGISTRY_PAGE_SIZE (1U << 8U)
-#define FLO_HTML_PROP_REGISTRATIONS_PER_PAGE                                   \
-    (FLO_HTML_PROP_REGISTRY_PAGE_SIZE / sizeof(flo_html_HashElement))
-
-#define FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE (1U << 8U)
-#define FLO_HTML_PARENT_FIRST_CHILDS_PER_PAGE                                  \
-    (FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE / sizeof(flo_html_ParentChild))
-
-#define FLO_HTML_PARENT_CHILDS_PAGE_SIZE (1U << 8U)
-#define FLO_HTML_PARENT_CHILDS_PER_PAGE                                        \
-    (FLO_HTML_PARENT_CHILDS_PAGE_SIZE / sizeof(flo_html_ParentChild))
-
-#define NEXT_FLO_HTML_NODES_PAGE_SIZE (1U << 8U)
-#define NEXT_FLO_HTML_NODES_PER_PAGE                                           \
-    (NEXT_FLO_HTML_NODES_PAGE_SIZE / sizeof(flo_html_NextNode))
-
-#define BOOLEAN_PROPERTIES_PAGE_SIZE (1U << 8U)
-#define BOOLEAN_PROPERTIES_PER_PAGE                                            \
-    (BOOLEAN_PROPERTIES_PAGE_SIZE / sizeof(flo_html_BooleanProperty))
-
-#define PROPERTIES_PAGE_SIZE (1U << 8U)
-#define PROPERTIES_PER_PAGE (PROPERTIES_PAGE_SIZE / sizeof(flo_html_Property))
+#define FLO_HTML_MAX_PARENT_FIRST_CHILDS (1U << 10U)
+#define FLO_HTML_MAX_PARENT_CHILDS (1U << 14U)
+#define FLO_HTML_MAX_NEXT_NODES (1U << 14U)
+#define FLO_HTML_MAX_BOOL_PROPS (1U << 14U)
+#define FLO_HTML_MAX_PROPS (1U << 14U)
 
 typedef struct {
     flo_html_HashElement *hashes;
@@ -106,10 +85,8 @@ typedef struct {
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
-                                      flo_html_Dom *dom,
-                                      flo_html_TextStore *textStore,
-                                      flo_html_Arena *perm);
+void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
+                        flo_html_TextStore *textStore, flo_html_Arena *perm);
 
 /**
  * @brief Create a DOM structure from an HTML file.

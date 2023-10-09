@@ -36,7 +36,7 @@ typedef struct {
     flo_html_node_id nodeID;
     flo_html_NodeType nodeType;
     union {
-        flo_html_indexID tagID;
+        flo_html_index_id tagID;
         flo_html_String text;
     };
 } flo_html_Node;

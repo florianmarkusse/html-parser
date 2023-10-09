@@ -45,7 +45,6 @@ typedef struct {
     const char *testName;
 } TestFile;
 
-// TODO(florian): also try deleting the only node that exists
 static const TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, FLO_HTML_S("span[required] > p"),
      DELETE_NODE, "node without children and only child removal"},

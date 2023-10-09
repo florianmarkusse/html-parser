@@ -106,11 +106,11 @@ flo_html_alloc(flo_html_Arena *a, ptrdiff_t size, ptrdiff_t align,
  *
  * @param[in,out] ptr   A pointer to be freed and set to NULL.
  */
-#define FLO_HTML_FREE_TO_NULL(ptr)                                             \
-    do {                                                                       \
-        free(ptr);                                                             \
-        (ptr) = NULL;                                                          \
-    } while (0)
+//#define FLO_HTML_FREE_TO_NULL(ptr)                                             \
+//    do {                                                                       \
+//        free(ptr);                                                             \
+//        (ptr) = NULL;                                                          \
+//    } while (0)
 
 /**
  * @brief Resize a dynamically allocated array.
@@ -129,22 +129,23 @@ flo_html_alloc(flo_html_Arena *a, ptrdiff_t size, ptrdiff_t align,
  *
  * @return  A pointer to the resized array, or NULL if reallocation fails.
  */
-__attribute__((unused)) static inline void *
-flo_html_resizeArray(void *array, ptrdiff_t currentLen, ptrdiff_t *currentCap,
-                     ptrdiff_t elementSize, ptrdiff_t extraElements) {
-    if (currentLen < *currentCap) {
-        return array;
-    }
-    ptrdiff_t newCap = (currentLen + extraElements);
-    void *newArray = realloc(array, newCap * elementSize);
-    if (newArray == NULL) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to reallocate more memory for the array.\n");
-        return NULL;
-    }
-    *currentCap = newCap;
-    return newArray;
-}
+//__attribute__((unused)) static inline void *
+// flo_html_resizeArray(void *array, ptrdiff_t currentLen, ptrdiff_t
+// *currentCap,
+//                     ptrdiff_t elementSize, ptrdiff_t extraElements) {
+//    if (currentLen < *currentCap) {
+//        return array;
+//    }
+//    ptrdiff_t newCap = (currentLen + extraElements);
+//    void *newArray = realloc(array, newCap * elementSize);
+//    if (newArray == NULL) {
+//        FLO_HTML_PRINT_ERROR(
+//            "Failed to reallocate more memory for the array.\n");
+//        return NULL;
+//    }
+//    *currentCap = newCap;
+//    return newArray;
+//}
 
 #ifdef __cplusplus
 }

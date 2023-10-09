@@ -7,25 +7,11 @@ extern "C" {
 
 #include "dom.h"
 
-flo_html_DomStatus
-flo_html_addRegistration(const flo_html_HashElement *hashElement,
-                         flo_html_BasicRegistry *basicRegistry);
-flo_html_DomStatus
-flo_html_addTagRegistration(flo_html_indexID tagID, bool isPaired,
-                            const flo_html_HashElement *hashElement,
-                            flo_html_Dom *dom);
-
-flo_html_DomStatus
-flo_html_addBoolPropRegistration(const flo_html_HashElement *hashElement,
+void flo_html_addRegistration(const flo_html_HashElement *hashElement,
+                              flo_html_BasicRegistry *basicRegistry);
+void flo_html_addTagRegistration(flo_html_index_id tagID, bool isPaired,
+                                 const flo_html_HashElement *hashElement,
                                  flo_html_Dom *dom);
-
-flo_html_DomStatus
-flo_html_addPropKeyRegistration(const flo_html_HashElement *hashElement,
-                                flo_html_Dom *dom);
-
-flo_html_DomStatus
-flo_html_addPropValueRegistration(const flo_html_HashElement *hashElement,
-                                  flo_html_Dom *dom);
 
 #ifdef __cplusplus
 }

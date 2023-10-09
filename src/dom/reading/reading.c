@@ -17,7 +17,7 @@ bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
                           const flo_html_String boolProp,
                           const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore) {
-    flo_html_element_id boolPropID =
+    flo_html_index_id boolPropID =
         flo_html_getBoolPropID(boolProp, textStore);
     if (boolPropID == 0) {
         return false;
@@ -36,7 +36,7 @@ bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
 bool flo_html_hasPropKey(const flo_html_node_id nodeID,
                          const flo_html_String propKey, const flo_html_Dom *dom,
                          const flo_html_TextStore *textStore) {
-    flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
+    flo_html_index_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return false;
     }
@@ -54,7 +54,7 @@ bool flo_html_hasPropValue(const flo_html_node_id nodeID,
                            const flo_html_String propValue,
                            const flo_html_Dom *dom,
                            const flo_html_TextStore *textStore) {
-    flo_html_element_id propValueID =
+    flo_html_index_id propValueID =
         flo_html_getPropValueID(propValue, textStore);
     if (propValueID == 0) {
         return false;
@@ -74,12 +74,12 @@ bool flo_html_hasProperty(flo_html_node_id nodeID,
                           const flo_html_String propValue,
                           const flo_html_Dom *dom,
                           const flo_html_TextStore *textStore) {
-    flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
+    flo_html_index_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return false;
     }
 
-    flo_html_element_id propValueID =
+    flo_html_index_id propValueID =
         flo_html_getPropValueID(propValue, textStore);
     if (propKeyID == 0) {
         return false;
@@ -126,7 +126,7 @@ const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
                                         const flo_html_String propKey,
                                         const flo_html_Dom *dom,
                                         const flo_html_TextStore *textStore) {
-    flo_html_element_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
+    flo_html_index_id propKeyID = flo_html_getPropKeyID(propKey, textStore);
     if (propKeyID == 0) {
         return FLO_HTML_EMPTY_STRING;
     }

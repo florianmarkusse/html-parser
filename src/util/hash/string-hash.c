@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "flo/html-parser/util/hash/hash-element.h"
 #include "flo/html-parser/util/hash/hashes.h"
 #include "flo/html-parser/util/hash/string-hash.h"
 #include "flo/html-parser/util/memory.h"
@@ -14,17 +15,16 @@ void flo_html_initStringHashSet(flo_html_StringHashSet *set,
 
     set->arrayLen = capacity;
     set->entries = 0;
-    set->array =
-        FLO_HTML_NEW(perm, flo_html_HashEntry, capacity, FLO_HTML_ZERO_MEMORY);
+    set->array = FLO_HTML_NEW(perm, flo_html_StringHashEntry, capacity,
+                              FLO_HTML_ZERO_MEMORY);
 }
 
-// Sets the flo_html_indexID that is used in the DOM, starting at 1 because then
-// 0 can be used as an error/init value.
-flo_html_HashStatus
+// Sets the flo_html_index_id that is used in the DOM, starting at 1 because
+// then 0 can be used as an error/init value.
+flo_html_index_id
 flo_html_insertStringAtHash(flo_html_StringHashSet *set,
                             const flo_html_String string,
-                            const flo_html_HashElement *hashElement,
-                            flo_html_indexID *flo_html_indexID) {
+                            const flo_html_HashElement *hashElement) {
     if (set->entries >= set->arrayLen) {
         FLO_HTML_PRINT_ERROR("String hash set is at full capacity!\n");
         return HASH_ERROR_CAPACITY;
@@ -36,13 +36,11 @@ flo_html_insertStringAtHash(flo_html_StringHashSet *set,
         (hashElement->hash + hashElement->offset) % set->arrayLen;
     set->array[arrayIndex].string = string;
     set->array[arrayIndex].indexID = set->entries;
-    *flo_html_indexID = set->entries;
-
-    return HASH_SUCCESS;
+    return set->entries;
 }
 
-// Sets the flo_html_indexID that is used in the DOM, starting at 1 because then
-// 0 can be used as an error/init value.
+// Sets the flo_html_index_id that is used in the DOM, starting at 1 because
+// then 0 can be used as an error/init value.
 flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                                  const flo_html_String string) {
     if (set->entries >= set->arrayLen) {
@@ -70,33 +68,34 @@ flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
 
 bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
                                     const flo_html_String string) {
-    flo_html_HashElement ignore;
-    flo_html_indexID ignore2 = 0;
-    return flo_html_containsStringWithDataHashSet(set, string, &ignore,
-                                                  &ignore2);
+    return flo_html_containsStringWithDataHashSet(set, string).wasPresent;
 }
 
-bool flo_html_containsStringWithDataHashSet(
-    const flo_html_StringHashSet *set, const flo_html_String string,
-    flo_html_HashElement *hashElement, flo_html_indexID *flo_html_indexID) {
+flo_html_Contains
+flo_html_containsStringWithDataHashSet(const flo_html_StringHashSet *set,
+                                       const flo_html_String string) {
+    flo_html_Contains result;
+
     size_t hash = flo_html_hashString(string);
-    hashElement->hash = hash;
+    result.hashEntry.hashElement.hash = hash;
     ptrdiff_t index = hash % set->arrayLen;
 
     ptrdiff_t probes = 0;
     while (set->array[index].string.buf != NULL) {
-        flo_html_HashEntry entry = set->array[index];
+        flo_html_StringHashEntry entry = set->array[index];
         if (flo_html_stringEquals(entry.string, string)) {
-            hashElement->offset = probes;
-            *flo_html_indexID = entry.indexID;
-            return true;
+            result.hashEntry.hashElement.offset = probes;
+            result.hashEntry.entryID = entry.indexID;
+            result.wasPresent = true;
+            return result;
         }
         probes++;
         index = (index + 1) % set->arrayLen;
     }
 
-    hashElement->offset = probes;
-    return false;
+    result.hashEntry.hashElement.offset = probes;
+    result.wasPresent = false;
+    return result;
 }
 
 const flo_html_String

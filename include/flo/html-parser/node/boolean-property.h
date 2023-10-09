@@ -10,7 +10,7 @@ extern "C" {
 
 typedef struct {
     flo_html_node_id nodeID;
-    flo_html_element_id propID;
+    flo_html_index_id propID;
 } flo_html_BooleanProperty;
 
 #ifdef __cplusplus

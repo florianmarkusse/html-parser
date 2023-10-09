@@ -9,8 +9,8 @@ extern "C" {
 
 typedef struct {
     flo_html_node_id nodeID;
-    flo_html_indexID keyID;
-    flo_html_indexID valueID;
+    flo_html_index_id keyID;
+    flo_html_index_id valueID;
 } flo_html_Property;
 
 #ifdef __cplusplus

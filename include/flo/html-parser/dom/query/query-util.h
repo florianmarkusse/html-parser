@@ -35,11 +35,11 @@ typedef enum {
 typedef struct {
     flo_html_AttributeSelector attributeSelector;
     union {
-        flo_html_element_id tagID;
-        flo_html_element_id propID;
+        flo_html_index_id tagID;
+        flo_html_index_id propID;
         struct {
-            flo_html_element_id keyID;
-            flo_html_element_id valueID;
+            flo_html_index_id keyID;
+            flo_html_index_id valueID;
         } keyValuePair;
     } data;
 } flo_html_FilterType;
@@ -47,16 +47,11 @@ typedef struct {
 bool flo_html_filterNode(flo_html_node_id nodeID,
                          const flo_html_FilterType *filters,
                          ptrdiff_t filterslen, const flo_html_Dom *dom);
-flo_html_indexID flo_html_getTagID(const flo_html_String tag,
-                                   const flo_html_TextStore *textStore);
-flo_html_indexID flo_html_getBoolPropID(const flo_html_String boolProp,
-                                        const flo_html_TextStore *textStore);
-flo_html_indexID flo_html_getPropKeyID(const flo_html_String keyProp,
-                                       const flo_html_TextStore *textStore);
-flo_html_indexID flo_html_getPropValueID(const flo_html_String valueProp,
-                                         const flo_html_TextStore *textStore);
 
-flo_html_QueryStatus flo_html_filterByTagID(flo_html_element_id tagID,
+flo_html_index_id flo_html_getEntryID(flo_html_String string,
+                                      flo_html_StringHashSet *set);
+
+flo_html_QueryStatus flo_html_filterByTagID(flo_html_index_id tagID,
                                             const flo_html_Dom *dom,
                                             flo_html_node_id *results,
                                             ptrdiff_t *len);

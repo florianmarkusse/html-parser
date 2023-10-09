@@ -36,14 +36,12 @@ void flo_html_initDataPage(flo_html_DataPage *dataPage,
 
 void flo_html_destroyDataPage(flo_html_DataPage *dataPage);
 
-flo_html_DataPageStatus flo_html_insertIntoPage(const flo_html_String data,
-                                                flo_html_DataPage *page,
-                                                char **dataLocation);
+unsigned char *flo_html_insertIntoPage(const flo_html_String data,
+                                       flo_html_DataPage *page);
 
-flo_html_DataPageStatus flo_html_insertIntoPageWithHash(
+flo_html_index_id flo_html_insertIntoPageWithHash(
     const flo_html_String data, flo_html_DataPage *page,
-    flo_html_StringHashSet *set, flo_html_HashElement *hashElement,
-    flo_html_indexID *indexID);
+    flo_html_StringHashSet *set, flo_html_HashElement *hashElement);
 
 #ifdef __cplusplus
 }

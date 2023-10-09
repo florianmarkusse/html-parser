@@ -28,9 +28,9 @@ flo_html_ComparisonStatus convertHashComparisonToComparison(
 }
 
 void printAttributes(
-    const flo_html_indexID tagID1, const flo_html_StringHashSet *set1,
+    const flo_html_index_id tagID1, const flo_html_StringHashSet *set1,
     const flo_html_Dom *dom1, const flo_html_TextStore *textStore1,
-    const flo_html_indexID tagID2, const flo_html_StringHashSet *set2,
+    const flo_html_index_id tagID2, const flo_html_StringHashSet *set2,
     const flo_html_Dom *dom2, const flo_html_TextStore *textStore2) {
     const flo_html_String tag1 = flo_html_getTag(tagID1, dom1, textStore1);
     FLO_HTML_PRINT_ERROR(
@@ -82,7 +82,7 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
     // TODO(florian): make faster. (BTREE)
     for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
         if (dom->props[i].nodeID == nodeID) {
-            flo_html_indexID keyID = dom->props[i].keyID;
+            flo_html_index_id keyID = dom->props[i].keyID;
             const flo_html_String propKey =
                 flo_html_getPropKey(keyID, dom, textStore);
             if ((status = flo_html_insertStringHashSet(keySet, propKey)) !=
@@ -96,7 +96,7 @@ flo_html_HashStatus createPropsSet(const flo_html_node_id nodeID,
                 return status;
             }
 
-            flo_html_indexID valueID = dom->props[i].valueID;
+            flo_html_index_id valueID = dom->props[i].valueID;
             const flo_html_String propValue =
                 flo_html_getPropValue(valueID, dom, textStore);
             if ((status = flo_html_insertStringHashSet(keySet, propValue)) !=
@@ -207,7 +207,7 @@ flo_html_HashStatus createBoolPropsSet(const flo_html_node_id nodeID,
     // TODO(florian): make faster. (BTREE)
     for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
         if (dom->boolProps[i].nodeID == nodeID) {
-            flo_html_indexID propID = dom->boolProps[i].propID;
+            flo_html_index_id propID = dom->boolProps[i].propID;
             const flo_html_String boolProp =
                 flo_html_getBoolProp(propID, dom, textStore);
             if ((status = flo_html_insertStringHashSet(set, boolProp)) !=

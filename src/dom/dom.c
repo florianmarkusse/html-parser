@@ -28,24 +28,16 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
         return DOM_ERROR_MEMORY;
     }
 
-    flo_html_DomStatus documentStatus =
-        flo_html_createDom(content, dom, textStore, perm);
-    if (documentStatus != DOM_SUCCESS) {
-        FLO_HTML_FREE_TO_NULL(content.buf);
-        FLO_HTML_ERROR_WITH_CODE_FORMAT(
-            documentStatusToString(documentStatus),
-            "Failed to create document from file \"%s\"", fileLocation.buf);
-        return documentStatus;
-    }
+    flo_html_createDom(content, dom, textStore, perm);
+    // TODO: we are here, probably just want to remove these calls since there
+    // will be above calls that do require the permanenet arena.
     FLO_HTML_FREE_TO_NULL(content.buf);
 
     return DOM_SUCCESS;
 }
 
-flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
-                                      flo_html_Dom *dom,
-                                      flo_html_TextStore *textStore,
-                                      flo_html_Arena *perm) {
+void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
+                        flo_html_TextStore *textStore, flo_html_Arena *perm) {
     dom->firstNodeID = 0;
 
     flo_html_TagRegistration initTag = {0};
@@ -78,44 +70,31 @@ flo_html_DomStatus flo_html_createDom(const flo_html_String htmlString,
                       // 1 is used as the root node.
     dom->nodeCap = FLO_HTML_MAX_NODES;
 
-    dom->parentFirstChilds = malloc(FLO_HTML_PARENT_FIRST_CHILDS_PAGE_SIZE);
+    dom->parentFirstChilds = FLO_HTML_NEW(perm, flo_html_ParentChild,
+                                          FLO_HTML_MAX_PARENT_FIRST_CHILDS);
     dom->parentFirstChildLen = 0;
-    dom->parentFirstChildCap = FLO_HTML_PARENT_FIRST_CHILDS_PER_PAGE;
+    dom->parentFirstChildCap = FLO_HTML_MAX_PARENT_FIRST_CHILDS;
 
-    dom->parentChilds = malloc(FLO_HTML_PARENT_CHILDS_PAGE_SIZE);
+    dom->parentChilds =
+        FLO_HTML_NEW(perm, flo_html_ParentChild, FLO_HTML_MAX_PARENT_CHILDS);
     dom->parentChildLen = 0;
-    dom->parentChildCap = FLO_HTML_PARENT_CHILDS_PER_PAGE;
+    dom->parentChildCap = FLO_HTML_MAX_PARENT_CHILDS;
 
-    dom->nextNodes = malloc(NEXT_FLO_HTML_NODES_PAGE_SIZE);
+    dom->nextNodes =
+        FLO_HTML_NEW(perm, flo_html_NextNode, FLO_HTML_MAX_NEXT_NODES);
     dom->nextNodeLen = 0;
-    dom->nextNodeCap = NEXT_FLO_HTML_NODES_PER_PAGE;
+    dom->nextNodeCap = FLO_HTML_MAX_NEXT_NODES;
 
-    dom->boolProps = malloc(BOOLEAN_PROPERTIES_PAGE_SIZE);
+    dom->boolProps =
+        FLO_HTML_NEW(perm, flo_html_BooleanProperty, FLO_HTML_MAX_BOOL_PROPS);
     dom->boolPropsLen = 0;
-    dom->boolPropsCap = BOOLEAN_PROPERTIES_PER_PAGE;
+    dom->boolPropsCap = FLO_HTML_MAX_BOOL_PROPS;
 
-    dom->props = malloc(PROPERTIES_PAGE_SIZE);
+    dom->props = FLO_HTML_NEW(perm, flo_html_Property, FLO_HTML_MAX_PROPS);
     dom->propsLen = 0;
-    dom->propsCap = PROPERTIES_PER_PAGE;
+    dom->propsCap = FLO_HTML_MAX_PROPS;
 
-    if (dom->nodes == NULL || dom->tagRegistry == NULL ||
-        dom->boolPropRegistry.hashes == NULL ||
-        dom->propKeyRegistry.hashes == NULL ||
-        dom->propValueRegistry.hashes == NULL ||
-        dom->parentFirstChilds == NULL || dom->parentChilds == NULL ||
-        dom->nextNodes == NULL || dom->boolProps == NULL ||
-        dom->props == NULL) {
-        FLO_HTML_PRINT_ERROR("Failed to allocate memory for nodes.\n");
-        flo_html_destroyDom(dom);
-        return DOM_ERROR_MEMORY;
-    }
-
-    flo_html_DomStatus domumentStatus =
-        flo_html_parseRoot(htmlString, dom, textStore);
-    if (domumentStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to parse document.\n");
-    }
-    return domumentStatus;
+    flo_html_parseRoot(htmlString, dom, textStore, perm);
 }
 
 void flo_html_destroyDom(flo_html_Dom *dom) {

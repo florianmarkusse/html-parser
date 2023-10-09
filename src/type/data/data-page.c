@@ -17,39 +17,25 @@ void flo_html_destroyDataPage(flo_html_DataPage *dataPage) {
     dataPage->freeSpace = NULL;
 }
 
-flo_html_DataPageStatus flo_html_insertIntoPage(const flo_html_String data,
-                                                flo_html_DataPage *page,
-                                                char **dataLocation) {
+unsigned char *flo_html_insertIntoPage(const flo_html_String data,
+                                       flo_html_DataPage *page) {
+    // TODO: dynamic
     if (page->spaceLeft < data.len) {
         FLO_HTML_PRINT_ERROR("No more capacity to add data to page.\n");
-        return DATA_PAGE_NO_CAPACITY;
     }
 
     memcpy(page->freeSpace, data.buf, data.len);
-    *dataLocation = page->freeSpace;
+    unsigned char *dataLocation = page->freeSpace;
     page->freeSpace += data.len;
     page->spaceLeft -= data.len;
 
-    return DATA_PAGE_SUCCESS;
+    return dataLocation;
 }
 
-flo_html_DataPageStatus flo_html_insertIntoPageWithHash(
+flo_html_index_id flo_html_insertIntoPageWithHash(
     const flo_html_String data, flo_html_DataPage *page,
-    flo_html_StringHashSet *set, flo_html_HashElement *hashElement,
-    flo_html_indexID *indexID) {
-    flo_html_DataPageStatus status = DATA_PAGE_SUCCESS;
-
-    char *dataLocation = NULL;
-    if ((status = flo_html_insertIntoPage(data, page, &dataLocation)) !=
-        DATA_PAGE_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_dataPageStatusToString(status),
-                                        "Failed to insert data page %.*s\n",
-                                        FLO_HTML_S_P(data));
-        return status;
-    }
-
-    flo_html_insertStringAtHash(set, FLO_HTML_S_LEN(dataLocation, data.len),
-                                hashElement, indexID);
-
-    return status;
+    flo_html_StringHashSet *set, flo_html_HashElement *hashElement) {
+    unsigned char *dataLocation = flo_html_insertIntoPage(data, page);
+    return flo_html_insertStringAtHash(
+        set, FLO_HTML_S_LEN(dataLocation, data.len), hashElement);
 }

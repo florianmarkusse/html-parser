@@ -9,7 +9,7 @@ extern "C" {
 
 typedef struct {
     flo_html_node_id nodeID;
-    flo_html_element_id textID;
+    flo_html_index_id textID;
 } flo_html_TextNode;
 
 #ifdef __cplusplus
