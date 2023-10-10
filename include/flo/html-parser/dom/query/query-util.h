@@ -55,9 +55,10 @@ flo_html_QueryStatus flo_html_filterByTagID(flo_html_index_id tagID,
                                             const flo_html_Dom *dom,
                                             flo_html_node_id *results,
                                             ptrdiff_t *len);
-flo_html_QueryStatus flo_html_getNodesWithoutflo_html_Combinator(
+bool flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, const flo_html_Dom *dom, flo_html_Uint16HashSet *set);
+    ptrdiff_t filtersLen, const flo_html_Dom *dom, flo_html_Uint16HashSet *set,
+    flo_html_Arena *perm);
 
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],

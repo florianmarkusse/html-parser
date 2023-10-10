@@ -101,8 +101,7 @@ void flo_html_addBooleanProperty(const flo_html_node_id nodeID,
 
 void flo_html_addProperty(const flo_html_node_id nodeID,
                           const flo_html_index_id keyID,
-                          const flo_html_index_id valueID,
-                          flo_html_Dom *dom) {
+                          const flo_html_index_id valueID, flo_html_Dom *dom) {
     // TODO: DYNAMIC
     if (dom->propsLen >= dom->propsCap) {
         FLO_HTML_PRINT_ERROR("Too many parent chillds created!\n");
@@ -130,7 +129,8 @@ void flo_html_getTagRegistration(flo_html_index_id tagID,
 }
 
 const flo_html_String
-flo_html_getBoolProp(const flo_html_index_id boolPropID, const flo_html_Dom *dom,
+flo_html_getBoolProp(const flo_html_index_id boolPropID,
+                     const flo_html_Dom *dom,
                      const flo_html_TextStore *textStore) {
     return flo_html_getStringFromHashSet(
         &textStore->boolProps.set, &dom->boolPropRegistry.hashes[boolPropID]);
@@ -152,22 +152,15 @@ flo_html_getPropValue(const flo_html_index_id propValueID,
         &dom->propValueRegistry.hashes[propValueID]);
 }
 
-flo_html_MergeResult flo_html_tryMerge(flo_html_Node *possibleMergeNode,
-                                       flo_html_Node *replacingNode,
-                                       flo_html_Dom *dom,
-                                       flo_html_TextStore *textStore,
-                                       bool isAppend) {
+bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
+                       flo_html_Node *replacingNode, flo_html_Dom *dom,
+                       flo_html_TextStore *textStore, bool isAppend) {
     if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
-        flo_html_ElementStatus elementStatus = flo_html_addTextToTextNode(
-            possibleMergeNode, replacingNode->text, dom, textStore, isAppend);
-        if (elementStatus != ELEMENT_CREATED) {
-            FLO_HTML_PRINT_ERROR(
-                "Failed to merge new text node with up node!\n");
-            return FAILED_MERGE;
-        }
-        return COMPLETED_MERGE;
+        flo_html_addTextToTextNode(possibleMergeNode, replacingNode->text, dom,
+                                   textStore, isAppend);
+        return true;
     }
-    return NO_MERGE;
+    return false;
 }
 
 void flo_html_connectOtherNodesToParent(const flo_html_node_id parentID,

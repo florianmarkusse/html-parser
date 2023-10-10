@@ -70,25 +70,22 @@ flo_html_index_id flo_html_getEntryID(flo_html_String string,
     return 0;
 }
 
-flo_html_QueryStatus flo_html_getNodesWithoutflo_html_Combinator(
+bool flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     const ptrdiff_t filtersLen, const flo_html_Dom *dom,
-    flo_html_Uint16HashSet *set) {
+    flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
+    //
     for (ptrdiff_t i = 0; i < dom->nodeLen; i++) {
         if (flo_html_filterNode(dom->nodes[i].nodeID, filters, filtersLen,
                                 dom)) {
-            flo_html_HashStatus status =
-                flo_html_insertUint16HashSet(set, dom->nodes[i].nodeID);
-            if (status != HASH_SUCCESS) {
-                FLO_HTML_ERROR_WITH_CODE_ONLY(
-                    flo_html_hashStatusToString(status),
-                    "inserting into hash set failed!\n");
-                return QUERY_MEMORY_ERROR;
+            if (!flo_html_insertUint16HashSet(set, dom->nodes[i].nodeID,
+                                              perm)) {
+                return false;
             }
         }
     }
 
-    return QUERY_SUCCESS;
+    return true;
 }
 
 flo_html_QueryStatus flo_html_filterByTagID(const flo_html_index_id tagID,
@@ -124,6 +121,7 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     const ptrdiff_t filtersLen, const flo_html_Dom *dom,
     const ptrdiff_t numberOfSiblings, flo_html_Uint16HashSet *set) {
+    //
     flo_html_Uint16HashSet filteredAdjacents;
     if (flo_html_initUint16HashSet(&filteredAdjacents, set->arrayLen) !=
         HASH_SUCCESS) {

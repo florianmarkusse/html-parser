@@ -80,22 +80,80 @@ flo_html_alloc(flo_html_Arena *a, ptrdiff_t size, ptrdiff_t align,
     return flags & FLO_HTML_ZERO_MEMORY ? memset(a->end, 0, total) : a->end;
 }
 
+void *flo_html_copyToArena(flo_html_Arena *arena, void *data, ptrdiff_t size,
+                           ptrdiff_t align, ptrdiff_t count) {
+    unsigned char *copy = flo_html_alloc(arena, size, align, count, 0);
+    memcpy(copy, data, size * count);
+    return copy;
+}
+
 #define FLO_HTML_SIZEOF(x) (ptrdiff_t)sizeof(x)
 #define FLO_HTML_COUNTOF(a) (FLO_HTML_SIZEOF(a) / FLO_HTML_SIZEOF(*(a)))
 #define FLO_HTML_LENGTHOF(s) (FLO_HTML_COUNTOF(s) - 1)
 #define FLO_HTML_ALIGNOF(t) (_Alignof(t))
 
-#define FLO_HTML_NEW2(a, t)                                                    \
+#define FLO_HTML_NEW_2(a, t)                                                   \
     (typeof(t))flo_html_alloc(a, FLO_HTML_SIZEOF(*(t)),                        \
                               FLO_HTML_ALIGNOF(*(t)), 1, 0)
-#define FLO_HTML_NEW3(a, t, n)                                                 \
+#define FLO_HTML_NEW_3(a, t, n)                                                \
     (t *)flo_html_alloc(a, FLO_HTML_SIZEOF(t), FLO_HTML_ALIGNOF(t), n, 0)
-#define FLO_HTML_NEW4(a, t, n, f)                                              \
+#define FLO_HTML_NEW_4(a, t, n, f)                                             \
     (t *)flo_html_alloc(a, FLO_HTML_SIZEOF(t), FLO_HTML_ALIGNOF(t), n, f)
-#define FLO_HTML_NEWx(a, b, c, d, e, ...) e
+#define FLO_HTML_NEW_X(a, b, c, d, e, ...) e
 #define FLO_HTML_NEW(...)                                                      \
-    FLO_HTML_NEWx(__VA_ARGS__, FLO_HTML_NEW4, FLO_HTML_NEW3,                   \
-                  FLO_HTML_NEW2)(__VA_ARGS__)
+    FLO_HTML_NEW_X(__VA_ARGS__, FLO_HTML_NEW_4, FLO_HTML_NEW_3,                \
+                   FLO_HTML_NEW_2)                                             \
+    (__VA_ARGS__)
+
+__attribute((unused)) static void flo_html_grow(void *slice, ptrdiff_t size,
+                                                ptrdiff_t align,
+                                                flo_html_Arena *a,
+                                                unsigned char flags) {
+    struct {
+        char *data;
+        ptrdiff_t len;
+        ptrdiff_t cap;
+    } replica;
+    memcpy(&replica, slice, FLO_HTML_SIZEOF(replica));
+
+    if (replica.data == NULL) {
+        replica.cap = 1;
+        replica.data = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
+    } else if (a->end == replica.data - size * replica.cap) {
+        flo_html_alloc(a, size, 1, replica.cap, flags);
+    } else {
+        void *data = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
+        memcpy(data, replica.data, size * replica.len);
+        replica.data = data;
+    }
+
+    replica.cap *= 2;
+    memcpy(slice, &replica, sizeof(replica));
+}
+
+#define FLO_HTML_PUSH_2(s, a)                                                  \
+    ({                                                                         \
+        typeof(s) s_ = (s);                                                    \
+        typeof(a) a_ = (a);                                                    \
+        if (s_->len >= s_->cap) {                                              \
+            flo_html_grow(s_, FLO_HTML_SIZEOF(*s_->data),                      \
+                          FLO_HTML_ALIGNOF(*s_->data), a_, 0);                 \
+        }                                                                      \
+        s_->data + s_->len++;                                                  \
+    })
+#define FLO_HTML_PUSH_3(s, a, f)                                               \
+    ({                                                                         \
+        typeof(s) s_ = (s);                                                    \
+        typeof(a) a_ = (a);                                                    \
+        if (s_->len >= s_->cap) {                                              \
+            flo_html_grow(s_, FLO_HTML_SIZEOF(*s_->data),                      \
+                          FLO_HTML_ALIGNOF(*s_->data), a_, f);                 \
+        }                                                                      \
+        s_->data + s_->len++;                                                  \
+    })
+#define FLO_HTML_PUSH_X(a, b, c, d, ...) d
+#define FLO_HTML_PUSH(...)                                                     \
+    FLO_HTML_NEW_X(__VA_ARGS__, FLO_HTML_PUSH_3, FLO_HTML_NEW_2)(__VA_ARGS__)
 
 /**
  * @brief Free a pointer and set it to NULL.

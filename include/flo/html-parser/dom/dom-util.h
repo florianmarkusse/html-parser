@@ -46,13 +46,9 @@ const flo_html_String
 flo_html_getPropValue(flo_html_index_id propValueID, const flo_html_Dom *dom,
                       const flo_html_TextStore *textStore);
 
-typedef enum { COMPLETED_MERGE, NO_MERGE, FAILED_MERGE } flo_html_MergeResult;
-
-flo_html_MergeResult flo_html_tryMerge(flo_html_Node *possibleMergeNode,
-                                       flo_html_Node *replacingNode,
-                                       flo_html_Dom *dom,
-                                       flo_html_TextStore *textStore,
-                                       bool isAppend);
+bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
+                       flo_html_Node *replacingNode, flo_html_Dom *dom,
+                       flo_html_TextStore *textStore, bool isAppend);
 
 void flo_html_connectOtherNodesToParent(flo_html_node_id parentID,
                                         flo_html_node_id lastAddedChild,

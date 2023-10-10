@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_DOM_REPLACEMENT_REPLACEMENT_H
-#define FLO_HTML_PARSER_DOM_REPLACEMENT_REPLACEMENT_H
+#ifndef FLO_HTML_PARSER_DOM_REPLACEMENT_H
+#define FLO_HTML_PARSER_DOM_REPLACEMENT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -90,7 +90,7 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromStringWithQuery(
  */
 flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
     const flo_html_String cssQuery, const flo_html_String fileLocation,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_Dom *dom, flo_html_TextStore *textStore, flo_html_Arena *perm);
 
 /**
  * @brief Replace an HTML element with a DocumentNode.
@@ -107,9 +107,10 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_replaceWithDocumentNode(
-    flo_html_node_id toReplaceNodeID, const flo_html_DocumentNode *docNode,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+void flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
+                                      const flo_html_DocumentNode *docNode,
+                                      flo_html_Dom *dom,
+                                      flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with a text node.
@@ -126,10 +127,9 @@ flo_html_DomStatus flo_html_replaceWithDocumentNode(
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
-flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
-                             const flo_html_String text, flo_html_Dom *dom,
-                             flo_html_TextStore *textStore);
+void flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
+                                  const flo_html_String text, flo_html_Dom *dom,
+                                  flo_html_TextStore *textStore);
 
 /**
  * @brief Replace an HTML element with HTML content from a string.
@@ -146,9 +146,11 @@ flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
  * @return  The status of the replacement operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_replaceWithHTMLFromString(
-    flo_html_node_id toReplaceNodeID, const flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+void flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
+                                        const flo_html_String htmlString,
+                                        flo_html_Dom *dom,
+                                        flo_html_TextStore *textStore,
+                                        flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

@@ -29,9 +29,6 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
     }
 
     flo_html_createDom(content, dom, textStore, perm);
-    // TODO: we are here, probably just want to remove these calls since there
-    // will be above calls that do require the permanenet arena.
-    FLO_HTML_FREE_TO_NULL(content.buf);
 
     return DOM_SUCCESS;
 }
@@ -95,17 +92,4 @@ void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
     dom->propsCap = FLO_HTML_MAX_PROPS;
 
     flo_html_parseRoot(htmlString, dom, textStore, perm);
-}
-
-void flo_html_destroyDom(flo_html_Dom *dom) {
-    FLO_HTML_FREE_TO_NULL(dom->nodes);
-    FLO_HTML_FREE_TO_NULL(dom->tagRegistry);
-    FLO_HTML_FREE_TO_NULL(dom->boolPropRegistry.hashes);
-    FLO_HTML_FREE_TO_NULL(dom->propKeyRegistry.hashes);
-    FLO_HTML_FREE_TO_NULL(dom->propValueRegistry.hashes);
-    FLO_HTML_FREE_TO_NULL(dom->parentFirstChilds);
-    FLO_HTML_FREE_TO_NULL(dom->parentChilds);
-    FLO_HTML_FREE_TO_NULL(dom->nextNodes);
-    FLO_HTML_FREE_TO_NULL(dom->boolProps);
-    FLO_HTML_FREE_TO_NULL(dom->props);
 }

@@ -10,7 +10,11 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "flo/html-parser/util/array.h"
+#include "flo/html-parser/util/memory.h"
 #include "hash-status.h"
+
+typedef FLO_HTML_ARRAY(uint16_t) flo_html_uint16_t_a;
 
 typedef struct {
     uint16_t value;
@@ -27,23 +31,21 @@ typedef struct {
     ptrdiff_t entries;
 } flo_html_Uint16HashSet;
 
-flo_html_HashStatus flo_html_initUint16HashSet(flo_html_Uint16HashSet *set,
-                                               uint16_t capacity);
+flo_html_Uint16HashSet flo_html_initUint16HashSet(uint16_t capacity,
+                                                  flo_html_Arena *perm);
 
-flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
-                                                 uint16_t id);
-
-flo_html_HashStatus
+bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
+                                  flo_html_Arena *perm);
+flo_html_uint16_t_a
 flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
-                              uint16_t **results, ptrdiff_t *resultsLen);
+                              flo_html_Arena *perm);
 
 bool flo_html_containsUint16HashSet(const flo_html_Uint16HashSet *set,
                                     uint16_t id);
 
-void flo_html_destroyUint16HashSet(flo_html_Uint16HashSet *set);
-flo_html_HashStatus
+flo_html_Uint16HashSet
 flo_html_copyUint16HashSet(const flo_html_Uint16HashSet *originalSet,
-                           flo_html_Uint16HashSet *copy);
+                           flo_html_Arena *perm);
 void flo_html_resetUint16HashSet(flo_html_Uint16HashSet *set);
 
 typedef struct {

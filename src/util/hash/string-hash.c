@@ -11,8 +11,6 @@
 void flo_html_initStringHashSet(flo_html_StringHashSet *set,
                                 const ptrdiff_t capacity,
                                 flo_html_Arena *perm) {
-    flo_html_String *thing = FLO_HTML_NEW(perm, thing);
-
     set->arrayLen = capacity;
     set->entries = 0;
     set->array = FLO_HTML_NEW(perm, flo_html_StringHashEntry, capacity,

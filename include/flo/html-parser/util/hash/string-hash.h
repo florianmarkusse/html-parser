@@ -40,6 +40,7 @@ typedef struct {
     flo_html_HashEntry hashEntry;
 } flo_html_Contains;
 
+// TODO: replace with just returning the set by vlaue.
 void flo_html_initStringHashSet(flo_html_StringHashSet *set, ptrdiff_t capacity,
                                 flo_html_Arena *perm);
 

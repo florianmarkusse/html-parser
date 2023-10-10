@@ -30,11 +30,9 @@ extern "C" {
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-flo_html_QueryStatus
-flo_html_querySelectorAll(const flo_html_String cssQuery,
-                          const flo_html_Dom *dom,
-                          const flo_html_TextStore *textStore,
-                          flo_html_node_id **results, ptrdiff_t *resultsLen);
+flo_html_QueryStatus flo_html_querySelectorAll(
+    flo_html_String cssQuery, flo_html_Dom *dom, flo_html_TextStore *textStore,
+    flo_html_node_id **results, ptrdiff_t *resultsLen, flo_html_Arena *perm);
 
 /**
  * @brief Get elements by their class name in the DOM.
@@ -59,9 +57,8 @@ flo_html_querySelectorAll(const flo_html_String cssQuery,
  *          'results' when no longer needed.
  */
 flo_html_QueryStatus flo_html_getElementsByClassName(
-    const flo_html_String className, const flo_html_Dom *dom,
-    const flo_html_TextStore *textStore, flo_html_node_id **results,
-    ptrdiff_t *resultsLen);
+    flo_html_String className, flo_html_Dom *dom, flo_html_TextStore *textSto,
+    flo_html_node_id **results, ptrdiff_t *resultsLen, flo_html_Arena *perm);
 
 /**
  * @brief Get elements by their tag name in the DOM.
@@ -86,9 +83,8 @@ flo_html_QueryStatus flo_html_getElementsByClassName(
  *          'results' when no longer needed.
  */
 flo_html_QueryStatus flo_html_getElementsByTagName(
-    const flo_html_String tag, const flo_html_Dom *dom,
-    const flo_html_TextStore *textStore, flo_html_node_id **results,
-    ptrdiff_t *resultsLen);
+    flo_html_String tag, flo_html_Dom *dom, flo_html_TextStore *textStore,
+    flo_html_node_id **results, ptrdiff_t *resultsLen, flo_html_Arena *perm);
 
 /**
  * @brief Query for the first element matching a CSS selector in the DOM.
@@ -106,10 +102,11 @@ flo_html_QueryStatus flo_html_getElementsByTagName(
  *          otherwise). See @ref
  *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
-flo_html_QueryStatus flo_html_querySelector(const flo_html_String cssQuery,
-                                            const flo_html_Dom *dom,
-                                            const flo_html_TextStore *textStore,
-                                            flo_html_node_id *result);
+flo_html_QueryStatus flo_html_querySelector(flo_html_String cssQuery,
+                                            flo_html_Dom *dom,
+                                            flo_html_TextStore *textStore,
+                                            flo_html_node_id *result,
+                                            flo_html_Arena scratch);
 
 /**
  * @brief Get an element by its ID attribute in the DOM.
@@ -127,10 +124,11 @@ flo_html_QueryStatus flo_html_querySelector(const flo_html_String cssQuery,
  *          otherwise). See @ref
  *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
-flo_html_QueryStatus
-flo_html_getElementByID(const flo_html_String id, const flo_html_Dom *dom,
-                        const flo_html_TextStore *textStore,
-                        flo_html_node_id *result);
+flo_html_QueryStatus flo_html_getElementByID(flo_html_String id,
+                                             flo_html_Dom *dom,
+                                             flo_html_TextStore *textStore,
+                                             flo_html_node_id *result,
+                                             flo_html_Arena scratch);
 
 #ifdef __cplusplus
 }

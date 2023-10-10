@@ -1,33 +1,31 @@
 #include <string.h>
 
-#include "flo/html-parser/util/memory.h"
 #include "flo/html-parser/util/hash/hashes.h"
 #include "flo/html-parser/util/hash/uint16-t-hash.h"
+#include "flo/html-parser/util/memory.h"
 
 #define MAX_CAPACITY ((1U << 16U) - 1) // Maximum capacity for uint16_t
 
-flo_html_HashStatus flo_html_initUint16HashSet(flo_html_Uint16HashSet *set,
-                                               const uint16_t capacity) {
-    set->arrayLen = capacity;
-    set->entries = 0;
-    set->array = calloc(capacity, sizeof(flo_html_Uint16Entry));
-    if (set->array == NULL) {
-        FLO_HTML_PRINT_ERROR(
-            "Could not allocate memory for element hash set!\n");
-        return HASH_ERROR_MEMORY;
-    }
-    return HASH_SUCCESS;
+flo_html_Uint16HashSet flo_html_initUint16HashSet(const uint16_t capacity,
+                                                  flo_html_Arena *perm) {
+    flo_html_Uint16HashSet set = {
+        .array = FLO_HTML_NEW(perm, flo_html_Uint16Entry, capacity,
+                              FLO_HTML_ZERO_MEMORY),
+        .arrayLen = capacity,
+        .entries = 0,
+    };
+    return set;
 }
 
-flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
-                                                 const uint16_t id) {
+bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
+                                  const uint16_t id, flo_html_Arena *perm) {
     uint16_t hash = flo_html_hash16_xm3(id); // Calculate the hash once
 
     ptrdiff_t index = hash % set->arrayLen;
 
     while (set->array[index].value != 0) {
         if (set->array[index].value == id) {
-            return HASH_SUCCESS; // Element already in the set, nothing to do
+            return true;
         }
         index = (index + 1) % set->arrayLen;
     }
@@ -40,33 +38,28 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
             FLO_HTML_PRINT_ERROR(
                 "Hash set capacity would exceed the maximum capacity "
                 "for uint16_t!\n");
-            return HASH_ERROR_CAPACITY;
+            return false;
         }
 
         ptrdiff_t newCapacity = (set->arrayLen * 2 <= MAX_CAPACITY)
                                     ? set->arrayLen * 2
                                     : MAX_CAPACITY;
-        flo_html_Uint16Entry *newArray =
-            calloc(newCapacity, sizeof(flo_html_Uint16Entry));
-        if (newArray == NULL) {
-            FLO_HTML_PRINT_ERROR(
-                "Could not allocate memory for element hash set expansion!\n");
-            return HASH_ERROR_MEMORY;
-        }
+        flo_html_Uint16Entry *oldArray = set->array;
+        set->array = FLO_HTML_NEW(perm, flo_html_Uint16Entry, newCapacity,
+                                  FLO_HTML_ZERO_MEMORY);
 
+        // Rehashing.
         for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
             if (set->array[i].value != 0) {
-                ptrdiff_t newIndex = set->array[i].hash % newCapacity;
-                while (newArray[newIndex].value != 0) {
+                ptrdiff_t newIndex = oldArray[i].hash % newCapacity;
+                while (set->array[newIndex].value != 0) {
                     newIndex = (newIndex + 1) % newCapacity;
                 }
-                newArray[newIndex].value = set->array[i].value;
-                newArray[newIndex].hash = set->array[i].hash;
+                set->array[newIndex].value = oldArray[i].value;
+                set->array[newIndex].hash = oldArray[i].hash;
             }
         }
 
-        FLO_HTML_FREE_TO_NULL(set->array);
-        set->array = newArray;
         set->arrayLen = newCapacity;
     }
 
@@ -87,25 +80,21 @@ flo_html_HashStatus flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
     return HASH_SUCCESS;
 }
 
-flo_html_HashStatus
+flo_html_uint16_t_a
 flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
-                              uint16_t **results, ptrdiff_t *resultsLen) {
-    *resultsLen = set->entries;
-    *results = (uint16_t *)malloc(*resultsLen * sizeof(uint16_t));
-    if (*results == NULL) {
-        FLO_HTML_PRINT_ERROR(
-            "Could not allocate memory for the result array!\n");
-        return HASH_ERROR_MEMORY;
-    }
+                              flo_html_Arena *perm) {
+    flo_html_uint16_t_a result;
+    result.buf = FLO_HTML_NEW(perm, uint16_t, set->entries);
+    result.len = set->entries;
 
     ptrdiff_t resultIndex = 0;
     for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
         if (set->array[i].value != 0) {
-            (*results)[resultIndex++] = set->array[i].value;
+            result.buf[resultIndex++] = set->array[i].value;
         }
     }
 
-    return HASH_SUCCESS;
+    return result;
 }
 
 bool flo_html_containsUint16HashSet(const flo_html_Uint16HashSet *set,
@@ -122,27 +111,16 @@ bool flo_html_containsUint16HashSet(const flo_html_Uint16HashSet *set,
     return false;
 }
 
-void flo_html_destroyUint16HashSet(flo_html_Uint16HashSet *set) {
-    FLO_HTML_FREE_TO_NULL(set->array);
-    set->arrayLen = 0;
-    set->entries = 0;
-}
-
-flo_html_HashStatus
+flo_html_Uint16HashSet
 flo_html_copyUint16HashSet(const flo_html_Uint16HashSet *originalSet,
-                           flo_html_Uint16HashSet *copy) {
-    flo_html_HashStatus status = HASH_SUCCESS;
-    if ((status = flo_html_initUint16HashSet(copy, originalSet->arrayLen)) !=
-        HASH_SUCCESS) {
-        return status;
-    }
+                           flo_html_Arena *perm) {
+    flo_html_Uint16HashSet copy =
+        flo_html_initUint16HashSet(originalSet->arrayLen, perm);
+    memcpy(copy.array, originalSet->array,
+           originalSet->arrayLen * sizeof(flo_html_Uint16Entry));
+    copy.entries = originalSet->entries;
 
-    ptrdiff_t arraySize = originalSet->arrayLen * sizeof(flo_html_Uint16Entry);
-    memcpy(copy->array, originalSet->array, arraySize);
-
-    copy->entries = originalSet->entries;
-
-    return status;
+    return copy;
 }
 
 void flo_html_resetUint16HashSet(flo_html_Uint16HashSet *set) {

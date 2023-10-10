@@ -40,6 +40,7 @@ typedef struct {
     ptrdiff_t nodeLen;
     ptrdiff_t nodeCap;
 
+    // TODO: this can all be turned into dynamic arrays.
     flo_html_ParentChild *parentFirstChilds;
     ptrdiff_t parentFirstChildLen;
     ptrdiff_t parentFirstChildCap;
@@ -107,16 +108,6 @@ flo_html_DomStatus
 flo_html_createDomFromFile(const flo_html_String fileLocation,
                            flo_html_Dom *dom, flo_html_TextStore *textStore,
                            flo_html_Arena *perm);
-
-/**
- * @brief Destroy a DOM structure and release associated memory.
- *
- * This function releases the memory associated with the provided `dom`
- * structure.
- *
- * @param[in]   dom     The DOM structure to destroy.
- */
-void flo_html_destroyDom(flo_html_Dom *dom);
 
 #ifdef __cplusplus
 }

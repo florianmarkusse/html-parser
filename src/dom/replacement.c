@@ -55,9 +55,10 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromStringWithQuery(
 
 flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
     const flo_html_String cssQuery, const flo_html_String fileLocation,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
+    flo_html_Dom *dom, flo_html_TextStore *textStore, flo_html_Arena *perm) {
     flo_html_String content;
-    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &content);
+    flo_html_FileStatus fileStatus =
+        flo_html_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
@@ -69,9 +70,9 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromFileWithQuery(
                                 flo_html_replaceWithHTMLFromString);
 }
 
-static flo_html_DomStatus
-updateReferences(const flo_html_node_id toReplaceNodeID,
-                 const flo_html_node_id newNodeID, flo_html_Dom *dom) {
+static void updateReferences(const flo_html_node_id toReplaceNodeID,
+                             const flo_html_node_id newNodeID,
+                             flo_html_Dom *dom) {
     flo_html_Node *nodeToReplace = &dom->nodes[toReplaceNodeID];
     const flo_html_node_id lastNextOfNew = flo_html_getLastNext(newNodeID, dom);
 
@@ -84,7 +85,7 @@ updateReferences(const flo_html_node_id toReplaceNodeID,
 
         dom->firstNodeID = newNodeID;
         nodeToReplace->nodeType = NODE_TYPE_REMOVED;
-        return DOM_SUCCESS;
+        return;
     }
 
     flo_html_ParentChild *parentChildNode =
@@ -113,12 +114,8 @@ updateReferences(const flo_html_node_id toReplaceNodeID,
         parentChildNode->childID = newNodeID;
         flo_html_node_id otherNewNodeID = flo_html_getNext(newNodeID, dom);
         while (otherNewNodeID > 0) {
-            flo_html_DomStatus domStatus = flo_html_addParentChild(
-                parentFirstChildNode->parentID, otherNewNodeID, dom);
-            if (domStatus != DOM_SUCCESS) {
-                FLO_HTML_PRINT_ERROR("Failed to add new node ID as child!\n");
-                return domStatus;
-            }
+            flo_html_addParentChild(parentFirstChildNode->parentID,
+                                    otherNewNodeID, dom);
             otherNewNodeID = flo_html_getNext(otherNewNodeID, dom);
         }
     }
@@ -128,91 +125,68 @@ updateReferences(const flo_html_node_id toReplaceNodeID,
     }
 
     nodeToReplace->nodeType = NODE_TYPE_REMOVED;
-
-    return DOM_SUCCESS;
 }
 
-flo_html_DomStatus flo_html_replaceWithDocumentNode(
-    flo_html_node_id toReplaceNodeID, const flo_html_DocumentNode *docNode,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    flo_html_node_id newNodeID = 0;
-    flo_html_DomStatus domStatus =
-        flo_html_parseDocumentElement(docNode, dom, textStore, &newNodeID);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to parse document element!\n");
-        return domStatus;
-    }
-    return updateReferences(toReplaceNodeID, newNodeID, dom);
+void flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
+                                      const flo_html_DocumentNode *docNode,
+                                      flo_html_Dom *dom,
+                                      flo_html_TextStore *textStore) {
+    flo_html_node_id newNodeID =
+        flo_html_parseDocumentElement(docNode, dom, textStore);
+    updateReferences(toReplaceNodeID, newNodeID, dom);
 }
 
-flo_html_MergeResult tryMergeBothSides(const flo_html_node_id toReplaceNodeID,
-                                       const flo_html_node_id replacingNodeID,
-                                       flo_html_Dom *dom,
-                                       flo_html_TextStore *textStore) {
+bool tryMergeBothSides(const flo_html_node_id toReplaceNodeID,
+                       const flo_html_node_id replacingNodeID,
+                       flo_html_Dom *dom, flo_html_TextStore *textStore) {
     flo_html_Node *replacingNode = &dom->nodes[replacingNodeID];
     if (replacingNode->nodeType == NODE_TYPE_TEXT) {
         flo_html_NextNode *previousNode =
             flo_html_getPreviousNode(toReplaceNodeID, dom);
         if (previousNode != NULL) {
-            flo_html_MergeResult mergeTry =
+            bool isMerged =
                 flo_html_tryMerge(&dom->nodes[previousNode->currentNodeID],
                                   replacingNode, dom, textStore, true);
-            if (mergeTry == FAILED_MERGE || mergeTry == COMPLETED_MERGE) {
-                return mergeTry;
+            if (isMerged) {
+                return isMerged;
             }
         }
 
         flo_html_NextNode *nextNode =
             flo_html_getNextNode(toReplaceNodeID, dom);
         if (nextNode != NULL) {
-            flo_html_MergeResult mergeTry =
-                flo_html_tryMerge(&dom->nodes[nextNode->nextNodeID],
-                                  replacingNode, dom, textStore, false);
-            return mergeTry;
+            return flo_html_tryMerge(&dom->nodes[nextNode->nextNodeID],
+                                     replacingNode, dom, textStore, false);
         }
     }
 
-    return NO_MERGE;
+    return false;
 }
 
-flo_html_DomStatus
-flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
-                             const flo_html_String text, flo_html_Dom *dom,
-                             flo_html_TextStore *textStore) {
-    flo_html_node_id newNodeID = 0;
-    flo_html_DomStatus domStatus =
-        flo_html_parseTextElement(text, dom, textStore, &newNodeID);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to parse text element!\n");
-        return domStatus;
-    }
+void flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
+                                  const flo_html_String text, flo_html_Dom *dom,
+                                  flo_html_TextStore *textStore) {
+    flo_html_node_id newNodeID =
+        flo_html_parseTextElement(text, dom, textStore);
 
-    flo_html_MergeResult mergeResult =
+    bool isMerged =
         tryMergeBothSides(toReplaceNodeID, newNodeID, dom, textStore);
-    if (mergeResult == COMPLETED_MERGE) {
+    if (isMerged) {
         flo_html_removeNode(newNodeID, dom);
         flo_html_removeNode(toReplaceNodeID, dom);
-        return domStatus;
+        return;
     }
 
-    if (mergeResult == FAILED_MERGE) {
-        return DOM_NO_ADD;
-    }
-
-    return updateReferences(toReplaceNodeID, newNodeID, dom);
+    updateReferences(toReplaceNodeID, newNodeID, dom);
 }
 
-flo_html_DomStatus flo_html_replaceWithHTMLFromString(
-    flo_html_node_id toReplaceNodeID, const flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
+void flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
+                                        const flo_html_String htmlString,
+                                        flo_html_Dom *dom,
+                                        flo_html_TextStore *textStore,
+                                        flo_html_Arena *perm) {
     flo_html_node_id firstNewAddedNode = dom->nodeLen;
-    flo_html_DomStatus domStatus =
-        flo_html_parseExtra(htmlString, dom, textStore);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to parse string!\n");
-        return domStatus;
-    }
-
+    flo_html_parseExtra(htmlString, dom, textStore, perm);
     flo_html_node_id lastNextNode =
         flo_html_getLastNext(firstNewAddedNode, dom);
     if (lastNextNode > firstNewAddedNode) {
@@ -221,18 +195,14 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromString(
             flo_html_NextNode *previousNode =
                 flo_html_getPreviousNode(toReplaceNodeID, dom);
             if (previousNode != NULL) {
-                flo_html_MergeResult mergeResult =
+                bool isMerged =
                     flo_html_tryMerge(&dom->nodes[previousNode->currentNodeID],
                                       firstAddedNode, dom, textStore, true);
-                if (mergeResult == COMPLETED_MERGE) {
+                if (isMerged) {
                     ptrdiff_t secondNewAddedNode =
                         flo_html_getNext(firstNewAddedNode, dom);
                     flo_html_removeNode(firstNewAddedNode, dom);
                     firstNewAddedNode = secondNewAddedNode;
-                }
-
-                if (mergeResult == FAILED_MERGE) {
-                    return DOM_NO_ADD;
                 }
             }
         }
@@ -242,32 +212,23 @@ flo_html_DomStatus flo_html_replaceWithHTMLFromString(
             flo_html_NextNode *nextNode =
                 flo_html_getNextNode(toReplaceNodeID, dom);
             if (nextNode != NULL) {
-                flo_html_MergeResult mergeResult = flo_html_tryMerge(
+                bool isMerged = flo_html_tryMerge(
                     &dom->nodes[nextNode->nextNodeID],
                     &dom->nodes[lastNextNode], dom, textStore, false);
-
-                if (mergeResult == COMPLETED_MERGE) {
+                if (isMerged) {
                     flo_html_removeNode(lastNextNode, dom);
-                }
-
-                if (mergeResult == FAILED_MERGE) {
-                    return DOM_NO_ADD;
                 }
             }
         }
     } else {
-        flo_html_MergeResult mergeResult = tryMergeBothSides(
-            toReplaceNodeID, firstNewAddedNode, dom, textStore);
-        if (mergeResult == COMPLETED_MERGE) {
+        bool isMerged = tryMergeBothSides(toReplaceNodeID, firstNewAddedNode,
+                                          dom, textStore);
+        if (isMerged) {
             flo_html_removeNode(firstNewAddedNode, dom);
             flo_html_removeNode(toReplaceNodeID, dom);
-            return domStatus;
-        }
-
-        if (mergeResult == FAILED_MERGE) {
-            return DOM_NO_ADD;
+            return;
         }
     }
 
-    return updateReferences(toReplaceNodeID, firstNewAddedNode, dom);
+    updateReferences(toReplaceNodeID, firstNewAddedNode, dom);
 }

@@ -87,10 +87,10 @@ ptrdiff_t parseToken(const flo_html_String css, ptrdiff_t currentPosition,
     return currentPosition;
 }
 
-flo_html_QueryStatus getQueryResults(const flo_html_String css,
-                                     const flo_html_Dom *dom,
-                                     const flo_html_TextStore *textStore,
-                                     flo_html_Uint16HashSet *set) {
+flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
+                                     flo_html_TextStore *textStore,
+                                     flo_html_Uint16HashSet *set,
+                                     flo_html_Arena *perm) {
     flo_html_QueryStatus result = QUERY_SUCCESS;
 
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT];
@@ -115,9 +115,9 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
             }
             ptrdiff_t tagLen = currentPosition - tagStart;
 
-            flo_html_index_id tagID = flo_html_getTagID(
+            flo_html_index_id tagID = flo_html_getEntryID(
                 FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen),
-                textStore);
+                &textStore->tags.set);
             if (tagID == 0) {
                 return QUERY_NOT_SEEN_BEFORE;
             }
@@ -170,13 +170,13 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                                                       ? FLO_HTML_S("class")
                                                       : FLO_HTML_S("id");
                 flo_html_index_id propKeyID =
-                    flo_html_getPropKeyID(keyBuffer, textStore);
+                    flo_html_getEntryID(keyBuffer, &textStore->propKeys.set);
                 if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 flo_html_index_id propValueID =
-                    flo_html_getPropValueID(token, textStore);
+                    flo_html_getEntryID(token, &textStore->propValues.set);
                 if (propValueID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -187,7 +187,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                 filtersLen++;
             } else if (ch == ']') {
                 flo_html_index_id boolPropID =
-                    flo_html_getBoolPropID(token, textStore);
+                    flo_html_getEntryID(token, &textStore->boolProps.set);
                 if (boolPropID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -197,7 +197,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                 filtersLen++;
             } else if (ch == '=') {
                 flo_html_index_id propKeyID =
-                    flo_html_getPropKeyID(token, textStore);
+                    flo_html_getEntryID(token, &textStore->propKeys.set);
                 if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -213,7 +213,7 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
                 ch = flo_html_getChar(css, currentPosition);
 
                 flo_html_index_id propValueID =
-                    flo_html_getPropValueID(propValue, textStore);
+                    flo_html_getEntryID(propValue, &textStore->propValues.set);
                 if (propValueID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -241,9 +241,10 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
         // Do filtering :)
         switch (currentflo_html_Combinator) {
         case NO_COMBINATOR: {
-            if ((result = flo_html_getNodesWithoutflo_html_Combinator(
-                     filters, filtersLen, dom, set)) != QUERY_SUCCESS) {
-                return result;
+            // TODO: this is not an actual perm arena I think.
+            if (!flo_html_getNodesWithoutflo_html_Combinator(
+                    filters, filtersLen, dom, set, perm)) {
+                return QUERY_MEMORY_ERROR;
             }
             break;
         }
@@ -317,36 +318,64 @@ flo_html_QueryStatus getQueryResults(const flo_html_String css,
     return result;
 }
 
-flo_html_QueryStatus
-flo_html_querySelectorAll(const flo_html_String css, const flo_html_Dom *dom,
-                          const flo_html_TextStore *textStore,
-                          flo_html_node_id **results, ptrdiff_t *resultsLen) {
-    flo_html_Uint16HashSet resultsSet;
-    if (flo_html_initUint16HashSet(&resultsSet, FLO_HTML_INITIAL_QUERY_CAP) !=
-        HASH_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to allocate memory initializating querySelectorAll\n");
-        return QUERY_MEMORY_ERROR;
-    }
+flo_html_QueryStatus flo_html_querySelectorAll(
+    flo_html_String css, flo_html_Dom *dom, flo_html_TextStore *textStore,
+    flo_html_node_id **results, ptrdiff_t *resultsLen, flo_html_Arena *perm) {
+    {
+        flo_html_Arena scratch = *perm;
+        flo_html_Uint16HashSet resultsSet =
+            flo_html_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, perm);
 
-    flo_html_QueryStatus result = QUERY_SUCCESS;
-    ptrdiff_t currentQueryStart = 0;
-    ptrdiff_t currentQueryEnd =
-        flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
+        flo_html_QueryStatus result = QUERY_SUCCESS;
+        ptrdiff_t currentQueryStart = 0;
+        ptrdiff_t currentQueryEnd =
+            flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
 
-    if (currentQueryEnd > 0) {
-        flo_html_Uint16HashSet set;
-        if (flo_html_initUint16HashSet(&set, FLO_HTML_INITIAL_QUERY_CAP) !=
-            HASH_SUCCESS) {
-            FLO_HTML_PRINT_ERROR(
-                "Failed to allocate memory initializating querySelectorAll\n");
-            return QUERY_MEMORY_ERROR;
-        }
+        if (currentQueryEnd > 0) {
+            flo_html_Uint16HashSet set =
+                flo_html_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, perm);
 
-        while (currentQueryEnd >= 0) {
-            flo_html_String singularQuery =
-                FLO_HTML_S_LEN(css.buf + currentQueryStart,
-                               currentQueryEnd - currentQueryStart);
+            while (currentQueryEnd >= 0) {
+                flo_html_String singularQuery =
+                    FLO_HTML_S_LEN(css.buf + currentQueryStart,
+                                   currentQueryEnd - currentQueryStart);
+
+                if ((result = getQueryResults(singularQuery, dom, textStore,
+                                              &set)) != QUERY_SUCCESS) {
+                    flo_html_destroyUint16HashSet(&resultsSet);
+                    flo_html_destroyUint16HashSet(&set);
+                    FLO_HTML_ERROR_WITH_CODE_ONLY(
+                        flo_html_queryingStatusToString(result),
+                        "Unable get query results!\n");
+                    return result;
+                }
+
+                flo_html_Uint16HashSetIterator iterator;
+                flo_html_initUint16HashSetIterator(&iterator, &set);
+                while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
+                    flo_html_HashStatus insertStatus =
+                        flo_html_insertUint16HashSet(
+                            &resultsSet,
+                            flo_html_nextUint16HashSetIterator(&iterator));
+                    if (insertStatus != HASH_SUCCESS) {
+                        flo_html_destroyUint16HashSet(&resultsSet);
+                        flo_html_destroyUint16HashSet(&set);
+                        FLO_HTML_ERROR_WITH_CODE_ONLY(
+                            flo_html_hashStatusToString(insertStatus),
+                            "Failed to save intermediate results!\n");
+
+                        return QUERY_MEMORY_ERROR;
+                    }
+                }
+
+                flo_html_resetUint16HashSet(&set);
+
+                currentQueryStart = currentQueryEnd + 1; // skip ','
+                currentQueryEnd =
+                    flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
+            }
+            flo_html_String singularQuery = FLO_HTML_S_LEN(
+                css.buf + currentQueryStart, css.len - currentQueryStart);
 
             if ((result = getQueryResults(singularQuery, dom, textStore,
                                           &set)) != QUERY_SUCCESS) {
@@ -374,72 +403,51 @@ flo_html_querySelectorAll(const flo_html_String css, const flo_html_Dom *dom,
                 }
             }
 
-            flo_html_resetUint16HashSet(&set);
-
-            currentQueryStart = currentQueryEnd + 1; // skip ','
-            currentQueryEnd =
-                flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
-        }
-        flo_html_String singularQuery = FLO_HTML_S_LEN(
-            css.buf + currentQueryStart, css.len - currentQueryStart);
-
-        if ((result = getQueryResults(singularQuery, dom, textStore, &set)) !=
-            QUERY_SUCCESS) {
-            flo_html_destroyUint16HashSet(&resultsSet);
             flo_html_destroyUint16HashSet(&set);
-            FLO_HTML_ERROR_WITH_CODE_ONLY(
-                flo_html_queryingStatusToString(result),
-                "Unable get query results!\n");
-            return result;
-        }
-
-        flo_html_Uint16HashSetIterator iterator;
-        flo_html_initUint16HashSetIterator(&iterator, &set);
-        while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
-            flo_html_HashStatus insertStatus = flo_html_insertUint16HashSet(
-                &resultsSet, flo_html_nextUint16HashSetIterator(&iterator));
-            if (insertStatus != HASH_SUCCESS) {
+        } else {
+            if ((result = getQueryResults(css, dom, textStore, &resultsSet)) !=
+                QUERY_SUCCESS) {
                 flo_html_destroyUint16HashSet(&resultsSet);
-                flo_html_destroyUint16HashSet(&set);
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
-                    flo_html_hashStatusToString(insertStatus),
-                    "Failed to save intermediate results!\n");
-
-                return QUERY_MEMORY_ERROR;
+                    flo_html_queryingStatusToString(result),
+                    "Unable get query results!\n");
+                return result;
             }
         }
 
-        flo_html_destroyUint16HashSet(&set);
-    } else {
-        if ((result = getQueryResults(css, dom, textStore, &resultsSet)) !=
-            QUERY_SUCCESS) {
-            flo_html_destroyUint16HashSet(&resultsSet);
+        // TODO: what to do with custom allocators?
+        flo_html_HashStatus conversionResult =
+            flo_html_uint16HashSetToArray(&resultsSet, results, resultsLen);
+        if (conversionResult != HASH_SUCCESS) {
             FLO_HTML_ERROR_WITH_CODE_ONLY(
-                flo_html_queryingStatusToString(result),
-                "Unable get query results!\n");
-            return result;
+                flo_html_hashStatusToString(conversionResult),
+                "Failed to convert set to array!\n");
+            flo_html_destroyUint16HashSet(&resultsSet);
+            return QUERY_MEMORY_ERROR;
         }
-    }
 
-    // TODO: what to do with custom allocators?
-    flo_html_HashStatus conversionResult =
-        flo_html_uint16HashSetToArray(&resultsSet, results, resultsLen);
-    if (conversionResult != HASH_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_hashStatusToString(conversionResult),
-            "Failed to convert set to array!\n");
         flo_html_destroyUint16HashSet(&resultsSet);
-        return QUERY_MEMORY_ERROR;
+
+        flo_html_Uint16HashSet *finalResults;
+        // create on scratch arena by conversion.
+        flo_html_uint16_t_a resultsArray =
+            flo_html_uint16HashSetToArray(finalResults, &scratch);
+
+        // copy to perm arena
+        resultsArray.buf = (uint16_t *)flo_html_copyToArena(
+            perm, resultsArray.buf, FLO_HTML_SIZEOF(uint16_t),
+            FLO_HTML_ALIGNOF(uint16_t), resultsArray.len);
     }
 
-    flo_html_destroyUint16HashSet(&resultsSet);
-    return result;
+    // TODO: fix mess on top, use correct arena
+    // RETURN RESULTSARRAY HERE OR SMTH....
+
+    return results;
 }
 
 flo_html_QueryStatus flo_html_getElementsByClassName(
-    const flo_html_String className, const flo_html_Dom *dom,
-    const flo_html_TextStore *textStore, flo_html_node_id **results,
-    ptrdiff_t *resultsLen) {
+    flo_html_String className, flo_html_Dom *dom, flo_html_TextStore *textStore,
+    flo_html_node_id **results, ptrdiff_t *resultsLen, flo_html_Arena *perm) {
     ptrdiff_t cssLen = className.len + 1;
     unsigned char cssBuffer[cssLen];
     flo_html_String css;
@@ -448,25 +456,27 @@ flo_html_QueryStatus flo_html_getElementsByClassName(
     css.buf[0] = '.';
     memcpy(css.buf, className.buf, className.len);
 
-    return flo_html_querySelectorAll(css, dom, textStore, results, resultsLen);
+    return flo_html_querySelectorAll(css, dom, textStore, results, resultsLen,
+                                     perm);
 }
 
 flo_html_QueryStatus flo_html_getElementsByTagName(
-    const flo_html_String tag, const flo_html_Dom *dom,
-    const flo_html_TextStore *textStore, flo_html_node_id **results,
-    ptrdiff_t *resultsLen) {
-    return flo_html_querySelectorAll(tag, dom, textStore, results, resultsLen);
+    flo_html_String tag, flo_html_Dom *dom, flo_html_TextStore *textStore,
+    flo_html_node_id **results, ptrdiff_t *resultsLen, flo_html_Arena *perm) {
+    return flo_html_querySelectorAll(tag, dom, textStore, results, resultsLen,
+                                     perm);
 }
 
-flo_html_QueryStatus flo_html_querySelector(const flo_html_String css,
-                                            const flo_html_Dom *dom,
-                                            const flo_html_TextStore *textStore,
-                                            flo_html_node_id *result) {
+flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
+                                            flo_html_Dom *dom,
+                                            flo_html_TextStore *textStore,
+                                            flo_html_node_id *result,
+                                            flo_html_Arena scratch) {
     flo_html_node_id *results = NULL;
     ptrdiff_t resultsLen = 0;
 
-    flo_html_QueryStatus status =
-        flo_html_querySelectorAll(css, dom, textStore, &results, &resultsLen);
+    flo_html_QueryStatus status = flo_html_querySelectorAll(
+        css, dom, textStore, &results, &resultsLen, &scratch);
     if (status != QUERY_SUCCESS) {
         FLO_HTML_FREE_TO_NULL(results);
         return status;
@@ -493,10 +503,11 @@ flo_html_QueryStatus flo_html_querySelector(const flo_html_String css,
     return status;
 }
 
-flo_html_QueryStatus
-flo_html_getElementByID(const flo_html_String id, const flo_html_Dom *dom,
-                        const flo_html_TextStore *textStore,
-                        flo_html_node_id *result) {
+flo_html_QueryStatus flo_html_getElementByID(flo_html_String id,
+                                             flo_html_Dom *dom,
+                                             flo_html_TextStore *textStore,
+                                             flo_html_node_id *result,
+                                             flo_html_Arena scratch) {
     ptrdiff_t cssLen = id.len + 1;
     unsigned char cssBuffer[cssLen];
     flo_html_String css;
@@ -505,5 +516,5 @@ flo_html_getElementByID(const flo_html_String id, const flo_html_Dom *dom,
     css.buf[0] = '.';
     memcpy(css.buf, id.buf, id.len);
 
-    return flo_html_querySelector(css, dom, textStore, result);
+    return flo_html_querySelector(css, dom, textStore, result, scratch);
 }

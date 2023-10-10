@@ -32,7 +32,6 @@ flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
     if (result != dataLen) {
         FLO_HTML_PRINT_ERROR("Failed to read the file.\n");
         fclose(srcFile);
-        FLO_HTML_FREE_TO_NULL((*buffer).buf);
         return FILE_CANT_READ;
     }
 
