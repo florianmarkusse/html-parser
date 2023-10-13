@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/user.h"
 
 flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom);
@@ -29,22 +30,18 @@ void flo_html_addBooleanProperty(flo_html_node_id nodeID,
 void flo_html_addProperty(flo_html_node_id nodeID, flo_html_index_id keyID,
                           flo_html_index_id valueID, flo_html_Dom *dom);
 
-const flo_html_String flo_html_getTag(flo_html_index_id tagID,
-                                      const flo_html_Dom *dom,
-                                      const flo_html_TextStore *textStore);
 void flo_html_getTagRegistration(flo_html_index_id tagID,
                                  const flo_html_Dom *dom,
                                  flo_html_TagRegistration **tagRegistration);
+const flo_html_String flo_html_getTag(flo_html_index_id tagID,
+                                      flo_html_ParsedHTML *parsed);
 
 const flo_html_String flo_html_getBoolProp(flo_html_index_id boolPropID,
-                                           const flo_html_Dom *dom,
-                                           const flo_html_TextStore *textStore);
+                                           flo_html_ParsedHTML *parsed);
 const flo_html_String flo_html_getPropKey(flo_html_index_id propKeyID,
-                                          const flo_html_Dom *dom,
-                                          const flo_html_TextStore *textStore);
-const flo_html_String
-flo_html_getPropValue(flo_html_index_id propValueID, const flo_html_Dom *dom,
-                      const flo_html_TextStore *textStore);
+                                          flo_html_ParsedHTML *parsed);
+const flo_html_String flo_html_getPropValue(flo_html_index_id propValueID,
+                                            flo_html_ParsedHTML *parsed);
 
 bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
                        flo_html_Node *replacingNode, flo_html_Dom *dom,

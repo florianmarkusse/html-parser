@@ -60,21 +60,13 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
     return true;
 }
 
-flo_html_index_id flo_html_getEntryID(flo_html_String string,
-                                      flo_html_StringHashSet *set) {
-    flo_html_ElementIndex index =
-        flo_html_containsStringWithDataHashSet(set, string);
-    if (index.wasPresent) {
-        return index.hashEntry.entryID;
-    }
-    return 0;
-}
+// flo_html_containsStringWithDataHashSet(set, string);
 
+// TODO: only the end result is required on the perm arena.
 bool flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     const ptrdiff_t filtersLen, const flo_html_Dom *dom,
     flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
-    //
     for (ptrdiff_t i = 0; i < dom->nodeLen; i++) {
         if (flo_html_filterNode(dom->nodes[i].nodeID, filters, filtersLen,
                                 dom)) {
@@ -105,33 +97,27 @@ flo_html_QueryStatus flo_html_filterByTagID(const flo_html_index_id tagID,
 
 // TODO(florian): not very nice way of doing this. Use a
 // hash or something.
-unsigned char isPresentIn(const flo_html_node_id nodeID,
-                          const flo_html_node_id *array,
-                          const ptrdiff_t arrayLen) {
+bool isPresentIn(const flo_html_node_id nodeID, const flo_html_node_id *array,
+                 const ptrdiff_t arrayLen) {
     for (ptrdiff_t j = 0; j < arrayLen; j++) {
         if (nodeID == array[j]) {
-            return 1;
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
+// TODO: only the end result is required on the perm arena.
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     const ptrdiff_t filtersLen, const flo_html_Dom *dom,
-    const ptrdiff_t numberOfSiblings, flo_html_Uint16HashSet *set) {
-    //
-    flo_html_Uint16HashSet filteredAdjacents;
-    if (flo_html_initUint16HashSet(&filteredAdjacents, set->arrayLen) !=
-        HASH_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Could not allocate memory for the filtered adjacents set\n");
-        return QUERY_MEMORY_ERROR;
-    }
-
-    flo_html_Uint16HashSetIterator iterator;
-    flo_html_initUint16HashSetIterator(&iterator, set);
+    const ptrdiff_t numberOfSiblings, flo_html_Uint16HashSet *set,
+    flo_html_Arena *perm) {
+    flo_html_Uint16HashSet filteredAdjacents =
+        flo_html_initUint16HashSet(set->arrayLen, perm);
+    flo_html_Uint16HashSetIterator iterator =
+        flo_html_initUint16HashSetIterator(set);
 
     while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
         flo_html_node_id inSet = flo_html_nextUint16HashSetIterator(&iterator);
@@ -140,13 +126,8 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
 
         while (siblingsNumberCopy > 0 && nextNodeID > 0) {
             if (flo_html_filterNode(nextNodeID, filters, filtersLen, dom)) {
-                flo_html_HashStatus status = flo_html_insertUint16HashSet(
-                    &filteredAdjacents, nextNodeID);
-                if (status != HASH_SUCCESS) {
-                    flo_html_destroyUint16HashSet(&filteredAdjacents);
-                    FLO_HTML_ERROR_WITH_CODE_ONLY(
-                        flo_html_hashStatusToString(status),
-                        "inserting into hash set failed!\n");
+                if (!flo_html_insertUint16HashSet(&filteredAdjacents,
+                                                  nextNodeID, perm)) {
                     return QUERY_MEMORY_ERROR;
                 }
             }
@@ -156,7 +137,6 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
         }
     }
 
-    flo_html_destroyUint16HashSet(set);
     set->arrayLen = filteredAdjacents.arrayLen;
     set->array = filteredAdjacents.array;
     set->entries = filteredAdjacents.entries;
@@ -164,27 +144,17 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
     return QUERY_SUCCESS;
 }
 
+// TODO: only the end result is required on the perm arena.
 flo_html_QueryStatus flo_html_getFilteredDescendants(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     const ptrdiff_t filtersLen, const flo_html_Dom *dom, ptrdiff_t depth,
-    flo_html_Uint16HashSet *set) {
-    flo_html_Uint16HashSet firstDescendants;
-    if (flo_html_copyUint16HashSet(set, &firstDescendants) != HASH_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Could not allocate & copy memory for the first descendants set\n");
-        return QUERY_MEMORY_ERROR;
-    }
-
+    flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
+    flo_html_Uint16HashSet firstDescendants =
+        flo_html_copyUint16HashSet(set, perm);
     flo_html_resetUint16HashSet(set);
 
-    flo_html_Uint16HashSet secondDescendants;
-    if (flo_html_initUint16HashSet(&secondDescendants,
-                                   firstDescendants.arrayLen) != HASH_SUCCESS) {
-        flo_html_destroyUint16HashSet(&firstDescendants);
-        FLO_HTML_PRINT_ERROR(
-            "Could not allocate memory for the second descendants set\n");
-        return QUERY_MEMORY_ERROR;
-    }
+    flo_html_Uint16HashSet secondDescendants =
+        flo_html_initUint16HashSet(firstDescendants.arrayLen, perm);
 
     bool isFirstFilled = true;
     flo_html_Uint16HashSet *toBeFilledSet = &secondDescendants;
@@ -197,25 +167,16 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
                     NODE_TYPE_DOCUMENT &&
                 flo_html_containsUint16HashSet(filledSet,
                                                parentChildNode.parentID)) {
-                flo_html_HashStatus status = flo_html_insertUint16HashSet(
-                    toBeFilledSet, parentChildNode.childID);
-                if (status != HASH_SUCCESS) {
-                    flo_html_destroyUint16HashSet(&firstDescendants);
-                    flo_html_destroyUint16HashSet(&secondDescendants);
-                    FLO_HTML_ERROR_WITH_CODE_ONLY(
-                        flo_html_hashStatusToString(status),
-                        "inserting into hash set failed!\n");
+                if (!flo_html_insertUint16HashSet(
+                        toBeFilledSet, parentChildNode.childID, perm)) {
+                    FLO_HTML_PRINT_ERROR("inserting into hash set failed!\n");
                     return QUERY_MEMORY_ERROR;
                 }
                 if (flo_html_filterNode(parentChildNode.childID, filters,
                                         filtersLen, dom)) {
-                    status = flo_html_insertUint16HashSet(
-                        set, parentChildNode.childID);
-                    if (status != HASH_SUCCESS) {
-                        flo_html_destroyUint16HashSet(&firstDescendants);
-                        flo_html_destroyUint16HashSet(&secondDescendants);
-                        FLO_HTML_ERROR_WITH_CODE_ONLY(
-                            flo_html_hashStatusToString(status),
+                    if (!flo_html_insertUint16HashSet(
+                            set, parentChildNode.childID, perm)) {
+                        FLO_HTML_PRINT_ERROR(
                             "inserting into results set failed!\n");
                         return QUERY_MEMORY_ERROR;
                     }
@@ -238,7 +199,5 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
         depth--;
     }
 
-    flo_html_destroyUint16HashSet(&firstDescendants);
-    flo_html_destroyUint16HashSet(&secondDescendants);
     return QUERY_SUCCESS;
 }

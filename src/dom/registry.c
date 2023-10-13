@@ -3,8 +3,7 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/memory.h"
 
-void flo_html_addTagRegistration(const flo_html_index_id tagID,
-                                 const bool isPaired,
+void flo_html_addTagRegistration(const bool isPaired,
                                  const flo_html_HashElement *hashElement,
                                  flo_html_Dom *dom) {
     // TODO: dynamic
@@ -14,7 +13,6 @@ void flo_html_addTagRegistration(const flo_html_index_id tagID,
 
     flo_html_TagRegistration *tagRegistry =
         &(dom->tagRegistry[dom->tagRegistryLen]);
-    tagRegistry->tagID = tagID;
     tagRegistry->isPaired = isPaired;
     tagRegistry->hashElement.hash = hashElement->hash;
     tagRegistry->hashElement.offset = hashElement->offset;

@@ -9,7 +9,7 @@ extern "C" {
 
 void flo_html_addRegistration(const flo_html_HashElement *hashElement,
                               flo_html_BasicRegistry *basicRegistry);
-void flo_html_addTagRegistration(flo_html_index_id tagID, bool isPaired,
+void flo_html_addTagRegistration(bool isPaired,
                                  const flo_html_HashElement *hashElement,
                                  flo_html_Dom *dom);
 

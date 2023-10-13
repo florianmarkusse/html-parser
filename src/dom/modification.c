@@ -25,27 +25,27 @@ getCreatedPropIDFromString(const PropertyType propertyType,
     flo_html_ElementIndex elementIndex =
         flo_html_elementToIndex(stringRegistry, prop);
 
-    if (!elementIndex.wasPresent) {
+    if (!elementIndex.entryIndex) {
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
-            flo_html_addRegistration(&elementIndex.hashEntry.hashElement,
+            flo_html_addRegistration(&elementIndex.hashElement,
                                      &dom->boolPropRegistry);
             break;
         }
         case PROPERTY_TYPE_KEY: {
-            flo_html_addRegistration(&elementIndex.hashEntry.hashElement,
+            flo_html_addRegistration(&elementIndex.hashElement,
                                      &dom->propKeyRegistry);
             break;
         }
         case PROPERTY_TYPE_VALUE: {
-            flo_html_addRegistration(&elementIndex.hashEntry.hashElement,
+            flo_html_addRegistration(&elementIndex.hashElement,
                                      &dom->propValueRegistry);
             break;
         }
         }
     }
 
-    return elementIndex.hashEntry.entryID;
+    return elementIndex.entryIndex;
 }
 
 void flo_html_addPropertyToNode(const flo_html_node_id nodeID,
@@ -77,7 +77,8 @@ bool flo_html_setPropertyValue(const flo_html_node_id nodeID,
                                flo_html_Dom *dom,
                                flo_html_TextStore *textStore) {
     flo_html_index_id keyID =
-        flo_html_getEntryID(key, &textStore->propKeys.set);
+        flo_html_containsStringHashSet(&textStore->propKeys.set, key)
+            .entryIndex;
     if (keyID == 0) {
         FLO_HTML_PRINT_ERROR("Could not find key in stored prop keys\n");
         return false;
@@ -137,10 +138,9 @@ void flo_html_setTagOnDocumentNode(const flo_html_String tag,
     flo_html_ElementIndex elementIndex =
         flo_html_elementToIndex(&textStore->tags, tag);
 
-    if (!elementIndex.wasPresent) {
-        flo_html_addTagRegistration(elementIndex.hashEntry.entryID, isPaired,
-                                    &elementIndex.hashEntry.hashElement, dom);
+    if (elementIndex.entryIndex > 0) {
+        flo_html_addTagRegistration(isPaired, &elementIndex.hashElement, dom);
     }
 
-    flo_html_setNodeTagID(nodeID, elementIndex.hashEntry.entryID, dom);
+    flo_html_setNodeTagID(nodeID, elementIndex.entryIndex, dom);
 }

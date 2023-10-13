@@ -11,12 +11,6 @@ void flo_html_initDataPage(flo_html_DataPage *dataPage,
     dataPage->spaceLeft = pageSize;
 }
 
-void flo_html_destroyDataPage(flo_html_DataPage *dataPage) {
-    FLO_HTML_FREE_TO_NULL(dataPage->start);
-    dataPage->spaceLeft = 0;
-    dataPage->freeSpace = NULL;
-}
-
 unsigned char *flo_html_insertIntoPage(const flo_html_String data,
                                        flo_html_DataPage *page) {
     // TODO: dynamic

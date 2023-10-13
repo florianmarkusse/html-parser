@@ -16,6 +16,7 @@ extern "C" {
 
 typedef FLO_HTML_ARRAY(uint16_t) flo_html_uint16_t_a;
 
+// TODO: store offset as well wtd flo>?
 typedef struct {
     uint16_t value;
     uint16_t hash;
@@ -53,9 +54,8 @@ typedef struct {
     ptrdiff_t index;
 } flo_html_Uint16HashSetIterator;
 
-void flo_html_initUint16HashSetIterator(
-    flo_html_Uint16HashSetIterator *iterator,
-    const flo_html_Uint16HashSet *set);
+flo_html_Uint16HashSetIterator
+flo_html_initUint16HashSetIterator(const flo_html_Uint16HashSet *set);
 
 uint16_t
 flo_html_nextUint16HashSetIterator(flo_html_Uint16HashSetIterator *iterator);

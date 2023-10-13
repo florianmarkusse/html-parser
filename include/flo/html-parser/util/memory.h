@@ -105,56 +105,6 @@ void *flo_html_copyToArena(flo_html_Arena *arena, void *data, ptrdiff_t size,
                    FLO_HTML_NEW_2)                                             \
     (__VA_ARGS__)
 
-__attribute((unused)) static void flo_html_grow(void *slice, ptrdiff_t size,
-                                                ptrdiff_t align,
-                                                flo_html_Arena *a,
-                                                unsigned char flags) {
-    struct {
-        char *data;
-        ptrdiff_t len;
-        ptrdiff_t cap;
-    } replica;
-    memcpy(&replica, slice, FLO_HTML_SIZEOF(replica));
-
-    if (replica.data == NULL) {
-        replica.cap = 1;
-        replica.data = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
-    } else if (a->end == replica.data - size * replica.cap) {
-        flo_html_alloc(a, size, 1, replica.cap, flags);
-    } else {
-        void *data = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
-        memcpy(data, replica.data, size * replica.len);
-        replica.data = data;
-    }
-
-    replica.cap *= 2;
-    memcpy(slice, &replica, sizeof(replica));
-}
-
-#define FLO_HTML_PUSH_2(s, a)                                                  \
-    ({                                                                         \
-        typeof(s) s_ = (s);                                                    \
-        typeof(a) a_ = (a);                                                    \
-        if (s_->len >= s_->cap) {                                              \
-            flo_html_grow(s_, FLO_HTML_SIZEOF(*s_->data),                      \
-                          FLO_HTML_ALIGNOF(*s_->data), a_, 0);                 \
-        }                                                                      \
-        s_->data + s_->len++;                                                  \
-    })
-#define FLO_HTML_PUSH_3(s, a, f)                                               \
-    ({                                                                         \
-        typeof(s) s_ = (s);                                                    \
-        typeof(a) a_ = (a);                                                    \
-        if (s_->len >= s_->cap) {                                              \
-            flo_html_grow(s_, FLO_HTML_SIZEOF(*s_->data),                      \
-                          FLO_HTML_ALIGNOF(*s_->data), a_, f);                 \
-        }                                                                      \
-        s_->data + s_->len++;                                                  \
-    })
-#define FLO_HTML_PUSH_X(a, b, c, d, ...) d
-#define FLO_HTML_PUSH(...)                                                     \
-    FLO_HTML_NEW_X(__VA_ARGS__, FLO_HTML_PUSH_3, FLO_HTML_NEW_2)(__VA_ARGS__)
-
 /**
  * @brief Free a pointer and set it to NULL.
  *

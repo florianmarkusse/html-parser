@@ -40,30 +40,18 @@ void flo_html_createTextStore(flo_html_TextStore *textStore,
     flo_html_initDataPage(&textStore->text, FLO_HTML_TEXT_PAGE_SIZE, perm);
 }
 
-void flo_html_destroyTextStore(flo_html_TextStore *textStore) {
-    flo_html_destroyStringRegistry(&textStore->tags);
-    flo_html_destroyStringRegistry(&textStore->boolProps);
-    flo_html_destroyStringRegistry(&textStore->propKeys);
-    flo_html_destroyStringRegistry(&textStore->propValues);
-    flo_html_destroyDataPage(&textStore->text);
-}
-
-/**
- * If the element is found, then  flo_html_index_id is set.
- * flo_html_HashElement is always set.
- */
 flo_html_ElementIndex
 flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
                         const flo_html_String element) {
     flo_html_ElementIndex result =
-        flo_html_containsStringWithDataHashSet(&stringRegistry->set, element);
-    if (result.wasPresent) {
+        flo_html_containsStringHashSet(&stringRegistry->set, element);
+    if (result.entryIndex > 0) {
         return result;
     }
 
-    result.hashEntry.entryID = flo_html_insertIntoPageWithHash(
+    result.entryIndex = flo_html_insertIntoPageWithHash(
         element, &stringRegistry->dataPage, &stringRegistry->set,
-        &result.hashEntry.hashElement);
+        &result.hashElement);
 
     return result;
 }

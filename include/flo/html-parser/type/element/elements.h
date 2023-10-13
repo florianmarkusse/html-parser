@@ -37,7 +37,6 @@ typedef struct {
 
 void flo_html_createTextStore(flo_html_TextStore *textStore,
                               flo_html_Arena *perm);
-void flo_html_destroyTextStore(flo_html_TextStore *textStore);
 
 flo_html_ElementIndex
 flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,

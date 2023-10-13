@@ -8,13 +8,12 @@
 
 flo_html_Uint16HashSet flo_html_initUint16HashSet(const uint16_t capacity,
                                                   flo_html_Arena *perm) {
-    flo_html_Uint16HashSet set = {
+    return (flo_html_Uint16HashSet){
         .array = FLO_HTML_NEW(perm, flo_html_Uint16Entry, capacity,
                               FLO_HTML_ZERO_MEMORY),
         .arrayLen = capacity,
         .entries = 0,
     };
-    return set;
 }
 
 bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
@@ -77,7 +76,7 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
     set->array[index].hash = hash;
     set->entries++;
 
-    return HASH_SUCCESS;
+    return true;
 }
 
 flo_html_uint16_t_a
@@ -130,11 +129,9 @@ void flo_html_resetUint16HashSet(flo_html_Uint16HashSet *set) {
     set->entries = 0;
 }
 
-void flo_html_initUint16HashSetIterator(
-    flo_html_Uint16HashSetIterator *iterator,
-    const flo_html_Uint16HashSet *set) {
-    iterator->set = set;
-    iterator->index = 0;
+flo_html_Uint16HashSetIterator
+flo_html_initUint16HashSetIterator(const flo_html_Uint16HashSet *set) {
+    return (flo_html_Uint16HashSetIterator){.set = set, .index = 0};
 }
 
 uint16_t

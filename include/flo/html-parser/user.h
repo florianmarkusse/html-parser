@@ -13,13 +13,13 @@ extern "C" {
 typedef struct {
     flo_html_TextStore textStore;
     flo_html_Dom dom;
-    flo_html_Arena arena;
 } flo_html_ParsedHTML;
 
 flo_html_UserStatus flo_html_fromFile(const flo_html_String fileLocation,
-                                      flo_html_ParsedHTML *parsed);
+                                      flo_html_ParsedHTML *parsed,
+                                      flo_html_Arena *perm);
 
-void flo_html_destroyHTML(flo_html_ParsedHTML *parsed);
+void flo_html_destroyHTML(flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

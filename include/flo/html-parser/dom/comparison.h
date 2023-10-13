@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_H
-#define FLO_HTML_PARSER_DOM_COMPARISON_COMPARISON_H
+#ifndef FLO_HTML_PARSER_DOM_COMPARISON_H
+#define FLO_HTML_PARSER_DOM_COMPARISON_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -7,6 +7,12 @@ extern "C" {
 
 #include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/user.h"
+
+typedef struct {
+    flo_html_ParsedHTML *parsed;
+    flo_html_node_id *current;
+} flo_html_ComparisonLocation;
 
 /**
  * @brief Compare two DOM structures and get the first unequal nodes.
@@ -29,10 +35,9 @@ extern "C" {
  *          "flo/html-parser/comparison-status.h#flo_html_ComparisonStatus".
  */
 flo_html_ComparisonStatus
-flo_html_equalsWithNode(flo_html_node_id *currNodeID1, const flo_html_Dom *dom1,
-                        const flo_html_TextStore *textStore1,
-                        flo_html_node_id *currNodeID2, const flo_html_Dom *dom2,
-                        const flo_html_TextStore *textStore2);
+flo_html_equalsWithNode(flo_html_ComparisonLocation loc1,
+                        flo_html_ComparisonLocation loc2,
+                        flo_html_Arena scratch);
 
 /**
  * @brief Compare two DOM structures.
@@ -50,10 +55,9 @@ flo_html_equalsWithNode(flo_html_node_id *currNodeID1, const flo_html_Dom *dom1,
  *          otherwise). See @ref
  *          "flo/html-parser/comparison-status.h#flo_html_ComparisonStatus".
  */
-flo_html_ComparisonStatus flo_html_equals(const flo_html_Dom *dom1,
-                                          const flo_html_TextStore *textStore1,
-                                          const flo_html_Dom *dom2,
-                                          const flo_html_TextStore *textStore2);
+flo_html_ComparisonStatus flo_html_equals(flo_html_ParsedHTML *parsed1,
+                                          flo_html_ParsedHTML parsed2,
+                                          flo_html_Arena scratch);
 
 /**
  * @brief Print the first difference between two nodes.

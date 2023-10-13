@@ -15,48 +15,44 @@ extern "C" {
 #include "hash-element.h"
 #include "hash-status.h"
 
-typedef struct {
-    flo_html_index_id indexID;
-    flo_html_String string;
-} flo_html_StringHashEntry;
-
 /**
  * Hashing with linear probing for natural values > 0 up until ptrdiff_t max
  * size.
  */
+
+// This seems to be a general structure I would like to have, maybe have
+// hashElement hash type be based on the type tho, maybe have hashElement hash
+// type be based on the type tho
+typedef struct {
+    ptrdiff_t entryIndex;
+    flo_html_HashElement hashElement;
+} flo_html_Contains;
+
+typedef struct {
+    flo_html_Contains contains;
+    flo_html_String string;
+} flo_html_StringHashEntry;
+
 typedef struct {
     flo_html_StringHashEntry *array;
     ptrdiff_t arrayLen;
     ptrdiff_t entries;
 } flo_html_StringHashSet;
 
-typedef struct {
-    flo_html_HashElement hashElement;
-    flo_html_index_id entryID;
-} flo_html_HashEntry;
+flo_html_StringHashSet flo_html_initStringHashSet(ptrdiff_t capacity,
+                                                  flo_html_Arena *perm);
 
-typedef struct {
-    bool wasPresent;
-    flo_html_HashEntry hashEntry;
-} flo_html_Contains;
+ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
+                                       const flo_html_String string,
+                                       flo_html_Arena *perm);
 
-// TODO: replace with just returning the set by vlaue.
-void flo_html_initStringHashSet(flo_html_StringHashSet *set, ptrdiff_t capacity,
-                                flo_html_Arena *perm);
+ptrdiff_t flo_html_insertStringAtHash(flo_html_StringHashSet *set,
+                                      const flo_html_String string,
+                                      const flo_html_HashElement *hashElement);
 
-flo_html_HashStatus flo_html_insertStringHashSet(flo_html_StringHashSet *set,
-                                                 const flo_html_String string);
-
-flo_html_index_id
-flo_html_insertStringAtHash(flo_html_StringHashSet *set,
-                            const flo_html_String string,
-                            const flo_html_HashElement *hashElement);
-
-bool flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
-                                    const flo_html_String string);
 flo_html_Contains
-flo_html_containsStringWithDataHashSet(const flo_html_StringHashSet *set,
-                                       const flo_html_String string);
+flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
+                               const flo_html_String string);
 
 const flo_html_String
 flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
@@ -65,8 +61,6 @@ flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
 flo_html_HashComparisonStatus
 flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
                              const flo_html_StringHashSet *set2);
-
-void flo_html_destroyStringHashSet(flo_html_StringHashSet *set);
 
 typedef struct {
     const flo_html_StringHashSet *set;

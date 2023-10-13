@@ -115,41 +115,34 @@ void flo_html_addProperty(const flo_html_node_id nodeID,
 }
 
 const flo_html_String flo_html_getTag(const flo_html_index_id tagID,
-                                      const flo_html_Dom *dom,
-                                      const flo_html_TextStore *textStore) {
-    flo_html_TagRegistration *tagRegistration = &dom->tagRegistry[tagID];
-    return flo_html_getStringFromHashSet(&textStore->tags.set,
+                                      flo_html_ParsedHTML *parsed) {
+    flo_html_TagRegistration *tagRegistration = &parsed->dom.tagRegistry[tagID];
+    return flo_html_getStringFromHashSet(&parsed->textStore.tags.set,
                                          &tagRegistration->hashElement);
 }
 
-void flo_html_getTagRegistration(flo_html_index_id tagID,
-                                 const flo_html_Dom *dom,
-                                 flo_html_TagRegistration **tagRegistration) {
-    *tagRegistration = &dom->tagRegistry[tagID];
-}
-
-const flo_html_String
-flo_html_getBoolProp(const flo_html_index_id boolPropID,
-                     const flo_html_Dom *dom,
-                     const flo_html_TextStore *textStore) {
+// TODO: get rid of these functions and use a single generic one
+const flo_html_String flo_html_getBoolProp(const flo_html_index_id boolPropID,
+                                           flo_html_ParsedHTML *parsed) {
     return flo_html_getStringFromHashSet(
-        &textStore->boolProps.set, &dom->boolPropRegistry.hashes[boolPropID]);
+        &parsed->textStore.boolProps.set,
+        &parsed->dom.boolPropRegistry.hashes[boolPropID]);
 }
 
+// TODO: get rid of these functions and use a single generic one
 const flo_html_String flo_html_getPropKey(const flo_html_index_id propKeyID,
-                                          const flo_html_Dom *dom,
-                                          const flo_html_TextStore *textStore) {
+                                          flo_html_ParsedHTML *parsed) {
     return flo_html_getStringFromHashSet(
-        &textStore->propKeys.set, &dom->propKeyRegistry.hashes[propKeyID]);
+        &parsed->textStore.propKeys.set,
+        &parsed->dom.propKeyRegistry.hashes[propKeyID]);
 }
 
-const flo_html_String
-flo_html_getPropValue(const flo_html_index_id propValueID,
-                      const flo_html_Dom *dom,
-                      const flo_html_TextStore *textStore) {
+// TODO: get rid of these functions and use a single generic one
+const flo_html_String flo_html_getPropValue(const flo_html_index_id propValueID,
+                                            flo_html_ParsedHTML *parsed) {
     return flo_html_getStringFromHashSet(
-        &textStore->propValues.set,
-        &dom->propValueRegistry.hashes[propValueID]);
+        &parsed->textStore.propValues.set,
+        &parsed->dom.propValueRegistry.hashes[propValueID]);
 }
 
 bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,

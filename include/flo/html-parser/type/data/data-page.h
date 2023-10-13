@@ -34,8 +34,6 @@ typedef struct {
 void flo_html_initDataPage(flo_html_DataPage *dataPage,
                            const ptrdiff_t pageSize, flo_html_Arena *perm);
 
-void flo_html_destroyDataPage(flo_html_DataPage *dataPage);
-
 unsigned char *flo_html_insertIntoPage(const flo_html_String data,
                                        flo_html_DataPage *page);
 
