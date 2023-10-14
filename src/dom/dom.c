@@ -3,15 +3,19 @@
 #include "flo/html-parser/util/file/read.h"
 #include "flo/html-parser/util/memory.h"
 
-void initflo_html_BasicRegistry(flo_html_BasicRegistry *basicRegistry,
-                                const flo_html_HashElement *initRegistration,
-                                flo_html_Arena *perm) {
-    basicRegistry->hashes = FLO_HTML_NEW(perm, flo_html_HashElement,
-                                         FLO_HTML_MAX_PROP_REGISTRATIONS);
-    basicRegistry->hashes[0] = *initRegistration;
-    basicRegistry->len =
+flo_html_BasicRegistry
+initflo_html_BasicRegistry(flo_html_HashElement initRegistration,
+                           flo_html_Arena *perm) {
+    flo_html_BasicRegistry basicRegistry;
+
+    basicRegistry.hashes = FLO_HTML_NEW(perm, flo_html_HashElement,
+                                        FLO_HTML_MAX_PROP_REGISTRATIONS);
+    basicRegistry.hashes[0] = initRegistration;
+    basicRegistry.len =
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
-    basicRegistry->cap = FLO_HTML_MAX_PROP_REGISTRATIONS;
+    basicRegistry.cap = FLO_HTML_MAX_PROP_REGISTRATIONS;
+
+    return basicRegistry;
 }
 
 flo_html_DomStatus
@@ -46,9 +50,9 @@ void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
         1; // Start at 1 so we don't need to do tagRegistry[x - 1]
     dom->tagRegistryCap = FLO_HTML_MAX_TAG_REGISTRATIONS;
 
-    initflo_html_BasicRegistry(&dom->boolPropRegistry, &initHash, perm);
-    initflo_html_BasicRegistry(&dom->propKeyRegistry, &initHash, perm);
-    initflo_html_BasicRegistry(&dom->propValueRegistry, &initHash, perm);
+    dom->boolPropRegistry = initflo_html_BasicRegistry(initHash, perm);
+    dom->propKeyRegistry = initflo_html_BasicRegistry(initHash, perm);
+    dom->propValueRegistry = initflo_html_BasicRegistry(initHash, perm);
 
     dom->nodes = FLO_HTML_NEW(perm, flo_html_Node, FLO_HTML_MAX_NODES);
     flo_html_Node errorNode;
@@ -58,7 +62,7 @@ void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
     dom->nodes[0] = errorNode;
 
     flo_html_Node rootNode;
-    rootNode.nodeID = 1;
+    rootNode.nodeID = FLO_HTML_ROOT_NODE_ID;
     rootNode.nodeType = NODE_TYPE_ROOT;
     rootNode.tagID = 0;
     dom->nodes[1] = rootNode;

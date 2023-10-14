@@ -9,8 +9,9 @@
 #include "flo/html-parser/util/file/path.h"
 
 void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
-               const flo_html_Dom *dom, const flo_html_TextStore *textStore,
-               FILE *output) {
+               flo_html_ParsedHTML parsed, FILE *output) {
+    flo_html_Dom *dom = parsed.dom;
+
     flo_html_Node node = dom->nodes[nodeID];
 
     if (node.nodeType == NODE_TYPE_ERROR) {
@@ -22,7 +23,7 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         return;
     }
 
-    const flo_html_String tag = flo_html_getTag(node.tagID, dom, textStore);
+    const flo_html_String tag = flo_html_getTag(node.tagID, parsed);
     fprintf(output, "<%.*s", FLO_HTML_S_P(tag));
 
     for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
@@ -30,7 +31,7 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
 
         if (boolProp.nodeID == node.nodeID) {
             const flo_html_String prop =
-                flo_html_getBoolProp(boolProp.propID, dom, textStore);
+                flo_html_getBoolProp(boolProp.propID, parsed);
             fprintf(output, " %.*s", FLO_HTML_S_P(prop));
         }
     }
@@ -39,10 +40,9 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         flo_html_Property prop = dom->props[i];
 
         if (prop.nodeID == node.nodeID) {
-            const flo_html_String key =
-                flo_html_getPropKey(prop.keyID, dom, textStore);
+            const flo_html_String key = flo_html_getPropKey(prop.keyID, parsed);
             const flo_html_String value =
-                flo_html_getPropValue(prop.valueID, dom, textStore);
+                flo_html_getPropValue(prop.valueID, parsed);
             fprintf(output, " %.*s=\"%.*s\"", FLO_HTML_S_P(key),
                     FLO_HTML_S_P(value));
         }
@@ -61,27 +61,24 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
     fprintf(output, ">");
     flo_html_node_id childNode = flo_html_getFirstChild(nodeID, dom);
     while (childNode) {
-        printNode(childNode, indentation + 1, dom, textStore, output);
+        printNode(childNode, indentation + 1, parsed, output);
         childNode = flo_html_getNext(childNode, dom);
     }
     fprintf(output, "</%.*s>", FLO_HTML_S_P(tag));
 }
 
-void flo_html_printHTML(const flo_html_Dom *dom,
-                        const flo_html_TextStore *textStore) {
+void flo_html_printHTML(flo_html_ParsedHTML parsed) {
     printf("printing HTML...\n\n");
-    flo_html_node_id currentNodeID = dom->firstNodeID;
+    flo_html_node_id currentNodeID = parsed.dom->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, dom, textStore, stdout);
-        currentNodeID = flo_html_getNext(currentNodeID, dom);
+        printNode(currentNodeID, 0, parsed, stdout);
+        currentNodeID = flo_html_getNext(currentNodeID, parsed.dom);
     }
     printf("\n\n");
 }
 
-flo_html_FileStatus
-flo_html_writeHTMLToFile(const flo_html_Dom *dom,
-                         const flo_html_TextStore *textStore,
-                         const flo_html_String filePath) {
+flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_ParsedHTML parsed,
+                                             const flo_html_String filePath) {
     flo_html_createPath(filePath);
     // casting here because filePath should not contain any funny characters.
     FILE *file = fopen((char *)filePath.buf, "wbe");
@@ -91,10 +88,10 @@ flo_html_writeHTMLToFile(const flo_html_Dom *dom,
         return FILE_CANT_OPEN;
     }
 
-    flo_html_node_id currentNodeID = dom->firstNodeID;
+    flo_html_node_id currentNodeID = parsed.dom->firstNodeID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, dom, textStore, file);
-        currentNodeID = flo_html_getNext(currentNodeID, dom);
+        printNode(currentNodeID, 0, parsed, file);
+        currentNodeID = flo_html_getNext(currentNodeID, parsed.dom);
     }
 
     fclose(file);
@@ -118,8 +115,10 @@ void printflo_html_BasicRegistry(const flo_html_String registryName,
     printf("\n");
 }
 
-void flo_html_printDomStatus(const flo_html_Dom *dom,
-                             const flo_html_TextStore *textStore) {
+void flo_html_printDomStatus(flo_html_ParsedHTML parsed) {
+    flo_html_Dom *dom = parsed.dom;
+    flo_html_TextStore *textStore = parsed.textStore;
+
     printf("printing DOM status...\n\n");
 
     printf("Printing Text Store contents...\n");

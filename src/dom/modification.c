@@ -50,66 +50,63 @@ getCreatedPropIDFromString(const PropertyType propertyType,
 
 void flo_html_addPropertyToNode(const flo_html_node_id nodeID,
                                 const flo_html_String key,
-                                const flo_html_String value, flo_html_Dom *dom,
-                                flo_html_TextStore *textStore) {
+                                const flo_html_String value,
+                                flo_html_ParsedHTML parsed) {
     flo_html_index_id keyID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_KEY, key, dom, &textStore->propKeys);
+        PROPERTY_TYPE_KEY, key, parsed.dom, &parsed.textStore->propKeys);
 
     flo_html_index_id valueID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_VALUE, value, dom, &textStore->propValues);
+        PROPERTY_TYPE_VALUE, value, parsed.dom, &parsed.textStore->propValues);
 
-    flo_html_addProperty(nodeID, keyID, valueID, dom);
+    flo_html_addProperty(nodeID, keyID, valueID, parsed.dom);
 }
 
 void flo_html_addBooleanPropertyToNode(const flo_html_node_id nodeID,
                                        const flo_html_String boolProp,
-                                       flo_html_Dom *dom,
-                                       flo_html_TextStore *textStore) {
+                                       flo_html_ParsedHTML parsed) {
     flo_html_index_id boolPropID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_BOOL, boolProp, dom, &textStore->boolProps);
+        PROPERTY_TYPE_BOOL, boolProp, parsed.dom, &parsed.textStore->boolProps);
 
-    flo_html_addBooleanProperty(nodeID, boolPropID, dom);
+    flo_html_addBooleanProperty(nodeID, boolPropID, parsed.dom);
 }
 
 bool flo_html_setPropertyValue(const flo_html_node_id nodeID,
                                const flo_html_String key,
                                const flo_html_String newValue,
-                               flo_html_Dom *dom,
-                               flo_html_TextStore *textStore) {
+                               flo_html_ParsedHTML parsed) {
     flo_html_index_id keyID =
-        flo_html_containsStringHashSet(&textStore->propKeys.set, key)
+        flo_html_containsStringHashSet(&parsed.textStore->propKeys.set, key)
             .entryIndex;
     if (keyID == 0) {
         FLO_HTML_PRINT_ERROR("Could not find key in stored prop keys\n");
         return false;
     }
-    flo_html_Property *prop = flo_html_getProperty(nodeID, keyID, dom);
+    flo_html_Property *prop = flo_html_getProperty(nodeID, keyID, parsed.dom);
     if (prop == NULL) {
         FLO_HTML_PRINT_ERROR("Could not find key for given node\n");
         return false;
     }
 
-    flo_html_index_id newValueID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_VALUE, newValue, dom, &textStore->propValues);
+    flo_html_index_id newValueID =
+        getCreatedPropIDFromString(PROPERTY_TYPE_VALUE, newValue, parsed.dom,
+                                   &parsed.textStore->propValues);
     prop->valueID = newValueID;
 
     return true;
 }
 
 void flo_html_setTextContent(const flo_html_node_id nodeID,
-                             const flo_html_String text, flo_html_Dom *dom,
-                             flo_html_TextStore *textStore) {
-    flo_html_removeChildren(nodeID, dom);
+                             const flo_html_String text,
+                             flo_html_ParsedHTML parsed) {
+    flo_html_removeChildren(nodeID, parsed.dom);
 
-    flo_html_node_id newNodeID =
-        flo_html_parseTextElement(text, dom, textStore);
-    flo_html_addParentFirstChild(nodeID, newNodeID, dom);
-    flo_html_addParentChild(nodeID, newNodeID, dom);
+    flo_html_node_id newNodeID = flo_html_parseTextElement(text, parsed);
+    flo_html_addParentFirstChild(nodeID, newNodeID, parsed.dom);
+    flo_html_addParentChild(nodeID, newNodeID, parsed.dom);
 }
 
 void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,
-                                flo_html_Dom *dom,
-                                flo_html_TextStore *textStore, bool isAppend) {
+                                flo_html_ParsedHTML parsed, bool isAppend) {
     const flo_html_String prevText = node->text;
     const ptrdiff_t mergedLen =
         prevText.len + text.len + 1; // Adding a whitespace in between.
@@ -126,21 +123,22 @@ void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,
     }
 
     unsigned char *dataLocation = flo_html_insertIntoPage(
-        FLO_HTML_S_LEN(buffer, mergedLen), &textStore->text);
+        FLO_HTML_S_LEN(buffer, mergedLen), &parsed.textStore->text);
     flo_html_setNodeText(node->nodeID, FLO_HTML_S_LEN(dataLocation, mergedLen),
-                         dom);
+                         parsed.dom);
 }
 
 void flo_html_setTagOnDocumentNode(const flo_html_String tag,
                                    const flo_html_node_id nodeID,
-                                   const bool isPaired, flo_html_Dom *dom,
-                                   flo_html_TextStore *textStore) {
+                                   const bool isPaired,
+                                   flo_html_ParsedHTML parsed) {
     flo_html_ElementIndex elementIndex =
-        flo_html_elementToIndex(&textStore->tags, tag);
+        flo_html_elementToIndex(&parsed.textStore->tags, tag);
 
     if (elementIndex.entryIndex > 0) {
-        flo_html_addTagRegistration(isPaired, &elementIndex.hashElement, dom);
+        flo_html_addTagRegistration(isPaired, &elementIndex.hashElement,
+                                    parsed.dom);
     }
 
-    flo_html_setNodeTagID(nodeID, elementIndex.entryIndex, dom);
+    flo_html_setNodeTagID(nodeID, elementIndex.entryIndex, parsed.dom);
 }

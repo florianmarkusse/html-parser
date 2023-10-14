@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_DOM_APPENDIX_APPENDIX_H
-#define FLO_HTML_PARSER_DOM_APPENDIX_APPENDIX_H
+#ifndef FLO_HTML_PARSER_DOM_APPENDIX_H
+#define FLO_HTML_PARSER_DOM_APPENDIX_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,6 +12,7 @@ extern "C" {
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/node/document-node.h"
 #include "flo/html-parser/node/node.h"
+#include "flo/html-parser/user.h"
 
 /**
  * @brief Append a DocumentNode to the DOM using a CSS query.
@@ -28,9 +29,9 @@ extern "C" {
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
+flo_html_node_id flo_html_appendDocumentNodeWithQuery(
     const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Append a text node to the DOM using a CSS query.
@@ -47,10 +48,9 @@ flo_html_DomStatus flo_html_appendDocumentNodeWithQuery(
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
-flo_html_appendTextNodeWithQuery(const flo_html_String cssQuery,
-                                 const flo_html_String text, flo_html_Dom *dom,
-                                 flo_html_TextStore *textStore);
+flo_html_node_id flo_html_appendTextNodeWithQuery(
+    const flo_html_String cssQuery, const flo_html_String text,
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Append HTML content from a string to the DOM using a CSS query.
@@ -67,9 +67,9 @@ flo_html_appendTextNodeWithQuery(const flo_html_String cssQuery,
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_appendHTMLFromStringWithQuery(
+flo_html_node_id flo_html_appendHTMLFromStringWithQuery(
     const flo_html_String cssQuery, const flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Append HTML content from a file to the DOM using a CSS query.
@@ -86,9 +86,9 @@ flo_html_DomStatus flo_html_appendHTMLFromStringWithQuery(
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_appendHTMLFromFileWithQuery(
+flo_html_node_id flo_html_appendHTMLFromFileWithQuery(
     const flo_html_String cssQuery, const flo_html_String fileLocation,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Append a DocumentNode to the DOM.
@@ -105,10 +105,10 @@ flo_html_DomStatus flo_html_appendHTMLFromFileWithQuery(
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
+flo_html_node_id
 flo_html_appendDocumentNode(flo_html_node_id parentID,
                             const flo_html_DocumentNode *docNode,
-                            flo_html_Dom *dom, flo_html_TextStore *textStore);
+                            flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Append a text node to the DOM.
@@ -125,10 +125,10 @@ flo_html_appendDocumentNode(flo_html_node_id parentID,
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_appendTextNode(flo_html_node_id parentID,
-                                           const flo_html_String text,
-                                           flo_html_Dom *dom,
-                                           flo_html_TextStore *textStore);
+flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
+                                         const flo_html_String text,
+                                         flo_html_ParsedHTML parsed,
+                                         flo_html_Arena *perm);
 
 /**
  * @brief Append HTML content from a string to the DOM.
@@ -145,10 +145,10 @@ flo_html_DomStatus flo_html_appendTextNode(flo_html_node_id parentID,
  * @return  The status of the append operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
-flo_html_appendHTMLFromString(flo_html_node_id parentID,
-                              const flo_html_String htmlString,
-                              flo_html_Dom *dom, flo_html_TextStore *textStore);
+flo_html_node_id flo_html_appendHTMLFromString(flo_html_node_id parentID,
+                                               const flo_html_String htmlString,
+                                               flo_html_ParsedHTML parsed,
+                                               flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

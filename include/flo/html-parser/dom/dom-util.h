@@ -34,18 +34,18 @@ void flo_html_getTagRegistration(flo_html_index_id tagID,
                                  const flo_html_Dom *dom,
                                  flo_html_TagRegistration **tagRegistration);
 const flo_html_String flo_html_getTag(flo_html_index_id tagID,
-                                      flo_html_ParsedHTML *parsed);
+                                      flo_html_ParsedHTML parsed);
 
 const flo_html_String flo_html_getBoolProp(flo_html_index_id boolPropID,
-                                           flo_html_ParsedHTML *parsed);
+                                           flo_html_ParsedHTML parsed);
 const flo_html_String flo_html_getPropKey(flo_html_index_id propKeyID,
-                                          flo_html_ParsedHTML *parsed);
+                                          flo_html_ParsedHTML parsed);
 const flo_html_String flo_html_getPropValue(flo_html_index_id propValueID,
-                                            flo_html_ParsedHTML *parsed);
+                                            flo_html_ParsedHTML parsed);
 
 bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
-                       flo_html_Node *replacingNode, flo_html_Dom *dom,
-                       flo_html_TextStore *textStore, bool isAppend);
+                       flo_html_Node *replacingNode, flo_html_ParsedHTML parsed,
+                       bool isAppend);
 
 void flo_html_connectOtherNodesToParent(flo_html_node_id parentID,
                                         flo_html_node_id lastAddedChild,

@@ -6,7 +6,7 @@
 #define MAX_MEMORY_PER_HTML 1U << 28U // 256MiB
 
 flo_html_UserStatus flo_html_fromFile(const flo_html_String fileLocation,
-                                      flo_html_ParsedHTML *parsed,
+                                      flo_html_ParsedHTML parsed,
                                       flo_html_Arena *perm) {
     if (perm->beg == NULL) {
         *perm = flo_html_newArena(MAX_MEMORY_PER_HTML);
@@ -24,8 +24,8 @@ flo_html_UserStatus flo_html_fromFile(const flo_html_String fileLocation,
         perm->jmp_buf = jmp_buf;
     }
 
-    flo_html_createTextStore(&parsed->textStore, perm);
-    flo_html_createDomFromFile(fileLocation, &parsed->dom, &parsed->textStore,
+    *parsed.textStore = flo_html_createTextStore(perm);
+    flo_html_createDomFromFile(fileLocation, &parsed.dom, &parsed.textStore,
                                perm);
 
     return USER_SUCCESS;

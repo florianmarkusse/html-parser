@@ -16,66 +16,67 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/file/read.h"
 
-#define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, textStore,        \
+#define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, parsed, perm,          \
                                     prependFunction)                           \
     do {                                                                       \
         flo_html_node_id parentNodeID = 0;                                     \
         flo_html_QueryStatus queryResult =                                     \
-            flo_html_querySelector(cssQuery, dom, textStore, &parentNodeID);   \
+            flo_html_querySelector(cssQuery, parsed, &parentNodeID, *(perm));  \
         if (queryResult != QUERY_SUCCESS) {                                    \
             FLO_HTML_PRINT_ERROR(                                              \
                 "Could not find element using query selector: %s\n",           \
                 (cssQuery).buf);                                               \
-            return DOM_NO_ELEMENT;                                             \
+            return 0;                                                          \
         }                                                                      \
-        return prependFunction(parentNodeID, nodeData, dom, textStore);        \
+        return prependFunction(parentNodeID, nodeData, parsed, perm);          \
     } while (0)
 
-flo_html_DomStatus flo_html_prependDocumentNodeWithQuery(
+flo_html_node_id flo_html_prependDocumentNodeWithQuery(
     const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    PREPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, textStore,
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
+    PREPEND_USING_QUERYSELECTOR(cssQuery, docNode, parsed, perm,
                                 flo_html_prependDocumentNode);
 }
 
-flo_html_DomStatus
-flo_html_prependTextNodeWithQuery(const flo_html_String cssQuery,
-                                  const flo_html_String text, flo_html_Dom *dom,
-                                  flo_html_TextStore *textStore) {
-    PREPEND_USING_QUERYSELECTOR(cssQuery, text, dom, textStore,
+flo_html_node_id flo_html_prependTextNodeWithQuery(
+    const flo_html_String cssQuery, const flo_html_String text,
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
+    PREPEND_USING_QUERYSELECTOR(cssQuery, text, parsed, perm,
                                 flo_html_prependTextNode);
 }
 
-flo_html_DomStatus flo_html_prependHTMLFromStringWithQuery(
+flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
     const flo_html_String cssQuery, const flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
-    PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, textStore,
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
+    PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, parsed, perm,
                                 flo_html_prependHTMLFromString);
 }
 
-flo_html_DomStatus flo_html_prependHTMLFromFileWithQuery(
+flo_html_node_id flo_html_prependHTMLFromFileWithQuery(
     const flo_html_String cssQuery, const flo_html_String fileLocation,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
     flo_html_String content;
-    flo_html_FileStatus fileStatus = flo_html_readFile(fileLocation, &content);
+    flo_html_FileStatus fileStatus =
+        flo_html_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
                                         fileLocation.buf);
-        return DOM_ERROR_MEMORY;
+        return 0;
     }
 
-    PREPEND_USING_QUERYSELECTOR(cssQuery, content, dom, textStore,
+    PREPEND_USING_QUERYSELECTOR(cssQuery, content, parsed, perm,
                                 flo_html_prependHTMLFromString);
 }
 
-static flo_html_DomStatus
-updateReferences(const flo_html_node_id parentID,
-                 const flo_html_node_id firstNewNodeID, flo_html_Dom *dom) {
+static void updateReferences(const flo_html_node_id parentID,
+                             const flo_html_node_id firstNewNodeID,
+                             flo_html_Dom *dom) {
     flo_html_DomStatus domStatus = DOM_SUCCESS;
+    // TODO: FIX THIS USE ROOT_NODEID
     if (parentID == 0) {
-        flo_html_node_id previousFirstNodeID = dom->firstNodeID;
-        domStatus = flo_html_addNextNode(firstNewNodeID, dom->firstNodeID, dom);
+        flo_html_node_id previousFirstNodeID =
+            flo_html_addNextNode(firstNewNodeID, dom->firstNodeID, dom);
         if (domStatus != DOM_SUCCESS) {
             FLO_HTML_PRINT_ERROR("Failed to add new node ID in next nodes!\n");
             return domStatus;
@@ -148,10 +149,10 @@ updateReferences(const flo_html_node_id parentID,
     return domStatus;
 }
 
-flo_html_DomStatus
+flo_html_node_id
 flo_html_prependDocumentNode(const flo_html_node_id parentID,
                              const flo_html_DocumentNode *docNode,
-                             flo_html_Dom *dom, flo_html_TextStore *textStore) {
+                             flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
     flo_html_node_id newNodeID = 0;
     flo_html_DomStatus domStatus =
         flo_html_parseDocumentElement(docNode, dom, textStore, &newNodeID);
@@ -164,8 +165,8 @@ flo_html_prependDocumentNode(const flo_html_node_id parentID,
 
 flo_html_DomStatus flo_html_prependTextNode(const flo_html_node_id parentID,
                                             const flo_html_String text,
-                                            flo_html_Dom *dom,
-                                            flo_html_TextStore *textStore) {
+                                            flo_html_ParsedHTML parsed,
+                                            flo_html_Arena *perm) {
     flo_html_node_id newNodeID = 0;
     flo_html_DomStatus domStatus =
         flo_html_parseTextElement(text, dom, textStore, &newNodeID);
@@ -194,7 +195,7 @@ flo_html_DomStatus flo_html_prependTextNode(const flo_html_node_id parentID,
 
 flo_html_DomStatus flo_html_prependHTMLFromString(
     const flo_html_node_id parentID, const flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_TextStore *textStore) {
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
     flo_html_node_id firstNewAddedNode = dom->nodeLen;
     flo_html_DomStatus domStatus =
         flo_html_parseExtra(htmlString, dom, textStore);

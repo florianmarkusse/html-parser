@@ -22,10 +22,9 @@ typedef struct {
 
 typedef flo_html_Contains flo_html_ElementIndex;
 
-void flo_html_initStringRegistry(flo_html_StringRegistry *stringRegistry,
-                                 ptrdiff_t stringsCapacity, ptrdiff_t pageSize,
-                                 flo_html_Arena *perm);
-void flo_html_destroyStringRegistry(flo_html_StringRegistry *stringRegistry);
+flo_html_StringRegistry flo_html_initStringRegistry(ptrdiff_t stringsCapacity,
+                                                    ptrdiff_t pageSize,
+                                                    flo_html_Arena *perm);
 
 typedef struct {
     flo_html_StringRegistry tags;
@@ -35,8 +34,7 @@ typedef struct {
     flo_html_DataPage text;
 } flo_html_TextStore;
 
-void flo_html_createTextStore(flo_html_TextStore *textStore,
-                              flo_html_Arena *perm);
+flo_html_TextStore flo_html_createTextStore(flo_html_Arena *perm);
 
 flo_html_ElementIndex
 flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,

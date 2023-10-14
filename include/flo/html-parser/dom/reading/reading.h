@@ -43,8 +43,7 @@ flo_html_NodeType flo_html_getflo_html_NodeType(flo_html_node_id nodeID,
  */
 bool flo_html_hasBoolProp(flo_html_node_id nodeID,
                           const flo_html_String boolProp,
-                          const flo_html_Dom *dom,
-                          const flo_html_TextStore *textStore);
+                          flo_html_ParsedHTML parsed);
 
 /**
  * @brief Check if a DOM node has a property with a given key.
@@ -60,8 +59,7 @@ bool flo_html_hasBoolProp(flo_html_node_id nodeID,
  * @return  True if a property with the key exists, otherwise false.
  */
 bool flo_html_hasPropKey(flo_html_node_id nodeID, const flo_html_String propKey,
-                         const flo_html_Dom *dom,
-                         const flo_html_TextStore *textStore);
+                         flo_html_ParsedHTML parsed);
 
 /**
  * @brief Check if a DOM node has a property with a given value.
@@ -78,8 +76,7 @@ bool flo_html_hasPropKey(flo_html_node_id nodeID, const flo_html_String propKey,
  */
 bool flo_html_hasPropValue(flo_html_node_id nodeID,
                            const flo_html_String propValue,
-                           const flo_html_Dom *dom,
-                           const flo_html_TextStore *textStore);
+                           flo_html_ParsedHTML parsed);
 
 /**
  * @brief Check if a DOM node has a property with a specific key and value.
@@ -99,8 +96,7 @@ bool flo_html_hasPropValue(flo_html_node_id nodeID,
 bool flo_html_hasProperty(flo_html_node_id nodeID,
                           const flo_html_String propKey,
                           const flo_html_String propValue,
-                          const flo_html_Dom *dom,
-                          const flo_html_TextStore *textStore);
+                          flo_html_ParsedHTML parsed);
 
 /**
  * @brief Get the value of a property associated with a DOM node.
@@ -117,7 +113,7 @@ bool flo_html_hasProperty(flo_html_node_id nodeID,
  */
 const flo_html_String flo_html_getValue(flo_html_node_id nodeID,
                                         const flo_html_String propKey,
-                                        flo_html_ParsedHTML *parsed);
+                                        flo_html_ParsedHTML parsed);
 
 /**
  * @brief Get the text content of a DOM node.

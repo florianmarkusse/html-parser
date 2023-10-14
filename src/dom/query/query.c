@@ -87,8 +87,8 @@ ptrdiff_t parseToken(const flo_html_String css, ptrdiff_t currentPosition,
     return currentPosition;
 }
 
-flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
-                                     flo_html_TextStore *textStore,
+flo_html_QueryStatus getQueryResults(flo_html_String css,
+                                     flo_html_ParsedHTML parsed,
                                      flo_html_Uint16HashSet *set,
                                      flo_html_Arena *perm) {
     flo_html_QueryStatus result = QUERY_SUCCESS;
@@ -115,9 +115,11 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             }
             ptrdiff_t tagLen = currentPosition - tagStart;
 
-            flo_html_index_id tagID = flo_html_getEntryID(
-                FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen),
-                &textStore->tags.set);
+            flo_html_index_id tagID =
+                flo_html_containsStringHashSet(
+                    &parsed.textStore->tags.set,
+                    FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen))
+                    .entryIndex;
             if (tagID == 0) {
                 return QUERY_NOT_SEEN_BEFORE;
             }
@@ -170,13 +172,17 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                                                       ? FLO_HTML_S("class")
                                                       : FLO_HTML_S("id");
                 flo_html_index_id propKeyID =
-                    flo_html_getEntryID(keyBuffer, &textStore->propKeys.set);
+                    flo_html_containsStringHashSet(
+                        &parsed.textStore->propKeys.set, keyBuffer)
+                        .entryIndex;
                 if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 flo_html_index_id propValueID =
-                    flo_html_getEntryID(token, &textStore->propValues.set);
+                    flo_html_containsStringHashSet(
+                        &parsed.textStore->propValues.set, token)
+                        .entryIndex;
                 if (propValueID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -187,7 +193,9 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 filtersLen++;
             } else if (ch == ']') {
                 flo_html_index_id boolPropID =
-                    flo_html_getEntryID(token, &textStore->boolProps.set);
+                    flo_html_containsStringHashSet(
+                        &parsed.textStore->boolProps.set, token)
+                        .entryIndex;
                 if (boolPropID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -197,7 +205,9 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 filtersLen++;
             } else if (ch == '=') {
                 flo_html_index_id propKeyID =
-                    flo_html_getEntryID(token, &textStore->propKeys.set);
+                    flo_html_containsStringHashSet(
+                        &parsed.textStore->propKeys.set, token)
+                        .entryIndex;
                 if (propKeyID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -213,7 +223,9 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 ch = flo_html_getChar(css, currentPosition);
 
                 flo_html_index_id propValueID =
-                    flo_html_getEntryID(propValue, &textStore->propValues.set);
+                    flo_html_containsStringHashSet(
+                        &parsed.textStore->propValues.set, token)
+                        .entryIndex;
                 if (propValueID == 0) {
                     return QUERY_NOT_SEEN_BEFORE;
                 }
@@ -241,16 +253,15 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
         // Do filtering :)
         switch (currentflo_html_Combinator) {
         case NO_COMBINATOR: {
-            // TODO: this is not an actual perm arena I think.
             if (!flo_html_getNodesWithoutflo_html_Combinator(
-                    filters, filtersLen, dom, set, perm)) {
+                    filters, filtersLen, parsed.dom, set, perm)) {
                 return QUERY_MEMORY_ERROR;
             }
             break;
         }
         case ADJACENT: {
             if ((result = flo_html_getFilteredAdjacents(
-                     filters, filtersLen, dom, 1,
+                     filters, filtersLen, parsed.dom, 1,
 
                      set, perm)) != QUERY_SUCCESS) {
                 return result;
@@ -258,8 +269,8 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             break;
         }
         case CHILD: {
-            if ((result = flo_html_getFilteredDescendants(filters, filtersLen,
-                                                          dom, 1, set, perm)) !=
+            if ((result = flo_html_getFilteredDescendants(
+                     filters, filtersLen, parsed.dom, 1, set, perm)) !=
                 QUERY_SUCCESS) {
                 return result;
             }
@@ -267,16 +278,16 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
         }
         case GENERAL_SIBLING: {
             if ((result = flo_html_getFilteredAdjacents(
-                     filters, filtersLen, dom, PTRDIFF_MAX, set, perm)) !=
-                QUERY_SUCCESS) {
+                     filters, filtersLen, parsed.dom, PTRDIFF_MAX, set,
+                     perm)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case DESCENDANT: {
             if ((result = flo_html_getFilteredDescendants(
-                     filters, filtersLen, dom, PTRDIFF_MAX, set, perm)) !=
-                QUERY_SUCCESS) {
+                     filters, filtersLen, parsed.dom, PTRDIFF_MAX, set,
+                     perm)) != QUERY_SUCCESS) {
                 return result;
             }
             break;
@@ -320,8 +331,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
 }
 
 flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
-                                               flo_html_Dom *dom,
-                                               flo_html_TextStore *textStore,
+                                               flo_html_ParsedHTML parsed,
                                                flo_html_node_id_a *results,
                                                flo_html_Arena *perm) {
     {
@@ -343,9 +353,8 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
                     FLO_HTML_S_LEN(css.buf + currentQueryStart,
                                    currentQueryEnd - currentQueryStart);
 
-                if ((result = getQueryResults(singularQuery, dom, textStore,
-                                              &set, &scratch)) !=
-                    QUERY_SUCCESS) {
+                if ((result = getQueryResults(singularQuery, parsed, &set,
+                                              &scratch)) != QUERY_SUCCESS) {
                     FLO_HTML_ERROR_WITH_CODE_ONLY(
                         flo_html_queryingStatusToString(result),
                         "Unable get query results!\n");
@@ -375,7 +384,7 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
             flo_html_String singularQuery = FLO_HTML_S_LEN(
                 css.buf + currentQueryStart, css.len - currentQueryStart);
 
-            if ((result = getQueryResults(singularQuery, dom, textStore, &set,
+            if ((result = getQueryResults(singularQuery, parsed, &set,
                                           &scratch)) != QUERY_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
                     flo_html_queryingStatusToString(result),
@@ -397,7 +406,7 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
                 }
             }
         } else {
-            if ((result = getQueryResults(css, dom, textStore, &resultsSet,
+            if ((result = getQueryResults(css, parsed, &resultsSet,
                                           &scratch)) != QUERY_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
                     flo_html_queryingStatusToString(result),
@@ -421,7 +430,7 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
 }
 
 flo_html_QueryStatus flo_html_getElementsByClassName(
-    flo_html_String className, flo_html_Dom *dom, flo_html_TextStore *textStore,
+    flo_html_String className, flo_html_ParsedHTML parsed,
     flo_html_node_id_a *results, flo_html_Arena *perm) {
     ptrdiff_t cssLen = className.len + 1;
     // TODO: VLA :(
@@ -432,24 +441,24 @@ flo_html_QueryStatus flo_html_getElementsByClassName(
     css.buf[0] = '.';
     memcpy(css.buf, className.buf, className.len);
 
-    return flo_html_querySelectorAll(css, dom, textStore, results, perm);
+    return flo_html_querySelectorAll(css, parsed, results, perm);
 }
 
-flo_html_QueryStatus flo_html_getElementsByTagName(
-    flo_html_String tag, flo_html_Dom *dom, flo_html_TextStore *textStore,
-    flo_html_node_id_a *results, flo_html_Arena *perm) {
-    return flo_html_querySelectorAll(tag, dom, textStore, results, perm);
+flo_html_QueryStatus flo_html_getElementsByTagName(flo_html_String tag,
+                                                   flo_html_ParsedHTML parsed,
+                                                   flo_html_node_id_a *results,
+                                                   flo_html_Arena *perm) {
+    return flo_html_querySelectorAll(tag, parsed, results, perm);
 }
 
 flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
-                                            flo_html_Dom *dom,
-                                            flo_html_TextStore *textStore,
+                                            flo_html_ParsedHTML parsed,
                                             flo_html_node_id *result,
                                             flo_html_Arena scratch) {
     flo_html_node_id_a *results = NULL;
 
     flo_html_QueryStatus status =
-        flo_html_querySelectorAll(css, dom, textStore, results, &scratch);
+        flo_html_querySelectorAll(css, parsed, results, &scratch);
     if (status != QUERY_SUCCESS) {
         return status;
     }
@@ -459,7 +468,7 @@ flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
         return QUERY_SUCCESS;
     }
 
-    flo_html_node_id currentNode = dom->firstNodeID;
+    flo_html_node_id currentNode = parsed.dom->firstNodeID;
     while (currentNode) {
         for (ptrdiff_t i = 0; i < results->len; i++) {
             if (results->buf[i] == currentNode) {
@@ -467,15 +476,14 @@ flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
                 return QUERY_SUCCESS;
             }
         }
-        currentNode = flo_html_traverseDom(currentNode, dom);
+        currentNode = flo_html_traverseDom(currentNode, parsed.dom);
     }
 
     return status;
 }
 
 flo_html_QueryStatus flo_html_getElementByID(flo_html_String id,
-                                             flo_html_Dom *dom,
-                                             flo_html_TextStore *textStore,
+                                             flo_html_ParsedHTML parsed,
                                              flo_html_node_id *result,
                                              flo_html_Arena scratch) {
     ptrdiff_t cssLen = id.len + 1;
@@ -487,5 +495,5 @@ flo_html_QueryStatus flo_html_getElementByID(flo_html_String id,
     css.buf[0] = '.';
     memcpy(css.buf, id.buf, id.len);
 
-    return flo_html_querySelector(css, dom, textStore, result, scratch);
+    return flo_html_querySelector(css, parsed, result, scratch);
 }

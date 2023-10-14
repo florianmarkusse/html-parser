@@ -4,11 +4,11 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/memory.h"
 
-void flo_html_initDataPage(flo_html_DataPage *dataPage,
-                           const ptrdiff_t pageSize, flo_html_Arena *perm) {
-    dataPage->start = FLO_HTML_NEW(perm, char, pageSize);
-    dataPage->freeSpace = dataPage->start;
-    dataPage->spaceLeft = pageSize;
+flo_html_DataPage flo_html_initDataPage(const ptrdiff_t pageSize,
+                                        flo_html_Arena *perm) {
+    char *data = FLO_HTML_NEW(perm, char, pageSize);
+    return (flo_html_DataPage){
+        .start = data, .freeSpace = data, .spaceLeft = pageSize};
 }
 
 unsigned char *flo_html_insertIntoPage(const flo_html_String data,

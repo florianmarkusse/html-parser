@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "dom.h"
+#include "flo/html-parser/user.h"
 
 /**
  * @brief Print the status of a DOM structure.
@@ -18,8 +19,7 @@ extern "C" {
  * @param[in]   dom             The DOM structure to print status for.
  * @param[in]   textStore   The text store associated with the DOM.
  */
-void flo_html_printDomStatus(const flo_html_Dom *dom,
-                             const flo_html_TextStore *textStore);
+void flo_html_printDomStatus(flo_html_ParsedHTML parsed);
 
 /**
  * @brief Print the minified HTML representation of a DOM structure.
@@ -31,8 +31,7 @@ void flo_html_printDomStatus(const flo_html_Dom *dom,
  * @param[in]   dom             The DOM structure to print as minified HTML.
  * @param[in]   textStore   The text store associated with the DOM.
  */
-void flo_html_printHTML(const flo_html_Dom *dom,
-                        const flo_html_TextStore *textStore);
+void flo_html_printHTML(flo_html_ParsedHTML parsed);
 
 /**
  * @brief Write the minified HTML representation of a DOM structure to a file.
@@ -50,10 +49,8 @@ void flo_html_printHTML(const flo_html_Dom *dom,
  *          completed, an error code otherwise). See @ref
  *          "flo/html-parser/util/file/file-status.h#flo_html_FileStatus".
  */
-flo_html_FileStatus
-flo_html_writeHTMLToFile(const flo_html_Dom *dom,
-                         const flo_html_TextStore *textStore,
-                         const flo_html_String filePath);
+flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_ParsedHTML parsed,
+                                             const flo_html_String filePath);
 
 #ifdef __cplusplus
 }

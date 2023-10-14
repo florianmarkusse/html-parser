@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_DOM_PREPENDIX_PREPENDIX_H
-#define FLO_HTML_PARSER_DOM_PREPENDIX_PREPENDIX_H
+#ifndef FLO_HTML_PARSER_DOM_PREPENDIX_H
+#define FLO_HTML_PARSER_DOM_PREPENDIX_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,6 +12,7 @@ extern "C" {
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/node/document-node.h"
 #include "flo/html-parser/node/node.h"
+#include "flo/html-parser/user.h"
 
 /**
  * @brief Prepend a DocumentNode to the DOM using a CSS query.
@@ -28,9 +29,9 @@ extern "C" {
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_prependDocumentNodeWithQuery(
+flo_html_node_id flo_html_prependDocumentNodeWithQuery(
     const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Prepend a text node to the DOM using a CSS query.
@@ -47,10 +48,9 @@ flo_html_DomStatus flo_html_prependDocumentNodeWithQuery(
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
-flo_html_prependTextNodeWithQuery(const flo_html_String cssQuery,
-                                  const flo_html_String text, flo_html_Dom *dom,
-                                  flo_html_TextStore *textStore);
+flo_html_node_id flo_html_prependTextNodeWithQuery(
+    const flo_html_String cssQuery, const flo_html_String text,
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Prepend HTML content from a string to the DOM using a CSS query.
@@ -67,9 +67,9 @@ flo_html_prependTextNodeWithQuery(const flo_html_String cssQuery,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_prependHTMLFromStringWithQuery(
+flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
     const flo_html_String cssQuery, const flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Prepend HTML content from a file to the DOM using a CSS query.
@@ -87,9 +87,9 @@ flo_html_DomStatus flo_html_prependHTMLFromStringWithQuery(
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_prependHTMLFromFileWithQuery(
+flo_html_node_id flo_html_prependHTMLFromFileWithQuery(
     const flo_html_String cssQuery, const flo_html_String fileLocation,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Prepend a DocumentNode to the DOM.
@@ -106,10 +106,10 @@ flo_html_DomStatus flo_html_prependHTMLFromFileWithQuery(
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus
+flo_html_node_id
 flo_html_prependDocumentNode(flo_html_node_id parentID,
                              const flo_html_DocumentNode *docNode,
-                             flo_html_Dom *dom, flo_html_TextStore *textStore);
+                             flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 /**
  * @brief Prepend a text node to the DOM.
@@ -126,10 +126,10 @@ flo_html_prependDocumentNode(flo_html_node_id parentID,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_prependTextNode(flo_html_node_id parentID,
-                                            const flo_html_String text,
-                                            flo_html_Dom *dom,
-                                            flo_html_TextStore *textStore);
+flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
+                                          const flo_html_String text,
+                                          flo_html_ParsedHTML parsed,
+                                          flo_html_Arena *perm);
 
 /**
  * @brief Prepend HTML content from a string to the DOM.
@@ -146,9 +146,9 @@ flo_html_DomStatus flo_html_prependTextNode(flo_html_node_id parentID,
  * @return  The status of the prepend operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-flo_html_DomStatus flo_html_prependHTMLFromString(
+flo_html_node_id flo_html_prependHTMLFromString(
     flo_html_node_id parentID, const flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_TextStore *textStore);
+    flo_html_ParsedHTML parsed, flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }
