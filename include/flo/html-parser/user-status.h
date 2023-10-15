@@ -8,13 +8,12 @@ extern "C" {
 typedef enum {
     USER_SUCCESS,
     USER_MEMORY,
-    USER_TEXT_STORE_FAIL,
-    USER_DOM_FAIL,
+    USER_FILE_FAIL,
     USER_NUM_STATUS
 } flo_html_UserStatus;
 
 static const char *const userStatusStrings[USER_NUM_STATUS] = {
-    "Success", "Memory error", "Text store error", "DOM error"};
+    "Success", "Memory error", "Creating DOM from file failed"};
 
 __attribute__((unused)) static const char *
 flo_html_userStatusToString(flo_html_UserStatus status) {

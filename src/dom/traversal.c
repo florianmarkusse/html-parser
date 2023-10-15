@@ -15,9 +15,6 @@ flo_html_getFirstChildNode(const flo_html_node_id currentNodeID,
 
 flo_html_node_id flo_html_getFirstChild(const flo_html_node_id currentNodeID,
                                         const flo_html_Dom *dom) {
-    if (currentNodeID == 0) {
-        return dom->firstNodeID;
-    }
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(currentNodeID, dom);
     if (firstChild == NULL) {

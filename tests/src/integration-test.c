@@ -10,23 +10,16 @@
 #define PARSE_QUERY_MODIFY_BEFORE CURRENT_DIR "parse-query-modify-before.html"
 #define PARSE_QUERY_MODIFY_AFTER CURRENT_DIR "parse-query-modify-after.html"
 
-static TestStatus parseQueryModify() {
+static TestStatus parseQueryModify(flo_html_Arena scratch) {
     printTestStart("Parse/Query/Modify");
-    TestStatus result = TEST_FAILURE;
 
-    ComparisonTest comparisonTest;
-    result = initComparisonTest(&comparisonTest,
-                                FLO_HTML_S(PARSE_QUERY_MODIFY_BEFORE),
-                                FLO_HTML_S(PARSE_QUERY_MODIFY_AFTER));
-    if (result != TEST_SUCCESS) {
-        return result;
-    }
+    ComparisonTest comparisonTest =
+        initComparisonTest(FLO_HTML_S(PARSE_QUERY_MODIFY_BEFORE),
+                           FLO_HTML_S(PARSE_QUERY_MODIFY_AFTER), &scratch);
 
-    flo_html_node_id *results = NULL;
-    ptrdiff_t resultsLen = 0;
+    flo_html_node_id_a results;
     flo_html_QueryStatus actual = flo_html_querySelectorAll(
-        FLO_HTML_S("title"), &comparisonTest.startflo_html_Dom,
-        &comparisonTest.startTextStore, &results, &resultsLen);
+        FLO_HTML_S("title"), comparisonTest.actual, &results, &scratch);
 
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
@@ -38,33 +31,27 @@ static TestStatus parseQueryModify() {
         return TEST_FAILURE;
     }
 
-    if (resultsLen != 1) {
+    if (results.len != 1) {
         printTestFailure();
         printTestDemarcation();
-        printTestResultDifferenceNumber(1, resultsLen);
+        printTestResultDifferenceNumber(1, results.len);
         printf("Node IDs received...\n");
-        for (ptrdiff_t i = 0; i < resultsLen; i++) {
-            printf("%u\n", results[i]);
+        for (ptrdiff_t i = 0; i < results.len; i++) {
+            printf("%u\n", results.buf[i]);
         }
         printTestDemarcation();
-        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
-    flo_html_setTextContent(results[0], FLO_HTML_S("FOURTH"),
-                            &comparisonTest.startflo_html_Dom,
-                            &comparisonTest.startTextStore);
-    flo_html_addBooleanPropertyToNode(results[0], FLO_HTML_S("the-fourth"),
-                                      &comparisonTest.startflo_html_Dom,
-                                      &comparisonTest.startTextStore);
-    flo_html_addPropertyToNode(
-        results[0], FLO_HTML_S("the-property"), FLO_HTML_S("my value"),
-        &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
-    FLO_HTML_FREE_TO_NULL(results);
+    flo_html_setTextContent(results.buf[0], FLO_HTML_S("FOURTH"),
+                            comparisonTest.actual);
+    flo_html_addBooleanPropertyToNode(results.buf[0], FLO_HTML_S("the-fourth"),
+                                      comparisonTest.actual);
+    flo_html_addPropertyToNode(results.buf[0], FLO_HTML_S("the-property"),
+                               FLO_HTML_S("my value"), comparisonTest.actual);
 
     flo_html_node_id currentNodeID = 0;
-    actual = flo_html_querySelector(
-        FLO_HTML_S("head"), &comparisonTest.startflo_html_Dom,
-        &comparisonTest.startTextStore, &currentNodeID);
+    actual = flo_html_querySelector(FLO_HTML_S("head"), comparisonTest.actual,
+                                    &currentNodeID, scratch);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
@@ -80,11 +67,10 @@ static TestStatus parseQueryModify() {
         FLO_HTML_S("<title "
                    "id=\"first-title-tag\"></title><title>FIRST</"
                    "title><title>SECOND</title><title>THIRD</title>"),
-        &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
+        comparisonTest.actual, &scratch);
 
     actual = flo_html_querySelectorAll(
-        FLO_HTML_S("title"), &comparisonTest.startflo_html_Dom,
-        &comparisonTest.startTextStore, &results, &resultsLen);
+        FLO_HTML_S("title"), comparisonTest.actual, &results, &scratch);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
@@ -92,28 +78,24 @@ static TestStatus parseQueryModify() {
             QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
             actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
-        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    if (resultsLen != 5) {
+    if (results.len != 5) {
         printTestFailure();
         printTestDemarcation();
-        printTestResultDifferenceNumber(5, resultsLen);
+        printTestResultDifferenceNumber(5, results.len);
         printf("Node IDs received...\n");
-        for (ptrdiff_t i = 0; i < resultsLen; i++) {
-            printf("%u\n", results[i]);
+        for (ptrdiff_t i = 0; i < results.len; i++) {
+            printf("%u\n", results.buf[i]);
         }
         printTestDemarcation();
-        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    FLO_HTML_FREE_TO_NULL(results);
-
-    actual = flo_html_querySelector(
-        FLO_HTML_S("#first-title-tag"), &comparisonTest.startflo_html_Dom,
-        &comparisonTest.startTextStore, &currentNodeID);
+    actual =
+        flo_html_querySelector(FLO_HTML_S("#first-title-tag"),
+                               comparisonTest.actual, &currentNodeID, scratch);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
@@ -121,15 +103,13 @@ static TestStatus parseQueryModify() {
             QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
             actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
-        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    flo_html_removeNode(currentNodeID, &comparisonTest.startflo_html_Dom);
+    flo_html_removeNode(currentNodeID, comparisonTest.actual.dom);
 
     actual = flo_html_querySelectorAll(
-        FLO_HTML_S("title"), &comparisonTest.startflo_html_Dom,
-        &comparisonTest.startTextStore, &results, &resultsLen);
+        FLO_HTML_S("title"), comparisonTest.actual, &results, &scratch);
     if (actual != QUERY_SUCCESS) {
         printTestFailure();
         printTestDemarcation();
@@ -137,39 +117,36 @@ static TestStatus parseQueryModify() {
             QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
             actual, flo_html_queryingStatusToString(actual));
         printTestDemarcation();
-        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
 
-    if (resultsLen != 4) {
+    if (results.len != 4) {
         printTestFailure();
         printTestDemarcation();
-        printTestResultDifferenceNumber(4, resultsLen);
+        printTestResultDifferenceNumber(4, results.len);
         printf("Node IDs received...\n");
-        for (ptrdiff_t i = 0; i < resultsLen; i++) {
-            printf("%u\n", results[i]);
+        for (ptrdiff_t i = 0; i < results.len; i++) {
+            printf("%u\n", results.buf[i]);
         }
         printTestDemarcation();
-        FLO_HTML_FREE_TO_NULL(results);
         return TEST_FAILURE;
     }
-
-    FLO_HTML_FREE_TO_NULL(results);
 
     flo_html_writeHTMLToFile(
-        &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore,
+        comparisonTest.actual,
         FLO_HTML_S("boing-boing/bang-bang/boop/boop/result.html"));
 
-    return compareAndEndTest(&comparisonTest);
+    return compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testIntegrations(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testIntegrations(ptrdiff_t *successes, ptrdiff_t *failures,
+                      flo_html_Arena scratch) {
     printTestTopicStart("Integration tests");
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
-    if (parseQueryModify() != TEST_SUCCESS) {
+    if (parseQueryModify(scratch) != TEST_SUCCESS) {
         localFailures++;
     } else {
         localSuccesses++;

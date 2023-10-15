@@ -71,12 +71,6 @@ flo_html_node_id flo_html_appendHTMLFromFileWithQuery(
 static void updateReferences(const flo_html_node_id parentID,
                              const flo_html_node_id newNodeID,
                              flo_html_Dom *dom) {
-    if (parentID == FLO_HTML_ROOT_NODE_ID) {
-        flo_html_node_id lastNextNode =
-            flo_html_getLastNext(dom->firstNodeID, dom);
-        flo_html_addNextNode(lastNextNode, newNodeID, dom);
-    }
-
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(parentID, dom);
     if (firstChild == NULL) {

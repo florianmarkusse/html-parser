@@ -91,27 +91,19 @@ static TestStatus testQuery(const flo_html_String fileLocation,
                             const flo_html_String cssQuery,
                             const StringUnion stringUnion,
                             const BoolFunctionType boolFunctionType,
-                            const bool expectedResult) {
-    flo_html_TextStore textStore;
-    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
-    if (initStatus != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(initStatus),
-            "Failed to initialize text store");
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    flo_html_Dom dom;
-    if (flo_html_createDomFromFile(fileLocation, &dom, &textStore) !=
-        DOM_SUCCESS) {
-        flo_html_destroyTextStore(&textStore);
+                            const bool expectedResult, flo_html_Arena scratch) {
+    flo_html_ParsedHTML parsed;
+    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
+        FLO_HTML_PRINT_ERROR(
+            "Failed to created DOM & TextStore from file %.*s\n",
+            FLO_HTML_S_P(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
     TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
     flo_html_QueryStatus queryStatus =
-        flo_html_querySelector(cssQuery, &dom, &textStore, &foundNode);
+        flo_html_querySelector(cssQuery, parsed, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
         printTestFailure();
@@ -124,24 +116,23 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         bool actualResult = false;
         switch (boolFunctionType) {
         case HAS_BOOL_PROP: {
-            actualResult = flo_html_hasBoolProp(
-                foundNode, stringUnion.attribute, &dom, &textStore);
+            actualResult =
+                flo_html_hasBoolProp(foundNode, stringUnion.attribute, parsed);
             break;
         }
         case HAS_PROP_KEY: {
-            actualResult = flo_html_hasPropKey(foundNode, stringUnion.attribute,
-                                               &dom, &textStore);
+            actualResult =
+                flo_html_hasPropKey(foundNode, stringUnion.attribute, parsed);
             break;
         }
         case HAS_PROP_VALUE: {
-            actualResult = flo_html_hasPropValue(
-                foundNode, stringUnion.attribute, &dom, &textStore);
+            actualResult =
+                flo_html_hasPropValue(foundNode, stringUnion.attribute, parsed);
             break;
         }
         case HAS_PROPERTY: {
-            actualResult =
-                flo_html_hasProperty(foundNode, stringUnion.key,
-                                     stringUnion.value, &dom, &textStore);
+            actualResult = flo_html_hasProperty(foundNode, stringUnion.key,
+                                                stringUnion.value, parsed);
             break;
         }
         default: {
@@ -149,7 +140,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
             printTestDemarcation();
             printf("No suitable enum was supplied!\n");
             printTestDemarcation();
-            goto freeMemory;
+            return result;
         }
         }
 
@@ -164,14 +155,11 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         }
     }
 
-freeMemory:
-    flo_html_destroyDom(&dom);
-    flo_html_destroyTextStore(&textStore);
-
     return result;
 }
 
-bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
+                         flo_html_Arena scratch) {
     printTestTopicStart("bool queries");
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
@@ -186,7 +174,7 @@ bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures) {
                                strlen(testFile.fileLocation)),
                 FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
                 testFile.stringUnion, testFile.boolFunctionType,
-                testFile.expectedResult) != TEST_SUCCESS) {
+                testFile.expectedResult, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

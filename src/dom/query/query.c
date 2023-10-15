@@ -468,7 +468,7 @@ flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
         return QUERY_SUCCESS;
     }
 
-    flo_html_node_id currentNode = parsed.dom->firstNodeID;
+    flo_html_node_id currentNode = FLO_HTML_ROOT_NODE_ID;
     while (currentNode) {
         for (ptrdiff_t i = 0; i < results->len; i++) {
             if (results->buf[i] == currentNode) {

@@ -45,6 +45,7 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/dom/reading/reading-util.c"
     "src/dom/modification.c"
     "src/parser.c" 
+    "src/user.c" 
     "src/dom/comparison.c"
     "src/dom/appendix.c"
     "src/dom/prependix.c"

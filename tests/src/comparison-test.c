@@ -1,55 +1,48 @@
 #include <flo/html-parser.h>
+#include <flo/html-parser/dom/comparison.h>
+#include <flo/html-parser/dom/query/query-status.h>
 #include <flo/html-parser/type/element/elements-print.h>
 #include <flo/html-parser/util/memory.h>
 
 #include "comparison-test.h"
-#include "flo/html-parser/dom/query/query-status.h"
 #include "test.h"
 
-TestStatus initComparisonTest(ComparisonTest *comparisonTest,
-                              const flo_html_String startFileLocation,
-                              const flo_html_String expectedFileLocation) {
-    flo_html_ElementStatus initStatus =
-        flo_html_createTextStore(&comparisonTest->startTextStore);
-    if (initStatus != ELEMENT_SUCCESS) {
-        return failWithMessageAndCode(
-            FLO_HTML_S("Failed to initialize start text store!\n"),
-            TEST_ERROR_INITIALIZATION, comparisonTest);
-    }
-    if (flo_html_createDomFromFile(
-            startFileLocation, &comparisonTest->startflo_html_Dom,
-            &comparisonTest->startTextStore) != DOM_SUCCESS) {
-        return failWithMessageAndCode(
-            FLO_HTML_S("Failed to create start DOM from file!\n"),
-            TEST_ERROR_INITIALIZATION, comparisonTest);
-    }
-    initStatus = flo_html_createTextStore(&comparisonTest->expectedTextStore);
-    if (initStatus != ELEMENT_SUCCESS) {
-        return failWithMessageAndCode(
-            FLO_HTML_S("Failed to initialize expected text store!\n"),
-            TEST_ERROR_INITIALIZATION, comparisonTest);
-    }
-    if (flo_html_createDomFromFile(
-            expectedFileLocation, &comparisonTest->expectedflo_html_Dom,
-            &comparisonTest->expectedTextStore) != DOM_SUCCESS) {
-        return failWithMessageAndCode(
-            FLO_HTML_S("Failed to create expected DOM from file!\n"),
-            TEST_ERROR_INITIALIZATION, comparisonTest);
+ComparisonTest initComparisonTest(const flo_html_String startFileLocation,
+                                  const flo_html_String expectedFileLocation,
+                                  flo_html_Arena *perm) {
+    ComparisonTest test = {0};
+
+    flo_html_ParsedHTML parsed1;
+    if (flo_html_fromFile(startFileLocation, &parsed1, perm) != USER_SUCCESS) {
+        FLO_HTML_PRINT_ERROR(
+            "Failed to created DOM & TextStore from file %.*s\n",
+            FLO_HTML_S_P(startFileLocation));
+        return test;
     }
 
-    return TEST_SUCCESS;
+    flo_html_ParsedHTML parsed2;
+    if (flo_html_fromFile(expectedFileLocation, &parsed2, perm) !=
+        USER_SUCCESS) {
+        FLO_HTML_PRINT_ERROR(
+            "Failed to created DOM & TextStore from file %.*s\n",
+            FLO_HTML_S_P(expectedFileLocation));
+        return test;
+    }
+
+    test.actual = parsed1;
+    test.expected = parsed2;
+
+    return test;
 }
 
 TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
                                     ComparisonTest *comparisonTest,
-                                    flo_html_node_id *foundNode) {
-    flo_html_QueryStatus queryStatus =
-        flo_html_querySelector(cssQuery, &comparisonTest->startflo_html_Dom,
-                               &comparisonTest->startTextStore, foundNode);
+                                    flo_html_node_id *foundNode,
+                                    flo_html_Arena scratch) {
+    flo_html_QueryStatus queryStatus = flo_html_querySelector(
+        cssQuery, comparisonTest->actual, foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
-        destroyComparisonTest(comparisonTest);
-
         printTestFailure();
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
@@ -64,13 +57,10 @@ TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
 }
 
 TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
-                                  const TestStatus failureStatus,
-                                  ComparisonTest *comparisonTest) {
-    destroyComparisonTest(comparisonTest);
-
+                                  const TestStatus failureStatus) {
     printTestFailure();
     printTestDemarcation();
-    printf("%s", failureMessage.buf);
+    printf("%.*s\n", FLO_HTML_S_P(failureMessage));
     printTestDemarcation();
 
     if (failureStatus == TEST_SUCCESS) {
@@ -80,25 +70,20 @@ TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
     return failureStatus;
 }
 
-TestStatus failWithMessage(const flo_html_String failureMessage,
-                           ComparisonTest *comparisonTest) {
-    return failWithMessageAndCode(failureMessage, TEST_FAILURE, comparisonTest);
+TestStatus failWithMessage(const flo_html_String failureMessage) {
+    return failWithMessageAndCode(failureMessage, TEST_FAILURE);
 }
 
 TestStatus
 compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
-                          const flo_html_ComparisonStatus expectedStatus) {
+                          const flo_html_ComparisonStatus expectedStatus,
+                          flo_html_Arena scratch) {
     TestStatus result = TEST_FAILURE;
 
-    flo_html_node_id nodeID1 = 0;
-    flo_html_node_id nodeID2 = 0;
-    flo_html_ComparisonStatus comp =
-        flo_html_equalsWithNode(&nodeID1, &comparisonTest->startflo_html_Dom,
-                                &comparisonTest->startTextStore, &nodeID2,
-                                &comparisonTest->expectedflo_html_Dom,
-                                &comparisonTest->expectedTextStore);
+    flo_html_ComparisonResult comp = flo_html_equals(
+        comparisonTest->actual, comparisonTest->expected, scratch);
 
-    if (comp == expectedStatus) {
+    if (comp.status == expectedStatus) {
         printTestSuccess();
         result = TEST_SUCCESS;
     } else {
@@ -106,26 +91,17 @@ compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
         printTestDemarcation();
         printTestResultDifferenceErrorCode(
             expectedStatus, flo_html_comparisonStatusToString(expectedStatus),
-            comp, flo_html_comparisonStatusToString(comp));
-        flo_html_printFirstDifference(nodeID1,
-                                      &comparisonTest->startflo_html_Dom,
-                                      &comparisonTest->startTextStore, nodeID2,
-                                      &comparisonTest->expectedflo_html_Dom,
-                                      &comparisonTest->expectedTextStore);
+            comp.status, flo_html_comparisonStatusToString(comp.status));
+        flo_html_printFirstDifference(comp.nodeID1, comparisonTest->actual,
+                                      comp.nodeID2, comparisonTest->expected,
+                                      scratch);
         printTestDemarcation();
     }
-
-    destroyComparisonTest(comparisonTest);
     return result;
 }
 
-TestStatus compareAndEndTest(ComparisonTest *comparisonTest) {
-    return compareWithCodeAndEndTest(comparisonTest, COMPARISON_SUCCESS);
-}
-
-void destroyComparisonTest(ComparisonTest *comparisonTest) {
-    flo_html_destroyDom(&comparisonTest->startflo_html_Dom);
-    flo_html_destroyTextStore(&comparisonTest->startTextStore);
-    flo_html_destroyDom(&comparisonTest->expectedflo_html_Dom);
-    flo_html_destroyTextStore(&comparisonTest->expectedTextStore);
+TestStatus compareAndEndTest(ComparisonTest *comparisonTest,
+                             flo_html_Arena scratch) {
+    return compareWithCodeAndEndTest(comparisonTest, COMPARISON_SUCCESS,
+                                     scratch);
 }

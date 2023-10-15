@@ -44,17 +44,15 @@ static TestStatus testDeletion(const flo_html_String fileLocation1,
                                const flo_html_String fileLocation2,
                                const flo_html_String cssQuery,
                                const flo_html_String propToDelete,
-                               const DeletionType deletionType) {
+                               const DeletionType deletionType,
+                               flo_html_Arena scratch) {
+    ComparisonTest comparisonTest =
+        initComparisonTest(fileLocation1, fileLocation2, &scratch);
+
     TestStatus result = TEST_FAILURE;
-
-    ComparisonTest comparisonTest;
-    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
-    if (result != TEST_SUCCESS) {
-        return result;
-    }
-
     flo_html_node_id foundNode = 0;
-    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
+    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                      scratch);
     if (result != TEST_SUCCESS) {
         return result;
     }
@@ -62,27 +60,24 @@ static TestStatus testDeletion(const flo_html_String fileLocation1,
     switch (deletionType) {
     case DELETE_BOOLEAN_PROPERTY: {
         flo_html_removeBooleanProperty(foundNode, propToDelete,
-                                       &comparisonTest.startflo_html_Dom,
-                                       &comparisonTest.startTextStore);
+                                       comparisonTest.actual);
         break;
     }
     case DELETE_PROPERTY: {
-        flo_html_removeProperty(foundNode, propToDelete,
-                                &comparisonTest.startflo_html_Dom,
-                                &comparisonTest.startTextStore);
+        flo_html_removeProperty(foundNode, propToDelete, comparisonTest.actual);
         break;
     }
     default: {
         return failWithMessage(
-            FLO_HTML_S("No suitable DeletionType was supplied!\n"),
-            &comparisonTest);
+            FLO_HTML_S("No suitable DeletionType was supplied!\n"));
     }
     }
 
-    return compareAndEndTest(&comparisonTest);
+    return compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
+                       flo_html_Arena scratch) {
     printTestTopicStart("node deletions");
 
     ptrdiff_t localSuccesses = 0;
@@ -100,7 +95,7 @@ bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures) {
                 FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
                 FLO_HTML_S_LEN(testFile.propToDelete,
                                strlen(testFile.propToDelete)),
-                testFile.deletionType) != TEST_SUCCESS) {
+                testFile.deletionType, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

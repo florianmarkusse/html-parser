@@ -5,10 +5,12 @@
 extern "C" {
 #endif
 
+#include <flo/html-parser/user.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures);
+bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
+                           flo_html_Arena scratch);
 
 #ifdef __cplusplus
 }

@@ -30,31 +30,22 @@ static const TestFile testFiles[] = {
 
 static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const flo_html_String fileLocation,
-                            const flo_html_String cssQuery,
-                            const flo_html_String input,
-                            const CharFunctionType functionType,
-                            const flo_html_String expectedResult) {
-    flo_html_TextStore textStore;
-    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
-    if (initStatus != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(initStatus),
-            "Failed to initialize text store");
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    flo_html_Dom dom;
-    if (flo_html_createDomFromFile(fileLocation, &dom, &textStore) !=
-        DOM_SUCCESS) {
-        flo_html_destroyTextStore(&textStore);
+static TestStatus
+testQuery(const flo_html_String fileLocation, const flo_html_String cssQuery,
+          const flo_html_String input, const CharFunctionType functionType,
+          const flo_html_String expectedResult, flo_html_Arena scratch) {
+    flo_html_ParsedHTML parsed;
+    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
+        FLO_HTML_PRINT_ERROR(
+            "Failed to created DOM & TextStore from file %.*s\n",
+            FLO_HTML_S_P(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
     TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
     flo_html_QueryStatus queryStatus =
-        flo_html_querySelector(cssQuery, &dom, &textStore, &foundNode);
+        flo_html_querySelector(cssQuery, parsed, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
         printTestFailure();
@@ -67,8 +58,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         flo_html_String actualResult = FLO_HTML_EMPTY_STRING;
         switch (functionType) {
         case GET_VALUE: {
-            actualResult =
-                flo_html_getValue(foundNode, input, &dom, &textStore);
+            actualResult = flo_html_getValue(foundNode, input, parsed);
             break;
         }
         default: {
@@ -76,7 +66,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
             printTestDemarcation();
             printf("No suitable enum was supplied!\n");
             printTestDemarcation();
-            goto freeMemory;
+            return result;
         }
         }
 
@@ -93,14 +83,11 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         }
     }
 
-freeMemory:
-    flo_html_destroyDom(&dom);
-    flo_html_destroyTextStore(&textStore);
-
     return result;
 }
 
-bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
+                         flo_html_Arena scratch) {
     printTestTopicStart("char queries");
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
@@ -113,7 +100,7 @@ bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures) {
         if (testQuery(FLO_HTML_S_LEN(testFile.fileLocation,
                                      strlen(testFile.fileLocation)),
                       testFile.cssQuery, testFile.input, testFile.functionType,
-                      testFile.expectedResult) != TEST_SUCCESS) {
+                      testFile.expectedResult, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

@@ -179,19 +179,20 @@ static TestStatus testReplacements(const flo_html_String fileLocation1,
                                    const flo_html_String fileLocation2,
                                    const flo_html_String cssQuery,
                                    const ReplacementType replacementType,
-                                   const ReplacementInput *replacementInput) {
+                                   const ReplacementInput *replacementInput,
+                                   flo_html_Arena scratch) {
     TestStatus result = TEST_FAILURE;
 
-    ComparisonTest comparisonTest;
-    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
+    ComparisonTest comparisonTest =
+        initComparisonTest(fileLocation1, fileLocation2, &scratch);
     if (result != TEST_SUCCESS) {
         return result;
     }
 
     flo_html_node_id foundNode = 0;
     if (cssQuery.len > 0) {
-        result =
-            getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
+        result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                          scratch);
     }
     if (result != TEST_SUCCESS) {
         return result;
@@ -201,8 +202,8 @@ static TestStatus testReplacements(const flo_html_String fileLocation1,
     switch (replacementType) {
     case REPLACEMENT_DOCUMENT_NODE: {
         domStatus = flo_html_replaceWithDocumentNode(
-            foundNode, &replacementInput->documentNode,
-            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
+            foundNode, &replacementInput->documentNode, comparisonTest.actual,
+            &scratch);
         break;
     }
     case REPLACEMENT_TEXT_NODE: {
@@ -210,7 +211,7 @@ static TestStatus testReplacements(const flo_html_String fileLocation1,
             foundNode,
             FLO_HTML_S_LEN(replacementInput->text,
                            strlen(replacementInput->text)),
-            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
+            comparisonTest.actual, &scratch);
         break;
     }
     case REPLACEMENT_FROM_STRING: {
@@ -218,25 +219,24 @@ static TestStatus testReplacements(const flo_html_String fileLocation1,
             foundNode,
             FLO_HTML_S_LEN(replacementInput->text,
                            strlen(replacementInput->text)),
-            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
+            comparisonTest.actual, &scratch);
         break;
     }
     default: {
         return failWithMessage(
-            FLO_HTML_S("No suitable replacement type was supplied!\n"),
-            &comparisonTest);
+            FLO_HTML_S("No suitable replacement type was supplied!\n"));
     }
     }
 
     if (domStatus != DOM_SUCCESS) {
-        return failWithMessage(FLO_HTML_S("Failed to replace node!\n"),
-                               &comparisonTest);
+        return failWithMessage(FLO_HTML_S("Failed to replace node!\n"));
     }
 
-    return compareAndEndTest(&comparisonTest);
+    return compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testflo_html_DomReplacements(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testflo_html_DomReplacements(ptrdiff_t *successes, ptrdiff_t *failures,
+                                  flo_html_Arena scratch) {
     printTestTopicStart("DOM replacements");
 
     ptrdiff_t localSuccesses = 0;
@@ -251,7 +251,8 @@ bool testflo_html_DomReplacements(ptrdiff_t *successes, ptrdiff_t *failures) {
                              FLO_HTML_S_LEN(testFile.fileLocation2,
                                             strlen(testFile.fileLocation2)),
                              testFile.cssQuery, testFile.replacementType,
-                             &testFile.replacementInput) != TEST_SUCCESS) {
+                             &testFile.replacementInput,
+                             scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

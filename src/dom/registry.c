@@ -1,11 +1,13 @@
 
 #include "flo/html-parser/dom/registry.h"
+#include "flo/html-parser/util/assert.h"
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/memory.h"
 
 void flo_html_addTagRegistration(const bool isPaired,
                                  const flo_html_HashElement *hashElement,
                                  flo_html_Dom *dom) {
+    FLO_HTML_ASSERT(dom->tagRegistryLen < dom->tagRegistryCap);
     // TODO: dynamic
     if (dom->tagRegistryLen >= dom->tagRegistryCap) {
         FLO_HTML_PRINT_ERROR("THE TAG REGISTRY IS OVERFLOWING\n");

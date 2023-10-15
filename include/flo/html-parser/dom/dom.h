@@ -21,9 +21,9 @@ extern "C" {
 #define FLO_HTML_MAX_TAG_REGISTRATIONS (1U << 10U)
 #define FLO_HTML_MAX_PROP_REGISTRATIONS (1U << 14U)
 
-#define FLO_HTML_MAX_NODES (1U << 12U)
+#define FLO_HTML_MAX_NODES (1U << 14U)
 
-#define FLO_HTML_MAX_PARENT_FIRST_CHILDS (1U << 10U)
+#define FLO_HTML_MAX_PARENT_FIRST_CHILDS (1U << 12U)
 #define FLO_HTML_MAX_PARENT_CHILDS (1U << 14U)
 #define FLO_HTML_MAX_NEXT_NODES (1U << 14U)
 #define FLO_HTML_MAX_BOOL_PROPS (1U << 14U)
@@ -36,8 +36,6 @@ typedef struct {
 } flo_html_BasicRegistry;
 
 typedef struct {
-    flo_html_node_id firstNodeID;
-
     flo_html_Node *nodes;
     ptrdiff_t nodeLen;
     ptrdiff_t nodeCap;

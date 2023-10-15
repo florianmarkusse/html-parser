@@ -3,15 +3,16 @@
 #include "node/querying/querying.h"
 #include "test.h"
 
-bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
+                     flo_html_Arena scratch) {
     printTestTopicStart("node queries");
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
-    testBoolNodeQueries(&localSuccesses, &localFailures);
-    testCharNodeQueries(&localSuccesses, &localFailures);
-    testArrayNodeQueries(&localSuccesses, &localFailures);
+    testBoolNodeQueries(&localSuccesses, &localFailures, scratch);
+    testCharNodeQueries(&localSuccesses, &localFailures, scratch);
+    testArrayNodeQueries(&localSuccesses, &localFailures, scratch);
 
     printTestScore(localSuccesses, localFailures);
 

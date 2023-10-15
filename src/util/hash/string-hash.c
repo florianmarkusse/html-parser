@@ -40,17 +40,13 @@ ptrdiff_t flo_html_insertStringAtHash(flo_html_StringHashSet *set,
     return set->entries;
 }
 
+// TODO: could improve this to check first if it contains before resizing???
 ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                        const flo_html_String string,
                                        flo_html_Arena *perm) {
     size_t hash = flo_html_hashString(string);
 
-    ptrdiff_t index = hash % set->arrayLen;
-    ptrdiff_t probes = 0;
-
-    bool didResize = false;
     if (set->entries >= set->arrayLen * 0.7) {
-        didResize = true;
         // See if it makes sense to grow.
         if (set->arrayLen >= MAX_CAPACITY * 0.9) {
             FLO_HTML_PRINT_ERROR(
@@ -68,6 +64,7 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
 
         // Rehashing.
         for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
+            ptrdiff_t probes = 0;
             if (set->array[i].string.buf != NULL) {
                 ptrdiff_t newIndex =
                     oldArray[i].contains.hashElement.hash % newCapacity;
@@ -86,13 +83,11 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         set->arrayLen = newCapacity;
     }
 
-    if (didResize) {
-        index = hash % set->arrayLen;
-    }
-
-    while (set->array[hash].string.buf != NULL) {
-        if (flo_html_stringEquals(set->array[hash].string, string)) {
-            return HASH_SUCCESS;
+    ptrdiff_t index = hash % set->arrayLen;
+    ptrdiff_t probes = 0;
+    while (set->array[index].string.buf != NULL) {
+        if (flo_html_stringEquals(set->array[index].string, string)) {
+            return set->array[index].contains.entryIndex;
         }
         probes++;
         index = (index + probes) % set->arrayLen;

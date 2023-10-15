@@ -30,9 +30,6 @@ void flo_html_addBooleanProperty(flo_html_node_id nodeID,
 void flo_html_addProperty(flo_html_node_id nodeID, flo_html_index_id keyID,
                           flo_html_index_id valueID, flo_html_Dom *dom);
 
-void flo_html_getTagRegistration(flo_html_index_id tagID,
-                                 const flo_html_Dom *dom,
-                                 flo_html_TagRegistration **tagRegistration);
 const flo_html_String flo_html_getTag(flo_html_index_id tagID,
                                       flo_html_ParsedHTML parsed);
 

@@ -7,35 +7,34 @@ extern "C" {
 
 #include <flo/html-parser/dom/dom.h>
 #include <flo/html-parser/type/element/elements.h>
+#include <flo/html-parser/user.h>
 
 #include "flo/html-parser/comparison-status.h"
 #include "test-status.h"
 
 typedef struct {
-    flo_html_Dom startflo_html_Dom;
-    flo_html_TextStore startTextStore;
-    flo_html_Dom expectedflo_html_Dom;
-    flo_html_TextStore expectedTextStore;
+    flo_html_ParsedHTML actual;
+    flo_html_ParsedHTML expected;
 } ComparisonTest;
 
-TestStatus initComparisonTest(ComparisonTest *comparisonTest,
-                              const flo_html_String startFileLocation,
-                              const flo_html_String expectedFileLocation);
+ComparisonTest initComparisonTest(const flo_html_String startFileLocation,
+                                  const flo_html_String expectedFileLocation,
+                                  flo_html_Arena *perm);
 
-TestStatus compareAndEndTest(ComparisonTest *comparisonTest);
+TestStatus compareAndEndTest(ComparisonTest *comparisonTest,
+                             flo_html_Arena scratch);
 TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
-                                     flo_html_ComparisonStatus expectedStatus);
+                                     flo_html_ComparisonStatus expectedStatus,
+                                     flo_html_Arena scratch);
 
 TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
                                     ComparisonTest *comparisonTest,
-                                    flo_html_node_id *foundNode);
+                                    flo_html_node_id *foundNode,
+                                    flo_html_Arena scratch);
 TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
-                                  TestStatus failureStatus,
-                                  ComparisonTest *comparisonTest);
+                                  TestStatus failureStatus);
 
-TestStatus failWithMessage(const flo_html_String failureMessage,
-                           ComparisonTest *comparisonTest);
-void destroyComparisonTest(ComparisonTest *comparisonTest);
+TestStatus failWithMessage(const flo_html_String failureMessage);
 
 #ifdef __cplusplus
 }

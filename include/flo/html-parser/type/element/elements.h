@@ -36,10 +36,6 @@ typedef struct {
 
 flo_html_TextStore flo_html_createTextStore(flo_html_Arena *perm);
 
-flo_html_ElementIndex
-flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
-                        const flo_html_String element);
-
 #ifdef __cplusplus
 }
 #endif

@@ -75,41 +75,39 @@ static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 static TestStatus testDeletions(const flo_html_String fileLocation1,
                                 const flo_html_String fileLocation2,
                                 const flo_html_String cssQuery,
-                                const DeletionType deletionType) {
+                                const DeletionType deletionType,
+                                flo_html_Arena scratch) {
+    ComparisonTest comparisonTest =
+        initComparisonTest(fileLocation1, fileLocation2, &scratch);
+
     TestStatus result = TEST_FAILURE;
-
-    ComparisonTest comparisonTest;
-    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
-    if (result != TEST_SUCCESS) {
-        return result;
-    }
-
     flo_html_node_id foundNode = 0;
-    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
+    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                      scratch);
     if (result != TEST_SUCCESS) {
         return result;
     }
 
     switch (deletionType) {
     case DELETE_NODE: {
-        flo_html_removeNode(foundNode, &comparisonTest.startflo_html_Dom);
+        flo_html_removeNode(foundNode, comparisonTest.actual.dom);
         break;
     }
     case DELETE_CHILDREN: {
-        flo_html_removeChildren(foundNode, &comparisonTest.startflo_html_Dom);
+        flo_html_removeChildren(foundNode, comparisonTest.actual.dom);
         break;
     }
     default: {
         return failWithMessage(
-            FLO_HTML_S("No suitable DeletionType was supplied!\n"),
-            &comparisonTest);
+            FLO_HTML_S("No suitable DeletionType was supplied!\n"));
     }
     }
 
-    return compareAndEndTest(&comparisonTest);
+    return compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testflo_html_DomDeletions(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testflo_html_DomDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
+                               flo_html_Arena scratch) {
     printTestTopicStart("DOM deletions");
 
     ptrdiff_t localSuccesses = 0;
@@ -124,8 +122,8 @@ bool testflo_html_DomDeletions(ptrdiff_t *successes, ptrdiff_t *failures) {
                                          strlen(testFile.fileLocation1)),
                           FLO_HTML_S_LEN(testFile.fileLocation2,
                                          strlen(testFile.fileLocation2)),
-                          testFile.cssQuery,
-                          testFile.deletionType) != TEST_SUCCESS) {
+                          testFile.cssQuery, testFile.deletionType,
+                          scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

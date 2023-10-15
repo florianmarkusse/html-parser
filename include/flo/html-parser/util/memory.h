@@ -80,8 +80,9 @@ flo_html_alloc(flo_html_Arena *a, ptrdiff_t size, ptrdiff_t align,
     return flags & FLO_HTML_ZERO_MEMORY ? memset(a->end, 0, total) : a->end;
 }
 
-void *flo_html_copyToArena(flo_html_Arena *arena, void *data, ptrdiff_t size,
-                           ptrdiff_t align, ptrdiff_t count) {
+__attribute((unused)) static void *
+flo_html_copyToArena(flo_html_Arena *arena, void *data, ptrdiff_t size,
+                     ptrdiff_t align, ptrdiff_t count) {
     unsigned char *copy = flo_html_alloc(arena, size, align, count, 0);
     memcpy(copy, data, size * count);
     return copy;
@@ -93,8 +94,7 @@ void *flo_html_copyToArena(flo_html_Arena *arena, void *data, ptrdiff_t size,
 #define FLO_HTML_ALIGNOF(t) (_Alignof(t))
 
 #define FLO_HTML_NEW_2(a, t)                                                   \
-    (typeof(t))flo_html_alloc(a, FLO_HTML_SIZEOF(*(t)),                        \
-                              FLO_HTML_ALIGNOF(*(t)), 1, 0)
+    (t *)flo_html_alloc(a, FLO_HTML_SIZEOF(t), FLO_HTML_ALIGNOF(t), 1, 0)
 #define FLO_HTML_NEW_3(a, t, n)                                                \
     (t *)flo_html_alloc(a, FLO_HTML_SIZEOF(t), FLO_HTML_ALIGNOF(t), n, 0)
 #define FLO_HTML_NEW_4(a, t, n, f)                                             \
@@ -104,56 +104,6 @@ void *flo_html_copyToArena(flo_html_Arena *arena, void *data, ptrdiff_t size,
     FLO_HTML_NEW_X(__VA_ARGS__, FLO_HTML_NEW_4, FLO_HTML_NEW_3,                \
                    FLO_HTML_NEW_2)                                             \
     (__VA_ARGS__)
-
-/**
- * @brief Free a pointer and set it to NULL.
- *
- * This macro frees the memory pointed to by the given pointer and sets the
- * pointer itself to NULL. It is a safe way to free memory and avoid
- * dereferencing a dangling pointer.
- *
- * @param[in,out] ptr   A pointer to be freed and set to NULL.
- */
-//#define FLO_HTML_FREE_TO_NULL(ptr)                                             \
-//    do {                                                                       \
-//        free(ptr);                                                             \
-//        (ptr) = NULL;                                                          \
-//    } while (0)
-
-/**
- * @brief Resize a dynamically allocated array.
- *
- * This inline function resizes a dynamically allocated array when the current
- * length exceeds the current capacity. It ensures that enough memory is
- * allocated for the array to hold additional elements. If the reallocation
- * fails, it prints an error message.
- *
- * @param[in]       array           The current array to be resized.
- * @param[in]       currentLen      The current length of the array.
- * @param[in,out]   currentCap      The current capacity of the array (updated
- *                                  if reallocation occurs).
- * @param[in]       elementSize     The size of each element in the array.
- * @param[in]       extraElements   The number of extra elements to accommodate.
- *
- * @return  A pointer to the resized array, or NULL if reallocation fails.
- */
-//__attribute__((unused)) static inline void *
-// flo_html_resizeArray(void *array, ptrdiff_t currentLen, ptrdiff_t
-// *currentCap,
-//                     ptrdiff_t elementSize, ptrdiff_t extraElements) {
-//    if (currentLen < *currentCap) {
-//        return array;
-//    }
-//    ptrdiff_t newCap = (currentLen + extraElements);
-//    void *newArray = realloc(array, newCap * elementSize);
-//    if (newArray == NULL) {
-//        FLO_HTML_PRINT_ERROR(
-//            "Failed to reallocate more memory for the array.\n");
-//        return NULL;
-//    }
-//    *currentCap = newCap;
-//    return newArray;
-//}
 
 #ifdef __cplusplus
 }

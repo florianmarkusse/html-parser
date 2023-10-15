@@ -4,6 +4,8 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/memory.h"
 
+#include "flo/html-parser/util/assert.h"
+
 flo_html_DataPage flo_html_initDataPage(const ptrdiff_t pageSize,
                                         flo_html_Arena *perm) {
     char *data = FLO_HTML_NEW(perm, char, pageSize);
@@ -13,9 +15,13 @@ flo_html_DataPage flo_html_initDataPage(const ptrdiff_t pageSize,
 
 unsigned char *flo_html_insertIntoPage(const flo_html_String data,
                                        flo_html_DataPage *page) {
+    FLO_HTML_ASSERT(data.len >= 0);
+    FLO_HTML_ASSERT(page->spaceLeft >= data.len);
+
     // TODO: dynamic
     if (page->spaceLeft < data.len) {
         FLO_HTML_PRINT_ERROR("No more capacity to add data to page.\n");
+        return NULL;
     }
 
     memcpy(page->freeSpace, data.buf, data.len);

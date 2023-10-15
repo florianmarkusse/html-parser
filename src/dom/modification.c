@@ -22,30 +22,33 @@ flo_html_index_id
 getCreatedPropIDFromString(const PropertyType propertyType,
                            const flo_html_String prop, flo_html_Dom *dom,
                            flo_html_StringRegistry *stringRegistry) {
-    flo_html_ElementIndex elementIndex =
-        flo_html_elementToIndex(stringRegistry, prop);
+    flo_html_ElementIndex result =
+        flo_html_containsStringHashSet(&stringRegistry->set, prop);
+    if (!result.entryIndex) {
+        result.entryIndex = flo_html_insertIntoPageWithHash(
+            prop, &stringRegistry->dataPage, &stringRegistry->set,
+            &result.hashElement);
 
-    if (!elementIndex.entryIndex) {
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
-            flo_html_addRegistration(&elementIndex.hashElement,
+            flo_html_addRegistration(&result.hashElement,
                                      &dom->boolPropRegistry);
             break;
         }
         case PROPERTY_TYPE_KEY: {
-            flo_html_addRegistration(&elementIndex.hashElement,
+            flo_html_addRegistration(&result.hashElement,
                                      &dom->propKeyRegistry);
             break;
         }
         case PROPERTY_TYPE_VALUE: {
-            flo_html_addRegistration(&elementIndex.hashElement,
+            flo_html_addRegistration(&result.hashElement,
                                      &dom->propValueRegistry);
             break;
         }
         }
     }
 
-    return elementIndex.entryIndex;
+    return result.entryIndex;
 }
 
 void flo_html_addPropertyToNode(const flo_html_node_id nodeID,
@@ -132,13 +135,14 @@ void flo_html_setTagOnDocumentNode(const flo_html_String tag,
                                    const flo_html_node_id nodeID,
                                    const bool isPaired,
                                    flo_html_ParsedHTML parsed) {
-    flo_html_ElementIndex elementIndex =
-        flo_html_elementToIndex(&parsed.textStore->tags, tag);
-
-    if (elementIndex.entryIndex > 0) {
-        flo_html_addTagRegistration(isPaired, &elementIndex.hashElement,
-                                    parsed.dom);
+    flo_html_ElementIndex result =
+        flo_html_containsStringHashSet(&parsed.textStore->tags.set, tag);
+    if (!result.entryIndex) {
+        result.entryIndex = flo_html_insertIntoPageWithHash(
+            tag, &parsed.textStore->tags.dataPage, &parsed.textStore->tags.set,
+            &result.hashElement);
+        flo_html_addTagRegistration(isPaired, &result.hashElement, parsed.dom);
     }
 
-    flo_html_setNodeTagID(nodeID, elementIndex.entryIndex, parsed.dom);
+    flo_html_setNodeTagID(nodeID, result.entryIndex, parsed.dom);
 }

@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <flo/html-parser/dom/query/query-status.h>
+#include <flo/html-parser/user.h>
 #include <flo/html-parser/util/text/string.h>
 #include <stddef.h>
 
@@ -17,10 +18,12 @@ typedef struct {
     const char *testName;
 } TestFile;
 
-unsigned char testflo_html_DomQueries(ptrdiff_t *successes,
-                                      ptrdiff_t *failures);
-unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures);
-unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures);
+unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,
+                                      flo_html_Arena scratch);
+unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures,
+                                   flo_html_Arena scratch);
+unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures,
+                                flo_html_Arena scratch);
 
 #ifdef __cplusplus
 }

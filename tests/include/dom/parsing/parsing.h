@@ -5,10 +5,11 @@
 extern "C" {
 #endif
 
+#include <flo/html-parser/user.h>
 #include <stddef.h>
 
-unsigned char testflo_html_DomParsings(ptrdiff_t *successes,
-                                       ptrdiff_t *failures);
+bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
+                              flo_html_Arena scratch);
 
 #ifdef __cplusplus
 }

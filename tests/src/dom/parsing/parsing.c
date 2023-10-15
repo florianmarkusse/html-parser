@@ -11,29 +11,18 @@
 #define INPUTS_DIR "tests/src/dom/parsing/inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
-unsigned char parseFile(const flo_html_String fileLocation) {
-    flo_html_TextStore textStore;
-    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
-    if (initStatus != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(initStatus),
-            "Failed to initialize text store");
-        return TEST_ERROR_INITIALIZATION;
+bool parseFile(const flo_html_String fileLocation, flo_html_Arena scratch) {
+    flo_html_ParsedHTML parsed;
+    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
+        return false;
     }
 
-    flo_html_Dom dom1;
-    if (flo_html_createDomFromFile(fileLocation, &dom1, &textStore) !=
-        DOM_SUCCESS) {
-        flo_html_destroyTextStore(&textStore);
-        return 0;
-    }
-    flo_html_destroyDom(&dom1);
-    flo_html_destroyTextStore(&textStore);
-    return 1;
+    return true;
 }
 
 static inline void testAndCount(ptrdiff_t *localSuccesses,
-                                ptrdiff_t *localFailures) {
+                                ptrdiff_t *localFailures,
+                                flo_html_Arena scratch) {
     DIR *dir = NULL;
     struct dirent *ent = NULL;
     if ((dir = opendir(INPUTS_DIR)) == NULL) {
@@ -50,7 +39,8 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
                  ent->d_name);
         printTestStart(fileLocation);
-        if (!parseFile(FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)))) {
+        if (!parseFile(FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)),
+                       scratch)) {
             (*localFailures)++;
             printTestFailure();
             printTestDemarcation();
@@ -65,13 +55,13 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
     closedir(dir);
 }
 
-unsigned char testflo_html_DomParsings(ptrdiff_t *successes,
-                                       ptrdiff_t *failures) {
+bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
+                              flo_html_Arena scratch) {
     printTestTopicStart("DOM parsings");
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
-    testAndCount(&localSuccesses, &localFailures);
+    testAndCount(&localSuccesses, &localFailures, scratch);
 
     printTestScore(localSuccesses, localFailures);
 

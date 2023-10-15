@@ -19,40 +19,42 @@
 int main() {
     printf("Starting test suite...\n\n");
 
+    flo_html_Arena arena = flo_html_newArena(1U << 27U);
+
     ptrdiff_t successes = 0;
     ptrdiff_t failures = 0;
 
-    testflo_html_DomParsings(&successes, &failures);
+    testflo_html_DomParsings(&successes, &failures, arena);
     printf("\n");
 
-    testflo_html_DomComparisons(&successes, &failures);
+    testflo_html_DomComparisons(&successes, &failures, arena);
     printf("\n");
 
-    testflo_html_DomQueries(&successes, &failures);
+    testflo_html_DomQueries(&successes, &failures, arena);
     printf("\n");
 
-    testNodeQueries(&successes, &failures);
+    testNodeQueries(&successes, &failures, arena);
     printf("\n");
 
-    testflo_html_DomDeletions(&successes, &failures);
+    testflo_html_DomDeletions(&successes, &failures, arena);
     printf("\n");
 
-    testNodeModifications(&successes, &failures);
+    testNodeModifications(&successes, &failures, arena);
     printf("\n");
 
-    testNodeDeletions(&successes, &failures);
+    testNodeDeletions(&successes, &failures, arena);
     printf("\n");
 
-    testflo_html_DomAppendices(&successes, &failures);
+    testflo_html_DomAppendices(&successes, &failures, arena);
     printf("\n");
 
-    testflo_html_DomPrependices(&successes, &failures);
+    testflo_html_DomPrependices(&successes, &failures, arena);
     printf("\n");
 
-    testflo_html_DomReplacements(&successes, &failures);
+    testflo_html_DomReplacements(&successes, &failures, arena);
     printf("\n");
 
-    testIntegrations(&successes, &failures);
+    testIntegrations(&successes, &failures, arena);
     printf("\n");
 
     printTestScore(successes, failures);

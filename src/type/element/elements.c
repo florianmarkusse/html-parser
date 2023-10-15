@@ -33,19 +33,3 @@ flo_html_TextStore flo_html_createTextStore(flo_html_Arena *perm) {
         .text = flo_html_initDataPage(FLO_HTML_TEXT_PAGE_SIZE, perm),
     };
 }
-
-flo_html_ElementIndex
-flo_html_elementToIndex(flo_html_StringRegistry *stringRegistry,
-                        const flo_html_String element) {
-    flo_html_ElementIndex result =
-        flo_html_containsStringHashSet(&stringRegistry->set, element);
-    if (result.entryIndex > 0) {
-        return result;
-    }
-
-    result.entryIndex = flo_html_insertIntoPageWithHash(
-        element, &stringRegistry->dataPage, &stringRegistry->set,
-        &result.hashElement);
-
-    return result;
-}

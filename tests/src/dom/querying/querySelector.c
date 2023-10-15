@@ -26,26 +26,19 @@ static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 static TestStatus testQuery(const flo_html_String fileLocation,
                             const flo_html_String cssQuery,
                             const flo_html_QueryStatus expectedStatus,
-                            const flo_html_node_id expectedNode) {
-    flo_html_TextStore textStore;
-    flo_html_ElementStatus initStatus = flo_html_createTextStore(&textStore);
-    if (initStatus != ELEMENT_SUCCESS) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(
-            flo_html_elementStatusToString(initStatus),
-            "Failed to initialize text store");
-        return TEST_ERROR_INITIALIZATION;
-    }
-
-    flo_html_Dom dom;
-    if (flo_html_createDomFromFile(fileLocation, &dom, &textStore) !=
-        DOM_SUCCESS) {
-        flo_html_destroyTextStore(&textStore);
+                            const flo_html_node_id expectedNode,
+                            flo_html_Arena scratch) {
+    flo_html_ParsedHTML parsed;
+    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
+        FLO_HTML_PRINT_ERROR(
+            "Failed to created DOM & TextStore from file %.*s\n",
+            FLO_HTML_S_P(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
     flo_html_node_id actualNode = 0;
     flo_html_QueryStatus actual =
-        flo_html_querySelector(cssQuery, &dom, &textStore, &actualNode);
+        flo_html_querySelector(cssQuery, parsed, &actualNode, scratch);
 
     TestStatus result = TEST_FAILURE;
 
@@ -67,13 +60,11 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         printTestDemarcation();
     }
 
-    flo_html_destroyDom(&dom);
-    flo_html_destroyTextStore(&textStore);
-
     return result;
 }
 
-unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures) {
+unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures,
+                                flo_html_Arena scratch) {
     printTestTopicStart("querySelector");
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
@@ -86,7 +77,7 @@ unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures) {
         if (testQuery(FLO_HTML_S_LEN(testFile.fileLocation,
                                      strlen(testFile.fileLocation)),
                       testFile.cssQuery, testFile.expectedStatus,
-                      testFile.expectedResult) != TEST_SUCCESS) {
+                      testFile.expectedResult, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

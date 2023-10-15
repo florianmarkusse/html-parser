@@ -189,19 +189,16 @@ static TestStatus testAppendix(const flo_html_String fileLocation1,
                                const flo_html_String fileLocation2,
                                const flo_html_String cssQuery,
                                const AppendType appendType,
-                               const AppendInput *appendInput) {
+                               const AppendInput *appendInput,
+                               flo_html_Arena scratch) {
+    ComparisonTest comparisonTest =
+        initComparisonTest(fileLocation1, fileLocation2, &scratch);
+
     TestStatus result = TEST_FAILURE;
-
-    ComparisonTest comparisonTest;
-    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
-    if (result != TEST_SUCCESS) {
-        return result;
-    }
-
     flo_html_node_id foundNode = 0;
     if (cssQuery.len > 0) {
-        result =
-            getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
+        result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                          scratch);
         if (result != TEST_SUCCESS) {
             return result;
         }
@@ -210,40 +207,37 @@ static TestStatus testAppendix(const flo_html_String fileLocation1,
     flo_html_DomStatus domStatus = DOM_SUCCESS;
     switch (appendType) {
     case APPEND_DOCUMENT_NODE: {
-        domStatus = flo_html_appendDocumentNode(
-            foundNode, &appendInput->documentNode,
-            &comparisonTest.startflo_html_Dom, &comparisonTest.startTextStore);
+        domStatus =
+            flo_html_appendDocumentNode(foundNode, &appendInput->documentNode,
+                                        comparisonTest.actual, &scratch);
         break;
     }
     case APPEND_TEXT_NODE: {
         domStatus = flo_html_appendTextNode(foundNode, appendInput->text,
-                                            &comparisonTest.startflo_html_Dom,
-                                            &comparisonTest.startTextStore);
+                                            comparisonTest.actual, &scratch);
         break;
     }
     case APPEND_FROM_STRING: {
         domStatus = flo_html_appendHTMLFromString(
-            foundNode, appendInput->text, &comparisonTest.startflo_html_Dom,
-            &comparisonTest.startTextStore);
+            foundNode, appendInput->text, comparisonTest.actual, &scratch);
         break;
     }
     default: {
         return failWithMessage(
-            FLO_HTML_S("No suitable appendix type was supplied!\n"),
-            &comparisonTest);
+            FLO_HTML_S("No suitable appendix type was supplied!\n"));
     }
     }
 
     if (domStatus != DOM_SUCCESS) {
         return failWithMessage(
-            FLO_HTML_S("Failed to append document to node!\n"),
-            &comparisonTest);
+            FLO_HTML_S("Failed to append document to node!\n"));
     }
 
-    return compareAndEndTest(&comparisonTest);
+    return compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testflo_html_DomAppendices(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testflo_html_DomAppendices(ptrdiff_t *successes, ptrdiff_t *failures,
+                                flo_html_Arena scratch) {
     printTestTopicStart("DOM appendices");
 
     ptrdiff_t localSuccesses = 0;
@@ -258,7 +252,7 @@ bool testflo_html_DomAppendices(ptrdiff_t *successes, ptrdiff_t *failures) {
                          FLO_HTML_S_LEN(testFile.fileLocation2,
                                         strlen(testFile.fileLocation2)),
                          testFile.cssQuery, testFile.appendType,
-                         &testFile.appendInput) != TEST_SUCCESS) {
+                         &testFile.appendInput, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

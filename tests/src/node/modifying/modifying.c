@@ -39,43 +39,35 @@ static TestStatus testModification(const flo_html_String fileLocation1,
                                    const flo_html_String fileLocation2,
                                    const flo_html_String cssQuery,
                                    const flo_html_String propKey,
-                                   const flo_html_String newPropValue) {
+                                   const flo_html_String newPropValue,
+                                   flo_html_Arena scratch) {
+    ComparisonTest comparisonTest =
+        initComparisonTest(fileLocation1, fileLocation2, &scratch);
+
     TestStatus result = TEST_FAILURE;
-
-    ComparisonTest comparisonTest;
-    result = initComparisonTest(&comparisonTest, fileLocation1, fileLocation2);
-    if (result != TEST_SUCCESS) {
-        return result;
-    }
-
     flo_html_node_id foundNode = 0;
-    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode);
+    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                      scratch);
     if (result != TEST_SUCCESS) {
         return result;
     }
 
     if (newPropValue.len > 0) {
         flo_html_ElementStatus elementStatus = flo_html_setPropertyValue(
-            foundNode, propKey, newPropValue, &comparisonTest.startflo_html_Dom,
-            &comparisonTest.startTextStore);
+            foundNode, propKey, newPropValue, comparisonTest.actual);
         if (elementStatus != ELEMENT_SUCCESS) {
             return failWithMessage(
-                FLO_HTML_S("Failed to set property value!\n"), &comparisonTest);
+                FLO_HTML_S("Failed to set property value!\n"));
         }
     } else {
-        flo_html_DomStatus domStatus = flo_html_setTextContent(
-            foundNode, propKey, &comparisonTest.startflo_html_Dom,
-            &comparisonTest.startTextStore);
-        if (domStatus != DOM_SUCCESS) {
-            return failWithMessage(FLO_HTML_S("Failed to set text content!\n"),
-                                   &comparisonTest);
-        }
+        flo_html_setTextContent(foundNode, propKey, comparisonTest.actual);
     }
 
-    return compareAndEndTest(&comparisonTest);
+    return compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures) {
+bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
+                           flo_html_Arena scratch) {
     printTestTopicStart("node modifications");
 
     ptrdiff_t localSuccesses = 0;
@@ -93,7 +85,7 @@ bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures) {
                                strlen(testFile.fileLocation2)),
                 FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
                 FLO_HTML_S_LEN(testFile.propKey, strlen(testFile.propKey)),
-                testFile.newPropValue) != TEST_SUCCESS) {
+                testFile.newPropValue, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

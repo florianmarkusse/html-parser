@@ -21,10 +21,6 @@ flo_html_node_id flo_html_createNode(const flo_html_NodeType nodeType,
     newNode->nodeID = dom->nodeLen;
     dom->nodeLen++;
 
-    if (dom->firstNodeID == 0) {
-        dom->firstNodeID = newNode->nodeID;
-    }
-
     return newNode->nodeID;
 }
 
@@ -43,6 +39,7 @@ void flo_html_setNodeText(const flo_html_node_id nodeID,
 void flo_html_addParentFirstChild(const flo_html_node_id parentID,
                                   const flo_html_node_id childID,
                                   flo_html_Dom *dom) {
+    FLO_HTML_ASSERT(dom->parentFirstChildLen < dom->parentFirstChildCap);
     // TODO: DYNAMIC
     if (dom->parentFirstChildLen >= dom->parentFirstChildCap) {
         FLO_HTML_PRINT_ERROR("Too many parent first chillds created!\n");

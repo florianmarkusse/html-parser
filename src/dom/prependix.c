@@ -72,173 +72,87 @@ flo_html_node_id flo_html_prependHTMLFromFileWithQuery(
 static void updateReferences(const flo_html_node_id parentID,
                              const flo_html_node_id firstNewNodeID,
                              flo_html_Dom *dom) {
-    flo_html_DomStatus domStatus = DOM_SUCCESS;
-    // TODO: FIX THIS USE ROOT_NODEID
-    if (parentID == 0) {
-        flo_html_node_id previousFirstNodeID =
-            flo_html_addNextNode(firstNewNodeID, dom->firstNodeID, dom);
-        if (domStatus != DOM_SUCCESS) {
-            FLO_HTML_PRINT_ERROR("Failed to add new node ID in next nodes!\n");
-            return domStatus;
-        }
-        dom->firstNodeID = firstNewNodeID;
-
-        flo_html_node_id lastNextNode =
-            flo_html_getLastNext(dom->firstNodeID, dom);
-        if (lastNextNode > firstNewNodeID) {
-            domStatus =
-                flo_html_addNextNode(lastNextNode, previousFirstNodeID, dom);
-            if (domStatus != DOM_SUCCESS) {
-                FLO_HTML_PRINT_ERROR(
-                    "Failed to add new node ID in next nodes!\n");
-                return domStatus;
-            }
-        }
-
-        return domStatus;
-    }
-
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(parentID, dom);
     if (firstChild == NULL) {
-        domStatus = flo_html_addParentFirstChild(parentID, firstNewNodeID, dom);
-        if (domStatus != DOM_SUCCESS) {
-            FLO_HTML_PRINT_ERROR("Failed to add new node ID as first child!\n");
-            return domStatus;
-        }
+        flo_html_addParentFirstChild(parentID, firstNewNodeID, dom);
+        flo_html_addParentChild(parentID, firstNewNodeID, dom);
+        flo_html_connectOtherNodesToParent(parentID, firstNewNodeID, dom);
 
-        domStatus = flo_html_addParentChild(parentID, firstNewNodeID, dom);
-        if (domStatus != DOM_SUCCESS) {
-            FLO_HTML_PRINT_ERROR("Failed to add new node ID as child!\n");
-            return domStatus;
-        }
-
-        domStatus =
-            flo_html_connectOtherNodesToParent(parentID, firstNewNodeID, dom);
-        if (domStatus != DOM_SUCCESS) {
-            FLO_HTML_PRINT_ERROR("Failed to add remaning node IDs as child!\n");
-            return domStatus;
-        }
-
-        return domStatus;
+        return;
     }
 
     flo_html_node_id previousFirstChild = firstChild->childID;
     firstChild->childID = firstNewNodeID;
 
     flo_html_node_id lastNextOfNew = flo_html_getLastNext(firstNewNodeID, dom);
-    domStatus = flo_html_addNextNode(lastNextOfNew, previousFirstChild, dom);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to add new node ID in next nodes!\n");
-        return domStatus;
-    }
 
-    domStatus = flo_html_addParentChild(parentID, firstNewNodeID, dom);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to add new node ID as child!\n");
-        return domStatus;
-    }
-
-    domStatus =
-        flo_html_connectOtherNodesToParent(parentID, firstNewNodeID, dom);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to add remaning node IDs as child!\n");
-        return domStatus;
-    }
-
-    return domStatus;
+    flo_html_addNextNode(lastNextOfNew, previousFirstChild, dom);
+    flo_html_addParentChild(parentID, firstNewNodeID, dom);
+    flo_html_connectOtherNodesToParent(parentID, firstNewNodeID, dom);
 }
 
 flo_html_node_id
 flo_html_prependDocumentNode(const flo_html_node_id parentID,
                              const flo_html_DocumentNode *docNode,
                              flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    flo_html_node_id newNodeID = 0;
-    flo_html_DomStatus domStatus =
-        flo_html_parseDocumentElement(docNode, dom, textStore, &newNodeID);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to parse document element!\n");
-        return domStatus;
-    }
-    return updateReferences(parentID, newNodeID, dom);
+    flo_html_node_id newNodeID = flo_html_parseDocumentElement(docNode, parsed);
+    updateReferences(parentID, newNodeID, parsed.dom);
+    return newNodeID;
 }
 
-flo_html_DomStatus flo_html_prependTextNode(const flo_html_node_id parentID,
-                                            const flo_html_String text,
-                                            flo_html_ParsedHTML parsed,
-                                            flo_html_Arena *perm) {
-    flo_html_node_id newNodeID = 0;
-    flo_html_DomStatus domStatus =
-        flo_html_parseTextElement(text, dom, textStore, &newNodeID);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to parse text element!\n");
-        return domStatus;
-    }
+flo_html_node_id flo_html_prependTextNode(const flo_html_node_id parentID,
+                                          const flo_html_String text,
+                                          flo_html_ParsedHTML parsed,
+                                          flo_html_Arena *perm) {
+    flo_html_node_id newNodeID = flo_html_parseTextElement(text, parsed);
 
-    flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
+    flo_html_node_id child = flo_html_getFirstChild(parentID, parsed.dom);
     if (child > 0) {
-        flo_html_MergeResult mergeTry = flo_html_tryMerge(
-            &dom->nodes[child], &dom->nodes[newNodeID], dom, textStore, false);
-
-        if (mergeTry == COMPLETED_MERGE) {
-            flo_html_removeNode(newNodeID, dom);
-            return domStatus;
-        }
-
-        if (mergeTry == FAILED_MERGE) {
-            return DOM_NO_ADD;
+        if (flo_html_tryMerge(&parsed.dom->nodes[child],
+                              &parsed.dom->nodes[newNodeID], parsed, false)) {
+            flo_html_removeNode(newNodeID, parsed.dom);
+            return newNodeID;
         }
     }
 
-    return updateReferences(parentID, newNodeID, dom);
+    updateReferences(parentID, newNodeID, parsed.dom);
+
+    return newNodeID;
 }
 
-flo_html_DomStatus flo_html_prependHTMLFromString(
+flo_html_node_id flo_html_prependHTMLFromString(
     const flo_html_node_id parentID, const flo_html_String htmlString,
     flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    flo_html_node_id firstNewAddedNode = dom->nodeLen;
-    flo_html_DomStatus domStatus =
-        flo_html_parseExtra(htmlString, dom, textStore);
-    if (domStatus != DOM_SUCCESS) {
-        FLO_HTML_PRINT_ERROR("Failed to parse string!\n");
-        return domStatus;
-    }
+    flo_html_node_id firstNewAddedNode = parsed.dom->nodeLen;
+    flo_html_parseExtra(htmlString, parsed, perm);
 
-    flo_html_node_id firstChild = flo_html_getFirstChild(parentID, dom);
+    flo_html_node_id firstChild = flo_html_getFirstChild(parentID, parsed.dom);
     if (firstChild > 0) {
         flo_html_node_id lastNextNode =
-            flo_html_getLastNext(firstNewAddedNode, dom);
+            flo_html_getLastNext(firstNewAddedNode, parsed.dom);
         if (lastNextNode > firstNewAddedNode) {
-            flo_html_Node *lastAddedNode = &dom->nodes[lastNextNode];
+            flo_html_Node *lastAddedNode = &parsed.dom->nodes[lastNextNode];
             if (lastAddedNode->nodeType == NODE_TYPE_TEXT) {
-                flo_html_MergeResult mergeResult =
-                    flo_html_tryMerge(&dom->nodes[firstChild], lastAddedNode,
-                                      dom, textStore, false);
-                if (mergeResult == COMPLETED_MERGE) {
-                    flo_html_removeNode(lastNextNode, dom);
-                }
-
-                if (mergeResult == FAILED_MERGE) {
-                    return DOM_NO_ADD;
+                if (flo_html_tryMerge(&parsed.dom->nodes[firstChild],
+                                      lastAddedNode, parsed, false)) {
+                    flo_html_removeNode(lastNextNode, parsed.dom);
                 }
             }
         } else {
-            flo_html_Node *firstAddedNode = &dom->nodes[firstNewAddedNode];
-            if (firstAddedNode->nodeType == NODE_TYPE_TEXT) {
-                flo_html_MergeResult mergeResult =
-                    flo_html_tryMerge(&dom->nodes[firstChild], firstAddedNode,
-                                      dom, textStore, false);
-                if (mergeResult == COMPLETED_MERGE) {
-                    flo_html_removeNode(firstNewAddedNode, dom);
-                    return domStatus;
-                }
-
-                if (mergeResult == FAILED_MERGE) {
-                    return DOM_NO_ADD;
+            flo_html_Node *onlyAddedNode =
+                &parsed.dom->nodes[firstNewAddedNode];
+            if (onlyAddedNode->nodeType == NODE_TYPE_TEXT) {
+                if (flo_html_tryMerge(&parsed.dom->nodes[firstChild],
+                                      onlyAddedNode, parsed, false)) {
+                    flo_html_removeNode(firstNewAddedNode, parsed.dom);
+                    return firstChild;
                 }
             }
         }
     }
 
-    return updateReferences(parentID, firstNewAddedNode, dom);
+    updateReferences(parentID, firstNewAddedNode, parsed.dom);
+
+    return firstNewAddedNode;
 }

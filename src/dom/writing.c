@@ -18,6 +18,15 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         return;
     }
 
+    if (node.nodeType == NODE_TYPE_ROOT) {
+        flo_html_node_id childNode = flo_html_getFirstChild(nodeID, dom);
+        while (childNode) {
+            printNode(childNode, indentation + 1, parsed, output);
+            childNode = flo_html_getNext(childNode, dom);
+        }
+        return;
+    }
+
     if (node.nodeType == NODE_TYPE_TEXT) {
         fprintf(output, "%.*s", FLO_HTML_S_P(node.text));
         return;
@@ -48,8 +57,8 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         }
     }
 
-    flo_html_TagRegistration *tagRegistration = NULL;
-    flo_html_getTagRegistration(node.tagID, dom, &tagRegistration);
+    flo_html_TagRegistration *tagRegistration =
+        &parsed.dom->tagRegistry[node.tagID];
     if (!tagRegistration->isPaired) {
         if (flo_html_stringEquals(tag, FLO_HTML_S("!DOCTYPE"))) {
             fprintf(output, ">");
@@ -59,17 +68,19 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         return;
     }
     fprintf(output, ">");
+
     flo_html_node_id childNode = flo_html_getFirstChild(nodeID, dom);
     while (childNode) {
         printNode(childNode, indentation + 1, parsed, output);
         childNode = flo_html_getNext(childNode, dom);
     }
+
     fprintf(output, "</%.*s>", FLO_HTML_S_P(tag));
 }
 
 void flo_html_printHTML(flo_html_ParsedHTML parsed) {
     printf("printing HTML...\n\n");
-    flo_html_node_id currentNodeID = parsed.dom->firstNodeID;
+    flo_html_node_id currentNodeID = FLO_HTML_ROOT_NODE_ID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, parsed, stdout);
         currentNodeID = flo_html_getNext(currentNodeID, parsed.dom);
@@ -88,7 +99,7 @@ flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_ParsedHTML parsed,
         return FILE_CANT_OPEN;
     }
 
-    flo_html_node_id currentNodeID = parsed.dom->firstNodeID;
+    flo_html_node_id currentNodeID = FLO_HTML_ROOT_NODE_ID;
     while (currentNodeID) {
         printNode(currentNodeID, 0, parsed, file);
         currentNodeID = flo_html_getNext(currentNodeID, parsed.dom);

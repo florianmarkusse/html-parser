@@ -8,25 +8,18 @@
 #define INPUTS_DIR "benchmarks/inputs/"
 #define TEST_FILE_1 INPUTS_DIR "my-test.html"
 
-unsigned char parseFile(const char *fileLocation) {
-    flo_html_TextStore textStore;
-    if (flo_html_createTextStore(&textStore) != ELEMENT_SUCCESS) {
-        return 0;
-    }
-    flo_html_Dom dom1;
-    if (flo_html_createDomFromFile(
-            FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)), &dom1,
-            &textStore) != DOM_SUCCESS) {
-        flo_html_destroyTextStore(&textStore);
-        return 0;
+bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
+    flo_html_ParsedHTML parsed;
+    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
+        return false;
     }
 
-    flo_html_destroyDom(&dom1);
-    flo_html_destroyTextStore(&textStore);
-    return 1;
+    return true;
 }
 
 void benchmark() {
+    flo_html_Arena arena = flo_html_newArena(1U << 27U);
+
     // Open the inputs directory
     DIR *dir = NULL;
     struct dirent *ent = NULL;
@@ -45,7 +38,8 @@ void benchmark() {
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
                  ent->d_name);
         printf("parsing %s\n", fileLocation);
-        if (!parseFile(fileLocation)) {
+        if (!parseFile(FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)),
+                       arena)) {
             printf("Parsing DOM %s failed\n", fileLocation);
             break;
         }

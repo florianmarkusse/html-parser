@@ -39,8 +39,6 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
 
 void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
                         flo_html_TextStore *textStore, flo_html_Arena *perm) {
-    dom->firstNodeID = 0;
-
     flo_html_TagRegistration initTag = {0};
     flo_html_HashElement initHash = {0};
 
@@ -95,5 +93,7 @@ void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
     dom->propsLen = 0;
     dom->propsCap = FLO_HTML_MAX_PROPS;
 
-    flo_html_parseRoot(htmlString, dom, textStore, perm);
+    flo_html_parseRoot(
+        htmlString, (flo_html_ParsedHTML){.dom = dom, .textStore = textStore},
+        perm);
 }
