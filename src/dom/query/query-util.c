@@ -80,21 +80,6 @@ bool flo_html_getNodesWithoutflo_html_Combinator(
     return true;
 }
 
-flo_html_QueryStatus flo_html_filterByTagID(const flo_html_index_id tagID,
-                                            const flo_html_Dom *dom,
-                                            flo_html_node_id *results,
-                                            ptrdiff_t *len) {
-    ptrdiff_t nextFreeSpot = 0;
-    for (ptrdiff_t i = 0; i < *len; i++) {
-        if (dom->nodes[results[i]].tagID == tagID) {
-            results[nextFreeSpot++] = results[i];
-        }
-    }
-
-    *len = nextFreeSpot;
-    return QUERY_SUCCESS;
-}
-
 // TODO(florian): not very nice way of doing this. Use a
 // hash or something.
 bool isPresentIn(const flo_html_node_id nodeID, const flo_html_node_id *array,

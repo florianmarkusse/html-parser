@@ -195,7 +195,7 @@ static TestStatus testAppendix(const flo_html_String fileLocation1,
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
     TestStatus result = TEST_FAILURE;
-    flo_html_node_id foundNode = 0;
+    flo_html_node_id foundNode = FLO_HTML_ROOT_NODE_ID;
     if (cssQuery.len > 0) {
         result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
                                           scratch);
@@ -204,21 +204,21 @@ static TestStatus testAppendix(const flo_html_String fileLocation1,
         }
     }
 
-    flo_html_DomStatus domStatus = DOM_SUCCESS;
+    flo_html_node_id appendedNodeID = FLO_HTML_ERROR_NODE_ID;
     switch (appendType) {
     case APPEND_DOCUMENT_NODE: {
-        domStatus =
+        appendedNodeID =
             flo_html_appendDocumentNode(foundNode, &appendInput->documentNode,
                                         comparisonTest.actual, &scratch);
         break;
     }
     case APPEND_TEXT_NODE: {
-        domStatus = flo_html_appendTextNode(foundNode, appendInput->text,
-                                            comparisonTest.actual, &scratch);
+        appendedNodeID = flo_html_appendTextNode(
+            foundNode, appendInput->text, comparisonTest.actual, &scratch);
         break;
     }
     case APPEND_FROM_STRING: {
-        domStatus = flo_html_appendHTMLFromString(
+        appendedNodeID = flo_html_appendHTMLFromString(
             foundNode, appendInput->text, comparisonTest.actual, &scratch);
         break;
     }
@@ -228,9 +228,9 @@ static TestStatus testAppendix(const flo_html_String fileLocation1,
     }
     }
 
-    if (domStatus != DOM_SUCCESS) {
+    if (appendedNodeID == FLO_HTML_ERROR_NODE_ID) {
         return failWithMessage(
-            FLO_HTML_S("Failed to append document to node!\n"));
+            FLO_HTML_S("Failed to append node(s) to DOM!\n"));
     }
 
     return compareAndEndTest(&comparisonTest, scratch);

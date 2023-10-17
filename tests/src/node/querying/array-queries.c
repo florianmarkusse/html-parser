@@ -60,9 +60,10 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         ptrdiff_t actualResult = 0;
         switch (functionType) {
         case TEXT_CONTENT: {
-            flo_html_String_da results;
+            flo_html_String_da results = {0};
             queryStatus = flo_html_getTextContent(foundNode, parsed.dom,
                                                   &results, &scratch);
+            actualResult = results.len;
             break;
         }
         default: {

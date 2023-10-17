@@ -181,33 +181,30 @@ static TestStatus testReplacements(const flo_html_String fileLocation1,
                                    const ReplacementType replacementType,
                                    const ReplacementInput *replacementInput,
                                    flo_html_Arena scratch) {
-    TestStatus result = TEST_FAILURE;
-
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
-    if (result != TEST_SUCCESS) {
-        return result;
-    }
 
-    flo_html_node_id foundNode = 0;
+    TestStatus result = TEST_FAILURE;
+    flo_html_node_id foundNode = FLO_HTML_ROOT_NODE_ID;
     if (cssQuery.len > 0) {
         result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
                                           scratch);
-    }
-    if (result != TEST_SUCCESS) {
-        return result;
+        if (result != TEST_SUCCESS) {
+            return failWithMessageAndCode(
+                FLO_HTML_S("Failed to get node from DOM!\n"), result);
+        }
     }
 
-    flo_html_DomStatus domStatus = DOM_SUCCESS;
+    flo_html_node_id replacedNodeID = FLO_HTML_ERROR_NODE_ID;
     switch (replacementType) {
     case REPLACEMENT_DOCUMENT_NODE: {
-        domStatus = flo_html_replaceWithDocumentNode(
+        replacedNodeID = flo_html_replaceWithDocumentNode(
             foundNode, &replacementInput->documentNode, comparisonTest.actual,
             &scratch);
         break;
     }
     case REPLACEMENT_TEXT_NODE: {
-        domStatus = flo_html_replaceWithTextNode(
+        replacedNodeID = flo_html_replaceWithTextNode(
             foundNode,
             FLO_HTML_S_LEN(replacementInput->text,
                            strlen(replacementInput->text)),
@@ -215,7 +212,7 @@ static TestStatus testReplacements(const flo_html_String fileLocation1,
         break;
     }
     case REPLACEMENT_FROM_STRING: {
-        domStatus = flo_html_replaceWithHTMLFromString(
+        replacedNodeID = flo_html_replaceWithHTMLFromString(
             foundNode,
             FLO_HTML_S_LEN(replacementInput->text,
                            strlen(replacementInput->text)),
@@ -228,7 +225,7 @@ static TestStatus testReplacements(const flo_html_String fileLocation1,
     }
     }
 
-    if (domStatus != DOM_SUCCESS) {
+    if (replacedNodeID == FLO_HTML_ERROR_NODE_ID) {
         return failWithMessage(FLO_HTML_S("Failed to replace node!\n"));
     }
 

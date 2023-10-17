@@ -53,9 +53,8 @@ static TestStatus testModification(const flo_html_String fileLocation1,
     }
 
     if (newPropValue.len > 0) {
-        flo_html_ElementStatus elementStatus = flo_html_setPropertyValue(
-            foundNode, propKey, newPropValue, comparisonTest.actual);
-        if (elementStatus != ELEMENT_SUCCESS) {
+        if (!flo_html_setPropertyValue(foundNode, propKey, newPropValue,
+                                       comparisonTest.actual)) {
             return failWithMessage(
                 FLO_HTML_S("Failed to set property value!\n"));
         }

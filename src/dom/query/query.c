@@ -176,6 +176,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                         &parsed.textStore->propKeys.set, keyBuffer)
                         .entryIndex;
                 if (propKeyID == 0) {
+                    FLO_HTML_PRINT_ERROR("PROP KEY ID 0");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -184,6 +185,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                         &parsed.textStore->propValues.set, token)
                         .entryIndex;
                 if (propValueID == 0) {
+                    FLO_HTML_PRINT_ERROR("PROP VALUE ID 0");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -197,6 +199,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                         &parsed.textStore->boolProps.set, token)
                         .entryIndex;
                 if (boolPropID == 0) {
+                    FLO_HTML_PRINT_ERROR("BOOL PROP ID 0");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -209,6 +212,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                         &parsed.textStore->propKeys.set, token)
                         .entryIndex;
                 if (propKeyID == 0) {
+                    FLO_HTML_PRINT_ERROR("IN = PROPKEY 0");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -224,9 +228,10 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
 
                 flo_html_index_id propValueID =
                     flo_html_containsStringHashSet(
-                        &parsed.textStore->propValues.set, token)
+                        &parsed.textStore->propValues.set, propValue)
                         .entryIndex;
                 if (propValueID == 0) {
+                    FLO_HTML_PRINT_ERROR("IN = PROPVALUE 0");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -364,7 +369,7 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
                 flo_html_Uint16HashSetIterator iterator =
                     flo_html_initUint16HashSetIterator(&set);
                 while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
-                    if (flo_html_insertUint16HashSet(
+                    if (!flo_html_insertUint16HashSet(
                             &resultsSet,
                             flo_html_nextUint16HashSetIterator(&iterator),
                             &scratch)) {
@@ -455,7 +460,7 @@ flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
                                             flo_html_ParsedHTML parsed,
                                             flo_html_node_id *result,
                                             flo_html_Arena scratch) {
-    flo_html_node_id_a *results = NULL;
+    flo_html_node_id_a *results = FLO_HTML_NEW(&scratch, flo_html_node_id_a);
 
     flo_html_QueryStatus status =
         flo_html_querySelectorAll(css, parsed, results, &scratch);

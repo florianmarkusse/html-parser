@@ -193,32 +193,33 @@ static TestStatus testPrependix(const flo_html_String fileLocation1,
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
     TestStatus result = TEST_FAILURE;
-    flo_html_node_id foundNode = 0;
+    flo_html_node_id foundNode = FLO_HTML_ROOT_NODE_ID;
     if (cssQuery.len > 0) {
         result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
                                           scratch);
-    }
-    if (result != TEST_SUCCESS) {
-        return result;
+        if (result != TEST_SUCCESS) {
+            return failWithMessageAndCode(
+                FLO_HTML_S("Failed to get node from DOM!\n"), result);
+        }
     }
 
-    flo_html_DomStatus domStatus = DOM_SUCCESS;
+    flo_html_node_id prependedNodeID = FLO_HTML_ERROR_NODE_ID;
     switch (prependType) {
     case PREPEND_DOCUMENT_NODE: {
-        domStatus =
+        prependedNodeID =
             flo_html_prependDocumentNode(foundNode, &prependInput->documentNode,
                                          comparisonTest.actual, &scratch);
         break;
     }
     case PREPEND_TEXT_NODE: {
-        domStatus = flo_html_prependTextNode(
+        prependedNodeID = flo_html_prependTextNode(
             foundNode,
             FLO_HTML_S_LEN(prependInput->text, strlen(prependInput->text)),
             comparisonTest.actual, &scratch);
         break;
     }
     case PREPEND_FROM_STRING: {
-        domStatus = flo_html_prependHTMLFromString(
+        prependedNodeID = flo_html_prependHTMLFromString(
             foundNode,
             FLO_HTML_S_LEN(prependInput->text, strlen(prependInput->text)),
             comparisonTest.actual, &scratch);
@@ -230,7 +231,7 @@ static TestStatus testPrependix(const flo_html_String fileLocation1,
     }
     }
 
-    if (domStatus != DOM_SUCCESS) {
+    if (prependedNodeID == FLO_HTML_ERROR_NODE_ID) {
         return failWithMessage(
             FLO_HTML_S("Failed to prepend document to node!\n"));
     }

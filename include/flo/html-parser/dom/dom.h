@@ -16,6 +16,7 @@ extern "C" {
 #include "flo/html-parser/util/file/file-status.h"
 #include "flo/html-parser/util/memory.h"
 
+#define FLO_HTML_ERROR_NODE_ID 0U
 #define FLO_HTML_ROOT_NODE_ID 1U
 
 #define FLO_HTML_MAX_TAG_REGISTRATIONS (1U << 10U)

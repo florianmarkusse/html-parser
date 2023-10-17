@@ -54,7 +54,7 @@ void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
 
     dom->nodes = FLO_HTML_NEW(perm, flo_html_Node, FLO_HTML_MAX_NODES);
     flo_html_Node errorNode;
-    errorNode.nodeID = 0;
+    errorNode.nodeID = FLO_HTML_ERROR_NODE_ID;
     errorNode.nodeType = NODE_TYPE_ERROR;
     errorNode.tagID = 0;
     dom->nodes[0] = errorNode;

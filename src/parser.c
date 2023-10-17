@@ -41,7 +41,7 @@ bool isVoidElement(const flo_html_String str) {
             return true;
         }
     }
-    return false; // No match found
+    return false;
 }
 
 static void updateReferences(const flo_html_node_id newNodeID,
@@ -346,8 +346,8 @@ flo_html_NodeParseResult parseDocumentNode(const flo_html_String html,
 }
 
 void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
-                    flo_html_NodeDepth *nodeStack, flo_html_Arena *perm) {
-    flo_html_node_id prevNodeID = parsed.dom->nodes[1].nodeID;
+                    flo_html_node_id prevNodeID, flo_html_NodeDepth *nodeStack,
+                    flo_html_Arena *perm) {
     ptrdiff_t nodeStartLen = nodeStack->len;
 
     ptrdiff_t currentPosition = parseEmptyContent(html, 0);
@@ -424,11 +424,11 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
 void flo_html_parseRoot(const flo_html_String html, flo_html_ParsedHTML parsed,
                         flo_html_Arena *perm) {
     flo_html_NodeDepth nodeStack;
-    nodeStack.stack[0].nodeID = parsed.dom->nodes[1].nodeID;
+    nodeStack.stack[0].nodeID = FLO_HTML_ROOT_NODE_ID;
     nodeStack.stack[0].tag = FLO_HTML_EMPTY_STRING;
     nodeStack.len = 1;
 
-    flo_html_parse(html, parsed, &nodeStack, perm);
+    flo_html_parse(html, parsed, FLO_HTML_ROOT_NODE_ID, &nodeStack, perm);
 }
 
 void flo_html_parseExtra(const flo_html_String html, flo_html_ParsedHTML parsed,
@@ -436,7 +436,7 @@ void flo_html_parseExtra(const flo_html_String html, flo_html_ParsedHTML parsed,
     flo_html_NodeDepth nodeStack;
     nodeStack.len = 0;
 
-    flo_html_parse(html, parsed, &nodeStack, perm);
+    flo_html_parse(html, parsed, FLO_HTML_ERROR_NODE_ID, &nodeStack, perm);
 }
 
 flo_html_node_id

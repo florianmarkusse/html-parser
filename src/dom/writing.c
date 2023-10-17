@@ -164,9 +164,9 @@ void flo_html_printDomStatus(flo_html_ParsedHTML parsed) {
         flo_html_TagRegistration tagRegistration = dom->tagRegistry[i];
         const flo_html_String tag = flo_html_getStringFromHashSet(
             &textStore->tags.set, &tagRegistration.hashElement);
-        printf("tag ID: %-5u tag: %-20.*s isPaired: %d hash: %zu offset: %u\n",
-               tagRegistration.tagID, FLO_HTML_S_P(tag),
-               tagRegistration.isPaired, tagRegistration.hashElement.hash,
+        printf("tag ID: %-5td tag: %-20.*s isPaired: %d hash: %zu offset: %u\n",
+               i, FLO_HTML_S_P(tag), tagRegistration.isPaired,
+               tagRegistration.hashElement.hash,
                tagRegistration.hashElement.offset);
     }
     printf("\n");

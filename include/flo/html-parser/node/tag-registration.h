@@ -12,7 +12,6 @@ extern "C" {
 #include "node.h"
 
 typedef struct {
-    flo_html_index_id tagID;
     flo_html_HashElement hashElement;
     bool isPaired;
 } flo_html_TagRegistration;
