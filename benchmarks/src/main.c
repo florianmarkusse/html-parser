@@ -6,7 +6,6 @@
 #include <time.h>
 
 #define INPUTS_DIR "benchmarks/inputs/"
-#define TEST_FILE_1 INPUTS_DIR "my-test.html"
 
 bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
     flo_html_ParsedHTML parsed;
