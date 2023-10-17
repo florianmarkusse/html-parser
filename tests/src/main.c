@@ -64,6 +64,8 @@ int main() {
     testIntegrations(&successes, &failures, arena);
     printf("\n");
 
+    flo_html_destroyArena(&arena);
+
     printTestScore(successes, failures);
     if (failures > 0) {
         printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);

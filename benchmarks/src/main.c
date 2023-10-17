@@ -55,6 +55,8 @@ void benchmark() {
     printf("parsed %zu files\n", files);
 
     closedir(dir);
+
+    flo_html_destroyArena(&arena);
 }
 
 int main() {
