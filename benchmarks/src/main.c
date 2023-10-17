@@ -19,6 +19,13 @@ bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
 
 void benchmark() {
     flo_html_Arena arena = flo_html_newArena(1U << 27U);
+    void *jmp_buf[5];
+    if (__builtin_setjmp(jmp_buf)) {
+        flo_html_destroyArena(&arena);
+        FLO_HTML_PRINT_ERROR("OOM in arena!\n");
+        return;
+    }
+    arena.jmp_buf = jmp_buf;
 
     // Open the inputs directory
     DIR *dir = NULL;

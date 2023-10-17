@@ -20,6 +20,13 @@ int main() {
     printf("Starting test suite...\n\n");
 
     flo_html_Arena arena = flo_html_newArena(1U << 27U);
+    void *jmp_buf[5];
+    if (__builtin_setjmp(jmp_buf)) {
+        flo_html_destroyArena(&arena);
+        FLO_HTML_PRINT_ERROR("OOM in arena!\n");
+        return -1;
+    }
+    arena.jmp_buf = jmp_buf;
 
     ptrdiff_t successes = 0;
     ptrdiff_t failures = 0;
