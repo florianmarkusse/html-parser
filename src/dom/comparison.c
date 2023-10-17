@@ -178,19 +178,15 @@ flo_html_ComparisonStatus
 compareBoolProps(const flo_html_Node node1, flo_html_ParsedHTML parsed1,
                  const flo_html_Node node2, flo_html_ParsedHTML parsed2,
                  const bool printDifferences, flo_html_Arena scratch) {
-    flo_html_HashStatus hashStatus = HASH_SUCCESS;
-
     flo_html_StringHashSet set1;
     if (!(createBoolPropsSet(node1.nodeID, parsed1, &set1, &scratch))) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(hashStatus),
-                                      "Failed to create hash set 1");
+        FLO_HTML_PRINT_ERROR("Failed to create hash set 1");
         return COMPARISON_MEMORY;
     }
 
     flo_html_StringHashSet set2;
     if (!(createBoolPropsSet(node2.nodeID, parsed2, &set2, &scratch))) {
-        FLO_HTML_ERROR_WITH_CODE_ONLY(flo_html_hashStatusToString(hashStatus),
-                                      "Failed to create hash set 2");
+        FLO_HTML_PRINT_ERROR("Failed to create hash set 2");
         return COMPARISON_MEMORY;
     }
 

@@ -132,10 +132,6 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
         return TEST_FAILURE;
     }
 
-    flo_html_writeHTMLToFile(
-        comparisonTest.actual,
-        FLO_HTML_S("boing-boing/bang-bang/boop/boop/result.html"));
-
     return compareAndEndTest(&comparisonTest, scratch);
 }
 

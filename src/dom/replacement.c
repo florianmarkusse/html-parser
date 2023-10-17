@@ -63,7 +63,7 @@ flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
                                         fileLocation.buf);
-        return 0;
+        return FLO_HTML_ERROR_NODE_ID;
     }
 
     REPLACE_USING_QUERYSELECTOR(cssQuery, content, parsed, perm,

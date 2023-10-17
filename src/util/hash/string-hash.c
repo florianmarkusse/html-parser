@@ -86,6 +86,11 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
     ptrdiff_t index = hash % set->arrayLen;
     ptrdiff_t probes = 0;
     while (set->array[index].string.buf != NULL) {
+        if (probes > MAX_PROBES) {
+            FLO_HTML_PRINT_ERROR(
+                "Hash set maximum number of probes reached: %d!\n", MAX_PROBES);
+            return 0;
+        }
         if (flo_html_stringEquals(set->array[index].string, string)) {
             return set->array[index].contains.entryIndex;
         }

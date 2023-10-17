@@ -1,5 +1,5 @@
-#ifndef FLO_HTML_PARSER_UTILS_FILE_FILE_STATUS_H
-#define FLO_HTML_PARSER_UTILS_FILE_FILE_STATUS_H
+#ifndef FLO_HTML_PARSER_UTIL_FILE_FILE_STATUS_H
+#define FLO_HTML_PARSER_UTIL_FILE_FILE_STATUS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,14 +10,15 @@ typedef enum {
     FILE_CANT_OPEN,
     FILE_CANT_ALLOCATE,
     FILE_CANT_READ,
-    FILE_CANT_CREATE,
-    FILE_CANT_WRITE,
     FILE_NUM_STATUS
 } flo_html_FileStatus;
 
 static const char *const fileStatusStrings[FILE_NUM_STATUS] = {
-    "Success",          "Cannot open file",   "Cannot allocate memory",
-    "Cannot read file", "Cannot create file", "Cannot write to file"};
+    "Success",
+    "Cannot open file",
+    "Cannot allocate memory",
+    "Cannot read file",
+};
 
 // Not always used, but very handy for those that actually do want readable
 // error codes.

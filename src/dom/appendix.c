@@ -61,7 +61,7 @@ flo_html_node_id flo_html_appendHTMLFromFileWithQuery(
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
                                         fileLocation.buf);
-        return DOM_ERROR_MEMORY;
+        return FLO_HTML_ERROR_NODE_ID;
     }
 
     APPEND_USING_QUERYSELECTOR(cssQuery, content, parsed, perm,

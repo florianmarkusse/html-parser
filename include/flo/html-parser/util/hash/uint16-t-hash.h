@@ -12,7 +12,6 @@ extern "C" {
 
 #include "flo/html-parser/util/array.h"
 #include "flo/html-parser/util/memory.h"
-#include "hash-status.h"
 
 typedef FLO_HTML_ARRAY(uint16_t) flo_html_uint16_t_a;
 

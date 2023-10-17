@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-#include "dom-status.h"
 #include "flo/html-parser/node/boolean-property.h"
 #include "flo/html-parser/node/next-node.h"
 #include "flo/html-parser/node/node.h"
@@ -105,10 +104,10 @@ void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-flo_html_DomStatus
-flo_html_createDomFromFile(const flo_html_String fileLocation,
-                           flo_html_Dom *dom, flo_html_TextStore *textStore,
-                           flo_html_Arena *perm);
+bool flo_html_createDomFromFile(const flo_html_String fileLocation,
+                                flo_html_Dom *dom,
+                                flo_html_TextStore *textStore,
+                                flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

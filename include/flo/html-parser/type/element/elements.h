@@ -1,8 +1,6 @@
 #ifndef FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENTS_H
 #define FLO_HTML_PARSER_TYPE_ELEMENT_ELEMENTS_H
 
-#include "flo/html-parser/definitions.h"
-#include "flo/html-parser/util/hash/hash-element.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,8 +8,9 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#include "element-status.h"
+#include "flo/html-parser/definitions.h"
 #include "flo/html-parser/type/data/data-page.h"
+#include "flo/html-parser/util/hash/hash-element.h"
 #include "flo/html-parser/util/hash/string-hash.h"
 #include "flo/html-parser/util/memory.h"
 

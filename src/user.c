@@ -33,8 +33,8 @@ flo_html_UserStatus flo_html_fromFile(const flo_html_String fileLocation,
 
     parsed->dom = FLO_HTML_NEW(perm, flo_html_Dom);
 
-    if (flo_html_createDomFromFile(fileLocation, parsed->dom, parsed->textStore,
-                                   perm) != DOM_SUCCESS) {
+    if (!flo_html_createDomFromFile(fileLocation, parsed->dom,
+                                    parsed->textStore, perm)) {
         return USER_FILE_FAIL;
     }
 

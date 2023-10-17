@@ -1,7 +1,6 @@
 #ifndef FLO_HTML_PARSER_UTIL_HASH_STRING_HASH_H
 #define FLO_HTML_PARSER_UTIL_HASH_STRING_HASH_H
 
-#include "flo/html-parser/util/memory.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,10 +9,10 @@ extern "C" {
 #include <stdlib.h>
 
 #include "flo/html-parser/definitions.h"
+#include "flo/html-parser/util/memory.h"
 #include "flo/html-parser/util/text/string.h"
 #include "hash-comparison-status.h"
 #include "hash-element.h"
-#include "hash-status.h"
 
 /**
  * Hashing with linear probing for natural values > 0 up until ptrdiff_t max

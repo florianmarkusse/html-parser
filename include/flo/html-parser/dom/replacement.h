@@ -8,7 +8,6 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "flo/html-parser/dom/dom-status.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/node/document-node.h"
 #include "flo/html-parser/node/node.h"

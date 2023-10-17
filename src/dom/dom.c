@@ -18,10 +18,10 @@ initflo_html_BasicRegistry(flo_html_HashElement initRegistration,
     return basicRegistry;
 }
 
-flo_html_DomStatus
-flo_html_createDomFromFile(const flo_html_String fileLocation,
-                           flo_html_Dom *dom, flo_html_TextStore *textStore,
-                           flo_html_Arena *perm) {
+bool flo_html_createDomFromFile(const flo_html_String fileLocation,
+                                flo_html_Dom *dom,
+                                flo_html_TextStore *textStore,
+                                flo_html_Arena *perm) {
     flo_html_String content;
     flo_html_FileStatus fileStatus =
         flo_html_readFile(fileLocation, &content, perm);
@@ -29,12 +29,12 @@ flo_html_createDomFromFile(const flo_html_String fileLocation,
         FLO_HTML_ERROR_WITH_CODE_FORMAT(flo_html_fileStatusToString(fileStatus),
                                         "Failed to read file: \"%s\"",
                                         fileLocation.buf);
-        return DOM_ERROR_MEMORY;
+        return false;
     }
 
     flo_html_createDom(content, dom, textStore, perm);
 
-    return DOM_SUCCESS;
+    return true;
 }
 
 void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
