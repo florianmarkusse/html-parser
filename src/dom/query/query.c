@@ -345,52 +345,14 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
             flo_html_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, &scratch);
 
         flo_html_QueryStatus result = QUERY_SUCCESS;
-        ptrdiff_t currentQueryStart = 0;
-        ptrdiff_t currentQueryEnd =
-            flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
 
-        if (currentQueryEnd > 0) {
-            flo_html_Uint16HashSet set = flo_html_initUint16HashSet(
-                FLO_HTML_INITIAL_QUERY_CAP, &scratch);
-
-            while (currentQueryEnd >= 0) {
-                flo_html_String singularQuery =
-                    FLO_HTML_S_LEN(css.buf + currentQueryStart,
-                                   currentQueryEnd - currentQueryStart);
-
-                if ((result = getQueryResults(singularQuery, parsed, &set,
-                                              &scratch)) != QUERY_SUCCESS) {
-                    FLO_HTML_ERROR_WITH_CODE_ONLY(
-                        flo_html_queryingStatusToString(result),
-                        "Unable get query results!\n");
-                    return result;
-                }
-
-                flo_html_Uint16HashSetIterator iterator =
-                    flo_html_initUint16HashSetIterator(&set);
-                while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
-                    if (!flo_html_insertUint16HashSet(
-                            &resultsSet,
-                            flo_html_nextUint16HashSetIterator(&iterator),
-                            &scratch)) {
-                        FLO_HTML_PRINT_ERROR(
-                            "Failed to save intermediate results!\n");
-
-                        return QUERY_MEMORY_ERROR;
-                    }
-                }
-
-                flo_html_resetUint16HashSet(&set);
-
-                currentQueryStart = currentQueryEnd + 1; // skip ','
-                currentQueryEnd =
-                    flo_html_firstOccurenceOfFrom(css, ',', currentQueryStart);
-            }
-            flo_html_String singularQuery = FLO_HTML_S_LEN(
-                css.buf + currentQueryStart, css.len - currentQueryStart);
-
-            if ((result = getQueryResults(singularQuery, parsed, &set,
-                                          &scratch)) != QUERY_SUCCESS) {
+        flo_html_String iter;
+        ptrdiff_t start = 0;
+        flo_html_Uint16HashSet set =
+            flo_html_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, &scratch);
+        FLO_HTML_STRING_SPLIT_ITERATOR(iter, css, ',', start) {
+            if ((result = getQueryResults(iter, parsed, &set, &scratch)) !=
+                QUERY_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
                     flo_html_queryingStatusToString(result),
                     "Unable get query results!\n");
@@ -410,14 +372,8 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
                     return QUERY_MEMORY_ERROR;
                 }
             }
-        } else {
-            if ((result = getQueryResults(css, parsed, &resultsSet,
-                                          &scratch)) != QUERY_SUCCESS) {
-                FLO_HTML_ERROR_WITH_CODE_ONLY(
-                    flo_html_queryingStatusToString(result),
-                    "Unable get query results!\n");
-                return result;
-            }
+
+            flo_html_resetUint16HashSet(&set);
         }
 
         // create on scratch arena by conversion.
