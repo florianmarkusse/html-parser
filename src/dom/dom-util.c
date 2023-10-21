@@ -107,10 +107,10 @@ const flo_html_String flo_html_getPropValue(const flo_html_index_id propValueID,
 
 bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
                        flo_html_Node *replacingNode, flo_html_ParsedHTML parsed,
-                       bool isAppend) {
+                       bool isAppend, flo_html_Arena *perm) {
     if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
         flo_html_addTextToTextNode(possibleMergeNode, replacingNode->text,
-                                   parsed, isAppend);
+                                   parsed, isAppend, perm);
         return true;
     }
     return false;

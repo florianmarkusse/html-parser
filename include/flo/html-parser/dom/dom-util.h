@@ -47,7 +47,7 @@ const flo_html_String flo_html_getPropValue(flo_html_index_id propValueID,
 
 bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
                        flo_html_Node *replacingNode, flo_html_ParsedHTML parsed,
-                       bool isAppend);
+                       bool isAppend, flo_html_Arena *perm);
 
 void flo_html_connectOtherNodesToParent(flo_html_node_id parentID,
                                         flo_html_node_id lastAddedChild,

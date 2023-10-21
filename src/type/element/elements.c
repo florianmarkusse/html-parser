@@ -30,6 +30,5 @@ flo_html_TextStore flo_html_createTextStore(flo_html_Arena *perm) {
         .propValues =
             flo_html_initStringRegistry(FLO_HTML_MAX_ELEMENTS_PER_REGISTRY,
                                         FLO_HTML_PROP_VALUES_PAGE_SIZE, perm),
-        .text = flo_html_initDataPage(FLO_HTML_TEXT_PAGE_SIZE, perm),
     };
 }

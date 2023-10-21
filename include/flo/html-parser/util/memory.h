@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -69,6 +70,7 @@ flo_html_alloc(flo_html_Arena *a, ptrdiff_t size, ptrdiff_t align,
     newEnd -= (uintptr_t)a->end & !(align - 1); // fix alignment.
 
     if (newEnd < a->beg) {
+        FLO_HTML_ASSERT(false);
         if (flags & FLO_HTML_NULL_ON_FAIL) {
             return NULL;
         }

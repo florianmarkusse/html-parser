@@ -9,7 +9,6 @@ extern "C" {
 
 void flo_html_printPropertyStatus(const flo_html_TextStore *textStore);
 void flo_html_printBoolPropStatus(const flo_html_TextStore *textStore);
-void flo_html_printTextStatus(const flo_html_TextStore *textStore);
 void flo_html_printTagStatus(const flo_html_TextStore *textStore);
 
 #ifdef __cplusplus

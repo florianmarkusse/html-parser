@@ -55,11 +55,6 @@ void flo_html_printBoolPropStatus(const flo_html_TextStore *textStore) {
     printflo_html_StringRegistryStatus(&textStore->boolProps);
 }
 
-void flo_html_printTextStatus(const flo_html_TextStore *textStore) {
-    printf("printing text status...\n\n");
-    printPage(&textStore->text);
-}
-
 void flo_html_printTagStatus(const flo_html_TextStore *textStore) {
     printf("printing tags status...\n\n");
     printflo_html_StringRegistryStatus(&textStore->tags);

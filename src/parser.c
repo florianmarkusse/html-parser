@@ -18,6 +18,7 @@
 #include "flo/html-parser/type/element/elements.h"
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/memory.h"
+#include "flo/html-parser/util/raw-data.h"
 #include "flo/html-parser/util/text/char.h"
 
 typedef enum {
@@ -148,10 +149,11 @@ bool isEndOfTextNode(const flo_html_String html, ptrdiff_t currentIndex,
     return false;
 }
 
-flo_html_NodeParseResult
-parseTextNode(const flo_html_String html, ptrdiff_t textStart,
-              flo_html_String parentTag, flo_html_ParsedHTML parsed,
-              flo_html_Arena *perm, flo_html_Arena scratch) {
+flo_html_NodeParseResult parseTextNode(const flo_html_String html,
+                                       ptrdiff_t textStart,
+                                       flo_html_String parentTag,
+                                       flo_html_ParsedHTML parsed,
+                                       flo_html_Arena *perm) {
     flo_html_NodeParseResult result;
     flo_html_node_id nodeID =
         flo_html_createNode(NODE_TYPE_TEXT, parsed.dom, perm);
@@ -161,16 +163,6 @@ parseTextNode(const flo_html_String html, ptrdiff_t textStart,
                        // problematic if we have a roque opening tag.
     unsigned char ch = flo_html_getChar(html, textEnd);
 
-    ptrdiff_t totalTextLen = 0;
-    ptrdiff_t maxTextSize = 1U << 17U;
-    // TODO: Can make it into a dynamic array that grows, should work much
-    // better.
-    // TODO: dynamic array.
-    unsigned char *textBuffer =
-        FLO_HTML_NEW(&scratch, unsigned char, maxTextSize);
-    flo_html_String textString;
-    textString.buf = textBuffer;
-
     flo_html_String closeToken = FLO_HTML_EMPTY_STRING;
     if (flo_html_stringEquals(parentTag, FLO_HTML_S("style"))) {
         closeToken = FLO_HTML_S("/style");
@@ -179,13 +171,16 @@ parseTextNode(const flo_html_String html, ptrdiff_t textStart,
         closeToken = FLO_HTML_S("/script");
     }
 
-    flo_html_NodeParseResult commentNode;
+    flo_html_RawData raw = {0};
+    flo_html_String whiteSpace = FLO_HTML_S(" ");
+    bool isAppend = false;
     // Continue until the end of the text node.
     while (textEnd < html.len &&
            !(ch == '<' && isEndOfTextNode(html, textEnd, closeToken) &&
              !isCommentTag(html, textEnd))) {
         if (ch == '<' && isCommentTag(html, textEnd)) {
-            commentNode = parseComment(html, textEnd + 4);
+            flo_html_NodeParseResult commentNode =
+                parseComment(html, textEnd + 4);
             textStart = parseEmptyContent(html, commentNode.nextPosition);
         } else {
             // Continue until we encounter extra space or the end of the text
@@ -200,35 +195,23 @@ parseTextNode(const flo_html_String html, ptrdiff_t textStart,
                 textLen--;
             }
 
-            if (textLen + totalTextLen + 1 > maxTextSize) {
-                FLO_HTML_PRINT_ERROR(
-                    "Text node is too large to fit into text buffer.\n");
-                FLO_HTML_PRINT_ERROR(
-                    "want to add \n%.*s\n",
-                    FLO_HTML_S_P(FLO_HTML_S_LEN(
-                        flo_html_getCharPtr(html, textStart), textLen)));
-                FLO_HTML_PRINT_ERROR(
-                    "current text is \n%.*s\n",
-                    FLO_HTML_S_P(FLO_HTML_S_LEN(textBuffer, totalTextLen)));
-                FLO_HTML_PRINT_ERROR("Implement growing of the text buffer!!!");
+            if (isAppend) {
+                flo_html_addRawData(&raw, whiteSpace, perm);
             }
+            isAppend = true;
 
-            textBuffer[totalTextLen] = ' ';
-            memcpy(&textBuffer[totalTextLen + (totalTextLen > 0)],
-                   flo_html_getCharPtr(html, textStart), textLen);
-            totalTextLen += textLen + (totalTextLen > 0);
+            flo_html_addRawData(
+                &raw,
+                FLO_HTML_S_LEN(flo_html_getCharPtr(html, textStart), textLen),
+                perm);
 
             textStart = parseEmptyContent(html, textEnd);
         }
         textEnd = textStart;
         ch = flo_html_getChar(html, textEnd);
     }
-    textString.len = totalTextLen;
 
-    unsigned char *dataLocation =
-        flo_html_insertIntoPage(textString, &parsed.textStore->text);
-    flo_html_setNodeText(nodeID, FLO_HTML_S_LEN(dataLocation, textString.len),
-                         parsed.dom);
+    flo_html_setNodeText(nodeID, FLO_HTML_S_LEN(raw.buf, raw.len), parsed.dom);
 
     result.nodeID = nodeID;
     result.canHaveChildren = false;
@@ -402,7 +385,7 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
                         parseResult = parseTextNode(
                             html, currentPosition,
                             nodeStack->stack[nodeStack->len - 1].tag, parsed,
-                            perm, *perm);
+                            perm);
                         updateReferences(parseResult.nodeID, prevNodeID,
                                          nodeStack, parsed.dom, perm);
                     }
@@ -413,7 +396,7 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
         else {
             parseResult = parseTextNode(
                 html, currentPosition, nodeStack->stack[nodeStack->len - 1].tag,
-                parsed, perm, *perm);
+                parsed, perm);
             updateReferences(parseResult.nodeID, prevNodeID, nodeStack,
                              parsed.dom, perm);
         }
@@ -473,9 +456,9 @@ flo_html_node_id flo_html_parseTextElement(flo_html_String text,
                                            flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
         flo_html_createNode(NODE_TYPE_TEXT, parsed.dom, perm);
-    unsigned char *dataLocation =
-        flo_html_insertIntoPage(text, &parsed.textStore->text);
-    flo_html_setNodeText(newNodeID, FLO_HTML_S_LEN(dataLocation, text.len),
+    unsigned char *malloced = FLO_HTML_NEW(perm, unsigned char, text.len);
+    memcpy(malloced, text.buf, text.len);
+    flo_html_setNodeText(newNodeID, FLO_HTML_S_LEN(malloced, text.len),
                          parsed.dom);
 
     return newNodeID;

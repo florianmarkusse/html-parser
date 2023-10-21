@@ -111,7 +111,8 @@ void flo_html_setTextContent(flo_html_node_id nodeID,
  *          an error code otherwise).
  */
 void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,
-                                flo_html_ParsedHTML parsed, bool isAppend);
+                                flo_html_ParsedHTML parsed, bool isAppend,
+                                flo_html_Arena *perm);
 
 /**
  * @brief Set the tag on a DocumentNode within the DOM.

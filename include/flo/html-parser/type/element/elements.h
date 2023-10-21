@@ -30,7 +30,6 @@ typedef struct {
     flo_html_StringRegistry boolProps;
     flo_html_StringRegistry propKeys;
     flo_html_StringRegistry propValues;
-    flo_html_DataPage text;
 } flo_html_TextStore;
 
 flo_html_TextStore flo_html_createTextStore(flo_html_Arena *perm);

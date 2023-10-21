@@ -113,26 +113,25 @@ void flo_html_setTextContent(const flo_html_node_id nodeID,
 }
 
 void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,
-                                flo_html_ParsedHTML parsed, bool isAppend) {
-    const flo_html_String prevText = node->text;
-    const ptrdiff_t mergedLen =
+                                flo_html_ParsedHTML parsed, bool isAppend,
+                                flo_html_Arena *perm) {
+    flo_html_String prevText = node->text;
+    ptrdiff_t mergedLen =
         prevText.len + text.len + 1; // Adding a whitespace in between.
 
-    // TODO: VLA :(((
-    unsigned char buffer[mergedLen + 1];
+    unsigned char *newText = FLO_HTML_NEW(perm, unsigned char, mergedLen);
+
     if (isAppend) {
-        memcpy(buffer, prevText.buf, prevText.len);
-        buffer[prevText.len] = ' ';
-        memcpy(buffer + prevText.len + 1, text.buf, text.len);
+        memcpy(newText, prevText.buf, prevText.len);
+        newText[prevText.len] = ' ';
+        memcpy(newText + prevText.len + 1, text.buf, text.len);
     } else {
-        memcpy(buffer, text.buf, text.len);
-        buffer[text.len] = ' ';
-        memcpy(buffer + text.len + 1, prevText.buf, prevText.len);
+        memcpy(newText, text.buf, text.len);
+        newText[text.len] = ' ';
+        memcpy(newText + text.len + 1, prevText.buf, prevText.len);
     }
 
-    unsigned char *dataLocation = flo_html_insertIntoPage(
-        FLO_HTML_S_LEN(buffer, mergedLen), &parsed.textStore->text);
-    flo_html_setNodeText(node->nodeID, FLO_HTML_S_LEN(dataLocation, mergedLen),
+    flo_html_setNodeText(node->nodeID, FLO_HTML_S_LEN(newText, mergedLen),
                          parsed.dom);
 }
 
