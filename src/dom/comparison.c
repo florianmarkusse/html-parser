@@ -71,9 +71,9 @@ bool createPropsSet(const flo_html_node_id nodeID, flo_html_ParsedHTML parsed,
     *valueSet = flo_html_initStringHashSet(FLO_HTML_MAX_PROPERTIES * 2, perm);
 
     // TODO(florian): make faster. (BTREE)
-    for (ptrdiff_t i = 0; i < dom->propsLen; i++) {
-        if (dom->props[i].nodeID == nodeID) {
-            flo_html_index_id keyID = dom->props[i].keyID;
+    for (ptrdiff_t i = 0; i < dom->props.len; i++) {
+        if (dom->props.buf[i].nodeID == nodeID) {
+            flo_html_index_id keyID = dom->props.buf[i].keyID;
             const flo_html_String propKey = flo_html_getPropKey(keyID, parsed);
             if (!flo_html_insertStringHashSet(keySet, propKey, perm)) {
                 FLO_HTML_PRINT_ERROR(
@@ -82,7 +82,7 @@ bool createPropsSet(const flo_html_node_id nodeID, flo_html_ParsedHTML parsed,
                 return false;
             }
 
-            flo_html_index_id valueID = dom->props[i].valueID;
+            flo_html_index_id valueID = dom->props.buf[i].valueID;
             const flo_html_String propValue =
                 flo_html_getPropValue(valueID, parsed);
             if (!flo_html_insertStringHashSet(keySet, propValue, perm)) {
@@ -158,9 +158,9 @@ bool createBoolPropsSet(const flo_html_node_id nodeID,
     flo_html_Dom *dom = parsed.dom;
 
     // TODO(florian): make faster. (BTREE)
-    for (ptrdiff_t i = 0; i < dom->boolPropsLen; i++) {
-        if (dom->boolProps[i].nodeID == nodeID) {
-            flo_html_index_id propID = dom->boolProps[i].propID;
+    for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
+        if (dom->boolProps.buf[i].nodeID == nodeID) {
+            flo_html_index_id propID = dom->boolProps.buf[i].propID;
             const flo_html_String boolProp =
                 flo_html_getBoolProp(propID, parsed);
             if (!flo_html_insertStringHashSet(boolPropsSet, boolProp, perm)) {
@@ -253,9 +253,9 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
     }
     case NODE_TYPE_DOCUMENT: {
         flo_html_TagRegistration *tagRegistration1 =
-            &parsed1.dom->tagRegistry[node1.tagID];
+            &parsed1.dom->tagRegistry.buf[node1.tagID];
         flo_html_TagRegistration *tagRegistration2 =
-            &parsed2.dom->tagRegistry[node2.tagID];
+            &parsed2.dom->tagRegistry.buf[node2.tagID];
 
         if (tagRegistration1->isPaired != tagRegistration2->isPaired) {
             if (printDifferences) {
@@ -322,8 +322,8 @@ flo_html_ComparisonResult compareNode(flo_html_node_id nodeID1,
     result.nodeID1 = nodeID1;
     result.nodeID2 = nodeID2;
 
-    flo_html_Node node1 = parsed1.dom->nodes[nodeID1];
-    flo_html_Node node2 = parsed2.dom->nodes[nodeID2];
+    flo_html_Node node1 = parsed1.dom->nodes.buf[nodeID1];
+    flo_html_Node node2 = parsed2.dom->nodes.buf[nodeID2];
 
     result.status = compareTags(node1, parsed1, node2, parsed2, false);
     if (result.status != COMPARISON_SUCCESS) {
@@ -401,8 +401,8 @@ void flo_html_printFirstDifference(const flo_html_node_id nodeID1,
                                    const flo_html_node_id nodeID2,
                                    flo_html_ParsedHTML parsed2,
                                    flo_html_Arena scratch) {
-    flo_html_Node node1 = parsed1.dom->nodes[nodeID1];
-    flo_html_Node node2 = parsed2.dom->nodes[nodeID2];
+    flo_html_Node node1 = parsed1.dom->nodes.buf[nodeID1];
+    flo_html_Node node2 = parsed2.dom->nodes.buf[nodeID2];
 
     if (compareTags(node1, parsed1, node2, parsed2, true) !=
         COMPARISON_SUCCESS) {

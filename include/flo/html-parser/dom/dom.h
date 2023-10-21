@@ -12,6 +12,7 @@ extern "C" {
 #include "flo/html-parser/node/property.h"
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
+#include "flo/html-parser/util/array.h"
 #include "flo/html-parser/util/file/file-status.h"
 #include "flo/html-parser/util/memory.h"
 
@@ -29,45 +30,28 @@ extern "C" {
 #define FLO_HTML_MAX_BOOL_PROPS (1U << 14U)
 #define FLO_HTML_MAX_PROPS (1U << 14U)
 
-typedef struct {
-    flo_html_HashElement *hashes;
-    ptrdiff_t len;
-    ptrdiff_t cap;
-} flo_html_BasicRegistry;
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_Node) flo_html_Node_d_a;
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_ParentChild) flo_html_ParentChild_d_a;
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_NextNode) flo_html_NextNode_d_a;
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_BooleanProperty)
+    flo_html_BooleanProperty_d_a;
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_Property) flo_html_Property_d_a;
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_TagRegistration)
+    flo_html_TagRegistration_d_a;
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_HashElement) flo_html_HashElement_d_a;
 
 typedef struct {
-    flo_html_Node *nodes;
-    ptrdiff_t nodeLen;
-    ptrdiff_t nodeCap;
+    flo_html_Node_d_a nodes;
+    flo_html_ParentChild_d_a parentFirstChilds;
+    flo_html_ParentChild_d_a parentChilds;
+    flo_html_NextNode_d_a nextNodes;
+    flo_html_BooleanProperty_d_a boolProps;
+    flo_html_Property_d_a props;
 
-    // TODO: this can all be turned into dynamic arrays.
-    flo_html_ParentChild *parentFirstChilds;
-    ptrdiff_t parentFirstChildLen;
-    ptrdiff_t parentFirstChildCap;
-
-    flo_html_ParentChild *parentChilds;
-    ptrdiff_t parentChildLen;
-    ptrdiff_t parentChildCap;
-
-    flo_html_NextNode *nextNodes;
-    ptrdiff_t nextNodeLen;
-    ptrdiff_t nextNodeCap;
-
-    flo_html_BooleanProperty *boolProps;
-    ptrdiff_t boolPropsLen;
-    ptrdiff_t boolPropsCap;
-
-    flo_html_Property *props;
-    ptrdiff_t propsLen;
-    ptrdiff_t propsCap;
-
-    flo_html_TagRegistration *tagRegistry;
-    ptrdiff_t tagRegistryLen;
-    ptrdiff_t tagRegistryCap;
-
-    flo_html_BasicRegistry boolPropRegistry;
-    flo_html_BasicRegistry propKeyRegistry;
-    flo_html_BasicRegistry propValueRegistry;
+    flo_html_TagRegistration_d_a tagRegistry;
+    flo_html_HashElement_d_a boolPropRegistry;
+    flo_html_HashElement_d_a propKeyRegistry;
+    flo_html_HashElement_d_a propValueRegistry;
 } flo_html_Dom;
 
 /**
@@ -86,8 +70,9 @@ typedef struct {
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
-                        flo_html_TextStore *textStore, flo_html_Arena *perm);
+flo_html_Dom *flo_html_createDom(const flo_html_String htmlString,
+                                 flo_html_TextStore *textStore,
+                                 flo_html_Arena *perm);
 
 /**
  * @brief Create a DOM structure from an HTML file.
@@ -104,10 +89,9 @@ void flo_html_createDom(const flo_html_String htmlString, flo_html_Dom *dom,
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-bool flo_html_createDomFromFile(const flo_html_String fileLocation,
-                                flo_html_Dom *dom,
-                                flo_html_TextStore *textStore,
-                                flo_html_Arena *perm);
+flo_html_Dom *flo_html_createDomFromFile(const flo_html_String fileLocation,
+                                         flo_html_TextStore *textStore,
+                                         flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

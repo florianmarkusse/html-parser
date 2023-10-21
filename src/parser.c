@@ -47,18 +47,19 @@ bool isVoidElement(const flo_html_String str) {
 static void updateReferences(const flo_html_node_id newNodeID,
                              const flo_html_node_id previousNodeID,
                              const flo_html_NodeDepth *depthStack,
-                             flo_html_Dom *dom) {
+                             flo_html_Dom *dom, flo_html_Arena *perm) {
     if (newNodeID > 0 && previousNodeID > 0) {
         if (depthStack->len == 0) {
-            flo_html_addNextNode(previousNodeID, newNodeID, dom);
+            flo_html_addNextNode(previousNodeID, newNodeID, dom, perm);
         } else {
             const unsigned int parentNodeID =
                 depthStack->stack[depthStack->len - 1].nodeID;
-            flo_html_addParentChild(parentNodeID, newNodeID, dom);
+            flo_html_addParentChild(parentNodeID, newNodeID, dom, perm);
             if (parentNodeID == previousNodeID) {
-                flo_html_addParentFirstChild(parentNodeID, newNodeID, dom);
+                flo_html_addParentFirstChild(parentNodeID, newNodeID, dom,
+                                             perm);
             } else {
-                flo_html_addNextNode(previousNodeID, newNodeID, dom);
+                flo_html_addNextNode(previousNodeID, newNodeID, dom, perm);
             }
         }
     }
@@ -147,13 +148,13 @@ bool isEndOfTextNode(const flo_html_String html, ptrdiff_t currentIndex,
     return false;
 }
 
-flo_html_NodeParseResult parseTextNode(const flo_html_String html,
-                                       ptrdiff_t textStart,
-                                       flo_html_String parentTag,
-                                       flo_html_ParsedHTML parsed,
-                                       flo_html_Arena scratch) {
+flo_html_NodeParseResult
+parseTextNode(const flo_html_String html, ptrdiff_t textStart,
+              flo_html_String parentTag, flo_html_ParsedHTML parsed,
+              flo_html_Arena *perm, flo_html_Arena scratch) {
     flo_html_NodeParseResult result;
-    flo_html_node_id nodeID = flo_html_createNode(NODE_TYPE_TEXT, parsed.dom);
+    flo_html_node_id nodeID =
+        flo_html_createNode(NODE_TYPE_TEXT, parsed.dom, perm);
 
     ptrdiff_t textEnd =
         textStart + 1; // Always consume at least a single character, otherwise
@@ -268,10 +269,11 @@ ptrdiff_t parseProp(const flo_html_String html, ptrdiff_t propStart,
 
 flo_html_NodeParseResult parseDocumentNode(const flo_html_String html,
                                            ptrdiff_t tagStart, bool exclamTag,
-                                           flo_html_ParsedHTML parsed) {
+                                           flo_html_ParsedHTML parsed,
+                                           flo_html_Arena *perm) {
     flo_html_NodeParseResult result;
     flo_html_node_id nodeID =
-        flo_html_createNode(NODE_TYPE_DOCUMENT, parsed.dom);
+        flo_html_createNode(NODE_TYPE_DOCUMENT, parsed.dom, perm);
 
     ptrdiff_t parsedChars = tagStart;
     unsigned char ch = flo_html_getChar(html, parsedChars);
@@ -324,16 +326,19 @@ flo_html_NodeParseResult parseDocumentNode(const flo_html_String html,
                     parseProp(html, parsedChars + 1, &propValue); // skip '='
                 ch = flo_html_getChar(html, parsedChars);
 
-                flo_html_addPropertyToNode(nodeID, propKey, propValue, parsed);
+                flo_html_addPropertyToNode(nodeID, propKey, propValue, parsed,
+                                           perm);
             } else {
-                flo_html_addBooleanPropertyToNode(nodeID, propKey, parsed);
+                flo_html_addBooleanPropertyToNode(nodeID, propKey, parsed,
+                                                  perm);
             }
         }
         parsedChars = parseEmptyContent(html, parsedChars);
         ch = flo_html_getChar(html, parsedChars);
     }
 
-    flo_html_setTagOnDocumentNode(documentTag, nodeID, canHaveChildren, parsed);
+    flo_html_setTagOnDocumentNode(documentTag, nodeID, canHaveChildren, parsed,
+                                  perm);
 
     result.nodeID = nodeID;
     result.canHaveChildren = canHaveChildren;
@@ -365,11 +370,11 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
 
                 if (flo_html_isAlphaBetical(nextCh) || nextCh == '!') {
                     // standard opening tag or !DOCTYPE and friends
-                    parseResult = parseDocumentNode(html, currentPosition + 1,
-                                                    nextCh == '!', parsed);
+                    parseResult = parseDocumentNode(
+                        html, currentPosition + 1, nextCh == '!', parsed, perm);
 
                     updateReferences(parseResult.nodeID, prevNodeID, nodeStack,
-                                     parsed.dom);
+                                     parsed.dom, perm);
 
                     if (parseResult.canHaveChildren) {
                         // TODO: dynamic, but handle array growth of others
@@ -397,9 +402,9 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
                         parseResult = parseTextNode(
                             html, currentPosition,
                             nodeStack->stack[nodeStack->len - 1].tag, parsed,
-                            *perm);
+                            perm, *perm);
                         updateReferences(parseResult.nodeID, prevNodeID,
-                                         nodeStack, parsed.dom);
+                                         nodeStack, parsed.dom, perm);
                     }
                 }
             }
@@ -408,9 +413,9 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
         else {
             parseResult = parseTextNode(
                 html, currentPosition, nodeStack->stack[nodeStack->len - 1].tag,
-                parsed, *perm);
+                parsed, perm, *perm);
             updateReferences(parseResult.nodeID, prevNodeID, nodeStack,
-                             parsed.dom);
+                             parsed.dom, perm);
         }
 
         prevNodeID = parseResult.nodeID;
@@ -441,31 +446,33 @@ void flo_html_parseExtra(const flo_html_String html, flo_html_ParsedHTML parsed,
 
 flo_html_node_id
 flo_html_parseDocumentElement(const flo_html_DocumentNode *documentNode,
-                              flo_html_ParsedHTML parsed) {
+                              flo_html_ParsedHTML parsed,
+                              flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
-        flo_html_createNode(NODE_TYPE_DOCUMENT, parsed.dom);
+        flo_html_createNode(NODE_TYPE_DOCUMENT, parsed.dom, perm);
 
     flo_html_setTagOnDocumentNode(documentNode->tag, newNodeID,
-                                  documentNode->isPaired, parsed);
+                                  documentNode->isPaired, parsed, perm);
 
     for (ptrdiff_t i = 0; i < documentNode->boolPropsLen; i++) {
         const flo_html_String boolProp = documentNode->boolProps[i];
-        flo_html_addBooleanPropertyToNode(newNodeID, boolProp, parsed);
+        flo_html_addBooleanPropertyToNode(newNodeID, boolProp, parsed, perm);
     }
 
     for (ptrdiff_t i = 0; i < documentNode->propsLen; i++) {
         const flo_html_String keyProp = documentNode->keyProps[i];
         const flo_html_String valueProp = documentNode->valueProps[i];
-        flo_html_addPropertyToNode(newNodeID, keyProp, valueProp, parsed);
+        flo_html_addPropertyToNode(newNodeID, keyProp, valueProp, parsed, perm);
     }
 
     return newNodeID;
 }
 
 flo_html_node_id flo_html_parseTextElement(flo_html_String text,
-                                           flo_html_ParsedHTML parsed) {
+                                           flo_html_ParsedHTML parsed,
+                                           flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
-        flo_html_createNode(NODE_TYPE_TEXT, parsed.dom);
+        flo_html_createNode(NODE_TYPE_TEXT, parsed.dom, perm);
     unsigned char *dataLocation =
         flo_html_insertIntoPage(text, &parsed.textStore->text);
     flo_html_setNodeText(newNodeID, FLO_HTML_S_LEN(dataLocation, text.len),

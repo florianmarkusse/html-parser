@@ -17,7 +17,7 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
             break;
         }
         case TAG: {
-            if (dom->nodes[nodeID].tagID != filterType.data.tagID) {
+            if (dom->nodes.buf[nodeID].tagID != filterType.data.tagID) {
                 return false;
             }
             break;
@@ -25,9 +25,9 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
         case BOOLEAN_PROPERTY: {
             bool flo_html_hasBoolProp = false;
             // TODO(florian): find way to improve this.
-            for (ptrdiff_t j = 0; j < dom->boolPropsLen; j++) {
-                if (dom->boolProps[j].nodeID == nodeID &&
-                    dom->boolProps[j].propID == filterType.data.propID) {
+            for (ptrdiff_t j = 0; j < dom->boolProps.len; j++) {
+                if (dom->boolProps.buf[j].nodeID == nodeID &&
+                    dom->boolProps.buf[j].propID == filterType.data.propID) {
                     flo_html_hasBoolProp = true;
                     break;
                 }
@@ -40,10 +40,11 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
         case PROPERTY: {
             bool hasProp = false;
             // TODO(florian): find way to improve this.
-            for (ptrdiff_t j = 0; j < dom->propsLen; j++) {
-                if (dom->props[j].nodeID == nodeID &&
-                    dom->props[j].keyID == filterType.data.keyValuePair.keyID &&
-                    dom->props[j].valueID ==
+            for (ptrdiff_t j = 0; j < dom->props.len; j++) {
+                if (dom->props.buf[j].nodeID == nodeID &&
+                    dom->props.buf[j].keyID ==
+                        filterType.data.keyValuePair.keyID &&
+                    dom->props.buf[j].valueID ==
                         filterType.data.keyValuePair.valueID) {
                     hasProp = true;
                     break;
@@ -67,10 +68,10 @@ bool flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     const ptrdiff_t filtersLen, const flo_html_Dom *dom,
     flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
-    for (ptrdiff_t i = 0; i < dom->nodeLen; i++) {
-        if (flo_html_filterNode(dom->nodes[i].nodeID, filters, filtersLen,
+    for (ptrdiff_t i = 0; i < dom->nodes.len; i++) {
+        if (flo_html_filterNode(dom->nodes.buf[i].nodeID, filters, filtersLen,
                                 dom)) {
-            if (!flo_html_insertUint16HashSet(set, dom->nodes[i].nodeID,
+            if (!flo_html_insertUint16HashSet(set, dom->nodes.buf[i].nodeID,
                                               perm)) {
                 return false;
             }
@@ -146,9 +147,9 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
     flo_html_Uint16HashSet *filledSet = &firstDescendants;
 
     while (depth > 0 && filledSet->entries > 0) {
-        for (ptrdiff_t i = 0; i < dom->parentChildLen; i++) {
-            flo_html_ParentChild parentChildNode = dom->parentChilds[i];
-            if (dom->nodes[parentChildNode.childID].nodeType ==
+        for (ptrdiff_t i = 0; i < dom->parentChilds.len; i++) {
+            flo_html_ParentChild parentChildNode = dom->parentChilds.buf[i];
+            if (dom->nodes.buf[parentChildNode.childID].nodeType ==
                     NODE_TYPE_DOCUMENT &&
                 flo_html_containsUint16HashSet(filledSet,
                                                parentChildNode.parentID)) {

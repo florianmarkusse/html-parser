@@ -345,12 +345,13 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
             flo_html_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, &scratch);
 
         flo_html_QueryStatus result = QUERY_SUCCESS;
-
-        flo_html_String iter;
-        ptrdiff_t start = 0;
         flo_html_Uint16HashSet set =
             flo_html_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, &scratch);
-        FLO_HTML_STRING_SPLIT_ITERATOR(iter, css, ',', start) {
+
+        ptrdiff_t from = 0;
+        while (from < css.len) {
+            flo_html_String iter = flo_html_splitString(css, ',', from);
+
             if ((result = getQueryResults(iter, parsed, &set, &scratch)) !=
                 QUERY_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
@@ -374,6 +375,8 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
             }
 
             flo_html_resetUint16HashSet(&set);
+
+            from += iter.len + 1;
         }
 
         // create on scratch arena by conversion.

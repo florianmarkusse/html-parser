@@ -12,25 +12,21 @@ ComparisonTest initComparisonTest(const flo_html_String startFileLocation,
                                   flo_html_Arena *perm) {
     ComparisonTest test = {0};
 
-    flo_html_ParsedHTML parsed1;
-    if (flo_html_fromFile(startFileLocation, &parsed1, perm) != USER_SUCCESS) {
+    if (flo_html_fromFile(startFileLocation, &test.actual, perm) !=
+        USER_SUCCESS) {
         FLO_HTML_PRINT_ERROR(
             "Failed to created DOM & TextStore from file %.*s\n",
             FLO_HTML_S_P(startFileLocation));
         return test;
     }
 
-    flo_html_ParsedHTML parsed2;
-    if (flo_html_fromFile(expectedFileLocation, &parsed2, perm) !=
+    if (flo_html_fromFile(expectedFileLocation, &test.expected, perm) !=
         USER_SUCCESS) {
         FLO_HTML_PRINT_ERROR(
             "Failed to created DOM & TextStore from file %.*s\n",
             FLO_HTML_S_P(expectedFileLocation));
         return test;
     }
-
-    test.actual = parsed1;
-    test.expected = parsed2;
 
     return test;
 }

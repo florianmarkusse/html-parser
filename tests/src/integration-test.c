@@ -43,11 +43,12 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
         return TEST_FAILURE;
     }
     flo_html_setTextContent(results.buf[0], FLO_HTML_S("FOURTH"),
-                            comparisonTest.actual);
+                            comparisonTest.actual, &scratch);
     flo_html_addBooleanPropertyToNode(results.buf[0], FLO_HTML_S("the-fourth"),
-                                      comparisonTest.actual);
+                                      comparisonTest.actual, &scratch);
     flo_html_addPropertyToNode(results.buf[0], FLO_HTML_S("the-property"),
-                               FLO_HTML_S("my value"), comparisonTest.actual);
+                               FLO_HTML_S("my value"), comparisonTest.actual,
+                               &scratch);
 
     flo_html_node_id currentNodeID = 0;
     actual = flo_html_querySelector(FLO_HTML_S("head"), comparisonTest.actual,

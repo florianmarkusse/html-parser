@@ -5,9 +5,9 @@
 flo_html_ParentChild *
 flo_html_getFirstChildNode(const flo_html_node_id currentNodeID,
                            const flo_html_Dom *dom) {
-    for (flo_html_node_id i = 0; i < dom->parentFirstChildLen; i++) {
-        if (dom->parentFirstChilds[i].parentID == currentNodeID) {
-            return &dom->parentFirstChilds[i];
+    for (flo_html_node_id i = 0; i < dom->parentFirstChilds.len; i++) {
+        if (dom->parentFirstChilds.buf[i].parentID == currentNodeID) {
+            return &dom->parentFirstChilds.buf[i];
         }
     }
     return NULL;
@@ -27,9 +27,9 @@ flo_html_node_id flo_html_getFirstChild(const flo_html_node_id currentNodeID,
 // TODO(florian): make faster.
 flo_html_NextNode *flo_html_getNextNode(const flo_html_node_id currentNodeID,
                                         const flo_html_Dom *dom) {
-    for (flo_html_node_id i = 0; i < dom->nextNodeLen; i++) {
-        if (dom->nextNodes[i].currentNodeID == currentNodeID) {
-            return &dom->nextNodes[i];
+    for (flo_html_node_id i = 0; i < dom->nextNodes.len; i++) {
+        if (dom->nextNodes.buf[i].currentNodeID == currentNodeID) {
+            return &dom->nextNodes.buf[i];
         }
     }
     return NULL;
@@ -49,8 +49,8 @@ flo_html_node_id flo_html_getNext(const flo_html_node_id currentNodeID,
 flo_html_ParentChild *
 flo_html_getParentNode(const flo_html_node_id currentNodeID,
                        const flo_html_Dom *dom) {
-    for (ptrdiff_t i = 0; i < dom->parentChildLen; i++) {
-        flo_html_ParentChild *node = &dom->parentChilds[i];
+    for (ptrdiff_t i = 0; i < dom->parentChilds.len; i++) {
+        flo_html_ParentChild *node = &dom->parentChilds.buf[i];
         if (node->childID == currentNodeID) {
             return node;
         }
@@ -71,9 +71,9 @@ flo_html_node_id flo_html_getParent(const flo_html_node_id currentNodeID,
 flo_html_NextNode *
 flo_html_getPreviousNode(const flo_html_node_id currentNodeID,
                          const flo_html_Dom *dom) {
-    for (flo_html_node_id i = 0; i < dom->nextNodeLen; i++) {
-        if (dom->nextNodes[i].nextNodeID == currentNodeID) {
-            return &dom->nextNodes[i];
+    for (flo_html_node_id i = 0; i < dom->nextNodes.len; i++) {
+        if (dom->nextNodes.buf[i].nextNodeID == currentNodeID) {
+            return &dom->nextNodes.buf[i];
         }
     }
     return NULL;

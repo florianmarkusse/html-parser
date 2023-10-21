@@ -54,12 +54,13 @@ static TestStatus testModification(const flo_html_String fileLocation1,
 
     if (newPropValue.len > 0) {
         if (!flo_html_setPropertyValue(foundNode, propKey, newPropValue,
-                                       comparisonTest.actual)) {
+                                       comparisonTest.actual, &scratch)) {
             return failWithMessage(
                 FLO_HTML_S("Failed to set property value!\n"));
         }
     } else {
-        flo_html_setTextContent(foundNode, propKey, comparisonTest.actual);
+        flo_html_setTextContent(foundNode, propKey, comparisonTest.actual,
+                                &scratch);
     }
 
     return compareAndEndTest(&comparisonTest, scratch);

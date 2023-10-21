@@ -72,8 +72,8 @@ flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
 
 static void updateReferences(const flo_html_node_id toReplaceNodeID,
                              const flo_html_node_id newNodeID,
-                             flo_html_Dom *dom) {
-    flo_html_Node *nodeToReplace = &dom->nodes[toReplaceNodeID];
+                             flo_html_Dom *dom, flo_html_Arena *perm) {
+    flo_html_Node *nodeToReplace = &dom->nodes.buf[toReplaceNodeID];
     const flo_html_node_id lastNextOfNew = flo_html_getLastNext(newNodeID, dom);
 
     flo_html_ParentChild *parentChildNode =
@@ -103,7 +103,7 @@ static void updateReferences(const flo_html_node_id toReplaceNodeID,
         flo_html_node_id otherNewNodeID = flo_html_getNext(newNodeID, dom);
         while (otherNewNodeID > 0) {
             flo_html_addParentChild(parentFirstChildNode->parentID,
-                                    otherNewNodeID, dom);
+                                    otherNewNodeID, dom, perm);
             otherNewNodeID = flo_html_getNext(otherNewNodeID, dom);
         }
     }
@@ -118,22 +118,23 @@ static void updateReferences(const flo_html_node_id toReplaceNodeID,
 flo_html_node_id flo_html_replaceWithDocumentNode(
     flo_html_node_id toReplaceNodeID, const flo_html_DocumentNode *docNode,
     flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    flo_html_node_id newNodeID = flo_html_parseDocumentElement(docNode, parsed);
-    updateReferences(toReplaceNodeID, newNodeID, parsed.dom);
+    flo_html_node_id newNodeID =
+        flo_html_parseDocumentElement(docNode, parsed, perm);
+    updateReferences(toReplaceNodeID, newNodeID, parsed.dom, perm);
     return newNodeID;
 }
 
 bool tryMergeBothSides(const flo_html_node_id toReplaceNodeID,
                        const flo_html_node_id replacingNodeID,
                        flo_html_ParsedHTML parsed) {
-    flo_html_Node *replacingNode = &parsed.dom->nodes[replacingNodeID];
+    flo_html_Node *replacingNode = &parsed.dom->nodes.buf[replacingNodeID];
     if (replacingNode->nodeType == NODE_TYPE_TEXT) {
         flo_html_NextNode *previousNode =
             flo_html_getPreviousNode(toReplaceNodeID, parsed.dom);
         if (previousNode != NULL) {
             bool isMerged = flo_html_tryMerge(
-                &parsed.dom->nodes[previousNode->currentNodeID], replacingNode,
-                parsed, true);
+                &parsed.dom->nodes.buf[previousNode->currentNodeID],
+                replacingNode, parsed, true);
             if (isMerged) {
                 return isMerged;
             }
@@ -142,8 +143,9 @@ bool tryMergeBothSides(const flo_html_node_id toReplaceNodeID,
         flo_html_NextNode *nextNode =
             flo_html_getNextNode(toReplaceNodeID, parsed.dom);
         if (nextNode != NULL) {
-            return flo_html_tryMerge(&parsed.dom->nodes[nextNode->nextNodeID],
-                                     replacingNode, parsed, false);
+            return flo_html_tryMerge(
+                &parsed.dom->nodes.buf[nextNode->nextNodeID], replacingNode,
+                parsed, false);
         }
     }
 
@@ -154,7 +156,7 @@ flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
                                               const flo_html_String text,
                                               flo_html_ParsedHTML parsed,
                                               flo_html_Arena *perm) {
-    flo_html_node_id newNodeID = flo_html_parseTextElement(text, parsed);
+    flo_html_node_id newNodeID = flo_html_parseTextElement(text, parsed, perm);
 
     bool isMerged = tryMergeBothSides(toReplaceNodeID, newNodeID, parsed);
     if (isMerged) {
@@ -163,14 +165,14 @@ flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
         return newNodeID;
     }
 
-    updateReferences(toReplaceNodeID, newNodeID, parsed.dom);
+    updateReferences(toReplaceNodeID, newNodeID, parsed.dom, perm);
     return newNodeID;
 }
 
 flo_html_node_id flo_html_replaceWithHTMLFromString(
     flo_html_node_id toReplaceNodeID, const flo_html_String htmlString,
     flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    flo_html_node_id firstNewAddedNode = parsed.dom->nodeLen;
+    flo_html_node_id firstNewAddedNode = parsed.dom->nodes.len;
     flo_html_parseExtra(htmlString, parsed, perm);
 
     flo_html_node_id lastNextNode =
@@ -179,11 +181,12 @@ flo_html_node_id flo_html_replaceWithHTMLFromString(
     flo_html_NextNode *previousNode =
         flo_html_getPreviousNode(toReplaceNodeID, parsed.dom);
     if (lastNextNode > firstNewAddedNode) {
-        flo_html_Node *firstAddedNode = &parsed.dom->nodes[firstNewAddedNode];
+        flo_html_Node *firstAddedNode =
+            &parsed.dom->nodes.buf[firstNewAddedNode];
         if (firstAddedNode->nodeType == NODE_TYPE_TEXT) {
             if (previousNode != NULL) {
                 if (flo_html_tryMerge(
-                        &parsed.dom->nodes[previousNode->currentNodeID],
+                        &parsed.dom->nodes.buf[previousNode->currentNodeID],
                         firstAddedNode, parsed, true)) {
                     ptrdiff_t secondNewAddedNode =
                         flo_html_getNext(firstNewAddedNode, parsed.dom);
@@ -194,14 +197,14 @@ flo_html_node_id flo_html_replaceWithHTMLFromString(
             }
         }
 
-        flo_html_Node *lastAddedNode = &parsed.dom->nodes[lastNextNode];
+        flo_html_Node *lastAddedNode = &parsed.dom->nodes.buf[lastNextNode];
         if (lastAddedNode->nodeType == NODE_TYPE_TEXT) {
             flo_html_NextNode *nextNode =
                 flo_html_getNextNode(toReplaceNodeID, parsed.dom);
             if (nextNode != NULL) {
-                if (flo_html_tryMerge(&parsed.dom->nodes[nextNode->nextNodeID],
-                                      &parsed.dom->nodes[lastNextNode], parsed,
-                                      false)) {
+                if (flo_html_tryMerge(
+                        &parsed.dom->nodes.buf[nextNode->nextNodeID],
+                        &parsed.dom->nodes.buf[lastNextNode], parsed, false)) {
                     flo_html_removeNode(lastNextNode, parsed.dom);
                 }
             }
@@ -216,7 +219,7 @@ flo_html_node_id flo_html_replaceWithHTMLFromString(
         }
     }
 
-    updateReferences(toReplaceNodeID, firstNewAddedNode, parsed.dom);
+    updateReferences(toReplaceNodeID, firstNewAddedNode, parsed.dom, perm);
 
     return firstNewAddedNode;
 }

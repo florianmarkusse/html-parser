@@ -10,7 +10,7 @@
 void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {
     flo_html_removeChildren(nodeID, dom);
 
-    flo_html_Node *node = &dom->nodes[nodeID];
+    flo_html_Node *node = &dom->nodes.buf[nodeID];
     flo_html_NextNode *nextNode = flo_html_getNextNode(node->nodeID, dom);
 
     flo_html_ParentChild *parentChildNode =

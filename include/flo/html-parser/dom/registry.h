@@ -6,12 +6,14 @@ extern "C" {
 #endif
 
 #include "dom.h"
+#include "flo/html-parser/util/memory.h"
 
-void flo_html_addRegistration(const flo_html_HashElement *hashElement,
-                              flo_html_BasicRegistry *basicRegistry);
+void flo_html_addRegistration(flo_html_HashElement hashElement,
+                              flo_html_HashElement_d_a *hashElements,
+                              flo_html_Arena *perm);
 void flo_html_addTagRegistration(bool isPaired,
-                                 const flo_html_HashElement *hashElement,
-                                 flo_html_Dom *dom);
+                                 flo_html_HashElement hashElement,
+                                 flo_html_Dom *dom, flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

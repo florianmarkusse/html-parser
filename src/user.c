@@ -9,10 +9,10 @@ flo_html_UserStatus flo_html_fromFile(const flo_html_String fileLocation,
     parsed->textStore = FLO_HTML_NEW(perm, flo_html_TextStore);
     *parsed->textStore = flo_html_createTextStore(perm);
 
-    parsed->dom = FLO_HTML_NEW(perm, flo_html_Dom);
+    parsed->dom =
+        flo_html_createDomFromFile(fileLocation, parsed->textStore, perm);
 
-    if (!flo_html_createDomFromFile(fileLocation, parsed->dom,
-                                    parsed->textStore, perm)) {
+    if (parsed->dom == NULL) {
         return USER_FILE_FAIL;
     }
 

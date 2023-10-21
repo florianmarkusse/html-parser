@@ -8,11 +8,6 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/util/memory.h"
 
-flo_html_NodeType flo_html_getflo_html_NodeType(const flo_html_node_id nodeID,
-                                                const flo_html_Dom *dom) {
-    return dom->nodes[nodeID].nodeType;
-}
-
 bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
                           const flo_html_String boolProp,
                           flo_html_ParsedHTML parsed) {
@@ -24,8 +19,9 @@ bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->boolPropsLen; i++) {
-        flo_html_BooleanProperty *booleanProperty = &parsed.dom->boolProps[i];
+    for (ptrdiff_t i = 0; i < parsed.dom->boolProps.len; i++) {
+        flo_html_BooleanProperty *booleanProperty =
+            &parsed.dom->boolProps.buf[i];
         if (booleanProperty->nodeID == nodeID &&
             booleanProperty->propID == boolPropID) {
             return true;
@@ -44,8 +40,8 @@ bool flo_html_hasPropKey(const flo_html_node_id nodeID,
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->propsLen; i++) {
-        flo_html_Property *property = &parsed.dom->props[i];
+    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
+        flo_html_Property *property = &parsed.dom->props.buf[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
             return true;
         }
@@ -64,8 +60,8 @@ bool flo_html_hasPropValue(const flo_html_node_id nodeID,
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->propsLen; i++) {
-        flo_html_Property *property = &parsed.dom->props[i];
+    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
+        flo_html_Property *property = &parsed.dom->props.buf[i];
         if (property->nodeID == nodeID && property->valueID == propValueID) {
             return true;
         }
@@ -92,8 +88,8 @@ bool flo_html_hasProperty(flo_html_node_id nodeID,
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->propsLen; i++) {
-        flo_html_Property *property = &parsed.dom->props[i];
+    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
+        flo_html_Property *property = &parsed.dom->props.buf[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID &&
             property->valueID == propValueID) {
             return true;
@@ -102,22 +98,22 @@ bool flo_html_hasProperty(flo_html_node_id nodeID,
     return false;
 }
 
-// TODO: Only use the final result on the perm aerna.
-flo_html_QueryStatus flo_html_getTextContent(const flo_html_node_id nodeID,
-                                             const flo_html_Dom *dom,
-                                             flo_html_String_da *results,
-                                             flo_html_Arena *perm) {
+flo_html_String_d_a flo_html_getTextContent(const flo_html_node_id nodeID,
+                                            const flo_html_Dom *dom,
+                                            flo_html_Arena *perm) {
+    flo_html_String_d_a results = {0};
+
     flo_html_node_id currentNodeID = nodeID;
     while ((currentNodeID =
                 flo_html_traverseNode(currentNodeID, nodeID, dom)) != 0) {
-        flo_html_Node node = dom->nodes[currentNodeID];
+        flo_html_Node node = dom->nodes.buf[currentNodeID];
 
         if (node.nodeType == NODE_TYPE_TEXT) {
-            *FLO_HTML_PUSH(results, perm) = node.text;
+            *FLO_HTML_PUSH(&results, perm) = node.text;
         }
     }
 
-    return QUERY_SUCCESS;
+    return results;
 }
 
 const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
@@ -130,8 +126,8 @@ const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
         return FLO_HTML_EMPTY_STRING;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->propsLen; i++) {
-        flo_html_Property *property = &parsed.dom->props[i];
+    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
+        flo_html_Property *property = &parsed.dom->props.buf[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
             return flo_html_getPropValue(property->valueID, parsed);
         }

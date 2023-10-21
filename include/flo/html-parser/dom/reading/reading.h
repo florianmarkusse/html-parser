@@ -11,22 +11,7 @@ extern "C" {
 #include "flo/html-parser/user.h"
 #include "flo/html-parser/util/array.h"
 
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_String) flo_html_String_da;
-
-/**
- * @brief Get the type of a DOM node.
- *
- * This function retrieves the type of a DOM node identified by `nodeID` within
- * the given DOM `dom`.
- *
- * @param[in]   nodeID          The ID of the node to query.
- * @param[in]   dom             The DOM structure.
- *
- * @return  The type of the node (e.g., NODE_TYPE_DOCUMENT, NODE_TYPE_TEXT,
- * etc.). See @ref /flo/html-parser/node/node.h#flo_html_NodeType.
- */
-flo_html_NodeType flo_html_getflo_html_NodeType(flo_html_node_id nodeID,
-                                                const flo_html_Dom *dom);
+typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_String) flo_html_String_d_a;
 
 /**
  * @brief Check if a DOM node has a boolean property.
@@ -133,10 +118,9 @@ const flo_html_String flo_html_getValue(flo_html_node_id nodeID,
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-flo_html_QueryStatus flo_html_getTextContent(flo_html_node_id nodeID,
-                                             const flo_html_Dom *dom,
-                                             flo_html_String_da *results,
-                                             flo_html_Arena *perm);
+flo_html_String_d_a flo_html_getTextContent(flo_html_node_id nodeID,
+                                            const flo_html_Dom *dom,
+                                            flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

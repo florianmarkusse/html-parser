@@ -78,11 +78,6 @@ flo_html_splitString(flo_html_String s, unsigned char token, ptrdiff_t from) {
                              .len = s.len - from};
 }
 
-#define FLO_HTML_STRING_SPLIT_ITERATOR(iter, src, token, from)                 \
-    for ((iter) = flo_html_splitString(src, token, from); (iter).len > 0;      \
-         (from) += (iter).len + 1,                                             \
-        (iter) = flo_html_splitString(src, token, from))
-
 __attribute__((unused)) static inline ptrdiff_t
 flo_html_firstOccurenceOfFrom(flo_html_String s, unsigned char ch,
                               ptrdiff_t from) {
