@@ -135,7 +135,6 @@ void flo_html_printDomStatus(flo_html_ParsedHTML parsed) {
     printf("Printing Text Store contents...\n");
     flo_html_printPropertyStatus(textStore);
     flo_html_printBoolPropStatus(textStore);
-    flo_html_printTextStatus(textStore);
     flo_html_printTagStatus(textStore);
 
     printf("Printing DOM contents...\n");

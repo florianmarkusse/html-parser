@@ -23,8 +23,8 @@ jobs:
       run: ./build.sh -t -b
 
     - name: Memory check tests
-      run: valgrind --leak-check=full --error-exitcode=1 build/tests/html-parser-tests-Release
+      run: valgrind --leak-check=full --error-exitcode=1 --track-origins=yes build/tests/html-parser-tests-Release
 
     - name: Memory check benchmarks
-      run: valgrind --leak-check=full --error-exitcode=1 build/benchmarks/html-parser-benchmarks-Release
+      run: valgrind --leak-check=full --error-exitcode=1 --track-origins=yes build/benchmarks/html-parser-benchmarks-Release
 
