@@ -5,12 +5,13 @@
 
 #define FULL_ACCESS 0700
 
-void flo_html_createPath(const flo_html_String fileLocation) {
+void flo_html_createPath(const flo_html_String fileLocation,
+                         flo_html_Arena scratch) {
     ptrdiff_t currentIndex = 0;
     ptrdiff_t slashIndex =
         flo_html_firstOccurenceOfFrom(fileLocation, '/', currentIndex);
     if (slashIndex >= 0) {
-        char dirPath[fileLocation.len + 1];
+        char *dirPath = FLO_HTML_NEW(&scratch, char, fileLocation.len + 1);
         memcpy(dirPath, fileLocation.buf, fileLocation.len);
         dirPath[fileLocation.len] = '\0';
 

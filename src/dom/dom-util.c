@@ -21,46 +21,6 @@ flo_html_node_id flo_html_createNode(const flo_html_NodeType nodeType,
     return node.nodeID;
 }
 
-void flo_html_setNodeTagID(const flo_html_node_id nodeID,
-                           const flo_html_index_id tagID, flo_html_Dom *dom) {
-    flo_html_Node *createdNode = &(dom->nodes.buf[nodeID]);
-    createdNode->tagID = tagID;
-}
-
-void flo_html_setNodeText(const flo_html_node_id nodeID,
-                          const flo_html_String text, flo_html_Dom *dom) {
-    flo_html_Node *createdNode = &(dom->nodes.buf[nodeID]);
-    createdNode->text = text;
-}
-
-const flo_html_String flo_html_getTag(const flo_html_index_id tagID,
-                                      flo_html_Dom *dom) {
-    flo_html_TagRegistration *tagRegistration = &dom->tagRegistry.buf[tagID];
-    return flo_html_getStringFromHashSet(&dom->tags,
-                                         &tagRegistration->hashElement);
-}
-
-// TODO: get rid of these functions and use a single generic one
-const flo_html_String flo_html_getBoolProp(const flo_html_index_id boolPropID,
-                                           flo_html_Dom *dom) {
-    return flo_html_getStringFromHashSet(
-        &dom->boolPropsSet, &dom->boolPropRegistry.buf[boolPropID]);
-}
-
-// TODO: get rid of these functions and use a single generic one
-const flo_html_String flo_html_getPropKey(const flo_html_index_id propKeyID,
-                                          flo_html_Dom *dom) {
-    return flo_html_getStringFromHashSet(&dom->propKeys,
-                                         &dom->propKeyRegistry.buf[propKeyID]);
-}
-
-// TODO: get rid of these functions and use a single generic one
-const flo_html_String flo_html_getPropValue(const flo_html_index_id propValueID,
-                                            flo_html_Dom *dom) {
-    return flo_html_getStringFromHashSet(
-        &dom->propValues, &dom->propValueRegistry.buf[propValueID]);
-}
-
 bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
                        flo_html_Node *replacingNode, flo_html_Dom *dom,
                        bool isAppend, flo_html_Arena *perm) {

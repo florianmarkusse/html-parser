@@ -131,9 +131,8 @@ flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
 
 const flo_html_String
 flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
-                              const flo_html_HashElement *hashElement) {
-    return set
-        ->array[((hashElement->hash + hashElement->offset) % set->arrayLen)]
+                              const flo_html_HashElement hashElement) {
+    return set->array[((hashElement.hash + hashElement.offset) % set->arrayLen)]
         .string;
 }
 

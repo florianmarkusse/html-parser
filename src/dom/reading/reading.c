@@ -113,9 +113,10 @@ const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
     }
 
     for (ptrdiff_t i = 0; i < dom->props.len; i++) {
-        flo_html_Property *property = &dom->props.buf[i];
-        if (property->nodeID == nodeID && property->keyID == propKeyID) {
-            return flo_html_getPropValue(property->valueID, dom);
+        flo_html_Property property = dom->props.buf[i];
+        if (property.nodeID == nodeID && property.keyID == propKeyID) {
+            return flo_html_getStringFromHashSet(
+                &dom->propValues, dom->propValueRegistry.buf[property.valueID]);
         }
     }
     return FLO_HTML_EMPTY_STRING;

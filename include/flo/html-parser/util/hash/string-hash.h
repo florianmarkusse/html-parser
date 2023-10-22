@@ -51,7 +51,7 @@ flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
 
 const flo_html_String
 flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
-                              const flo_html_HashElement *hashElement);
+                              const flo_html_HashElement hashElement);
 
 flo_html_HashComparisonStatus
 flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,

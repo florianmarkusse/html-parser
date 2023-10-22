@@ -29,15 +29,16 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         return;
     }
 
-    const flo_html_String tag = flo_html_getTag(node.tagID, dom);
+    const flo_html_String tag = flo_html_getStringFromHashSet(
+        &dom->tags, dom->tagRegistry.buf[node.tagID].hashElement);
     fprintf(output, "<%.*s", FLO_HTML_S_P(tag));
 
     for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
         flo_html_BooleanProperty boolProp = dom->boolProps.buf[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            const flo_html_String prop =
-                flo_html_getBoolProp(boolProp.propID, dom);
+            const flo_html_String prop = flo_html_getStringFromHashSet(
+                &dom->boolPropsSet, dom->boolPropRegistry.buf[boolProp.propID]);
             fprintf(output, " %.*s", FLO_HTML_S_P(prop));
         }
     }
@@ -46,9 +47,10 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         flo_html_Property prop = dom->props.buf[i];
 
         if (prop.nodeID == node.nodeID) {
-            const flo_html_String key = flo_html_getPropKey(prop.keyID, dom);
-            const flo_html_String value =
-                flo_html_getPropValue(prop.valueID, dom);
+            const flo_html_String key = flo_html_getStringFromHashSet(
+                &dom->propKeys, dom->propKeyRegistry.buf[prop.keyID]);
+            const flo_html_String value = flo_html_getStringFromHashSet(
+                &dom->propValues, dom->propValueRegistry.buf[prop.valueID]);
             fprintf(output, " %.*s=\"%.*s\"", FLO_HTML_S_P(key),
                     FLO_HTML_S_P(value));
         }
@@ -86,8 +88,9 @@ void flo_html_printHTML(flo_html_Dom *dom) {
 }
 
 flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
-                                             const flo_html_String filePath) {
-    flo_html_createPath(filePath);
+                                             const flo_html_String filePath,
+                                             flo_html_Arena scratch) {
+    flo_html_createPath(filePath, scratch);
     // casting here because filePath should not contain any funny characters.
     FILE *file = fopen((char *)filePath.buf, "wbe");
     if (file == NULL) {
@@ -116,7 +119,7 @@ void printflo_html_BasicRegistry(const flo_html_String registryName,
     for (ptrdiff_t i = 0; i < hashElements->len; i++) {
         flo_html_HashElement hashElement = hashElements->buf[i];
         const flo_html_String value =
-            flo_html_getStringFromHashSet(set, &hashElement);
+            flo_html_getStringFromHashSet(set, hashElement);
         printf("ID: %zu value: %-20.*s hash: %zu offset: %u\n", i,
                FLO_HTML_S_P(value), hashElement.hash, hashElement.offset);
     }
@@ -174,7 +177,7 @@ void flo_html_printDomStatus(flo_html_Dom *dom) {
     for (ptrdiff_t i = 0; i < dom->tagRegistry.len; i++) {
         flo_html_TagRegistration tagRegistration = dom->tagRegistry.buf[i];
         const flo_html_String tag = flo_html_getStringFromHashSet(
-            &dom->tags, &tagRegistration.hashElement);
+            &dom->tags, tagRegistration.hashElement);
         printf("tag ID: %-5td tag: %-20.*s isPaired: %d hash: %zu offset: %u\n",
                i, FLO_HTML_S_P(tag), tagRegistration.isPaired,
                tagRegistration.hashElement.hash,

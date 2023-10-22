@@ -31,7 +31,8 @@ void printAttributes(const flo_html_index_id tagID1,
                      const flo_html_StringHashSet *set1, flo_html_Dom *dom1,
                      const flo_html_index_id tagID2,
                      const flo_html_StringHashSet *set2, flo_html_Dom *dom2) {
-    const flo_html_String tag1 = flo_html_getTag(tagID1, dom1);
+    const flo_html_String tag1 = flo_html_getStringFromHashSet(
+        &dom1->tags, dom1->tagRegistry.buf[tagID1].hashElement);
     FLO_HTML_PRINT_ERROR(
         "Printing certain attributes of node 1 with tag %.*s:\n",
         FLO_HTML_S_P(tag1));
@@ -44,7 +45,8 @@ void printAttributes(const flo_html_index_id tagID1,
         FLO_HTML_PRINT_ERROR("%.*s\n", FLO_HTML_S_P(attribute));
     }
 
-    const flo_html_String tag2 = flo_html_getTag(tagID2, dom2);
+    const flo_html_String tag2 = flo_html_getStringFromHashSet(
+        &dom2->tags, dom2->tagRegistry.buf[tagID2].hashElement);
     FLO_HTML_PRINT_ERROR(
         "Printing certain attributes of node 2 with tag %.*s:\n",
         FLO_HTML_S_P(tag2));
@@ -66,7 +68,8 @@ bool createPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
     for (ptrdiff_t i = 0; i < dom->props.len; i++) {
         if (dom->props.buf[i].nodeID == nodeID) {
             flo_html_index_id keyID = dom->props.buf[i].keyID;
-            const flo_html_String propKey = flo_html_getPropKey(keyID, dom);
+            const flo_html_String propKey = flo_html_getStringFromHashSet(
+                &dom->propKeys, dom->propKeyRegistry.buf[keyID]);
             if (!flo_html_insertStringHashSet(keySet, propKey, perm)) {
                 FLO_HTML_PRINT_ERROR(
                     "Failed to insert \"%.*s\" into key hash set\n",
@@ -75,8 +78,8 @@ bool createPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
             }
 
             flo_html_index_id valueID = dom->props.buf[i].valueID;
-            const flo_html_String propValue =
-                flo_html_getPropValue(valueID, dom);
+            const flo_html_String propValue = flo_html_getStringFromHashSet(
+                &dom->propValues, dom->propValueRegistry.buf[valueID]);
             if (!flo_html_insertStringHashSet(keySet, propValue, perm)) {
                 FLO_HTML_PRINT_ERROR(
                     "Failed to insert \"%.*s\" into value hash set\n",
@@ -148,7 +151,8 @@ bool createBoolPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
     for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
         if (dom->boolProps.buf[i].nodeID == nodeID) {
             flo_html_index_id propID = dom->boolProps.buf[i].propID;
-            const flo_html_String boolProp = flo_html_getBoolProp(propID, dom);
+            flo_html_String boolProp = flo_html_getStringFromHashSet(
+                &dom->boolPropsSet, dom->boolPropRegistry.buf[propID]);
             if (!flo_html_insertStringHashSet(boolPropsSet, boolProp, perm)) {
                 FLO_HTML_PRINT_ERROR("Failed to insert %.*s into hash set",
                                      FLO_HTML_S_P(boolProp));
@@ -194,9 +198,9 @@ bool tagStringEquals(const flo_html_TagRegistration *tagRegistration1,
                      const flo_html_TagRegistration *tagRegistration2,
                      const flo_html_Dom *dom2) {
     const flo_html_String string1 = flo_html_getStringFromHashSet(
-        &dom1->tags, &tagRegistration1->hashElement);
+        &dom1->tags, tagRegistration1->hashElement);
     const flo_html_String string2 = flo_html_getStringFromHashSet(
-        &dom2->tags, &tagRegistration2->hashElement);
+        &dom2->tags, tagRegistration2->hashElement);
     return flo_html_stringEquals(string1, string2);
 }
 
@@ -250,9 +254,9 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
                 }
 
                 const flo_html_String tag1 = flo_html_getStringFromHashSet(
-                    &dom1->tags, &tagRegistration1->hashElement);
+                    &dom1->tags, tagRegistration1->hashElement);
                 const flo_html_String tag2 = flo_html_getStringFromHashSet(
-                    &dom2->tags, &tagRegistration2->hashElement);
+                    &dom2->tags, tagRegistration2->hashElement);
                 FLO_HTML_PRINT_ERROR(
                     "Uncomparable nodes: single node and paired node.\nFound "
                     "single node in node %c.\n"
@@ -264,10 +268,12 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
 
         if (!tagStringEquals(tagRegistration1, dom1, tagRegistration2, dom2)) {
             if (printDifferences) {
-                const flo_html_String tag1 =
-                    flo_html_getTag(node1.nodeID, dom1);
-                const flo_html_String tag2 =
-                    flo_html_getTag(node2.nodeID, dom2);
+                const flo_html_String tag1 = flo_html_getStringFromHashSet(
+                    &dom1->tags,
+                    dom1->tagRegistry.buf[node1.nodeID].hashElement);
+                const flo_html_String tag2 = flo_html_getStringFromHashSet(
+                    &dom2->tags,
+                    dom2->tagRegistry.buf[node2.nodeID].hashElement);
                 FLO_HTML_PRINT_ERROR(
                     "Nodes have different tags.\nnode 1 tag: %.*s\nnode "
                     "2 tag: %.*s\n",

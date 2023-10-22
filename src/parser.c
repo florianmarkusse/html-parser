@@ -210,7 +210,7 @@ flo_html_NodeParseResult parseTextNode(const flo_html_String html,
         ch = flo_html_getChar(html, textEnd);
     }
 
-    flo_html_setNodeText(nodeID, FLO_HTML_S_LEN(raw.buf, raw.len), dom);
+    dom->nodes.buf[nodeID].text = FLO_HTML_S_LEN(raw.buf, raw.len);
 
     return (flo_html_NodeParseResult){
         .nodeID = nodeID, .canHaveChildren = false, .nextPosition = textEnd};
@@ -455,7 +455,7 @@ flo_html_node_id flo_html_parseTextElement(flo_html_String text,
     flo_html_node_id newNodeID = flo_html_createNode(NODE_TYPE_TEXT, dom, perm);
     unsigned char *malloced = FLO_HTML_NEW(perm, unsigned char, text.len);
     memcpy(malloced, text.buf, text.len);
-    flo_html_setNodeText(newNodeID, FLO_HTML_S_LEN(malloced, text.len), dom);
+    dom->nodes.buf[newNodeID].text = FLO_HTML_S_LEN(malloced, text.len);
 
     return newNodeID;
 }
