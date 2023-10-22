@@ -12,14 +12,14 @@ typedef enum {
     HASH_COMPARISON_NUM_STATUS
 } flo_html_HashComparisonStatus;
 
-static const char
-    *const hashComparisonStatusStrings[HASH_COMPARISON_NUM_STATUS] = {
+static char
+    *hashComparisonStatusStrings[HASH_COMPARISON_NUM_STATUS] = {
         "Success", "Collections have different sizes",
         "Collections have different content"};
 
 // Not always used, but very handy for those that actually do want readable
 // error codes.
-__attribute__((unused)) static const char *
+__attribute__((unused)) static char *
 flo_html_hashComparisonStatusToString(flo_html_HashComparisonStatus status) {
     if (status >= 0 && status < HASH_COMPARISON_NUM_STATUS) {
         return hashComparisonStatusStrings[status];

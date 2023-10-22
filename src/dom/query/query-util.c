@@ -6,9 +6,9 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/util/error.h"
 
-bool flo_html_filterNode(const flo_html_node_id nodeID,
-                         const flo_html_FilterType *filters,
-                         const ptrdiff_t filterslen, const flo_html_Dom *dom) {
+bool flo_html_filterNode(flo_html_node_id nodeID,
+                         flo_html_FilterType *filters,
+                         ptrdiff_t filterslen, flo_html_Dom *dom) {
     for (ptrdiff_t i = 0; i < filterslen; i++) {
         flo_html_FilterType filterType = filters[i];
         switch (filterType.attributeSelector) {
@@ -62,8 +62,8 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
 }
 
 bool flo_html_getNodesWithoutflo_html_Combinator(
-    const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    const ptrdiff_t filtersLen, const flo_html_Dom *dom,
+    flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
+    ptrdiff_t filtersLen, flo_html_Dom *dom,
     flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
     for (ptrdiff_t i = 0; i < dom->nodes.len; i++) {
         if (flo_html_filterNode(dom->nodes.buf[i].nodeID, filters, filtersLen,
@@ -80,9 +80,9 @@ bool flo_html_getNodesWithoutflo_html_Combinator(
 
 // TODO: only the end result is required on the perm arena.
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
-    const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    const ptrdiff_t filtersLen, const flo_html_Dom *dom,
-    const ptrdiff_t numberOfSiblings, flo_html_Uint16HashSet *set,
+    flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
+    ptrdiff_t filtersLen, flo_html_Dom *dom,
+    ptrdiff_t numberOfSiblings, flo_html_Uint16HashSet *set,
     flo_html_Arena *perm) {
     flo_html_Uint16HashSet filteredAdjacents =
         flo_html_initUint16HashSet(set->arrayLen, perm);
@@ -116,8 +116,8 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
 
 // TODO: only the end result is required on the perm arena.
 flo_html_QueryStatus flo_html_getFilteredDescendants(
-    const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    const ptrdiff_t filtersLen, const flo_html_Dom *dom, ptrdiff_t depth,
+    flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
+    ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t depth,
     flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
     flo_html_Uint16HashSet firstDescendants =
         flo_html_copyUint16HashSet(set, perm);

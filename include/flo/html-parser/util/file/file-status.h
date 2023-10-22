@@ -13,7 +13,7 @@ typedef enum {
     FILE_NUM_STATUS
 } flo_html_FileStatus;
 
-static const char *const fileStatusStrings[FILE_NUM_STATUS] = {
+static char *fileStatusStrings[FILE_NUM_STATUS] = {
     "Success",
     "Cannot open file",
     "Cannot allocate memory",
@@ -22,7 +22,7 @@ static const char *const fileStatusStrings[FILE_NUM_STATUS] = {
 
 // Not always used, but very handy for those that actually do want readable
 // error codes.
-__attribute__((unused)) static const char *
+__attribute__((unused)) static char *
 flo_html_fileStatusToString(flo_html_FileStatus status) {
     if (status >= 0 && status < FILE_NUM_STATUS) {
         return fileStatusStrings[status];

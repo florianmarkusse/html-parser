@@ -8,8 +8,8 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/util/memory.h"
 
-bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
-                          const flo_html_String boolProp, flo_html_Dom *dom) {
+bool flo_html_hasBoolProp(flo_html_node_id nodeID,
+                          flo_html_String boolProp, flo_html_Dom *dom) {
     flo_html_index_id boolPropID =
         flo_html_containsStringHashSet(&dom->boolPropsSet, boolProp).entryIndex;
     if (boolPropID == 0) {
@@ -26,8 +26,8 @@ bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
     return false;
 }
 
-bool flo_html_hasPropKey(const flo_html_node_id nodeID,
-                         const flo_html_String propKey, flo_html_Dom *dom) {
+bool flo_html_hasPropKey(flo_html_node_id nodeID,
+                         flo_html_String propKey, flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
         flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
     if (propKeyID == 0) {
@@ -43,8 +43,8 @@ bool flo_html_hasPropKey(const flo_html_node_id nodeID,
     return false;
 }
 
-bool flo_html_hasPropValue(const flo_html_node_id nodeID,
-                           const flo_html_String propValue, flo_html_Dom *dom) {
+bool flo_html_hasPropValue(flo_html_node_id nodeID,
+                           flo_html_String propValue, flo_html_Dom *dom) {
     flo_html_index_id propValueID =
         flo_html_containsStringHashSet(&dom->propValues, propValue).entryIndex;
     if (propValueID == 0) {
@@ -61,8 +61,8 @@ bool flo_html_hasPropValue(const flo_html_node_id nodeID,
 }
 
 bool flo_html_hasProperty(flo_html_node_id nodeID,
-                          const flo_html_String propKey,
-                          const flo_html_String propValue, flo_html_Dom *dom) {
+                          flo_html_String propKey,
+                          flo_html_String propValue, flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
         flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
     if (propKeyID == 0) {
@@ -85,8 +85,8 @@ bool flo_html_hasProperty(flo_html_node_id nodeID,
     return false;
 }
 
-flo_html_String_d_a flo_html_getTextContent(const flo_html_node_id nodeID,
-                                            const flo_html_Dom *dom,
+flo_html_String_d_a flo_html_getTextContent(flo_html_node_id nodeID,
+                                            flo_html_Dom *dom,
                                             flo_html_Arena *perm) {
     flo_html_String_d_a results = {0};
 
@@ -103,8 +103,8 @@ flo_html_String_d_a flo_html_getTextContent(const flo_html_node_id nodeID,
     return results;
 }
 
-const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
-                                        const flo_html_String propKey,
+flo_html_String flo_html_getValue(flo_html_node_id nodeID,
+                                        flo_html_String propKey,
                                         flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
         flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;

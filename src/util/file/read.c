@@ -5,7 +5,7 @@
 #include "flo/html-parser/util/file/read.h"
 #include "flo/html-parser/util/memory.h"
 
-flo_html_FileStatus flo_html_readFile(const flo_html_String srcPath,
+flo_html_FileStatus flo_html_readFile(flo_html_String srcPath,
                                       flo_html_String *buffer,
                                       flo_html_Arena *perm) {
     // casting to char* here because a srcpath should not contain any weird

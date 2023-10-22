@@ -34,23 +34,23 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
         }                                                                      \
     } while (0)
 
-bool isTagStartChar(const char ch) {
+bool isTagStartChar(char ch) {
     return flo_html_isAlphaBetical(ch) || ch == '!';
 }
 
-bool isElementStartChar(const char ch) {
+bool isElementStartChar(char ch) {
     return isTagStartChar(ch) || ch == '.' || ch == '#';
 }
 
-bool isSpecifiedCombinator(const char ch) {
+bool isSpecifiedCombinator(char ch) {
     return ch == '>' || ch == '+' || ch == '~';
 }
 
-bool isCombinator(const char ch) {
+bool isCombinator(char ch) {
     return ch == ' ' || isSpecifiedCombinator(ch);
 }
 
-bool endOfCurrentFilter(const char ch) {
+bool endOfCurrentFilter(char ch) {
     return isCombinator(ch) || flo_html_isSpecialSpace(ch) || ch == '[' ||
            ch == '.' || ch == '#';
 }
@@ -66,7 +66,7 @@ static ptrdiff_t parseEmptyContent(flo_html_String css, ptrdiff_t start) {
     return end;
 }
 
-ptrdiff_t parseToken(const flo_html_String css, ptrdiff_t currentPosition,
+ptrdiff_t parseToken(flo_html_String css, ptrdiff_t currentPosition,
                      flo_html_String *token) {
     ptrdiff_t tokenStart = currentPosition;
     unsigned char ch = flo_html_getChar(css, currentPosition);
@@ -167,7 +167,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             // at the beginnging. This is a bit of a funky inference to make,
             // but it is correct (I think).
             if (currentSelector == CLASS || currentSelector == ID) {
-                const flo_html_String keyBuffer = currentSelector == CLASS
+                flo_html_String keyBuffer = currentSelector == CLASS
                                                       ? FLO_HTML_S("class")
                                                       : FLO_HTML_S("id");
                 flo_html_index_id propKeyID =

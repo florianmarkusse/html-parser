@@ -10,7 +10,7 @@
 #include "flo/html-parser/util/error.h"
 
 flo_html_ComparisonStatus convertHashComparisonToComparison(
-    const flo_html_HashComparisonStatus hashComparisonStatus) {
+    flo_html_HashComparisonStatus hashComparisonStatus) {
     switch (hashComparisonStatus) {
     case HASH_COMPARISON_DIFFERENT_SIZES: {
         return COMPARISON_DIFFERENT_SIZES;
@@ -27,11 +27,11 @@ flo_html_ComparisonStatus convertHashComparisonToComparison(
     }
 }
 
-void printAttributes(const flo_html_index_id tagID1,
-                     const flo_html_StringHashSet *set1, flo_html_Dom *dom1,
-                     const flo_html_index_id tagID2,
-                     const flo_html_StringHashSet *set2, flo_html_Dom *dom2) {
-    const flo_html_String tag1 = flo_html_getStringFromHashSet(
+void printAttributes(flo_html_index_id tagID1,
+                     flo_html_StringHashSet *set1, flo_html_Dom *dom1,
+                     flo_html_index_id tagID2,
+                     flo_html_StringHashSet *set2, flo_html_Dom *dom2) {
+    flo_html_String tag1 = flo_html_getStringFromHashSet(
         &dom1->tags, dom1->tagRegistry.buf[tagID1].hashElement);
     FLO_HTML_PRINT_ERROR(
         "Printing certain attributes of node 1 with tag %.*s:\n",
@@ -45,7 +45,7 @@ void printAttributes(const flo_html_index_id tagID1,
         FLO_HTML_PRINT_ERROR("%.*s\n", FLO_HTML_S_P(attribute));
     }
 
-    const flo_html_String tag2 = flo_html_getStringFromHashSet(
+    flo_html_String tag2 = flo_html_getStringFromHashSet(
         &dom2->tags, dom2->tagRegistry.buf[tagID2].hashElement);
     FLO_HTML_PRINT_ERROR(
         "Printing certain attributes of node 2 with tag %.*s:\n",
@@ -58,7 +58,7 @@ void printAttributes(const flo_html_index_id tagID1,
     }
 }
 
-bool createPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
+bool createPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
                     flo_html_StringHashSet *keySet,
                     flo_html_StringHashSet *valueSet, flo_html_Arena *perm) {
     *keySet = flo_html_initStringHashSet(FLO_HTML_MAX_PROPERTIES * 2, perm);
@@ -68,7 +68,7 @@ bool createPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
     for (ptrdiff_t i = 0; i < dom->props.len; i++) {
         if (dom->props.buf[i].nodeID == nodeID) {
             flo_html_index_id keyID = dom->props.buf[i].keyID;
-            const flo_html_String propKey = flo_html_getStringFromHashSet(
+            flo_html_String propKey = flo_html_getStringFromHashSet(
                 &dom->propKeys, dom->propKeyRegistry.buf[keyID]);
             if (!flo_html_insertStringHashSet(keySet, propKey, perm)) {
                 FLO_HTML_PRINT_ERROR(
@@ -78,7 +78,7 @@ bool createPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
             }
 
             flo_html_index_id valueID = dom->props.buf[i].valueID;
-            const flo_html_String propValue = flo_html_getStringFromHashSet(
+            flo_html_String propValue = flo_html_getStringFromHashSet(
                 &dom->propValues, dom->propValueRegistry.buf[valueID]);
             if (!flo_html_insertStringHashSet(keySet, propValue, perm)) {
                 FLO_HTML_PRINT_ERROR(
@@ -96,9 +96,9 @@ bool createPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
 // e.g. <a thing="a", foo="bar" /> IS NOT EQUAL TO
 //      <a foo="a", thing="bar" />
 flo_html_ComparisonStatus
-compareProps(const flo_html_Node node1, flo_html_Dom *dom1,
-             const flo_html_Node node2, flo_html_Dom *dom2,
-             const bool printDifferences, flo_html_Arena scratch) {
+compareProps(flo_html_Node node1, flo_html_Dom *dom1,
+             flo_html_Node node2, flo_html_Dom *dom2,
+             bool printDifferences, flo_html_Arena scratch) {
     flo_html_StringHashSet keySet1;
     flo_html_StringHashSet valueSet1;
     if (!createPropsSet(node1.nodeID, dom1, &keySet1, &valueSet1, &scratch)) {
@@ -141,7 +141,7 @@ compareProps(const flo_html_Node node1, flo_html_Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-bool createBoolPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
+bool createBoolPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
                         flo_html_StringHashSet *boolPropsSet,
                         flo_html_Arena *perm) {
     *boolPropsSet =
@@ -165,9 +165,9 @@ bool createBoolPropsSet(const flo_html_node_id nodeID, flo_html_Dom *dom,
 }
 
 flo_html_ComparisonStatus
-compareBoolProps(const flo_html_Node node1, flo_html_Dom *dom1,
-                 const flo_html_Node node2, flo_html_Dom *dom2,
-                 const bool printDifferences, flo_html_Arena scratch) {
+compareBoolProps(flo_html_Node node1, flo_html_Dom *dom1,
+                 flo_html_Node node2, flo_html_Dom *dom2,
+                 bool printDifferences, flo_html_Arena scratch) {
     flo_html_StringHashSet set1;
     if (!(createBoolPropsSet(node1.nodeID, dom1, &set1, &scratch))) {
         FLO_HTML_PRINT_ERROR("Failed to create hash set 1");
@@ -193,27 +193,27 @@ compareBoolProps(const flo_html_Node node1, flo_html_Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-bool tagStringEquals(const flo_html_TagRegistration *tagRegistration1,
-                     const flo_html_Dom *dom1,
-                     const flo_html_TagRegistration *tagRegistration2,
-                     const flo_html_Dom *dom2) {
-    const flo_html_String string1 = flo_html_getStringFromHashSet(
+bool tagStringEquals(flo_html_TagRegistration *tagRegistration1,
+                     flo_html_Dom *dom1,
+                     flo_html_TagRegistration *tagRegistration2,
+                     flo_html_Dom *dom2) {
+    flo_html_String string1 = flo_html_getStringFromHashSet(
         &dom1->tags, tagRegistration1->hashElement);
-    const flo_html_String string2 = flo_html_getStringFromHashSet(
+    flo_html_String string2 = flo_html_getStringFromHashSet(
         &dom2->tags, tagRegistration2->hashElement);
     return flo_html_stringEquals(string1, string2);
 }
 
-flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
+flo_html_ComparisonStatus compareTags(flo_html_Node node1,
                                       flo_html_Dom *dom1,
-                                      const flo_html_Node node2,
+                                      flo_html_Node node2,
                                       flo_html_Dom *dom2,
-                                      const bool printDifferences) {
+                                      bool printDifferences) {
     if (node1.nodeType != node2.nodeType) {
         if (printDifferences) {
-            const flo_html_String nodeType1 =
+            flo_html_String nodeType1 =
                 flo_html_nodeTypeToString(node1.nodeType);
-            const flo_html_String nodeType2 =
+            flo_html_String nodeType2 =
                 flo_html_nodeTypeToString(node2.nodeType);
             FLO_HTML_PRINT_ERROR("Uncomparable nodes:\n"
                                  "node 1 type: %.*s\n"
@@ -226,8 +226,8 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
 
     switch (node1.nodeType) {
     case NODE_TYPE_TEXT: {
-        const flo_html_String text1 = node1.text;
-        const flo_html_String text2 = node2.text;
+        flo_html_String text1 = node1.text;
+        flo_html_String text2 = node2.text;
 
         if (flo_html_stringEquals(text1, text2)) {
             return COMPARISON_SUCCESS;
@@ -253,9 +253,9 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
                     singleNode++;
                 }
 
-                const flo_html_String tag1 = flo_html_getStringFromHashSet(
+                flo_html_String tag1 = flo_html_getStringFromHashSet(
                     &dom1->tags, tagRegistration1->hashElement);
-                const flo_html_String tag2 = flo_html_getStringFromHashSet(
+                flo_html_String tag2 = flo_html_getStringFromHashSet(
                     &dom2->tags, tagRegistration2->hashElement);
                 FLO_HTML_PRINT_ERROR(
                     "Uncomparable nodes: single node and paired node.\nFound "
@@ -268,10 +268,10 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
 
         if (!tagStringEquals(tagRegistration1, dom1, tagRegistration2, dom2)) {
             if (printDifferences) {
-                const flo_html_String tag1 = flo_html_getStringFromHashSet(
+                flo_html_String tag1 = flo_html_getStringFromHashSet(
                     &dom1->tags,
                     dom1->tagRegistry.buf[node1.nodeID].hashElement);
-                const flo_html_String tag2 = flo_html_getStringFromHashSet(
+                flo_html_String tag2 = flo_html_getStringFromHashSet(
                     &dom2->tags,
                     dom2->tagRegistry.buf[node2.nodeID].hashElement);
                 FLO_HTML_PRINT_ERROR(
@@ -289,7 +289,7 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
     }
     default: {
         if (printDifferences) {
-            const flo_html_String nodeType1 =
+            flo_html_String nodeType1 =
                 flo_html_nodeTypeToString(node1.nodeType);
             FLO_HTML_PRINT_ERROR(
                 "Comparison not implemented for this node type:"
@@ -382,9 +382,9 @@ flo_html_ComparisonResult flo_html_equals(flo_html_Dom *dom1,
     return result;
 }
 
-void flo_html_printFirstDifference(const flo_html_node_id nodeID1,
+void flo_html_printFirstDifference(flo_html_node_id nodeID1,
                                    flo_html_Dom *dom1,
-                                   const flo_html_node_id nodeID2,
+                                   flo_html_node_id nodeID2,
                                    flo_html_Dom *dom2, flo_html_Arena scratch) {
     flo_html_Node node1 = dom1->nodes.buf[nodeID1];
     flo_html_Node node2 = dom2->nodes.buf[nodeID2];

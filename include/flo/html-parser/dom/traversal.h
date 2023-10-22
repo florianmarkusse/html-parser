@@ -20,7 +20,7 @@ extern "C" {
  *          child nodes.
  */
 flo_html_node_id flo_html_getFirstChild(flo_html_node_id currentNodeID,
-                                        const flo_html_Dom *dom);
+                                        flo_html_Dom *dom);
 
 /**
  * @brief Get a pointer to the first child node of a given node.
@@ -36,7 +36,7 @@ flo_html_node_id flo_html_getFirstChild(flo_html_node_id currentNodeID,
  *          or NULL if there are no child nodes.
  */
 flo_html_ParentChild *flo_html_getFirstChildNode(flo_html_node_id currentNodeID,
-                                                 const flo_html_Dom *dom);
+                                                 flo_html_Dom *dom);
 
 /**
  * @brief Get the ID of the next sibling node of a given node.
@@ -51,7 +51,7 @@ flo_html_ParentChild *flo_html_getFirstChildNode(flo_html_node_id currentNodeID,
  *          more sibling nodes.
  */
 flo_html_node_id flo_html_getNext(flo_html_node_id currentNodeID,
-                                  const flo_html_Dom *dom);
+                                  flo_html_Dom *dom);
 
 /**
  * @brief Get a pointer to the next sibling node of a given node.
@@ -68,7 +68,7 @@ flo_html_node_id flo_html_getNext(flo_html_node_id currentNodeID,
  *          NULL if there are no more sibling nodes.
  */
 flo_html_NextNode *flo_html_getNextNode(flo_html_node_id currentNodeID,
-                                        const flo_html_Dom *dom);
+                                        flo_html_Dom *dom);
 
 /**
  * @brief Get the ID of the previous sibling node of a given node.
@@ -83,7 +83,7 @@ flo_html_NextNode *flo_html_getNextNode(flo_html_node_id currentNodeID,
  *          previous sibling nodes.
  */
 flo_html_node_id flo_html_getPrevious(flo_html_node_id currentNodeID,
-                                      const flo_html_Dom *dom);
+                                      flo_html_Dom *dom);
 
 /**
  * @brief Get a pointer to the previous sibling node of a given node.
@@ -100,7 +100,7 @@ flo_html_node_id flo_html_getPrevious(flo_html_node_id currentNodeID,
  *          or NULL if there are no previous sibling nodes.
  */
 flo_html_NextNode *flo_html_getPreviousNode(flo_html_node_id currentNodeID,
-                                            const flo_html_Dom *dom);
+                                            flo_html_Dom *dom);
 
 /**
  * @brief Get the ID of the parent node of a given node.
@@ -115,7 +115,7 @@ flo_html_NextNode *flo_html_getPreviousNode(flo_html_node_id currentNodeID,
  * node.
  */
 flo_html_node_id flo_html_getParent(flo_html_node_id currentNodeID,
-                                    const flo_html_Dom *dom);
+                                    flo_html_Dom *dom);
 
 /**
  * @brief Get a pointer to the parent node of a given node.
@@ -131,7 +131,7 @@ flo_html_node_id flo_html_getParent(flo_html_node_id currentNodeID,
  *          if there is no parent node.
  */
 flo_html_ParentChild *flo_html_getParentNode(flo_html_node_id currentNodeID,
-                                             const flo_html_Dom *dom);
+                                             flo_html_Dom *dom);
 
 /**
  * @brief Traverse the DOM structure to the next node.
@@ -146,7 +146,7 @@ flo_html_ParentChild *flo_html_getParentNode(flo_html_node_id currentNodeID,
  *          to traverse.
  */
 flo_html_node_id flo_html_traverseDom(flo_html_node_id currentNodeID,
-                                      const flo_html_Dom *dom);
+                                      flo_html_Dom *dom);
 
 /**
  * @brief Traverse over a specific node within the DOM structure.
@@ -170,7 +170,7 @@ flo_html_node_id flo_html_traverseDom(flo_html_node_id currentNodeID,
  */
 flo_html_node_id flo_html_traverseNode(flo_html_node_id currentNodeID,
                                        flo_html_node_id toTraverseNodeID,
-                                       const flo_html_Dom *dom);
+                                       flo_html_Dom *dom);
 
 /**
  * @brief Get the ID of the last sibling node starting from a given node.
@@ -185,7 +185,7 @@ flo_html_node_id flo_html_traverseNode(flo_html_node_id currentNodeID,
  *          no more sibling nodes.
  */
 flo_html_node_id flo_html_getLastNext(flo_html_node_id startNodeID,
-                                      const flo_html_Dom *dom);
+                                      flo_html_Dom *dom);
 
 /**
  * @brief Get a pointer to the last next sibling node starting from a given
@@ -203,7 +203,7 @@ flo_html_node_id flo_html_getLastNext(flo_html_node_id startNodeID,
  *          or NULL if there are no more sibling nodes.
  */
 flo_html_NextNode *flo_html_getLastNextNode(flo_html_node_id startNodeID,
-                                            const flo_html_Dom *dom);
+                                            flo_html_Dom *dom);
 
 #ifdef __cplusplus
 }

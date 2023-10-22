@@ -42,27 +42,27 @@ flo_html_StringHashSet flo_html_initStringHashSet(ptrdiff_t capacity,
                                                   flo_html_Arena *perm);
 
 ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
-                                       const flo_html_String string,
+                                       flo_html_String string,
                                        flo_html_Arena *perm);
 
 flo_html_Contains
-flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
-                               const flo_html_String string);
+flo_html_containsStringHashSet(flo_html_StringHashSet *set,
+                               flo_html_String string);
 
-const flo_html_String
-flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
-                              const flo_html_HashElement hashElement);
+flo_html_String
+flo_html_getStringFromHashSet(flo_html_StringHashSet *set,
+                              flo_html_HashElement hashElement);
 
 flo_html_HashComparisonStatus
-flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
-                             const flo_html_StringHashSet *set2);
+flo_html_equalsStringHashSet(flo_html_StringHashSet *set1,
+                             flo_html_StringHashSet *set2);
 
 typedef struct {
-    const flo_html_StringHashSet *set;
+    flo_html_StringHashSet *set;
     ptrdiff_t index;
 } flo_html_StringHashSetIterator;
 
-const flo_html_String
+flo_html_String
 flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator);
 
 bool flo_html_hasNextStringHashSetIterator(

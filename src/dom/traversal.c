@@ -3,8 +3,8 @@
 
 // TODO(florian): make faster.
 flo_html_ParentChild *
-flo_html_getFirstChildNode(const flo_html_node_id currentNodeID,
-                           const flo_html_Dom *dom) {
+flo_html_getFirstChildNode(flo_html_node_id currentNodeID,
+                           flo_html_Dom *dom) {
     for (flo_html_node_id i = 0; i < dom->parentFirstChilds.len; i++) {
         if (dom->parentFirstChilds.buf[i].parentID == currentNodeID) {
             return &dom->parentFirstChilds.buf[i];
@@ -13,8 +13,8 @@ flo_html_getFirstChildNode(const flo_html_node_id currentNodeID,
     return NULL;
 }
 
-flo_html_node_id flo_html_getFirstChild(const flo_html_node_id currentNodeID,
-                                        const flo_html_Dom *dom) {
+flo_html_node_id flo_html_getFirstChild(flo_html_node_id currentNodeID,
+                                        flo_html_Dom *dom) {
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(currentNodeID, dom);
     if (firstChild == NULL) {
@@ -25,8 +25,8 @@ flo_html_node_id flo_html_getFirstChild(const flo_html_node_id currentNodeID,
 }
 
 // TODO(florian): make faster.
-flo_html_NextNode *flo_html_getNextNode(const flo_html_node_id currentNodeID,
-                                        const flo_html_Dom *dom) {
+flo_html_NextNode *flo_html_getNextNode(flo_html_node_id currentNodeID,
+                                        flo_html_Dom *dom) {
     for (flo_html_node_id i = 0; i < dom->nextNodes.len; i++) {
         if (dom->nextNodes.buf[i].currentNodeID == currentNodeID) {
             return &dom->nextNodes.buf[i];
@@ -35,8 +35,8 @@ flo_html_NextNode *flo_html_getNextNode(const flo_html_node_id currentNodeID,
     return NULL;
 }
 
-flo_html_node_id flo_html_getNext(const flo_html_node_id currentNodeID,
-                                  const flo_html_Dom *dom) {
+flo_html_node_id flo_html_getNext(flo_html_node_id currentNodeID,
+                                  flo_html_Dom *dom) {
     flo_html_NextNode *nextNode = flo_html_getNextNode(currentNodeID, dom);
     if (nextNode == NULL) {
         return 0;
@@ -47,8 +47,8 @@ flo_html_node_id flo_html_getNext(const flo_html_node_id currentNodeID,
 
 // TODO(florian): make faster.
 flo_html_ParentChild *
-flo_html_getParentNode(const flo_html_node_id currentNodeID,
-                       const flo_html_Dom *dom) {
+flo_html_getParentNode(flo_html_node_id currentNodeID,
+                       flo_html_Dom *dom) {
     for (ptrdiff_t i = 0; i < dom->parentChilds.len; i++) {
         flo_html_ParentChild *node = &dom->parentChilds.buf[i];
         if (node->childID == currentNodeID) {
@@ -58,8 +58,8 @@ flo_html_getParentNode(const flo_html_node_id currentNodeID,
     return NULL;
 }
 
-flo_html_node_id flo_html_getParent(const flo_html_node_id currentNodeID,
-                                    const flo_html_Dom *dom) {
+flo_html_node_id flo_html_getParent(flo_html_node_id currentNodeID,
+                                    flo_html_Dom *dom) {
     flo_html_ParentChild *parentChildNode =
         flo_html_getParentNode(currentNodeID, dom);
     if (parentChildNode == NULL) {
@@ -69,8 +69,8 @@ flo_html_node_id flo_html_getParent(const flo_html_node_id currentNodeID,
 }
 
 flo_html_NextNode *
-flo_html_getPreviousNode(const flo_html_node_id currentNodeID,
-                         const flo_html_Dom *dom) {
+flo_html_getPreviousNode(flo_html_node_id currentNodeID,
+                         flo_html_Dom *dom) {
     for (flo_html_node_id i = 0; i < dom->nextNodes.len; i++) {
         if (dom->nextNodes.buf[i].nextNodeID == currentNodeID) {
             return &dom->nextNodes.buf[i];
@@ -79,8 +79,8 @@ flo_html_getPreviousNode(const flo_html_node_id currentNodeID,
     return NULL;
 }
 
-flo_html_node_id flo_html_getPrevious(const flo_html_node_id currentNodeID,
-                                      const flo_html_Dom *dom) {
+flo_html_node_id flo_html_getPrevious(flo_html_node_id currentNodeID,
+                                      flo_html_Dom *dom) {
     flo_html_NextNode *previousNode =
         flo_html_getPreviousNode(currentNodeID, dom);
     if (previousNode == NULL) {
@@ -89,9 +89,9 @@ flo_html_node_id flo_html_getPrevious(const flo_html_node_id currentNodeID,
     return previousNode->currentNodeID;
 }
 
-flo_html_node_id flo_html_traverseNode(const flo_html_node_id currentNodeID,
-                                       const flo_html_node_id toTraverseNodeID,
-                                       const flo_html_Dom *dom) {
+flo_html_node_id flo_html_traverseNode(flo_html_node_id currentNodeID,
+                                       flo_html_node_id toTraverseNodeID,
+                                       flo_html_Dom *dom) {
     flo_html_node_id firstChild = flo_html_getFirstChild(currentNodeID, dom);
     if (firstChild) {
         return firstChild;
@@ -117,8 +117,8 @@ flo_html_node_id flo_html_traverseNode(const flo_html_node_id currentNodeID,
     return 0;
 }
 
-flo_html_node_id flo_html_traverseDom(const flo_html_node_id currentNodeID,
-                                      const flo_html_Dom *dom) {
+flo_html_node_id flo_html_traverseDom(flo_html_node_id currentNodeID,
+                                      flo_html_Dom *dom) {
     flo_html_node_id firstChild = flo_html_getFirstChild(currentNodeID, dom);
     if (firstChild) {
         return firstChild;
@@ -141,8 +141,8 @@ flo_html_node_id flo_html_traverseDom(const flo_html_node_id currentNodeID,
     return 0;
 }
 
-flo_html_node_id flo_html_getLastNext(const flo_html_node_id startNodeID,
-                                      const flo_html_Dom *dom) {
+flo_html_node_id flo_html_getLastNext(flo_html_node_id startNodeID,
+                                      flo_html_Dom *dom) {
     flo_html_node_id lastNext = startNodeID;
     flo_html_NextNode *nextNode = flo_html_getNextNode(lastNext, dom);
     while (nextNode != NULL) {
@@ -153,8 +153,8 @@ flo_html_node_id flo_html_getLastNext(const flo_html_node_id startNodeID,
     return lastNext;
 }
 
-flo_html_NextNode *flo_html_getLastNextNode(const flo_html_node_id startNodeID,
-                                            const flo_html_Dom *dom) {
+flo_html_NextNode *flo_html_getLastNextNode(flo_html_node_id startNodeID,
+                                            flo_html_Dom *dom) {
     flo_html_NextNode *nextNode = flo_html_getNextNode(startNodeID, dom);
     if (nextNode == NULL) {
         return NULL;

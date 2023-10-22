@@ -10,7 +10,7 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/memory.h"
 
-flo_html_node_id flo_html_createNode(const flo_html_NodeType nodeType,
+flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_Node node;
     node.nodeType = nodeType;
@@ -33,8 +33,8 @@ bool flo_html_tryMerge(flo_html_node_id possibleMergeNodeID,
     return false;
 }
 
-void flo_html_connectOtherNodesToParent(const flo_html_node_id parentID,
-                                        const flo_html_node_id lastAddedChild,
+void flo_html_connectOtherNodesToParent(flo_html_node_id parentID,
+                                        flo_html_node_id lastAddedChild,
                                         flo_html_Dom *dom,
                                         flo_html_Arena *perm) {
     flo_html_node_id otherNewNodeID = flo_html_getNext(lastAddedChild, dom);

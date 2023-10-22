@@ -44,21 +44,21 @@ typedef struct {
 } flo_html_FilterType;
 
 bool flo_html_filterNode(flo_html_node_id nodeID,
-                         const flo_html_FilterType *filters,
-                         ptrdiff_t filterslen, const flo_html_Dom *dom);
+                         flo_html_FilterType *filters,
+                         ptrdiff_t filterslen, flo_html_Dom *dom);
 
 bool flo_html_getNodesWithoutflo_html_Combinator(
-    const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, const flo_html_Dom *dom, flo_html_Uint16HashSet *set,
+    flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
+    ptrdiff_t filtersLen, flo_html_Dom *dom, flo_html_Uint16HashSet *set,
     flo_html_Arena *perm);
 
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
-    const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, const flo_html_Dom *dom, ptrdiff_t numberOfSiblings,
+    flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
+    ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t numberOfSiblings,
     flo_html_Uint16HashSet *set, flo_html_Arena *perm);
 flo_html_QueryStatus flo_html_getFilteredDescendants(
-    const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, const flo_html_Dom *dom, ptrdiff_t depth,
+    flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
+    ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t depth,
     flo_html_Uint16HashSet *set, flo_html_Arena *perm);
 
 #ifdef __cplusplus

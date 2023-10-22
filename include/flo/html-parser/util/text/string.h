@@ -42,13 +42,13 @@ flo_html_strcpy(flo_html_String dest, flo_html_String src) {
     return dest;
 }
 __attribute__((unused)) static inline unsigned char
-flo_html_getChar(flo_html_String str, const ptrdiff_t index) {
+flo_html_getChar(flo_html_String str, ptrdiff_t index) {
     FLO_HTML_ASSERT(index >= 0 && index <= str.len);
 
     return str.buf[index];
 }
 __attribute__((unused)) static inline unsigned char *
-flo_html_getCharPtr(flo_html_String str, const ptrdiff_t index) {
+flo_html_getCharPtr(flo_html_String str, ptrdiff_t index) {
     FLO_HTML_ASSERT(index >= 0 && index <= str.len);
 
     return &str.buf[index];

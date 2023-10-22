@@ -43,20 +43,20 @@ typedef enum {
 } AppendType;
 
 typedef union {
-    const flo_html_DocumentNode documentNode;
-    const flo_html_String text;
+    flo_html_DocumentNode documentNode;
+    flo_html_String text;
 } AppendInput;
 
 typedef struct {
-    const char *fileLocation1;
-    const char *fileLocation2;
-    const flo_html_String cssQuery;
-    const char *testName;
-    const AppendType appendType;
-    const AppendInput appendInput;
+    char *fileLocation1;
+    char *fileLocation2;
+    flo_html_String cssQuery;
+    char *testName;
+    AppendType appendType;
+    AppendInput appendInput;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,
      TEST_FILE_1_AFTER,
      FLO_HTML_S("body"),
@@ -183,13 +183,13 @@ static const TestFile testFiles[] = {
      {{FLO_HTML_S("is all I do")}}},
 };
 
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testAppendix(const flo_html_String fileLocation1,
-                               const flo_html_String fileLocation2,
-                               const flo_html_String cssQuery,
-                               const AppendType appendType,
-                               const AppendInput *appendInput,
+static TestStatus testAppendix(flo_html_String fileLocation1,
+                               flo_html_String fileLocation2,
+                               flo_html_String cssQuery,
+                               AppendType appendType,
+                               AppendInput *appendInput,
                                flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);

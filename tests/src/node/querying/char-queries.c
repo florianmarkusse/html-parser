@@ -13,27 +13,27 @@ typedef enum { GET_VALUE, NUM_CHAR_FUNCTION_TYPES } CharFunctionType;
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 typedef struct {
-    const char *fileLocation;
-    const flo_html_String cssQuery;
-    const flo_html_String input;
-    const flo_html_String expectedResult;
-    const CharFunctionType functionType;
-    const char *testName;
+    char *fileLocation;
+    flo_html_String cssQuery;
+    flo_html_String input;
+    flo_html_String expectedResult;
+    CharFunctionType functionType;
+    char *testName;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1, FLO_HTML_S("body"), FLO_HTML_S("style"), FLO_HTML_S("class"),
      GET_VALUE, "flo_html_getValue when having key"},
     {TEST_FILE_1, FLO_HTML_S("html"), FLO_HTML_S("langg"),
      FLO_HTML_EMPTY_STRING, GET_VALUE, "flo_html_getValue when not having key"},
 };
 
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus
-testQuery(const flo_html_String fileLocation, const flo_html_String cssQuery,
-          const flo_html_String input, const CharFunctionType functionType,
-          const flo_html_String expectedResult, flo_html_Arena scratch) {
+testQuery(flo_html_String fileLocation, flo_html_String cssQuery,
+          flo_html_String input, CharFunctionType functionType,
+          flo_html_String expectedResult, flo_html_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",

@@ -31,31 +31,31 @@
     } while (0)
 
 flo_html_node_id
-flo_html_prependDocumentNodeWithQuery(const flo_html_String cssQuery,
-                                      const flo_html_DocumentNode *docNode,
+flo_html_prependDocumentNodeWithQuery(flo_html_String cssQuery,
+                                      flo_html_DocumentNode *docNode,
                                       flo_html_Dom *dom, flo_html_Arena *perm) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, perm,
                                 flo_html_prependDocumentNode);
 }
 
 flo_html_node_id
-flo_html_prependTextNodeWithQuery(const flo_html_String cssQuery,
-                                  const flo_html_String text, flo_html_Dom *dom,
+flo_html_prependTextNodeWithQuery(flo_html_String cssQuery,
+                                  flo_html_String text, flo_html_Dom *dom,
                                   flo_html_Arena *perm) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, text, dom, perm,
                                 flo_html_prependTextNode);
 }
 
 flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
-    const flo_html_String cssQuery, const flo_html_String htmlString,
+    flo_html_String cssQuery, flo_html_String htmlString,
     flo_html_Dom *dom, flo_html_Arena *perm) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, perm,
                                 flo_html_prependHTMLFromString);
 }
 
 flo_html_node_id
-flo_html_prependHTMLFromFileWithQuery(const flo_html_String cssQuery,
-                                      const flo_html_String fileLocation,
+flo_html_prependHTMLFromFileWithQuery(flo_html_String cssQuery,
+                                      flo_html_String fileLocation,
                                       flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_String content;
     flo_html_FileStatus fileStatus =
@@ -71,8 +71,8 @@ flo_html_prependHTMLFromFileWithQuery(const flo_html_String cssQuery,
                                 flo_html_prependHTMLFromString);
 }
 
-static void updateReferences(const flo_html_node_id parentID,
-                             const flo_html_node_id firstNewNodeID,
+static void updateReferences(flo_html_node_id parentID,
+                             flo_html_node_id firstNewNodeID,
                              flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(parentID, dom);
@@ -101,8 +101,8 @@ static void updateReferences(const flo_html_node_id parentID,
 }
 
 flo_html_node_id
-flo_html_prependDocumentNode(const flo_html_node_id parentID,
-                             const flo_html_DocumentNode *docNode,
+flo_html_prependDocumentNode(flo_html_node_id parentID,
+                             flo_html_DocumentNode *docNode,
                              flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
         flo_html_parseDocumentElement(docNode, dom, perm);
@@ -110,8 +110,8 @@ flo_html_prependDocumentNode(const flo_html_node_id parentID,
     return newNodeID;
 }
 
-flo_html_node_id flo_html_prependTextNode(const flo_html_node_id parentID,
-                                          const flo_html_String text,
+flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
+                                          flo_html_String text,
                                           flo_html_Dom *dom,
                                           flo_html_Arena *perm) {
     flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
@@ -130,8 +130,8 @@ flo_html_node_id flo_html_prependTextNode(const flo_html_node_id parentID,
 }
 
 flo_html_node_id
-flo_html_prependHTMLFromString(const flo_html_node_id parentID,
-                               const flo_html_String htmlString,
+flo_html_prependHTMLFromString(flo_html_node_id parentID,
+                               flo_html_String htmlString,
                                flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_node_id firstNewAddedNode = dom->nodes.len;
     flo_html_parseExtra(htmlString, dom, perm);

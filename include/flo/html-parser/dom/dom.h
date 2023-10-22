@@ -71,7 +71,7 @@ typedef struct {
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-flo_html_Dom *flo_html_createDom(const flo_html_String htmlString,
+flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
                                  flo_html_Arena *perm);
 
 /**
@@ -89,7 +89,7 @@ flo_html_Dom *flo_html_createDom(const flo_html_String htmlString,
  *          an error code otherwise). See @ref
  *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
  */
-flo_html_Dom *flo_html_createDomFromFile(const flo_html_String fileLocation,
+flo_html_Dom *flo_html_createDomFromFile(flo_html_String fileLocation,
                                          flo_html_Arena *perm);
 
 #ifdef __cplusplus

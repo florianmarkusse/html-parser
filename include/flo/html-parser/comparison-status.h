@@ -14,13 +14,13 @@ typedef enum {
     COMPARISON_NUM_STATUS
 } flo_html_ComparisonStatus;
 
-static const char *const comparisonStatusStrings[COMPARISON_NUM_STATUS] = {
+static char *comparisonStatusStrings[COMPARISON_NUM_STATUS] = {
     "Success", "Memory error", "Different type of node",
     "Collections have different sizes", "Collections have different content"};
 
 // Not always used, but very handy for those that actually do want readable
 // error codes.
-__attribute__((unused)) static const char *
+__attribute__((unused)) static char *
 flo_html_comparisonStatusToString(flo_html_ComparisonStatus status) {
     if (status >= 0 && status < COMPARISON_NUM_STATUS) {
         return comparisonStatusStrings[status];

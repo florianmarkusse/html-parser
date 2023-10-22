@@ -10,20 +10,20 @@ inline void printTabs() {
     }
 }
 
-inline void printTestScore(const ptrdiff_t successes,
-                           const ptrdiff_t failures) {
+inline void printTestScore(ptrdiff_t successes,
+                           ptrdiff_t failures) {
     tabLevel = tabLevel == 0 ? 0 : tabLevel - 1;
     printTabs();
     printf("[ %zu / %lu ]\n", successes, failures + successes);
 }
 
-inline void printTestTopicStart(const char *testTopic) {
+inline void printTestTopicStart(char *testTopic) {
     printTabs();
     printf("Testing %s...\n", testTopic);
     tabLevel++;
 }
 
-inline void printTestStart(const char *testName) {
+inline void printTestStart(char *testName) {
     printTabs();
     printf("%-50s", testName);
 }
@@ -41,29 +41,29 @@ inline void printTestDemarcation() {
            "---\n");
 }
 
-inline void printTestResultDifferenceErrorCode(const ptrdiff_t expected,
-                                               const char *expectedString,
-                                               const ptrdiff_t actual,
-                                               const char *actualString) {
+inline void printTestResultDifferenceErrorCode(ptrdiff_t expected,
+                                               char *expectedString,
+                                               ptrdiff_t actual,
+                                               char *actualString) {
     printf("%-10s: %-4zu - %s\n", "Expected", expected, expectedString);
     printf("%-10s: %-4zu - %s\n", "Actual", actual, actualString);
 }
 
 inline void
-printTestResultDifferenceString(const flo_html_String expectedString,
-                                const flo_html_String actualString) {
+printTestResultDifferenceString(flo_html_String expectedString,
+                                flo_html_String actualString) {
     printf("%-20s: %.*s\n", "Expected string", FLO_HTML_S_P(expectedString));
     printf("%-20s: %.*s\n", "Actual string", FLO_HTML_S_P(actualString));
 }
 
-inline void printTestResultDifferenceNumber(const ptrdiff_t expectedNumber,
-                                            const ptrdiff_t actualNumber) {
+inline void printTestResultDifferenceNumber(ptrdiff_t expectedNumber,
+                                            ptrdiff_t actualNumber) {
     printf("%-20s: %zu\n", "Expected number", expectedNumber);
     printf("%-20s: %zu\n", "Actual number", actualNumber);
 }
 
-inline void printTestResultDifferenceBool(const bool expectedBool,
-                                          const bool actualBool) {
+inline void printTestResultDifferenceBool(bool expectedBool,
+                                          bool actualBool) {
     printf("%-20s: %d\n", "Expected bool", expectedBool);
     printf("%-20s: %d\n", "Actual bool", actualBool);
 }

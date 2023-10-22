@@ -14,7 +14,7 @@ typedef enum {
     QUERY_NUM_STATUS
 } flo_html_QueryStatus;
 
-static const char *const queryStatusStrings[QUERY_NUM_STATUS] = {
+static char *queryStatusStrings[QUERY_NUM_STATUS] = {
     "Success",
     "Invalid element",
     "Too many filters for a single element",
@@ -22,7 +22,7 @@ static const char *const queryStatusStrings[QUERY_NUM_STATUS] = {
     "Memory error",
 };
 
-__attribute__((unused)) static const char *
+__attribute__((unused)) static char *
 flo_html_queryingStatusToString(flo_html_QueryStatus status) {
     if (status >= 0 && status < QUERY_NUM_STATUS) {
         return queryStatusStrings[status];

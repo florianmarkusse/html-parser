@@ -37,19 +37,19 @@ flo_html_Uint16HashSet flo_html_initUint16HashSet(uint16_t capacity,
 bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
                                   flo_html_Arena *perm);
 flo_html_uint16_t_a
-flo_html_uint16HashSetToArray(const flo_html_Uint16HashSet *set,
+flo_html_uint16HashSetToArray(flo_html_Uint16HashSet *set,
                               flo_html_Arena *perm);
 
-bool flo_html_containsUint16HashSet(const flo_html_Uint16HashSet *set,
+bool flo_html_containsUint16HashSet(flo_html_Uint16HashSet *set,
                                     uint16_t id);
 
 flo_html_Uint16HashSet
-flo_html_copyUint16HashSet(const flo_html_Uint16HashSet *originalSet,
+flo_html_copyUint16HashSet(flo_html_Uint16HashSet *originalSet,
                            flo_html_Arena *perm);
 void flo_html_resetUint16HashSet(flo_html_Uint16HashSet *set);
 
 typedef struct {
-    const flo_html_Uint16HashSet *set;
+    flo_html_Uint16HashSet *set;
     ptrdiff_t index;
 } flo_html_Uint16HashSetIterator;
 

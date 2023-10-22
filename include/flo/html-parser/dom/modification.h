@@ -25,8 +25,8 @@ extern "C" {
  *          an error code otherwise).
  */
 void flo_html_addPropertyToNode(flo_html_node_id nodeID,
-                                const flo_html_String key,
-                                const flo_html_String value, flo_html_Dom *dom,
+                                flo_html_String key,
+                                flo_html_String value, flo_html_Dom *dom,
                                 flo_html_Arena *perm);
 
 /**
@@ -45,7 +45,7 @@ void flo_html_addPropertyToNode(flo_html_node_id nodeID,
  *          an error code otherwise).
  */
 void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
-                                       const flo_html_String boolProp,
+                                       flo_html_String boolProp,
                                        flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -65,8 +65,8 @@ void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
  *          an error code otherwise).
  */
 bool flo_html_setPropertyValue(flo_html_node_id nodeID,
-                               const flo_html_String key,
-                               const flo_html_String newValue,
+                               flo_html_String key,
+                               flo_html_String newValue,
                                flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -85,7 +85,7 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID,
  *          an error code otherwise).
  */
 void flo_html_setTextContent(flo_html_node_id nodeID,
-                             const flo_html_String text, flo_html_Dom *dom,
+                             flo_html_String text, flo_html_Dom *dom,
                              flo_html_Arena *perm);
 
 /**
@@ -106,7 +106,7 @@ void flo_html_setTextContent(flo_html_node_id nodeID,
  *          an error code otherwise).
  */
 void flo_html_addTextToTextNode(flo_html_node_id nodeID,
-                                const flo_html_String text, flo_html_Dom *dom,
+                                flo_html_String text, flo_html_Dom *dom,
                                 bool isAppend, flo_html_Arena *perm);
 
 /**
@@ -126,7 +126,7 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID,
  * @return  The status of the tag setting operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-void flo_html_setTagOnDocumentNode(const flo_html_String tag,
+void flo_html_setTagOnDocumentNode(flo_html_String tag,
                                    flo_html_node_id nodeID, bool isPaired,
                                    flo_html_Dom *dom, flo_html_Arena *perm);
 

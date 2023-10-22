@@ -7,7 +7,7 @@
 #include "flo/html-parser/node/text-node.h"
 #include "flo/html-parser/util/file/path.h"
 
-void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
+void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
                flo_html_Dom *dom, FILE *output) {
     flo_html_Node node = dom->nodes.buf[nodeID];
 
@@ -29,7 +29,7 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         return;
     }
 
-    const flo_html_String tag = flo_html_getStringFromHashSet(
+    flo_html_String tag = flo_html_getStringFromHashSet(
         &dom->tags, dom->tagRegistry.buf[node.tagID].hashElement);
     fprintf(output, "<%.*s", FLO_HTML_S_P(tag));
 
@@ -37,7 +37,7 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         flo_html_BooleanProperty boolProp = dom->boolProps.buf[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            const flo_html_String prop = flo_html_getStringFromHashSet(
+            flo_html_String prop = flo_html_getStringFromHashSet(
                 &dom->boolPropsSet, dom->boolPropRegistry.buf[boolProp.propID]);
             fprintf(output, " %.*s", FLO_HTML_S_P(prop));
         }
@@ -47,9 +47,9 @@ void printNode(const flo_html_node_id nodeID, const ptrdiff_t indentation,
         flo_html_Property prop = dom->props.buf[i];
 
         if (prop.nodeID == node.nodeID) {
-            const flo_html_String key = flo_html_getStringFromHashSet(
+            flo_html_String key = flo_html_getStringFromHashSet(
                 &dom->propKeys, dom->propKeyRegistry.buf[prop.keyID]);
-            const flo_html_String value = flo_html_getStringFromHashSet(
+            flo_html_String value = flo_html_getStringFromHashSet(
                 &dom->propValues, dom->propValueRegistry.buf[prop.valueID]);
             fprintf(output, " %.*s=\"%.*s\"", FLO_HTML_S_P(key),
                     FLO_HTML_S_P(value));
@@ -88,7 +88,7 @@ void flo_html_printHTML(flo_html_Dom *dom) {
 }
 
 flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
-                                             const flo_html_String filePath,
+                                             flo_html_String filePath,
                                              flo_html_Arena scratch) {
     flo_html_createPath(filePath, scratch);
     // casting here because filePath should not contain any funny characters.
@@ -110,15 +110,15 @@ flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
     return FILE_SUCCESS;
 }
 
-void printflo_html_BasicRegistry(const flo_html_String registryName,
-                                 const flo_html_HashElement_d_a *hashElements,
-                                 const flo_html_StringHashSet *set) {
+void printflo_html_BasicRegistry(flo_html_String registryName,
+                                 flo_html_HashElement_d_a *hashElements,
+                                 flo_html_StringHashSet *set) {
     printf("%-20.*s\nregistration nodes inside DOM...\n",
            FLO_HTML_S_P(registryName));
     printf("total number of nodes: %zu\n", hashElements->len);
     for (ptrdiff_t i = 0; i < hashElements->len; i++) {
         flo_html_HashElement hashElement = hashElements->buf[i];
-        const flo_html_String value =
+        flo_html_String value =
             flo_html_getStringFromHashSet(set, hashElement);
         printf("ID: %zu value: %-20.*s hash: %zu offset: %u\n", i,
                FLO_HTML_S_P(value), hashElement.hash, hashElement.offset);
@@ -126,7 +126,7 @@ void printflo_html_BasicRegistry(const flo_html_String registryName,
     printf("\n");
 }
 
-void printSetStatus(const flo_html_StringHashSet *set) {
+void printSetStatus(flo_html_StringHashSet *set) {
     printf("hash set contents...\n");
     flo_html_StringHashSetIterator iterator =
         (flo_html_StringHashSetIterator){.set = set, .index = 0};
@@ -176,7 +176,7 @@ void flo_html_printDomStatus(flo_html_Dom *dom) {
            dom->tagRegistry.len);
     for (ptrdiff_t i = 0; i < dom->tagRegistry.len; i++) {
         flo_html_TagRegistration tagRegistration = dom->tagRegistry.buf[i];
-        const flo_html_String tag = flo_html_getStringFromHashSet(
+        flo_html_String tag = flo_html_getStringFromHashSet(
             &dom->tags, tagRegistration.hashElement);
         printf("tag ID: %-5td tag: %-20.*s isPaired: %d hash: %zu offset: %u\n",
                i, FLO_HTML_S_P(tag), tagRegistration.isPaired,

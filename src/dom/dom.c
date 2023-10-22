@@ -4,7 +4,7 @@
 #include "flo/html-parser/util/file/read.h"
 #include "flo/html-parser/util/memory.h"
 
-flo_html_Dom *flo_html_createDomFromFile(const flo_html_String fileLocation,
+flo_html_Dom *flo_html_createDomFromFile(flo_html_String fileLocation,
                                          flo_html_Arena *perm) {
     flo_html_String content;
     flo_html_FileStatus fileStatus =
@@ -19,7 +19,7 @@ flo_html_Dom *flo_html_createDomFromFile(const flo_html_String fileLocation,
     return flo_html_createDom(content, perm);
 }
 
-flo_html_Dom *flo_html_createDom(const flo_html_String htmlString,
+flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
                                  flo_html_Arena *perm) {
     flo_html_Dom *result =
         FLO_HTML_NEW(perm, flo_html_Dom, 1, FLO_HTML_ZERO_MEMORY);

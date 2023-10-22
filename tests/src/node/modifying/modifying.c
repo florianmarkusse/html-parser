@@ -16,15 +16,15 @@
 #define TEST_FILE_3_AFTER CURRENT_DIR "test-3-after.html"
 
 typedef struct {
-    const char *fileLocation1;
-    const char *fileLocation2;
-    const char *cssQuery;
-    const char *propKey;
-    const flo_html_String newPropValue;
-    const char *testName;
+    char *fileLocation1;
+    char *fileLocation2;
+    char *cssQuery;
+    char *propKey;
+    flo_html_String newPropValue;
+    char *testName;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "body", "style",
      FLO_HTML_S("newstyle"), "change property value"},
     {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "#text-content-test", "id",
@@ -33,13 +33,13 @@ static const TestFile testFiles[] = {
      "I am the new text content, bow for me!", FLO_HTML_EMPTY_STRING,
      "setting text content"},
 };
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testModification(const flo_html_String fileLocation1,
-                                   const flo_html_String fileLocation2,
-                                   const flo_html_String cssQuery,
-                                   const flo_html_String propKey,
-                                   const flo_html_String newPropValue,
+static TestStatus testModification(flo_html_String fileLocation1,
+                                   flo_html_String fileLocation2,
+                                   flo_html_String cssQuery,
+                                   flo_html_String propKey,
+                                   flo_html_String newPropValue,
                                    flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);

@@ -36,13 +36,13 @@
 #define TEST_FILE_19 CURRENT_DIR "test-19.html"
 
 typedef struct {
-    const char *fileLocation1;
-    const char *fileLocation2;
+    char *fileLocation1;
+    char *fileLocation2;
     flo_html_ComparisonStatus expectedStatus;
-    const char *testName;
+    char *testName;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file"},
     {TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_CONTENT,
      "different key-value property"},
@@ -73,11 +73,11 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
 };
 
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-TestStatus compareFiles(const flo_html_String fileLocation1,
-                        const flo_html_String fileLocation2,
-                        const flo_html_ComparisonStatus expectedResult,
+TestStatus compareFiles(flo_html_String fileLocation1,
+                        flo_html_String fileLocation2,
+                        flo_html_ComparisonStatus expectedResult,
                         flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);

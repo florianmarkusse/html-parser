@@ -22,15 +22,15 @@ typedef enum {
 #define TEST_FILE_3_AFTER CURRENT_DIR "test-3-after.html"
 
 typedef struct {
-    const char *fileLocation1;
-    const char *fileLocation2;
-    const char *cssQuery;
-    const char *propToDelete;
-    const DeletionType deletionType;
-    const char *testName;
+    char *fileLocation1;
+    char *fileLocation2;
+    char *cssQuery;
+    char *propToDelete;
+    DeletionType deletionType;
+    char *testName;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "!DOCTYPE", "html",
      DELETE_BOOLEAN_PROPERTY, "'html' on !DOCTYPE"},
     {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "input", "required",
@@ -38,13 +38,13 @@ static const TestFile testFiles[] = {
     {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "html", "lang", DELETE_PROPERTY,
      "'lang' on html"},
 };
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testDeletion(const flo_html_String fileLocation1,
-                               const flo_html_String fileLocation2,
-                               const flo_html_String cssQuery,
-                               const flo_html_String propToDelete,
-                               const DeletionType deletionType,
+static TestStatus testDeletion(flo_html_String fileLocation1,
+                               flo_html_String fileLocation2,
+                               flo_html_String cssQuery,
+                               flo_html_String propToDelete,
+                               DeletionType deletionType,
                                flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);

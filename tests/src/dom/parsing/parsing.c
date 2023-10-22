@@ -11,7 +11,7 @@
 #define INPUTS_DIR "tests/src/dom/parsing/inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
-bool parseFile(const flo_html_String fileLocation, flo_html_Arena scratch) {
+bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
     if (flo_html_createDomFromFile(fileLocation, &scratch) == NULL) {
         return false;
     }

@@ -10,7 +10,7 @@
 #define CURRENT_DIR "tests/src/dom/querying/inputs/"
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1, FLO_HTML_S("[html]"), QUERY_SUCCESS, 2,
      "with html attribute"},
     {TEST_FILE_1, FLO_HTML_S("body div p h1 lalalal input"),
@@ -53,12 +53,12 @@ static const TestFile testFiles[] = {
 };
 
 // Calculate the number of test files
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const flo_html_String fileLocation,
-                            const flo_html_String cssQuery,
-                            const flo_html_QueryStatus expectedStatus,
-                            const ptrdiff_t expectedNumberOfNodes,
+static TestStatus testQuery(flo_html_String fileLocation,
+                            flo_html_String cssQuery,
+                            flo_html_QueryStatus expectedStatus,
+                            ptrdiff_t expectedNumberOfNodes,
                             flo_html_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {

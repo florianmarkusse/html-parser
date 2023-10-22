@@ -13,14 +13,14 @@ typedef enum { TEXT_CONTENT, NUM_CHAR_FUNCTION_TYPES } ArrayFunctionType;
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 typedef struct {
-    const char *fileLocation;
-    const char *cssQuery;
-    const ptrdiff_t expectedResult;
-    const ArrayFunctionType functionType;
-    const char *testName;
+    char *fileLocation;
+    char *cssQuery;
+    ptrdiff_t expectedResult;
+    ArrayFunctionType functionType;
+    char *testName;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1, "#my-first-div", 1, TEXT_CONTENT, "nested text node"},
     {TEST_FILE_1, "title", 1, TEXT_CONTENT, "simple text node"},
     {TEST_FILE_1, "span > p", 0, TEXT_CONTENT, "no text nodes"},
@@ -29,12 +29,12 @@ static const TestFile testFiles[] = {
     {TEST_FILE_1, "body", 7, TEXT_CONTENT, "multiple text nodes 2"},
 };
 
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const flo_html_String fileLocation,
-                            const flo_html_String cssQuery,
-                            const ArrayFunctionType functionType,
-                            const ptrdiff_t expectedResult,
+static TestStatus testQuery(flo_html_String fileLocation,
+                            flo_html_String cssQuery,
+                            ArrayFunctionType functionType,
+                            ptrdiff_t expectedResult,
                             flo_html_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {

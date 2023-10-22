@@ -41,20 +41,20 @@ typedef enum {
 } ReplacementType;
 
 typedef union {
-    const flo_html_DocumentNode documentNode;
-    const char *text;
+    flo_html_DocumentNode documentNode;
+    char *text;
 } ReplacementInput;
 
 typedef struct {
-    const char *fileLocation1;
-    const char *fileLocation2;
-    const flo_html_String cssQuery;
-    const char *testName;
-    const ReplacementType replacementType;
-    const ReplacementInput replacementInput;
+    char *fileLocation1;
+    char *fileLocation2;
+    flo_html_String cssQuery;
+    char *testName;
+    ReplacementType replacementType;
+    ReplacementInput replacementInput;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,
      TEST_FILE_1_AFTER,
      FLO_HTML_S("body"),
@@ -173,13 +173,13 @@ static const TestFile testFiles[] = {
      REPLACEMENT_FROM_STRING,
      {{FLO_HTML_S("at the start<h1></h1><h2></h2>at the end")}}},
 };
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testReplacements(const flo_html_String fileLocation1,
-                                   const flo_html_String fileLocation2,
-                                   const flo_html_String cssQuery,
-                                   const ReplacementType replacementType,
-                                   const ReplacementInput *replacementInput,
+static TestStatus testReplacements(flo_html_String fileLocation1,
+                                   flo_html_String fileLocation2,
+                                   flo_html_String cssQuery,
+                                   ReplacementType replacementType,
+                                   ReplacementInput *replacementInput,
                                    flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);

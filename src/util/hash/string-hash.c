@@ -10,7 +10,7 @@
 
 #define MAX_PROBES (1U << 4U)
 
-flo_html_StringHashSet flo_html_initStringHashSet(const ptrdiff_t capacity,
+flo_html_StringHashSet flo_html_initStringHashSet(ptrdiff_t capacity,
                                                   flo_html_Arena *perm) {
     return (flo_html_StringHashSet){
         .arrayLen = capacity,
@@ -20,7 +20,7 @@ flo_html_StringHashSet flo_html_initStringHashSet(const ptrdiff_t capacity,
 }
 
 ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
-                                       const flo_html_String string,
+                                       flo_html_String string,
                                        flo_html_Arena *perm) {
     size_t newStringHash = flo_html_hashString(string);
     ptrdiff_t newStringProbes = 0;
@@ -110,8 +110,8 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
 }
 
 flo_html_Contains
-flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
-                               const flo_html_String string) {
+flo_html_containsStringHashSet(flo_html_StringHashSet *set,
+                               flo_html_String string) {
     size_t hash = flo_html_hashString(string);
 
     ptrdiff_t probes = 0;
@@ -129,16 +129,16 @@ flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
         .entryIndex = 0};
 }
 
-const flo_html_String
-flo_html_getStringFromHashSet(const flo_html_StringHashSet *set,
-                              const flo_html_HashElement hashElement) {
+flo_html_String
+flo_html_getStringFromHashSet(flo_html_StringHashSet *set,
+                              flo_html_HashElement hashElement) {
     return set->array[((hashElement.hash + hashElement.offset) % set->arrayLen)]
         .string;
 }
 
 flo_html_HashComparisonStatus
-flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
-                             const flo_html_StringHashSet *set2) {
+flo_html_equalsStringHashSet(flo_html_StringHashSet *set1,
+                             flo_html_StringHashSet *set2) {
     if (set1->entries != set2->entries) {
         return HASH_COMPARISON_DIFFERENT_SIZES;
     }
@@ -163,9 +163,9 @@ flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
     return HASH_COMPARISON_SUCCESS;
 }
 
-const flo_html_String
+flo_html_String
 flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator) {
-    const flo_html_StringHashSet *set = iterator->set;
+    flo_html_StringHashSet *set = iterator->set;
 
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index].string.buf != NULL) {
@@ -179,7 +179,7 @@ flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator) {
 
 bool flo_html_hasNextStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator) {
-    const flo_html_StringHashSet *set = iterator->set;
+    flo_html_StringHashSet *set = iterator->set;
     while (iterator->index < set->arrayLen) {
         if (set->array[iterator->index].string.buf != NULL) {
             return true;

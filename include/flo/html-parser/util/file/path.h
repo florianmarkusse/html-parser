@@ -8,7 +8,7 @@ extern "C" {
 #include "flo/html-parser/util/memory.h"
 #include "flo/html-parser/util/text/string.h"
 
-void flo_html_createPath(const flo_html_String fileLocation,
+void flo_html_createPath(flo_html_String fileLocation,
                          flo_html_Arena scratch);
 
 #ifdef __cplusplus

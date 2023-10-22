@@ -15,8 +15,8 @@ typedef struct {
     flo_html_Dom *expected;
 } ComparisonTest;
 
-ComparisonTest initComparisonTest(const flo_html_String startFileLocation,
-                                  const flo_html_String expectedFileLocation,
+ComparisonTest initComparisonTest(flo_html_String startFileLocation,
+                                  flo_html_String expectedFileLocation,
                                   flo_html_Arena *perm);
 
 TestStatus compareAndEndTest(ComparisonTest *comparisonTest,
@@ -25,14 +25,14 @@ TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
                                      flo_html_ComparisonStatus expectedStatus,
                                      flo_html_Arena scratch);
 
-TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
+TestStatus getNodeFromQuerySelector(flo_html_String cssQuery,
                                     ComparisonTest *comparisonTest,
                                     flo_html_node_id *foundNode,
                                     flo_html_Arena scratch);
-TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
+TestStatus failWithMessageAndCode(flo_html_String failureMessage,
                                   TestStatus failureStatus);
 
-TestStatus failWithMessage(const flo_html_String failureMessage);
+TestStatus failWithMessage(flo_html_String failureMessage);
 
 #ifdef __cplusplus
 }

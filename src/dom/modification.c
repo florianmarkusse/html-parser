@@ -15,8 +15,8 @@ typedef enum {
     PROPERTY_TYPE_VALUE,
 } PropertyType;
 
-flo_html_index_id getCreatedPropIDFromString(const PropertyType propertyType,
-                                             const flo_html_String prop,
+flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
+                                             flo_html_String prop,
                                              flo_html_Dom *dom,
                                              flo_html_StringHashSet *set,
                                              flo_html_Arena *perm) {
@@ -45,9 +45,9 @@ flo_html_index_id getCreatedPropIDFromString(const PropertyType propertyType,
     return result.entryIndex;
 }
 
-void flo_html_addPropertyToNode(const flo_html_node_id nodeID,
-                                const flo_html_String key,
-                                const flo_html_String value, flo_html_Dom *dom,
+void flo_html_addPropertyToNode(flo_html_node_id nodeID,
+                                flo_html_String key,
+                                flo_html_String value, flo_html_Dom *dom,
                                 flo_html_Arena *perm) {
     flo_html_index_id keyID = getCreatedPropIDFromString(
         PROPERTY_TYPE_KEY, key, dom, &dom->propKeys, perm);
@@ -59,8 +59,8 @@ void flo_html_addPropertyToNode(const flo_html_node_id nodeID,
         .nodeID = nodeID, .keyID = keyID, .valueID = valueID};
 }
 
-void flo_html_addBooleanPropertyToNode(const flo_html_node_id nodeID,
-                                       const flo_html_String boolProp,
+void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
+                                       flo_html_String boolProp,
                                        flo_html_Dom *dom,
                                        flo_html_Arena *perm) {
     flo_html_index_id boolPropID = getCreatedPropIDFromString(
@@ -70,9 +70,9 @@ void flo_html_addBooleanPropertyToNode(const flo_html_node_id nodeID,
         (flo_html_BooleanProperty){.nodeID = nodeID, .propID = boolPropID};
 }
 
-bool flo_html_setPropertyValue(const flo_html_node_id nodeID,
-                               const flo_html_String key,
-                               const flo_html_String newValue,
+bool flo_html_setPropertyValue(flo_html_node_id nodeID,
+                               flo_html_String key,
+                               flo_html_String newValue,
                                flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_index_id keyID =
         flo_html_containsStringHashSet(&dom->propKeys, key).entryIndex;
@@ -93,8 +93,8 @@ bool flo_html_setPropertyValue(const flo_html_node_id nodeID,
     return true;
 }
 
-void flo_html_setTextContent(const flo_html_node_id nodeID,
-                             const flo_html_String text, flo_html_Dom *dom,
+void flo_html_setTextContent(flo_html_node_id nodeID,
+                             flo_html_String text, flo_html_Dom *dom,
                              flo_html_Arena *perm) {
     flo_html_removeChildren(nodeID, dom);
 
@@ -107,7 +107,7 @@ void flo_html_setTextContent(const flo_html_node_id nodeID,
 }
 
 void flo_html_addTextToTextNode(flo_html_node_id nodeID,
-                                const flo_html_String text, flo_html_Dom *dom,
+                                flo_html_String text, flo_html_Dom *dom,
                                 bool isAppend, flo_html_Arena *perm) {
     flo_html_String prevText = dom->nodes.buf[nodeID].text;
     ptrdiff_t mergedLen =
@@ -128,9 +128,9 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID,
     dom->nodes.buf[nodeID].text = FLO_HTML_S_LEN(newText, mergedLen);
 }
 
-void flo_html_setTagOnDocumentNode(const flo_html_String tag,
-                                   const flo_html_node_id nodeID,
-                                   const bool isPaired, flo_html_Dom *dom,
+void flo_html_setTagOnDocumentNode(flo_html_String tag,
+                                   flo_html_node_id nodeID,
+                                   bool isPaired, flo_html_Dom *dom,
                                    flo_html_Arena *perm) {
     // TODO: make string hash support insert with getting entry back and whether
     // or not it was inserted.

@@ -6,8 +6,8 @@
 #include "comparison-test.h"
 #include "test.h"
 
-ComparisonTest initComparisonTest(const flo_html_String startFileLocation,
-                                  const flo_html_String expectedFileLocation,
+ComparisonTest initComparisonTest(flo_html_String startFileLocation,
+                                  flo_html_String expectedFileLocation,
                                   flo_html_Arena *perm) {
     ComparisonTest test = {0};
     test.actual = flo_html_createDomFromFile(startFileLocation, perm);
@@ -27,7 +27,7 @@ ComparisonTest initComparisonTest(const flo_html_String startFileLocation,
     return test;
 }
 
-TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
+TestStatus getNodeFromQuerySelector(flo_html_String cssQuery,
                                     ComparisonTest *comparisonTest,
                                     flo_html_node_id *foundNode,
                                     flo_html_Arena scratch) {
@@ -48,8 +48,8 @@ TestStatus getNodeFromQuerySelector(const flo_html_String cssQuery,
     return TEST_SUCCESS;
 }
 
-TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
-                                  const TestStatus failureStatus) {
+TestStatus failWithMessageAndCode(flo_html_String failureMessage,
+                                  TestStatus failureStatus) {
     printTestFailure();
     printTestDemarcation();
     printf("%.*s\n", FLO_HTML_S_P(failureMessage));
@@ -62,13 +62,13 @@ TestStatus failWithMessageAndCode(const flo_html_String failureMessage,
     return failureStatus;
 }
 
-TestStatus failWithMessage(const flo_html_String failureMessage) {
+TestStatus failWithMessage(flo_html_String failureMessage) {
     return failWithMessageAndCode(failureMessage, TEST_FAILURE);
 }
 
 TestStatus
 compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
-                          const flo_html_ComparisonStatus expectedStatus,
+                          flo_html_ComparisonStatus expectedStatus,
                           flo_html_Arena scratch) {
     TestStatus result = TEST_FAILURE;
 

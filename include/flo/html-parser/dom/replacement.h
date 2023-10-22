@@ -28,7 +28,7 @@ extern "C" {
  *          an error code otherwise).
  */
 flo_html_node_id flo_html_replaceWithDocumentNodeWithQuery(
-    const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
+    flo_html_String cssQuery, flo_html_DocumentNode *docNode,
     flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -47,8 +47,8 @@ flo_html_node_id flo_html_replaceWithDocumentNodeWithQuery(
  *          an error code otherwise).
  */
 flo_html_node_id
-flo_html_replaceWithTextNodeWithQuery(const flo_html_String cssQuery,
-                                      const flo_html_String text,
+flo_html_replaceWithTextNodeWithQuery(flo_html_String cssQuery,
+                                      flo_html_String text,
                                       flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -68,7 +68,7 @@ flo_html_replaceWithTextNodeWithQuery(const flo_html_String cssQuery,
  *          an error code otherwise).
  */
 flo_html_node_id flo_html_replaceWithHTMLFromStringWithQuery(
-    const flo_html_String cssQuery, const flo_html_String htmlString,
+    flo_html_String cssQuery, flo_html_String htmlString,
     flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -89,7 +89,7 @@ flo_html_node_id flo_html_replaceWithHTMLFromStringWithQuery(
  *          an error code otherwise).
  */
 flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
-    const flo_html_String cssQuery, const flo_html_String fileLocation,
+    flo_html_String cssQuery, flo_html_String fileLocation,
     flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -109,7 +109,7 @@ flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
  */
 flo_html_node_id
 flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
-                                 const flo_html_DocumentNode *docNode,
+                                 flo_html_DocumentNode *docNode,
                                  flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -128,7 +128,7 @@ flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
  *          an error code otherwise).
  */
 flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
-                                              const flo_html_String text,
+                                              flo_html_String text,
                                               flo_html_Dom *dom,
                                               flo_html_Arena *perm);
 
@@ -149,7 +149,7 @@ flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
  */
 flo_html_node_id
 flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
-                                   const flo_html_String htmlString,
+                                   flo_html_String htmlString,
                                    flo_html_Dom *dom, flo_html_Arena *perm);
 
 #ifdef __cplusplus

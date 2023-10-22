@@ -14,7 +14,7 @@ extern "C" {
 // http://www.cse.yorku.ca/~oz/hash.html
 // djb2 hash
 __attribute__((unused)) static size_t
-flo_html_hashString(const flo_html_String string) {
+flo_html_hashString(flo_html_String string) {
     size_t hash = 5381;
     for (ptrdiff_t i = 0; i < string.len; i++) {
         int c = (string.buf[i]);

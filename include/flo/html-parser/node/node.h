@@ -20,11 +20,11 @@ typedef enum {
     NODE_TYPE_NUM
 } flo_html_NodeType;
 
-static const flo_html_String nodeTypeStrings[NODE_TYPE_NUM] = {
+static flo_html_String nodeTypeStrings[NODE_TYPE_NUM] = {
     FLO_HTML_S("Root"), FLO_HTML_S("Document"), FLO_HTML_S("Text"),
     FLO_HTML_S("Removed"), FLO_HTML_S("Error")};
 
-__attribute__((unused)) static const flo_html_String
+__attribute__((unused)) static flo_html_String
 flo_html_nodeTypeToString(flo_html_NodeType type) {
     if (type >= 0 && type < NODE_TYPE_NUM) {
         return nodeTypeStrings[type];

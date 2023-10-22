@@ -42,7 +42,7 @@ void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom);
  * @param[in]   textStore       The text store.
  */
 void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
-                                    const flo_html_String boolProp,
+                                    flo_html_String boolProp,
                                     flo_html_Dom *dom);
 
 /**
@@ -58,7 +58,7 @@ void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
  * @param[in]   textStore       The text store.
  */
 void flo_html_removeProperty(flo_html_node_id nodeID,
-                             const flo_html_String keyProp, flo_html_Dom *dom);
+                             flo_html_String keyProp, flo_html_Dom *dom);
 
 #ifdef __cplusplus
 }

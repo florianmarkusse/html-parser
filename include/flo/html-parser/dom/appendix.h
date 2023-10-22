@@ -28,8 +28,8 @@ extern "C" {
  *          an error code otherwise).
  */
 flo_html_node_id
-flo_html_appendDocumentNodeWithQuery(const flo_html_String cssQuery,
-                                     const flo_html_DocumentNode *docNode,
+flo_html_appendDocumentNodeWithQuery(flo_html_String cssQuery,
+                                     flo_html_DocumentNode *docNode,
                                      flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -48,8 +48,8 @@ flo_html_appendDocumentNodeWithQuery(const flo_html_String cssQuery,
  *          an error code otherwise).
  */
 flo_html_node_id
-flo_html_appendTextNodeWithQuery(const flo_html_String cssQuery,
-                                 const flo_html_String text, flo_html_Dom *dom,
+flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
+                                 flo_html_String text, flo_html_Dom *dom,
                                  flo_html_Arena *perm);
 
 /**
@@ -68,8 +68,8 @@ flo_html_appendTextNodeWithQuery(const flo_html_String cssQuery,
  *          an error code otherwise).
  */
 flo_html_node_id
-flo_html_appendHTMLFromStringWithQuery(const flo_html_String cssQuery,
-                                       const flo_html_String htmlString,
+flo_html_appendHTMLFromStringWithQuery(flo_html_String cssQuery,
+                                       flo_html_String htmlString,
                                        flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -88,8 +88,8 @@ flo_html_appendHTMLFromStringWithQuery(const flo_html_String cssQuery,
  *          an error code otherwise).
  */
 flo_html_node_id
-flo_html_appendHTMLFromFileWithQuery(const flo_html_String cssQuery,
-                                     const flo_html_String fileLocation,
+flo_html_appendHTMLFromFileWithQuery(flo_html_String cssQuery,
+                                     flo_html_String fileLocation,
                                      flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -109,7 +109,7 @@ flo_html_appendHTMLFromFileWithQuery(const flo_html_String cssQuery,
  */
 flo_html_node_id
 flo_html_appendDocumentNode(flo_html_node_id parentID,
-                            const flo_html_DocumentNode *docNode,
+                            flo_html_DocumentNode *docNode,
                             flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -128,7 +128,7 @@ flo_html_appendDocumentNode(flo_html_node_id parentID,
  *          an error code otherwise).
  */
 flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
-                                         const flo_html_String text,
+                                         flo_html_String text,
                                          flo_html_Dom *dom,
                                          flo_html_Arena *perm);
 
@@ -148,7 +148,7 @@ flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
  *          an error code otherwise).
  */
 flo_html_node_id flo_html_appendHTMLFromString(flo_html_node_id parentID,
-                                               const flo_html_String htmlString,
+                                               flo_html_String htmlString,
                                                flo_html_Dom *dom,
                                                flo_html_Arena *perm);
 

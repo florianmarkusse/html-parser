@@ -7,7 +7,7 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/boolean-property.h"
 
-void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {
+void flo_html_removeNode(flo_html_node_id nodeID, flo_html_Dom *dom) {
     flo_html_removeChildren(nodeID, dom);
 
     flo_html_Node *node = &dom->nodes.buf[nodeID];
@@ -57,7 +57,7 @@ void flo_html_removeNode(const flo_html_node_id nodeID, flo_html_Dom *dom) {
 // TODO(florian): improve the speed
 // Either make it so we can just mark nodes as DELETED and then they wont show
 // up in query resuls or printing.
-void flo_html_removeChildren(const flo_html_node_id nodeID, flo_html_Dom *dom) {
+void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom) {
     flo_html_node_id childID = flo_html_getFirstChild(nodeID, dom);
     while (childID > 0) {
         flo_html_removeNode(childID, dom);
@@ -65,8 +65,8 @@ void flo_html_removeChildren(const flo_html_node_id nodeID, flo_html_Dom *dom) {
     }
 }
 
-void flo_html_removeBooleanProperty(const flo_html_node_id nodeID,
-                                    const flo_html_String boolProp,
+void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
+                                    flo_html_String boolProp,
                                     flo_html_Dom *dom) {
     flo_html_index_id boolPropID =
         flo_html_containsStringHashSet(&dom->boolPropsSet, boolProp).entryIndex;
@@ -80,8 +80,8 @@ void flo_html_removeBooleanProperty(const flo_html_node_id nodeID,
     }
 }
 
-void flo_html_removeProperty(const flo_html_node_id nodeID,
-                             const flo_html_String keyProp, flo_html_Dom *dom) {
+void flo_html_removeProperty(flo_html_node_id nodeID,
+                             flo_html_String keyProp, flo_html_Dom *dom) {
     flo_html_index_id keyPropID =
         flo_html_containsStringHashSet(&dom->propKeys, keyProp).entryIndex;
     if (keyPropID > 0) {

@@ -18,23 +18,23 @@ typedef enum {
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 typedef union {
-    const flo_html_String attribute;
+    flo_html_String attribute;
     struct {
-        const flo_html_String key;
-        const flo_html_String value;
+        flo_html_String key;
+        flo_html_String value;
     } __attribute__((aligned(16)));
 } StringUnion;
 
 typedef struct {
-    const char *fileLocation;
-    const char *cssQuery;
+    char *fileLocation;
+    char *cssQuery;
     StringUnion stringUnion;
-    const bool expectedResult;
-    const BoolFunctionType boolFunctionType;
-    const char *testName;
+    bool expectedResult;
+    BoolFunctionType boolFunctionType;
+    char *testName;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1,
      "section",
      {.attribute = FLO_HTML_S("a")},
@@ -85,13 +85,13 @@ static const TestFile testFiles[] = {
      "does not have property"},
 };
 
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(const flo_html_String fileLocation,
-                            const flo_html_String cssQuery,
-                            const StringUnion stringUnion,
-                            const BoolFunctionType boolFunctionType,
-                            const bool expectedResult, flo_html_Arena scratch) {
+static TestStatus testQuery(flo_html_String fileLocation,
+                            flo_html_String cssQuery,
+                            StringUnion stringUnion,
+                            BoolFunctionType boolFunctionType,
+                            bool expectedResult, flo_html_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",

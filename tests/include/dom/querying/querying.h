@@ -9,11 +9,11 @@ extern "C" {
 #include <stddef.h>
 
 typedef struct {
-    const char *fileLocation;
-    const flo_html_String cssQuery;
+    char *fileLocation;
+    flo_html_String cssQuery;
     flo_html_QueryStatus expectedStatus;
     ptrdiff_t expectedResult;
-    const char *testName;
+    char *testName;
 } TestFile;
 
 unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,

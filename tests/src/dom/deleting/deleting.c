@@ -38,14 +38,14 @@ typedef enum {
 } DeletionType;
 
 typedef struct {
-    const char *fileLocation1;
-    const char *fileLocation2;
-    const flo_html_String cssQuery;
-    const DeletionType deletionType;
-    const char *testName;
+    char *fileLocation1;
+    char *fileLocation2;
+    flo_html_String cssQuery;
+    DeletionType deletionType;
+    char *testName;
 } TestFile;
 
-static const TestFile testFiles[] = {
+static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, FLO_HTML_S("span[required] > p"),
      DELETE_NODE, "node without children and only child removal"},
     {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, FLO_HTML_S("!DOCTYPE"), DELETE_NODE,
@@ -70,12 +70,12 @@ static const TestFile testFiles[] = {
      DELETE_CHILDREN, "remove body's children"},
 };
 
-static const ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testDeletions(const flo_html_String fileLocation1,
-                                const flo_html_String fileLocation2,
-                                const flo_html_String cssQuery,
-                                const DeletionType deletionType,
+static TestStatus testDeletions(flo_html_String fileLocation1,
+                                flo_html_String fileLocation2,
+                                flo_html_String cssQuery,
+                                DeletionType deletionType,
                                 flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
