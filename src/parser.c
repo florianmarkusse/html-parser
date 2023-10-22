@@ -378,10 +378,12 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
                         parseResult.nodeID = prevNodeID;
                     } else {
                         // Rogue open tag -> Text node.
-                        parseResult = parseTextNode(
-                            html, currentPosition,
-                            nodeStack->stack[nodeStack->len - 1].tag, parsed,
-                            perm);
+                        flo_html_String parentTag =
+                            nodeStack->len > 0
+                                ? nodeStack->stack[nodeStack->len - 1].tag
+                                : FLO_HTML_EMPTY_STRING;
+                        parseResult = parseTextNode(html, currentPosition,
+                                                    parentTag, parsed, perm);
                         updateReferences(parseResult.nodeID, prevNodeID,
                                          nodeStack, parsed.dom, perm);
                     }
@@ -390,9 +392,11 @@ void flo_html_parse(const flo_html_String html, flo_html_ParsedHTML parsed,
         }
         // Text node.
         else {
-            parseResult = parseTextNode(
-                html, currentPosition, nodeStack->stack[nodeStack->len - 1].tag,
-                parsed, perm);
+            flo_html_String parentTag =
+                nodeStack->len > 0 ? nodeStack->stack[nodeStack->len - 1].tag
+                                   : FLO_HTML_EMPTY_STRING;
+            parseResult =
+                parseTextNode(html, currentPosition, parentTag, parsed, perm);
             updateReferences(parseResult.nodeID, prevNodeID, nodeStack,
                              parsed.dom, perm);
         }
