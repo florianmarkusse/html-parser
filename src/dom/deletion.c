@@ -69,8 +69,7 @@ void flo_html_removeBooleanProperty(const flo_html_node_id nodeID,
                                     const flo_html_String boolProp,
                                     flo_html_ParsedHTML parsed) {
     flo_html_index_id boolPropID =
-        flo_html_containsStringHashSet(&parsed.textStore->boolProps.set,
-                                       boolProp)
+        flo_html_containsStringHashSet(&parsed.textStore->boolProps, boolProp)
             .entryIndex;
     if (boolPropID > 0) {
         flo_html_BooleanProperty *prop =
@@ -86,7 +85,7 @@ void flo_html_removeProperty(const flo_html_node_id nodeID,
                              const flo_html_String keyProp,
                              flo_html_ParsedHTML parsed) {
     flo_html_index_id keyPropID =
-        flo_html_containsStringHashSet(&parsed.textStore->propKeys.set, keyProp)
+        flo_html_containsStringHashSet(&parsed.textStore->propKeys, keyProp)
             .entryIndex;
     if (keyPropID > 0) {
         flo_html_Property *prop =

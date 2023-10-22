@@ -162,7 +162,7 @@ void flo_html_printDomStatus(flo_html_ParsedHTML parsed) {
     for (ptrdiff_t i = 0; i < dom->tagRegistry.len; i++) {
         flo_html_TagRegistration tagRegistration = dom->tagRegistry.buf[i];
         const flo_html_String tag = flo_html_getStringFromHashSet(
-            &textStore->tags.set, &tagRegistration.hashElement);
+            &textStore->tags, &tagRegistration.hashElement);
         printf("tag ID: %-5td tag: %-20.*s isPaired: %d hash: %zu offset: %u\n",
                i, FLO_HTML_S_P(tag), tagRegistration.isPaired,
                tagRegistration.hashElement.hash,
@@ -171,13 +171,12 @@ void flo_html_printDomStatus(flo_html_ParsedHTML parsed) {
     printf("\n");
 
     printflo_html_BasicRegistry(FLO_HTML_S("bool props"),
-                                &dom->boolPropRegistry,
-                                &textStore->boolProps.set);
+                                &dom->boolPropRegistry, &textStore->boolProps);
     printflo_html_BasicRegistry(FLO_HTML_S("key props"), &dom->propKeyRegistry,
-                                &textStore->propKeys.set);
+                                &textStore->propKeys);
     printflo_html_BasicRegistry(FLO_HTML_S("value props"),
                                 &dom->propValueRegistry,
-                                &textStore->propValues.set);
+                                &textStore->propValues);
 
     printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolProps.len);

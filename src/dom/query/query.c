@@ -117,7 +117,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
 
             flo_html_index_id tagID =
                 flo_html_containsStringHashSet(
-                    &parsed.textStore->tags.set,
+                    &parsed.textStore->tags,
                     FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen))
                     .entryIndex;
             if (tagID == 0) {
@@ -172,8 +172,8 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                                                       ? FLO_HTML_S("class")
                                                       : FLO_HTML_S("id");
                 flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(
-                        &parsed.textStore->propKeys.set, keyBuffer)
+                    flo_html_containsStringHashSet(&parsed.textStore->propKeys,
+                                                   keyBuffer)
                         .entryIndex;
                 if (propKeyID == 0) {
                     FLO_HTML_PRINT_ERROR("PROP KEY ID 0");
@@ -182,7 +182,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
 
                 flo_html_index_id propValueID =
                     flo_html_containsStringHashSet(
-                        &parsed.textStore->propValues.set, token)
+                        &parsed.textStore->propValues, token)
                         .entryIndex;
                 if (propValueID == 0) {
                     FLO_HTML_PRINT_ERROR("PROP VALUE ID 0");
@@ -195,8 +195,8 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                 filtersLen++;
             } else if (ch == ']') {
                 flo_html_index_id boolPropID =
-                    flo_html_containsStringHashSet(
-                        &parsed.textStore->boolProps.set, token)
+                    flo_html_containsStringHashSet(&parsed.textStore->boolProps,
+                                                   token)
                         .entryIndex;
                 if (boolPropID == 0) {
                     FLO_HTML_PRINT_ERROR("BOOL PROP ID 0");
@@ -208,8 +208,8 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                 filtersLen++;
             } else if (ch == '=') {
                 flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(
-                        &parsed.textStore->propKeys.set, token)
+                    flo_html_containsStringHashSet(&parsed.textStore->propKeys,
+                                                   token)
                         .entryIndex;
                 if (propKeyID == 0) {
                     FLO_HTML_PRINT_ERROR("IN = PROPKEY 0");
@@ -228,7 +228,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
 
                 flo_html_index_id propValueID =
                     flo_html_containsStringHashSet(
-                        &parsed.textStore->propValues.set, propValue)
+                        &parsed.textStore->propValues, propValue)
                         .entryIndex;
                 if (propValueID == 0) {
                     FLO_HTML_PRINT_ERROR("IN = PROPVALUE 0");

@@ -37,7 +37,7 @@ const flo_html_String flo_html_getTag(const flo_html_index_id tagID,
                                       flo_html_ParsedHTML parsed) {
     flo_html_TagRegistration *tagRegistration =
         &parsed.dom->tagRegistry.buf[tagID];
-    return flo_html_getStringFromHashSet(&parsed.textStore->tags.set,
+    return flo_html_getStringFromHashSet(&parsed.textStore->tags,
                                          &tagRegistration->hashElement);
 }
 
@@ -45,7 +45,7 @@ const flo_html_String flo_html_getTag(const flo_html_index_id tagID,
 const flo_html_String flo_html_getBoolProp(const flo_html_index_id boolPropID,
                                            flo_html_ParsedHTML parsed) {
     return flo_html_getStringFromHashSet(
-        &parsed.textStore->boolProps.set,
+        &parsed.textStore->boolProps,
         &parsed.dom->boolPropRegistry.buf[boolPropID]);
 }
 
@@ -53,7 +53,7 @@ const flo_html_String flo_html_getBoolProp(const flo_html_index_id boolPropID,
 const flo_html_String flo_html_getPropKey(const flo_html_index_id propKeyID,
                                           flo_html_ParsedHTML parsed) {
     return flo_html_getStringFromHashSet(
-        &parsed.textStore->propKeys.set,
+        &parsed.textStore->propKeys,
         &parsed.dom->propKeyRegistry.buf[propKeyID]);
 }
 
@@ -61,7 +61,7 @@ const flo_html_String flo_html_getPropKey(const flo_html_index_id propKeyID,
 const flo_html_String flo_html_getPropValue(const flo_html_index_id propValueID,
                                             flo_html_ParsedHTML parsed) {
     return flo_html_getStringFromHashSet(
-        &parsed.textStore->propValues.set,
+        &parsed.textStore->propValues,
         &parsed.dom->propValueRegistry.buf[propValueID]);
 }
 

@@ -206,9 +206,9 @@ bool tagStringEquals(const flo_html_TagRegistration *tagRegistration1,
                      const flo_html_TagRegistration *tagRegistration2,
                      const flo_html_TextStore *textStore2) {
     const flo_html_String string1 = flo_html_getStringFromHashSet(
-        &textStore1->tags.set, &tagRegistration1->hashElement);
+        &textStore1->tags, &tagRegistration1->hashElement);
     const flo_html_String string2 = flo_html_getStringFromHashSet(
-        &textStore2->tags.set, &tagRegistration2->hashElement);
+        &textStore2->tags, &tagRegistration2->hashElement);
     return flo_html_stringEquals(string1, string2);
 }
 
@@ -262,11 +262,9 @@ flo_html_ComparisonStatus compareTags(const flo_html_Node node1,
                 }
 
                 const flo_html_String tag1 = flo_html_getStringFromHashSet(
-                    &parsed1.textStore->tags.set,
-                    &tagRegistration1->hashElement);
+                    &parsed1.textStore->tags, &tagRegistration1->hashElement);
                 const flo_html_String tag2 = flo_html_getStringFromHashSet(
-                    &parsed2.textStore->tags.set,
-                    &tagRegistration2->hashElement);
+                    &parsed2.textStore->tags, &tagRegistration2->hashElement);
                 FLO_HTML_PRINT_ERROR(
                     "Uncomparable nodes: single node and paired node.\nFound "
                     "single node in node %c.\n"
