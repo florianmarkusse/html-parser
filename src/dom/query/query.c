@@ -393,28 +393,6 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
     return QUERY_SUCCESS;
 }
 
-flo_html_QueryStatus flo_html_getElementsByClassName(
-    flo_html_String className, flo_html_ParsedHTML parsed,
-    flo_html_node_id_a *results, flo_html_Arena *perm) {
-    ptrdiff_t cssLen = className.len + 1;
-    // TODO: VLA :(
-    unsigned char cssBuffer[cssLen];
-    flo_html_String css;
-    css.buf = cssBuffer;
-
-    css.buf[0] = '.';
-    memcpy(css.buf, className.buf, className.len);
-
-    return flo_html_querySelectorAll(css, parsed, results, perm);
-}
-
-flo_html_QueryStatus flo_html_getElementsByTagName(flo_html_String tag,
-                                                   flo_html_ParsedHTML parsed,
-                                                   flo_html_node_id_a *results,
-                                                   flo_html_Arena *perm) {
-    return flo_html_querySelectorAll(tag, parsed, results, perm);
-}
-
 flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
                                             flo_html_ParsedHTML parsed,
                                             flo_html_node_id *result,
@@ -444,20 +422,4 @@ flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
     }
 
     return status;
-}
-
-flo_html_QueryStatus flo_html_getElementByID(flo_html_String id,
-                                             flo_html_ParsedHTML parsed,
-                                             flo_html_node_id *result,
-                                             flo_html_Arena scratch) {
-    ptrdiff_t cssLen = id.len + 1;
-    // TODO: VLA :(
-    unsigned char cssBuffer[cssLen];
-    flo_html_String css;
-    css.buf = cssBuffer;
-
-    css.buf[0] = '.';
-    memcpy(css.buf, id.buf, id.len);
-
-    return flo_html_querySelector(css, parsed, result, scratch);
 }
