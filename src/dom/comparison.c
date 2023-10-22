@@ -39,12 +39,11 @@ void printAttributes(const flo_html_index_id tagID1,
         "Printing certain attributes of node 1 with tag %.*s:\n",
         FLO_HTML_S_P(tag1));
 
-    flo_html_StringHashSetIterator iterator;
-    flo_html_initStringHashSetIterator(&iterator, set1);
-
-    while (flo_html_hasNextStringHashSetIterator(&iterator)) {
-        const flo_html_String attribute =
-            flo_html_nextStringHashSetIterator(&iterator);
+    flo_html_StringHashSetIterator iterator =
+        (flo_html_StringHashSetIterator){.set = set1, .index = 0};
+    flo_html_String attribute;
+    while ((attribute = flo_html_nextStringHashSetIterator(&iterator)).len !=
+           0) {
         FLO_HTML_PRINT_ERROR("%.*s\n", FLO_HTML_S_P(attribute));
     }
 
@@ -53,11 +52,9 @@ void printAttributes(const flo_html_index_id tagID1,
         "Printing certain attributes of node 2 with tag %.*s:\n",
         FLO_HTML_S_P(tag2));
 
-    flo_html_initStringHashSetIterator(&iterator, set2);
-
-    while (flo_html_hasNextStringHashSetIterator(&iterator)) {
-        const flo_html_String attribute =
-            flo_html_nextStringHashSetIterator(&iterator);
+    iterator = (flo_html_StringHashSetIterator){.set = set2, .index = 0};
+    while ((attribute = flo_html_nextStringHashSetIterator(&iterator)).len !=
+           0) {
         FLO_HTML_PRINT_ERROR("%.*s\n", FLO_HTML_S_P(attribute));
     }
 }

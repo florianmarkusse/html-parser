@@ -6,12 +6,11 @@
 void printflo_html_StringRegistryStatus(
     const flo_html_StringRegistry *newElements) {
     printf("hash set contents...\n");
-    flo_html_StringHashSetIterator iterator;
-    flo_html_initStringHashSetIterator(&iterator, &newElements->set);
+    flo_html_StringHashSetIterator iterator =
+        (flo_html_StringHashSetIterator){.set = &newElements->set, .index = 0};
 
-    while (flo_html_hasNextStringHashSetIterator(&iterator)) {
-        const flo_html_String string =
-            flo_html_nextStringHashSetIterator(&iterator);
+    flo_html_String string;
+    while ((string = flo_html_nextStringHashSetIterator(&iterator)).len != 0) {
         printf("%.*s\n", FLO_HTML_S_P(string));
     }
 }

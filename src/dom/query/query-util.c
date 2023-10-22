@@ -103,10 +103,10 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
     flo_html_Uint16HashSet filteredAdjacents =
         flo_html_initUint16HashSet(set->arrayLen, perm);
     flo_html_Uint16HashSetIterator iterator =
-        flo_html_initUint16HashSetIterator(set);
+        (flo_html_Uint16HashSetIterator){.set = set, .index = 0};
 
-    while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
-        flo_html_node_id inSet = flo_html_nextUint16HashSetIterator(&iterator);
+    flo_html_node_id inSet;
+    while ((inSet = flo_html_nextUint16HashSetIterator(&iterator)) != 0) {
         flo_html_node_id nextNodeID = flo_html_getNext(inSet, dom);
         ptrdiff_t siblingsNumberCopy = numberOfSiblings;
 

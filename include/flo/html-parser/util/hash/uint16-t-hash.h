@@ -53,16 +53,10 @@ typedef struct {
     ptrdiff_t index;
 } flo_html_Uint16HashSetIterator;
 
-flo_html_Uint16HashSetIterator
-flo_html_initUint16HashSetIterator(const flo_html_Uint16HashSet *set);
-
 uint16_t
 flo_html_nextUint16HashSetIterator(flo_html_Uint16HashSetIterator *iterator);
 
 bool flo_html_hasNextUint16HashSetIterator(
-    flo_html_Uint16HashSetIterator *iterator);
-
-void flo_html_resetUint16HashSetIterator(
     flo_html_Uint16HashSetIterator *iterator);
 
 #ifdef __cplusplus

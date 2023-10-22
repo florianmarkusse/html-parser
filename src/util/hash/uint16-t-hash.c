@@ -151,11 +151,6 @@ void flo_html_resetUint16HashSet(flo_html_Uint16HashSet *set) {
     set->entries = 0;
 }
 
-flo_html_Uint16HashSetIterator
-flo_html_initUint16HashSetIterator(const flo_html_Uint16HashSet *set) {
-    return (flo_html_Uint16HashSetIterator){.set = set, .index = 0};
-}
-
 uint16_t
 flo_html_nextUint16HashSetIterator(flo_html_Uint16HashSetIterator *iterator) {
     const flo_html_Uint16HashSet *set = iterator->set;
@@ -182,9 +177,4 @@ bool flo_html_hasNextUint16HashSetIterator(
         iterator->index++;
     }
     return false;
-}
-
-void flo_html_resetUint16HashSetIterator(
-    flo_html_Uint16HashSetIterator *iterator) {
-    iterator->index = 0;
 }

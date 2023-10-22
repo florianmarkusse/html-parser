@@ -6,7 +6,7 @@
 #include "flo/html-parser/util/hash/string-hash.h"
 #include "flo/html-parser/util/memory.h"
 
-#define MAX_CAPACITY ((1U << 18U) - 1) // Maximum capacity for uint16_t
+#define MAX_CAPACITY ((1U << 18U) - 1)
 
 #define MAX_PROBES (1U << 4U)
 
@@ -17,27 +17,6 @@ flo_html_StringHashSet flo_html_initStringHashSet(const ptrdiff_t capacity,
         .entries = 0,
         .array = FLO_HTML_NEW(perm, flo_html_StringHashEntry, capacity,
                               FLO_HTML_ZERO_MEMORY)};
-}
-
-// Sets the flo_html_index_id that is used in the DOM, starting at 1 because
-// then 0 can be used as an error/init value.
-// TODO: Add a way to grow dynamically here !!!
-ptrdiff_t flo_html_insertStringAtHash(flo_html_StringHashSet *set,
-                                      const flo_html_String string,
-                                      const flo_html_HashElement *hashElement) {
-    if (set->entries >= set->arrayLen) {
-        FLO_HTML_PRINT_ERROR("String hash set is at full capacity!\n");
-        return 0;
-    }
-
-    set->entries++;
-
-    const size_t arrayIndex =
-        (hashElement->hash + hashElement->offset) % set->arrayLen;
-    set->array[arrayIndex].string = string;
-    set->array[arrayIndex].contains.hashElement = *hashElement;
-    set->array[arrayIndex].contains.entryIndex = set->entries;
-    return set->entries;
 }
 
 ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
@@ -165,36 +144,24 @@ flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
         return HASH_COMPARISON_DIFFERENT_SIZES;
     }
 
-    flo_html_StringHashSetIterator iterator;
-    flo_html_initStringHashSetIterator(&iterator, set1);
+    flo_html_String element;
 
-    while (flo_html_hasNextStringHashSetIterator(&iterator)) {
-        const flo_html_String element =
-            flo_html_nextStringHashSetIterator(&iterator);
+    flo_html_StringHashSetIterator iterator =
+        (flo_html_StringHashSetIterator){.set = set1, .index = 0};
+    while ((element = flo_html_nextStringHashSetIterator(&iterator)).len != 0) {
         if (!flo_html_containsStringHashSet(set2, element).entryIndex) {
             return HASH_COMPARISON_DIFFERENT_CONTENT;
         }
     }
 
-    flo_html_initStringHashSetIterator(&iterator, set2);
-
-    while (flo_html_hasNextStringHashSetIterator(&iterator)) {
-        const flo_html_String element =
-            flo_html_nextStringHashSetIterator(&iterator);
+    iterator = (flo_html_StringHashSetIterator){.set = set2, .index = 0};
+    while ((element = flo_html_nextStringHashSetIterator(&iterator)).len != 0) {
         if (!flo_html_containsStringHashSet(set1, element).entryIndex) {
             return HASH_COMPARISON_DIFFERENT_CONTENT;
         }
     }
 
     return HASH_COMPARISON_SUCCESS;
-}
-
-// TODO: fix this weird iterator stuff.
-void flo_html_initStringHashSetIterator(
-    flo_html_StringHashSetIterator *iterator,
-    const flo_html_StringHashSet *set) {
-    iterator->set = set;
-    iterator->index = 0;
 }
 
 const flo_html_String
@@ -221,10 +188,4 @@ bool flo_html_hasNextStringHashSetIterator(
         iterator->index++;
     }
     return false;
-}
-
-// TODO: probably just remove this right?
-void flo_html_resetStringHashSetIterator(
-    flo_html_StringHashSetIterator *iterator) {
-    iterator->index = 0;
 }

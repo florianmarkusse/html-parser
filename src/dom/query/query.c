@@ -361,12 +361,12 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
             }
 
             flo_html_Uint16HashSetIterator iterator =
-                flo_html_initUint16HashSetIterator(&set);
-            while (flo_html_hasNextUint16HashSetIterator(&iterator)) {
-                if (!flo_html_insertUint16HashSet(
-                        &resultsSet,
-                        flo_html_nextUint16HashSetIterator(&iterator),
-                        &scratch)) {
+                (flo_html_Uint16HashSetIterator){.set = &set, .index = 0};
+            flo_html_node_id nodeIDResult;
+            while ((nodeIDResult =
+                        flo_html_nextUint16HashSetIterator(&iterator)) != 0) {
+                if (!flo_html_insertUint16HashSet(&resultsSet, nodeIDResult,
+                                                  &scratch)) {
                     FLO_HTML_PRINT_ERROR(
                         "Failed to save intermediate results!\n");
 

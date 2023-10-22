@@ -45,10 +45,6 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                        const flo_html_String string,
                                        flo_html_Arena *perm);
 
-ptrdiff_t flo_html_insertStringAtHash(flo_html_StringHashSet *set,
-                                      const flo_html_String string,
-                                      const flo_html_HashElement *hashElement);
-
 flo_html_Contains
 flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
                                const flo_html_String string);
@@ -66,17 +62,10 @@ typedef struct {
     ptrdiff_t index;
 } flo_html_StringHashSetIterator;
 
-void flo_html_initStringHashSetIterator(
-    flo_html_StringHashSetIterator *iterator,
-    const flo_html_StringHashSet *set);
-
 const flo_html_String
 flo_html_nextStringHashSetIterator(flo_html_StringHashSetIterator *iterator);
 
 bool flo_html_hasNextStringHashSetIterator(
-    flo_html_StringHashSetIterator *iterator);
-
-void flo_html_resetStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator);
 
 #ifdef __cplusplus
