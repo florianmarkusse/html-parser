@@ -115,8 +115,7 @@ flo_html_node_id flo_html_appendTextNode(const flo_html_node_id parentID,
     flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
     if (child > 0) {
         child = flo_html_getLastNext(child, dom);
-        if (flo_html_tryMerge(&dom->nodes.buf[child],
-                              &dom->nodes.buf[newNodeID], dom, true, perm)) {
+        if (flo_html_tryMerge(child, newNodeID, dom, true, perm)) {
             flo_html_removeNode(newNodeID, dom);
             return child;
         }
@@ -143,8 +142,8 @@ flo_html_node_id flo_html_appendHTMLFromString(const flo_html_node_id parentID,
             if (firstAddedNode->nodeType == NODE_TYPE_TEXT) {
                 flo_html_node_id lastNext =
                     flo_html_getLastNext(firstChild, dom);
-                if (flo_html_tryMerge(&dom->nodes.buf[lastNext], firstAddedNode,
-                                      dom, true, perm)) {
+                if (flo_html_tryMerge(lastNext, firstAddedNode->nodeID, dom,
+                                      true, perm)) {
                     ptrdiff_t secondNewAddedNode =
                         flo_html_getNext(firstNewAddedNodeID, dom);
                     flo_html_removeNode(firstNewAddedNodeID, dom);
@@ -157,8 +156,8 @@ flo_html_node_id flo_html_appendHTMLFromString(const flo_html_node_id parentID,
             if (firstAddedNode->nodeType == NODE_TYPE_TEXT) {
                 flo_html_node_id lastNext =
                     flo_html_getLastNext(firstChild, dom);
-                if (flo_html_tryMerge(&dom->nodes.buf[lastNext], firstAddedNode,
-                                      dom, true, perm)) {
+                if (flo_html_tryMerge(lastNext, firstAddedNode->nodeID, dom,
+                                      true, perm)) {
                     flo_html_removeNode(firstNewAddedNodeID, dom);
                     return lastNext;
                 }

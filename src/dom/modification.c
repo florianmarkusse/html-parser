@@ -106,11 +106,10 @@ void flo_html_setTextContent(const flo_html_node_id nodeID,
         (flo_html_ParentChild){.parentID = nodeID, .childID = newNodeID};
 }
 
-// TODO: why does this get a Node pointer? just poss a node ID lol.
-void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,
-                                flo_html_Dom *dom, bool isAppend,
-                                flo_html_Arena *perm) {
-    flo_html_String prevText = node->text;
+void flo_html_addTextToTextNode(flo_html_node_id nodeID,
+                                const flo_html_String text, flo_html_Dom *dom,
+                                bool isAppend, flo_html_Arena *perm) {
+    flo_html_String prevText = dom->nodes.buf[nodeID].text;
     ptrdiff_t mergedLen =
         prevText.len + text.len + 1; // Adding a whitespace in between.
 
@@ -126,7 +125,7 @@ void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,
         memcpy(newText + text.len + 1, prevText.buf, prevText.len);
     }
 
-    dom->nodes.buf[node->nodeID].text = FLO_HTML_S_LEN(newText, mergedLen);
+    dom->nodes.buf[nodeID].text = FLO_HTML_S_LEN(newText, mergedLen);
 }
 
 void flo_html_setTagOnDocumentNode(const flo_html_String tag,

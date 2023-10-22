@@ -135,8 +135,8 @@ bool tryMergeBothSides(const flo_html_node_id toReplaceNodeID,
             flo_html_getPreviousNode(toReplaceNodeID, dom);
         if (previousNode != NULL) {
             bool isMerged =
-                flo_html_tryMerge(&dom->nodes.buf[previousNode->currentNodeID],
-                                  replacingNode, dom, true, perm);
+                flo_html_tryMerge(previousNode->currentNodeID,
+                                  replacingNode->nodeID, dom, true, perm);
             if (isMerged) {
                 return isMerged;
             }
@@ -145,8 +145,8 @@ bool tryMergeBothSides(const flo_html_node_id toReplaceNodeID,
         flo_html_NextNode *nextNode =
             flo_html_getNextNode(toReplaceNodeID, dom);
         if (nextNode != NULL) {
-            return flo_html_tryMerge(&dom->nodes.buf[nextNode->nextNodeID],
-                                     replacingNode, dom, false, perm);
+            return flo_html_tryMerge(nextNode->nextNodeID,
+                                     replacingNode->nodeID, dom, false, perm);
         }
     }
 
@@ -186,9 +186,9 @@ flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
         flo_html_Node *firstAddedNode = &dom->nodes.buf[firstNewAddedNode];
         if (firstAddedNode->nodeType == NODE_TYPE_TEXT) {
             if (previousNode != NULL) {
-                if (flo_html_tryMerge(
-                        &dom->nodes.buf[previousNode->currentNodeID],
-                        firstAddedNode, dom, true, perm)) {
+                if (flo_html_tryMerge(previousNode->currentNodeID,
+                                      firstAddedNode->nodeID, dom, true,
+                                      perm)) {
                     ptrdiff_t secondNewAddedNode =
                         flo_html_getNext(firstNewAddedNode, dom);
 
@@ -203,9 +203,8 @@ flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
             flo_html_NextNode *nextNode =
                 flo_html_getNextNode(toReplaceNodeID, dom);
             if (nextNode != NULL) {
-                if (flo_html_tryMerge(&dom->nodes.buf[nextNode->nextNodeID],
-                                      &dom->nodes.buf[lastNextNode], dom, false,
-                                      perm)) {
+                if (flo_html_tryMerge(nextNode->nextNodeID, lastNextNode, dom,
+                                      false, perm)) {
                     flo_html_removeNode(lastNextNode, dom);
                 }
             }

@@ -82,6 +82,7 @@ flo_html_alloc(flo_html_Arena *a, ptrdiff_t size, ptrdiff_t align,
     return flags & FLO_HTML_ZERO_MEMORY ? memset(a->end, 0, total) : a->end;
 }
 
+// TODO: Create macro?? Or devise solution to handle perm & scratch better.
 __attribute((unused)) static void *
 flo_html_copyToArena(flo_html_Arena *arena, void *data, ptrdiff_t size,
                      ptrdiff_t align, ptrdiff_t count) {

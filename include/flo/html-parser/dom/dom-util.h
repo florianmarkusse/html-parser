@@ -10,8 +10,8 @@ extern "C" {
 flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom, flo_html_Arena *perm);
 
-bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
-                       flo_html_Node *replacingNode, flo_html_Dom *dom,
+bool flo_html_tryMerge(flo_html_node_id possibleMergeNodeID,
+                       flo_html_node_id replacingNodeID, flo_html_Dom *dom,
                        bool isAppend, flo_html_Arena *perm);
 
 void flo_html_connectOtherNodesToParent(flo_html_node_id parentID,

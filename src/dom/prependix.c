@@ -118,8 +118,7 @@ flo_html_node_id flo_html_prependTextNode(const flo_html_node_id parentID,
 
     flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
     if (child > 0) {
-        if (flo_html_tryMerge(&dom->nodes.buf[child],
-                              &dom->nodes.buf[newNodeID], dom, false, perm)) {
+        if (flo_html_tryMerge(child, newNodeID, dom, false, perm)) {
             flo_html_removeNode(newNodeID, dom);
             return newNodeID;
         }
@@ -144,16 +143,16 @@ flo_html_prependHTMLFromString(const flo_html_node_id parentID,
         if (lastNextNode > firstNewAddedNode) {
             flo_html_Node *lastAddedNode = &dom->nodes.buf[lastNextNode];
             if (lastAddedNode->nodeType == NODE_TYPE_TEXT) {
-                if (flo_html_tryMerge(&dom->nodes.buf[firstChild],
-                                      lastAddedNode, dom, false, perm)) {
+                if (flo_html_tryMerge(firstChild, lastAddedNode->nodeID, dom,
+                                      false, perm)) {
                     flo_html_removeNode(lastNextNode, dom);
                 }
             }
         } else {
             flo_html_Node *onlyAddedNode = &dom->nodes.buf[firstNewAddedNode];
             if (onlyAddedNode->nodeType == NODE_TYPE_TEXT) {
-                if (flo_html_tryMerge(&dom->nodes.buf[firstChild],
-                                      onlyAddedNode, dom, false, perm)) {
+                if (flo_html_tryMerge(firstChild, onlyAddedNode->nodeID, dom,
+                                      false, perm)) {
                     flo_html_removeNode(firstNewAddedNode, dom);
                     return firstChild;
                 }

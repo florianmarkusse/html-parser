@@ -355,9 +355,6 @@ void flo_html_parse(const flo_html_String html, flo_html_Dom *dom,
                                      dom, perm);
 
                     if (parseResult.canHaveChildren) {
-                        // TODO: dynamic, but handle array growth of others
-                        // first.
-                        // TODO: scratch array here that can grow when too big?
                         if (nodeStack->len >= FLO_HTML_MAX_NODE_DEPTH) {
                             FLO_HTML_PRINT_ERROR("Reached max node depth\n");
                         }

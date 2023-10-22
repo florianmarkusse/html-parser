@@ -61,9 +61,6 @@ bool flo_html_filterNode(const flo_html_node_id nodeID,
     return true;
 }
 
-// flo_html_containsStringWithDataHashSet(set, string);
-
-// TODO: only the end result is required on the perm arena.
 bool flo_html_getNodesWithoutflo_html_Combinator(
     const flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     const ptrdiff_t filtersLen, const flo_html_Dom *dom,
@@ -79,19 +76,6 @@ bool flo_html_getNodesWithoutflo_html_Combinator(
     }
 
     return true;
-}
-
-// TODO(florian): not very nice way of doing this. Use a
-// hash or something.
-bool isPresentIn(const flo_html_node_id nodeID, const flo_html_node_id *array,
-                 const ptrdiff_t arrayLen) {
-    for (ptrdiff_t j = 0; j < arrayLen; j++) {
-        if (nodeID == array[j]) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 // TODO: only the end result is required on the perm arena.

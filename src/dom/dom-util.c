@@ -21,11 +21,12 @@ flo_html_node_id flo_html_createNode(const flo_html_NodeType nodeType,
     return node.nodeID;
 }
 
-bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
-                       flo_html_Node *replacingNode, flo_html_Dom *dom,
+bool flo_html_tryMerge(flo_html_node_id possibleMergeNodeID,
+                       flo_html_node_id replacingNodeID, flo_html_Dom *dom,
                        bool isAppend, flo_html_Arena *perm) {
-    if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
-        flo_html_addTextToTextNode(possibleMergeNode, replacingNode->text, dom,
+    if (dom->nodes.buf[possibleMergeNodeID].nodeType == NODE_TYPE_TEXT) {
+        flo_html_addTextToTextNode(possibleMergeNodeID,
+                                   dom->nodes.buf[replacingNodeID].text, dom,
                                    isAppend, perm);
         return true;
     }

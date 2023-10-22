@@ -105,9 +105,9 @@ void flo_html_setTextContent(flo_html_node_id nodeID,
  * @return  The status of the text addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,
-                                flo_html_Dom *dom, bool isAppend,
-                                flo_html_Arena *perm);
+void flo_html_addTextToTextNode(flo_html_node_id nodeID,
+                                const flo_html_String text, flo_html_Dom *dom,
+                                bool isAppend, flo_html_Arena *perm);
 
 /**
  * @brief Set the tag on a DocumentNode within the DOM.
