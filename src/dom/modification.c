@@ -20,12 +20,13 @@ getCreatedPropIDFromString(const PropertyType propertyType,
                            const flo_html_String prop, flo_html_Dom *dom,
                            flo_html_StringRegistry *stringRegistry,
                            flo_html_Arena *perm) {
+    // TODO: make string hash support insert with getting entry back and whether
+    // or not it was inserted.
     flo_html_ElementIndex result =
         flo_html_containsStringHashSet(&stringRegistry->set, prop);
     if (!result.entryIndex) {
-        result.entryIndex = flo_html_insertIntoPageWithHash(
-            prop, &stringRegistry->dataPage, &stringRegistry->set,
-            &result.hashElement);
+        result.entryIndex =
+            flo_html_insertStringHashSet(&stringRegistry->set, prop, perm);
 
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
@@ -141,12 +142,13 @@ void flo_html_setTagOnDocumentNode(const flo_html_String tag,
                                    const bool isPaired,
                                    flo_html_ParsedHTML parsed,
                                    flo_html_Arena *perm) {
+    // TODO: make string hash support insert with getting entry back and whether
+    // or not it was inserted.
     flo_html_ElementIndex result =
         flo_html_containsStringHashSet(&parsed.textStore->tags.set, tag);
     if (!result.entryIndex) {
-        result.entryIndex = flo_html_insertIntoPageWithHash(
-            tag, &parsed.textStore->tags.dataPage, &parsed.textStore->tags.set,
-            &result.hashElement);
+        result.entryIndex = flo_html_insertStringHashSet(
+            &parsed.textStore->tags.set, tag, perm);
         *FLO_HTML_PUSH(&parsed.dom->tagRegistry, perm) =
             (flo_html_TagRegistration){.hashElement = result.hashElement,
                                        .isPaired = isPaired};

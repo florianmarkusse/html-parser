@@ -35,7 +35,6 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/util/hash/string-hash.c"
     "src/type/element/elements.c"
     "src/type/element/elements-print.c"
-    "src/type/data/data-page.c"
     "src/dom/dom-util.c"
     "src/dom/dom.c"
     "src/dom/writing.c"

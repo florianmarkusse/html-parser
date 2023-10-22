@@ -9,21 +9,15 @@ extern "C" {
 #include <stdint.h>
 
 #include "flo/html-parser/definitions.h"
-#include "flo/html-parser/type/data/data-page.h"
 #include "flo/html-parser/util/hash/hash-element.h"
 #include "flo/html-parser/util/hash/string-hash.h"
 #include "flo/html-parser/util/memory.h"
 
 typedef struct {
-    flo_html_DataPage dataPage;
     flo_html_StringHashSet set;
 } flo_html_StringRegistry;
 
 typedef flo_html_Contains flo_html_ElementIndex;
-
-flo_html_StringRegistry flo_html_initStringRegistry(ptrdiff_t stringsCapacity,
-                                                    ptrdiff_t pageSize,
-                                                    flo_html_Arena *perm);
 
 typedef struct {
     flo_html_StringRegistry tags;

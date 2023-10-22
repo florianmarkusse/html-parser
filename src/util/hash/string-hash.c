@@ -48,11 +48,10 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
 
     while (set->array[(newStringHash + newStringProbes) % set->arrayLen]
                .string.buf != NULL) {
-        if (flo_html_stringEquals(
-                set->array[(newStringHash + newStringProbes) % set->arrayLen]
-                    .string,
-                string)) {
-            return true;
+        flo_html_StringHashEntry entry =
+            set->array[(newStringHash + newStringProbes) % set->arrayLen];
+        if (flo_html_stringEquals(entry.string, string)) {
+            return entry.contains.entryIndex;
         }
         if (newStringProbes < MAX_PROBES) {
             newStringProbes++;
@@ -121,10 +120,12 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
     set->entries++;
 
     ptrdiff_t finalIndex = (newStringHash + newStringProbes) % set->arrayLen;
-    set->array[finalIndex].string = string;
-    set->array[finalIndex].contains.entryIndex = set->entries;
-    set->array[finalIndex].contains.hashElement.hash = newStringHash;
-    set->array[finalIndex].contains.hashElement.offset = newStringProbes;
+    set->array[finalIndex] = (flo_html_StringHashEntry){
+        .string = string,
+        .contains = (flo_html_Contains){
+            .entryIndex = set->entries,
+            .hashElement = (flo_html_HashElement){.hash = newStringHash,
+                                                  .offset = newStringProbes}}};
 
     return set->entries;
 }
@@ -144,11 +145,9 @@ flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
         probes++;
     }
 
-    flo_html_Contains result;
-    result.hashElement.hash = hash;
-    result.hashElement.offset = probes;
-    result.entryIndex = 0;
-    return result;
+    return (flo_html_Contains){
+        .hashElement = (flo_html_HashElement){.hash = hash, .offset = probes},
+        .entryIndex = 0};
 }
 
 const flo_html_String
@@ -190,6 +189,7 @@ flo_html_equalsStringHashSet(const flo_html_StringHashSet *set1,
     return HASH_COMPARISON_SUCCESS;
 }
 
+// TODO: fix this weird iterator stuff.
 void flo_html_initStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator,
     const flo_html_StringHashSet *set) {
@@ -223,6 +223,7 @@ bool flo_html_hasNextStringHashSetIterator(
     return false;
 }
 
+// TODO: probably just remove this right?
 void flo_html_resetStringHashSetIterator(
     flo_html_StringHashSetIterator *iterator) {
     iterator->index = 0;
