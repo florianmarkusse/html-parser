@@ -15,10 +15,10 @@ extern "C" {
 
 typedef FLO_HTML_ARRAY(uint16_t) flo_html_uint16_t_a;
 
-// TODO: store offset as well wtd flo>?
 typedef struct {
     uint16_t value;
     uint16_t hash;
+    uint8_t probes;
 } flo_html_Uint16Entry;
 
 /**

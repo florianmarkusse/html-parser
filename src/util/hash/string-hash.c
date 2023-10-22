@@ -40,13 +40,32 @@ ptrdiff_t flo_html_insertStringAtHash(flo_html_StringHashSet *set,
     return set->entries;
 }
 
-// TODO: could improve this to check first if it contains before resizing???
 ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
                                        const flo_html_String string,
                                        flo_html_Arena *perm) {
-    size_t hash = flo_html_hashString(string);
+    size_t newStringHash = flo_html_hashString(string);
+    ptrdiff_t newStringProbes = 0;
 
+    while (set->array[(newStringHash + newStringProbes) % set->arrayLen]
+               .string.buf != NULL) {
+        if (flo_html_stringEquals(
+                set->array[(newStringHash + newStringProbes) % set->arrayLen]
+                    .string,
+                string)) {
+            return true;
+        }
+        if (newStringProbes < MAX_PROBES) {
+            newStringProbes++;
+        } else {
+            FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
+                                 MAX_PROBES);
+            return 0;
+        }
+    }
+
+    bool didResize = false;
     if (set->entries >= set->arrayLen * 0.7) {
+        didResize = true;
         // See if it makes sense to grow.
         if (set->arrayLen >= MAX_CAPACITY * 0.9) {
             FLO_HTML_PRINT_ERROR(
@@ -64,46 +83,48 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
 
         // Rehashing.
         for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
-            ptrdiff_t probes = 0;
             if (set->array[i].string.buf != NULL) {
-                ptrdiff_t newIndex =
-                    oldArray[i].contains.hashElement.hash % newCapacity;
-                while (set->array[newIndex].string.buf != NULL) {
+                ptrdiff_t probes = 0;
+                ptrdiff_t hash = oldArray[i].contains.hashElement.hash;
+                while (set->array[(hash + probes) % newCapacity].string.buf !=
+                       NULL) {
                     probes++;
-                    newIndex = (newIndex + probes) % newCapacity;
                 }
-                set->array[newIndex].string = oldArray[i].string;
-                set->array[newIndex].contains.entryIndex =
+                ptrdiff_t finalIndex = (hash + probes) % newCapacity;
+                set->array[finalIndex].string = oldArray[i].string;
+                set->array[finalIndex].contains.entryIndex =
                     oldArray[i].contains.entryIndex;
-                set->array[newIndex].contains.hashElement.hash = hash;
-                set->array[newIndex].contains.hashElement.offset = probes;
+                set->array[finalIndex].contains.hashElement.hash = hash;
+                set->array[finalIndex].contains.hashElement.offset = probes;
             }
         }
 
         set->arrayLen = newCapacity;
     }
 
-    ptrdiff_t index = hash % set->arrayLen;
-    ptrdiff_t probes = 0;
-    while (set->array[index].string.buf != NULL) {
-        if (probes > MAX_PROBES) {
-            FLO_HTML_PRINT_ERROR(
-                "Hash set maximum number of probes reached: %d!\n", MAX_PROBES);
-            return 0;
+    if (didResize) {
+        newStringProbes = 0;
+        while (set->array[(newStringHash + newStringProbes) % set->arrayLen]
+                   .string.buf != NULL) {
+            // Don't need to check for equality here since we already did that.
+            if (newStringProbes < MAX_PROBES) {
+                newStringProbes++;
+            } else {
+                FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
+                                     MAX_PROBES);
+                return 0;
+            }
         }
-        if (flo_html_stringEquals(set->array[index].string, string)) {
-            return set->array[index].contains.entryIndex;
-        }
-        probes++;
-        index = (index + probes) % set->arrayLen;
     }
 
+    // increment entries before setting the entry index - 0 used as not found.
     set->entries++;
 
-    set->array[index].string = string;
-    set->array[index].contains.entryIndex = set->entries;
-    set->array[index].contains.hashElement.hash = hash;
-    set->array[index].contains.hashElement.offset = probes;
+    ptrdiff_t finalIndex = (newStringHash + newStringProbes) % set->arrayLen;
+    set->array[finalIndex].string = string;
+    set->array[finalIndex].contains.entryIndex = set->entries;
+    set->array[finalIndex].contains.hashElement.hash = newStringHash;
+    set->array[finalIndex].contains.hashElement.offset = newStringProbes;
 
     return set->entries;
 }
@@ -111,25 +132,20 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
 flo_html_Contains
 flo_html_containsStringHashSet(const flo_html_StringHashSet *set,
                                const flo_html_String string) {
-    flo_html_Contains result;
-
     size_t hash = flo_html_hashString(string);
-    result.hashElement.hash = hash;
-
-    ptrdiff_t index = hash % set->arrayLen;
 
     ptrdiff_t probes = 0;
-    while (set->array[index].string.buf != NULL) {
-        flo_html_StringHashEntry entry = set->array[index];
+    while (set->array[(hash + probes) % set->arrayLen].string.buf != NULL) {
+        flo_html_StringHashEntry entry =
+            set->array[(hash + probes) % set->arrayLen];
         if (flo_html_stringEquals(entry.string, string)) {
-            result.hashElement.offset = probes;
-            result.entryIndex = entry.contains.entryIndex;
-            return result;
+            return entry.contains;
         }
         probes++;
-        index = (index + 1) % set->arrayLen;
     }
 
+    flo_html_Contains result;
+    result.hashElement.hash = hash;
     result.hashElement.offset = probes;
     result.entryIndex = 0;
     return result;

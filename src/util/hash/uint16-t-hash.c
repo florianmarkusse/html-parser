@@ -6,6 +6,8 @@
 
 #define MAX_CAPACITY ((1U << 16U) - 1) // Maximum capacity for uint16_t
 
+#define MAX_PROBES (1U << 4U)
+
 flo_html_Uint16HashSet flo_html_initUint16HashSet(const uint16_t capacity,
                                                   flo_html_Arena *perm) {
     return (flo_html_Uint16HashSet){
@@ -18,15 +20,22 @@ flo_html_Uint16HashSet flo_html_initUint16HashSet(const uint16_t capacity,
 
 bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
                                   const uint16_t id, flo_html_Arena *perm) {
-    uint16_t hash = flo_html_hash16_xm3(id); // Calculate the hash once
+    uint16_t newIntHash = flo_html_hash16_xm3(id); // Calculate the hash once
+    ptrdiff_t newIntProbes = 0;
 
-    ptrdiff_t index = hash % set->arrayLen;
-
-    while (set->array[index].value != 0) {
-        if (set->array[index].value == id) {
+    while (set->array[(newIntHash + newIntProbes) % set->arrayLen].value != 0) {
+        if (set->array[(newIntHash + newIntProbes) % set->arrayLen].value ==
+            id) {
             return true;
         }
-        index = (index + 1) % set->arrayLen;
+        if (newIntProbes < MAX_PROBES) {
+            newIntProbes++;
+        } else {
+            FLO_HTML_PRINT_ERROR(
+                "Maximum number of fdfjdkfdfjdkfkdjprobes %u reached!",
+                MAX_PROBES);
+            return false;
+        }
     }
 
     bool didResize = false;
@@ -49,13 +58,19 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
 
         // Rehashing.
         for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
-            if (set->array[i].value != 0) {
+            ptrdiff_t probes = 0;
+            ptrdiff_t hash = oldArray[i].hash;
+            if (set->array[(hash + probes) % newCapacity].value != 0) {
                 ptrdiff_t newIndex = oldArray[i].hash % newCapacity;
                 while (set->array[newIndex].value != 0) {
-                    newIndex = (newIndex + 1) % newCapacity;
+                    probes++;
                 }
-                set->array[newIndex].value = oldArray[i].value;
-                set->array[newIndex].hash = oldArray[i].hash;
+
+                ptrdiff_t finalIndex = (hash + probes) % newCapacity;
+
+                set->array[finalIndex].value = oldArray[i].value;
+                set->array[finalIndex].hash = oldArray[i].hash;
+                set->array[finalIndex].probes = probes;
             }
         }
 
@@ -63,17 +78,24 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
     }
 
     if (didResize) {
-        index = hash % set->arrayLen;
-        while (set->array[index].value != 0) {
-            if (set->array[index].value == id) {
-                break;
+        newIntProbes = 0;
+        while (set->array[(newIntHash + newIntProbes) % set->arrayLen].value !=
+               0) {
+            if (newIntProbes < MAX_PROBES) {
+                newIntProbes++;
+            } else {
+                FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
+                                     MAX_PROBES);
+                return false;
             }
-            index = (index + 1) % set->arrayLen;
         }
     }
 
-    set->array[index].value = id;
-    set->array[index].hash = hash;
+    ptrdiff_t finalIndex = (newIntHash + newIntProbes) % set->arrayLen;
+    set->array[finalIndex].value = id;
+    set->array[finalIndex].hash = newIntHash;
+    set->array[finalIndex].probes = newIntProbes;
+
     set->entries++;
 
     return true;
