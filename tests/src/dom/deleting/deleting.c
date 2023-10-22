@@ -90,11 +90,11 @@ static TestStatus testDeletions(const flo_html_String fileLocation1,
 
     switch (deletionType) {
     case DELETE_NODE: {
-        flo_html_removeNode(foundNode, comparisonTest.actual.dom);
+        flo_html_removeNode(foundNode, comparisonTest.actual);
         break;
     }
     case DELETE_CHILDREN: {
-        flo_html_removeChildren(foundNode, comparisonTest.actual.dom);
+        flo_html_removeChildren(foundNode, comparisonTest.actual);
         break;
     }
     default: {

@@ -29,30 +29,33 @@
         return appendFunction(parentNodeID, nodeData, parsed, perm);           \
     } while (0)
 
-flo_html_node_id flo_html_appendDocumentNodeWithQuery(
-    const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    APPEND_USING_QUERYSELECTOR(cssQuery, docNode, parsed, perm,
+flo_html_node_id
+flo_html_appendDocumentNodeWithQuery(const flo_html_String cssQuery,
+                                     const flo_html_DocumentNode *docNode,
+                                     flo_html_Dom *dom, flo_html_Arena *perm) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, perm,
                                flo_html_appendDocumentNode);
 }
 
-flo_html_node_id flo_html_appendTextNodeWithQuery(
-    const flo_html_String cssQuery, const flo_html_String text,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    APPEND_USING_QUERYSELECTOR(cssQuery, text, parsed, perm,
+flo_html_node_id
+flo_html_appendTextNodeWithQuery(const flo_html_String cssQuery,
+                                 const flo_html_String text, flo_html_Dom *dom,
+                                 flo_html_Arena *perm) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, perm,
                                flo_html_appendTextNode);
 }
 
 flo_html_node_id flo_html_appendHTMLFromStringWithQuery(
     const flo_html_String cssQuery, const flo_html_String htmlString,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, parsed, perm,
+    flo_html_Dom *dom, flo_html_Arena *perm) {
+    APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, perm,
                                flo_html_appendHTMLFromString);
 }
 
-flo_html_node_id flo_html_appendHTMLFromFileWithQuery(
-    const flo_html_String cssQuery, const flo_html_String fileLocation,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
+flo_html_node_id
+flo_html_appendHTMLFromFileWithQuery(const flo_html_String cssQuery,
+                                     const flo_html_String fileLocation,
+                                     flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_String content;
     flo_html_FileStatus fileStatus =
         flo_html_readFile(fileLocation, &content, perm);
@@ -63,7 +66,7 @@ flo_html_node_id flo_html_appendHTMLFromFileWithQuery(
         return FLO_HTML_ERROR_NODE_ID;
     }
 
-    APPEND_USING_QUERYSELECTOR(cssQuery, content, parsed, perm,
+    APPEND_USING_QUERYSELECTOR(cssQuery, content, dom, perm,
                                flo_html_appendHTMLFromString);
 }
 
@@ -96,26 +99,24 @@ static void updateReferences(const flo_html_node_id parentID,
 flo_html_node_id
 flo_html_appendDocumentNode(const flo_html_node_id parentID,
                             const flo_html_DocumentNode *docNode,
-                            flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
+                            flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
-        flo_html_parseDocumentElement(docNode, parsed, perm);
-    updateReferences(parentID, newNodeID, parsed.dom, perm);
+        flo_html_parseDocumentElement(docNode, dom, perm);
+    updateReferences(parentID, newNodeID, dom, perm);
     return newNodeID;
 }
 
 flo_html_node_id flo_html_appendTextNode(const flo_html_node_id parentID,
                                          const flo_html_String text,
-                                         flo_html_ParsedHTML parsed,
+                                         flo_html_Dom *dom,
                                          flo_html_Arena *perm) {
-    flo_html_Dom *dom = parsed.dom;
-
-    flo_html_node_id newNodeID = flo_html_parseTextElement(text, parsed, perm);
+    flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
 
     flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
     if (child > 0) {
         child = flo_html_getLastNext(child, dom);
         if (flo_html_tryMerge(&dom->nodes.buf[child],
-                              &dom->nodes.buf[newNodeID], parsed, true, perm)) {
+                              &dom->nodes.buf[newNodeID], dom, true, perm)) {
             flo_html_removeNode(newNodeID, dom);
             return child;
         }
@@ -127,12 +128,10 @@ flo_html_node_id flo_html_appendTextNode(const flo_html_node_id parentID,
 
 flo_html_node_id flo_html_appendHTMLFromString(const flo_html_node_id parentID,
                                                const flo_html_String htmlString,
-                                               flo_html_ParsedHTML parsed,
+                                               flo_html_Dom *dom,
                                                flo_html_Arena *perm) {
-    flo_html_Dom *dom = parsed.dom;
-
     flo_html_node_id firstNewAddedNodeID = dom->nodes.len;
-    flo_html_parseExtra(htmlString, parsed, perm);
+    flo_html_parseExtra(htmlString, dom, perm);
 
     flo_html_node_id firstChild = flo_html_getFirstChild(parentID, dom);
     if (firstChild > 0) {
@@ -145,7 +144,7 @@ flo_html_node_id flo_html_appendHTMLFromString(const flo_html_node_id parentID,
                 flo_html_node_id lastNext =
                     flo_html_getLastNext(firstChild, dom);
                 if (flo_html_tryMerge(&dom->nodes.buf[lastNext], firstAddedNode,
-                                      parsed, true, perm)) {
+                                      dom, true, perm)) {
                     ptrdiff_t secondNewAddedNode =
                         flo_html_getNext(firstNewAddedNodeID, dom);
                     flo_html_removeNode(firstNewAddedNodeID, dom);
@@ -159,7 +158,7 @@ flo_html_node_id flo_html_appendHTMLFromString(const flo_html_node_id parentID,
                 flo_html_node_id lastNext =
                     flo_html_getLastNext(firstChild, dom);
                 if (flo_html_tryMerge(&dom->nodes.buf[lastNext], firstAddedNode,
-                                      parsed, true, perm)) {
+                                      dom, true, perm)) {
                     flo_html_removeNode(firstNewAddedNodeID, dom);
                     return lastNext;
                 }

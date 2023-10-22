@@ -36,18 +36,17 @@ static TestStatus testQuery(const flo_html_String fileLocation,
                             const ArrayFunctionType functionType,
                             const ptrdiff_t expectedResult,
                             flo_html_Arena scratch) {
-    flo_html_ParsedHTML parsed;
-    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to created DOM & TextStore from file %.*s\n",
-            FLO_HTML_S_P(fileLocation));
+    flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
+    if (dom == NULL) {
+        FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",
+                             FLO_HTML_S_P(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
     TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
     flo_html_QueryStatus queryStatus =
-        flo_html_querySelector(cssQuery, parsed, &foundNode, scratch);
+        flo_html_querySelector(cssQuery, dom, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
         printTestFailure();
@@ -61,7 +60,7 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         switch (functionType) {
         case TEXT_CONTENT: {
             flo_html_String_d_a results =
-                flo_html_getTextContent(foundNode, parsed.dom, &scratch);
+                flo_html_getTextContent(foundNode, dom, &scratch);
             actualResult = results.len;
             break;
         }

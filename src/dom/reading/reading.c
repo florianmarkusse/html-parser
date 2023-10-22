@@ -9,18 +9,15 @@
 #include "flo/html-parser/util/memory.h"
 
 bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
-                          const flo_html_String boolProp,
-                          flo_html_ParsedHTML parsed) {
+                          const flo_html_String boolProp, flo_html_Dom *dom) {
     flo_html_index_id boolPropID =
-        flo_html_containsStringHashSet(&parsed.textStore->boolProps, boolProp)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->boolPropsSet, boolProp).entryIndex;
     if (boolPropID == 0) {
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->boolProps.len; i++) {
-        flo_html_BooleanProperty *booleanProperty =
-            &parsed.dom->boolProps.buf[i];
+    for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
+        flo_html_BooleanProperty *booleanProperty = &dom->boolProps.buf[i];
         if (booleanProperty->nodeID == nodeID &&
             booleanProperty->propID == boolPropID) {
             return true;
@@ -30,17 +27,15 @@ bool flo_html_hasBoolProp(const flo_html_node_id nodeID,
 }
 
 bool flo_html_hasPropKey(const flo_html_node_id nodeID,
-                         const flo_html_String propKey,
-                         flo_html_ParsedHTML parsed) {
+                         const flo_html_String propKey, flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
-        flo_html_containsStringHashSet(&parsed.textStore->propKeys, propKey)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
     if (propKeyID == 0) {
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
-        flo_html_Property *property = &parsed.dom->props.buf[i];
+    for (ptrdiff_t i = 0; i < dom->props.len; i++) {
+        flo_html_Property *property = &dom->props.buf[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
             return true;
         }
@@ -49,17 +44,15 @@ bool flo_html_hasPropKey(const flo_html_node_id nodeID,
 }
 
 bool flo_html_hasPropValue(const flo_html_node_id nodeID,
-                           const flo_html_String propValue,
-                           flo_html_ParsedHTML parsed) {
+                           const flo_html_String propValue, flo_html_Dom *dom) {
     flo_html_index_id propValueID =
-        flo_html_containsStringHashSet(&parsed.textStore->propValues, propValue)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->propValues, propValue).entryIndex;
     if (propValueID == 0) {
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
-        flo_html_Property *property = &parsed.dom->props.buf[i];
+    for (ptrdiff_t i = 0; i < dom->props.len; i++) {
+        flo_html_Property *property = &dom->props.buf[i];
         if (property->nodeID == nodeID && property->valueID == propValueID) {
             return true;
         }
@@ -69,24 +62,21 @@ bool flo_html_hasPropValue(const flo_html_node_id nodeID,
 
 bool flo_html_hasProperty(flo_html_node_id nodeID,
                           const flo_html_String propKey,
-                          const flo_html_String propValue,
-                          flo_html_ParsedHTML parsed) {
+                          const flo_html_String propValue, flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
-        flo_html_containsStringHashSet(&parsed.textStore->propKeys, propKey)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
     if (propKeyID == 0) {
         return false;
     }
 
     flo_html_index_id propValueID =
-        flo_html_containsStringHashSet(&parsed.textStore->propValues, propValue)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->propValues, propValue).entryIndex;
     if (propKeyID == 0) {
         return false;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
-        flo_html_Property *property = &parsed.dom->props.buf[i];
+    for (ptrdiff_t i = 0; i < dom->props.len; i++) {
+        flo_html_Property *property = &dom->props.buf[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID &&
             property->valueID == propValueID) {
             return true;
@@ -115,18 +105,17 @@ flo_html_String_d_a flo_html_getTextContent(const flo_html_node_id nodeID,
 
 const flo_html_String flo_html_getValue(const flo_html_node_id nodeID,
                                         const flo_html_String propKey,
-                                        flo_html_ParsedHTML parsed) {
+                                        flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
-        flo_html_containsStringHashSet(&parsed.textStore->propKeys, propKey)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
     if (propKeyID == 0) {
         return FLO_HTML_EMPTY_STRING;
     }
 
-    for (ptrdiff_t i = 0; i < parsed.dom->props.len; i++) {
-        flo_html_Property *property = &parsed.dom->props.buf[i];
+    for (ptrdiff_t i = 0; i < dom->props.len; i++) {
+        flo_html_Property *property = &dom->props.buf[i];
         if (property->nodeID == nodeID && property->keyID == propKeyID) {
-            return flo_html_getPropValue(property->valueID, parsed);
+            return flo_html_getPropValue(property->valueID, dom);
         }
     }
     return FLO_HTML_EMPTY_STRING;

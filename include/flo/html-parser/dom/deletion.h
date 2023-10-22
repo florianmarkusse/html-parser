@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/user.h"
 
 /**
  * @brief Remove a node from the DOM.
@@ -44,7 +43,7 @@ void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom);
  */
 void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
                                     const flo_html_String boolProp,
-                                    flo_html_ParsedHTML parsed);
+                                    flo_html_Dom *dom);
 
 /**
  * @brief Remove a property with a given key from a node in the DOM.
@@ -59,8 +58,7 @@ void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
  * @param[in]   textStore       The text store.
  */
 void flo_html_removeProperty(flo_html_node_id nodeID,
-                             const flo_html_String keyProp,
-                             flo_html_ParsedHTML parsed);
+                             const flo_html_String keyProp, flo_html_Dom *dom);
 
 #ifdef __cplusplus
 }

@@ -9,7 +9,6 @@ extern "C" {
 
 #include "flo/html-parser/definitions.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/user.h"
 #include "flo/html-parser/util/array.h"
 #include "query-status.h"
 
@@ -38,7 +37,7 @@ typedef FLO_HTML_ARRAY(uint16_t) flo_html_node_id_a;
  *          'results' when no longer needed.
  */
 flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String cssQuery,
-                                               flo_html_ParsedHTML parsed,
+                                               flo_html_Dom *dom,
                                                flo_html_node_id_a *results,
                                                flo_html_Arena *perm);
 
@@ -59,7 +58,7 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String cssQuery,
  *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
 flo_html_QueryStatus flo_html_querySelector(flo_html_String cssQuery,
-                                            flo_html_ParsedHTML parsed,
+                                            flo_html_Dom *dom,
                                             flo_html_node_id *result,
                                             flo_html_Arena scratch);
 

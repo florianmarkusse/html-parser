@@ -34,43 +34,39 @@ void flo_html_setNodeText(const flo_html_node_id nodeID,
 }
 
 const flo_html_String flo_html_getTag(const flo_html_index_id tagID,
-                                      flo_html_ParsedHTML parsed) {
-    flo_html_TagRegistration *tagRegistration =
-        &parsed.dom->tagRegistry.buf[tagID];
-    return flo_html_getStringFromHashSet(&parsed.textStore->tags,
+                                      flo_html_Dom *dom) {
+    flo_html_TagRegistration *tagRegistration = &dom->tagRegistry.buf[tagID];
+    return flo_html_getStringFromHashSet(&dom->tags,
                                          &tagRegistration->hashElement);
 }
 
 // TODO: get rid of these functions and use a single generic one
 const flo_html_String flo_html_getBoolProp(const flo_html_index_id boolPropID,
-                                           flo_html_ParsedHTML parsed) {
+                                           flo_html_Dom *dom) {
     return flo_html_getStringFromHashSet(
-        &parsed.textStore->boolProps,
-        &parsed.dom->boolPropRegistry.buf[boolPropID]);
+        &dom->boolPropsSet, &dom->boolPropRegistry.buf[boolPropID]);
 }
 
 // TODO: get rid of these functions and use a single generic one
 const flo_html_String flo_html_getPropKey(const flo_html_index_id propKeyID,
-                                          flo_html_ParsedHTML parsed) {
-    return flo_html_getStringFromHashSet(
-        &parsed.textStore->propKeys,
-        &parsed.dom->propKeyRegistry.buf[propKeyID]);
+                                          flo_html_Dom *dom) {
+    return flo_html_getStringFromHashSet(&dom->propKeys,
+                                         &dom->propKeyRegistry.buf[propKeyID]);
 }
 
 // TODO: get rid of these functions and use a single generic one
 const flo_html_String flo_html_getPropValue(const flo_html_index_id propValueID,
-                                            flo_html_ParsedHTML parsed) {
+                                            flo_html_Dom *dom) {
     return flo_html_getStringFromHashSet(
-        &parsed.textStore->propValues,
-        &parsed.dom->propValueRegistry.buf[propValueID]);
+        &dom->propValues, &dom->propValueRegistry.buf[propValueID]);
 }
 
 bool flo_html_tryMerge(flo_html_Node *possibleMergeNode,
-                       flo_html_Node *replacingNode, flo_html_ParsedHTML parsed,
+                       flo_html_Node *replacingNode, flo_html_Dom *dom,
                        bool isAppend, flo_html_Arena *perm) {
     if (possibleMergeNode->nodeType == NODE_TYPE_TEXT) {
-        flo_html_addTextToTextNode(possibleMergeNode, replacingNode->text,
-                                   parsed, isAppend, perm);
+        flo_html_addTextToTextNode(possibleMergeNode, replacingNode->text, dom,
+                                   isAppend, perm);
         return true;
     }
     return false;

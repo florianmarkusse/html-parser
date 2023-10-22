@@ -7,7 +7,6 @@ extern "C" {
 
 #include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/user.h"
 
 typedef struct {
     flo_html_ComparisonStatus status;
@@ -31,9 +30,8 @@ typedef struct {
  *          otherwise). See @ref
  *          "flo/html-parser/comparison-status.h#flo_html_ComparisonStatus".
  */
-flo_html_ComparisonResult flo_html_equals(flo_html_ParsedHTML parsed1,
-                                          flo_html_ParsedHTML parsed2,
-                                          flo_html_Arena scratch);
+flo_html_ComparisonResult
+flo_html_equals(flo_html_Dom *dom1, flo_html_Dom *dom2, flo_html_Arena scratch);
 
 /**
  * @brief Print the first difference between two nodes.
@@ -48,10 +46,8 @@ flo_html_ComparisonResult flo_html_equals(flo_html_ParsedHTML parsed1,
  * @param[in]   dom2                The second DOM structure to compare.
  * @param[in]   textStore2      The text store for the second DOM.
  */
-void flo_html_printFirstDifference(flo_html_node_id nodeID1,
-                                   flo_html_ParsedHTML parsed1,
-                                   flo_html_node_id nodeID2,
-                                   flo_html_ParsedHTML parsed2,
+void flo_html_printFirstDifference(flo_html_node_id nodeID1, flo_html_Dom *dom1,
+                                   flo_html_node_id nodeID2, flo_html_Dom *dom2,
                                    flo_html_Arena scratch);
 
 #ifdef __cplusplus

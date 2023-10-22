@@ -12,8 +12,7 @@
 #define TEST_1 CURRENT_DIR "test-1.html"
 
 bool parseFile(const flo_html_String fileLocation, flo_html_Arena scratch) {
-    flo_html_ParsedHTML parsed;
-    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
+    if (flo_html_createDomFromFile(fileLocation, &scratch) == NULL) {
         return false;
     }
 

@@ -92,18 +92,17 @@ static TestStatus testQuery(const flo_html_String fileLocation,
                             const StringUnion stringUnion,
                             const BoolFunctionType boolFunctionType,
                             const bool expectedResult, flo_html_Arena scratch) {
-    flo_html_ParsedHTML parsed;
-    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to created DOM & TextStore from file %.*s\n",
-            FLO_HTML_S_P(fileLocation));
+    flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
+    if (dom == NULL) {
+        FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",
+                             FLO_HTML_S_P(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
     TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
     flo_html_QueryStatus queryStatus =
-        flo_html_querySelector(cssQuery, parsed, &foundNode, scratch);
+        flo_html_querySelector(cssQuery, dom, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
         printTestFailure();
@@ -117,22 +116,22 @@ static TestStatus testQuery(const flo_html_String fileLocation,
         switch (boolFunctionType) {
         case HAS_BOOL_PROP: {
             actualResult =
-                flo_html_hasBoolProp(foundNode, stringUnion.attribute, parsed);
+                flo_html_hasBoolProp(foundNode, stringUnion.attribute, dom);
             break;
         }
         case HAS_PROP_KEY: {
             actualResult =
-                flo_html_hasPropKey(foundNode, stringUnion.attribute, parsed);
+                flo_html_hasPropKey(foundNode, stringUnion.attribute, dom);
             break;
         }
         case HAS_PROP_VALUE: {
             actualResult =
-                flo_html_hasPropValue(foundNode, stringUnion.attribute, parsed);
+                flo_html_hasPropValue(foundNode, stringUnion.attribute, dom);
             break;
         }
         case HAS_PROPERTY: {
             actualResult = flo_html_hasProperty(foundNode, stringUnion.key,
-                                                stringUnion.value, parsed);
+                                                stringUnion.value, dom);
             break;
         }
         default: {

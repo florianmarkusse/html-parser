@@ -6,15 +6,13 @@ extern "C" {
 #endif
 
 #include <flo/html-parser/dom/dom.h>
-#include <flo/html-parser/type/element/elements.h>
-#include <flo/html-parser/user.h>
 
 #include "flo/html-parser/comparison-status.h"
 #include "test-status.h"
 
 typedef struct {
-    flo_html_ParsedHTML actual;
-    flo_html_ParsedHTML expected;
+    flo_html_Dom *actual;
+    flo_html_Dom *expected;
 } ComparisonTest;
 
 ComparisonTest initComparisonTest(const flo_html_String startFileLocation,

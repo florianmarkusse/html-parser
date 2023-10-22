@@ -5,9 +5,7 @@
 extern "C" {
 #endif
 
-#include <flo/html-parser/dom/query/query-status.h>
-#include <flo/html-parser/user.h>
-#include <flo/html-parser/util/text/string.h>
+#include <flo/html-parser.h>
 #include <stddef.h>
 
 typedef struct {

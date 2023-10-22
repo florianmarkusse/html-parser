@@ -15,45 +15,48 @@
 #include "flo/html-parser/util/error.h"
 #include "flo/html-parser/util/file/read.h"
 
-#define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, parsed, perm,          \
+#define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, perm,             \
                                     prependFunction)                           \
     do {                                                                       \
         flo_html_node_id parentNodeID = 0;                                     \
         flo_html_QueryStatus queryResult =                                     \
-            flo_html_querySelector(cssQuery, parsed, &parentNodeID, *(perm));  \
+            flo_html_querySelector(cssQuery, dom, &parentNodeID, *(perm));     \
         if (queryResult != QUERY_SUCCESS) {                                    \
             FLO_HTML_PRINT_ERROR(                                              \
                 "Could not find element using query selector: %s\n",           \
                 (cssQuery).buf);                                               \
             return 0;                                                          \
         }                                                                      \
-        return prependFunction(parentNodeID, nodeData, parsed, perm);          \
+        return prependFunction(parentNodeID, nodeData, dom, perm);             \
     } while (0)
 
-flo_html_node_id flo_html_prependDocumentNodeWithQuery(
-    const flo_html_String cssQuery, const flo_html_DocumentNode *docNode,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    PREPEND_USING_QUERYSELECTOR(cssQuery, docNode, parsed, perm,
+flo_html_node_id
+flo_html_prependDocumentNodeWithQuery(const flo_html_String cssQuery,
+                                      const flo_html_DocumentNode *docNode,
+                                      flo_html_Dom *dom, flo_html_Arena *perm) {
+    PREPEND_USING_QUERYSELECTOR(cssQuery, docNode, dom, perm,
                                 flo_html_prependDocumentNode);
 }
 
-flo_html_node_id flo_html_prependTextNodeWithQuery(
-    const flo_html_String cssQuery, const flo_html_String text,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    PREPEND_USING_QUERYSELECTOR(cssQuery, text, parsed, perm,
+flo_html_node_id
+flo_html_prependTextNodeWithQuery(const flo_html_String cssQuery,
+                                  const flo_html_String text, flo_html_Dom *dom,
+                                  flo_html_Arena *perm) {
+    PREPEND_USING_QUERYSELECTOR(cssQuery, text, dom, perm,
                                 flo_html_prependTextNode);
 }
 
 flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
     const flo_html_String cssQuery, const flo_html_String htmlString,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, parsed, perm,
+    flo_html_Dom *dom, flo_html_Arena *perm) {
+    PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, perm,
                                 flo_html_prependHTMLFromString);
 }
 
-flo_html_node_id flo_html_prependHTMLFromFileWithQuery(
-    const flo_html_String cssQuery, const flo_html_String fileLocation,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
+flo_html_node_id
+flo_html_prependHTMLFromFileWithQuery(const flo_html_String cssQuery,
+                                      const flo_html_String fileLocation,
+                                      flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_String content;
     flo_html_FileStatus fileStatus =
         flo_html_readFile(fileLocation, &content, perm);
@@ -64,7 +67,7 @@ flo_html_node_id flo_html_prependHTMLFromFileWithQuery(
         return FLO_HTML_ERROR_NODE_ID;
     }
 
-    PREPEND_USING_QUERYSELECTOR(cssQuery, content, parsed, perm,
+    PREPEND_USING_QUERYSELECTOR(cssQuery, content, dom, perm,
                                 flo_html_prependHTMLFromString);
 }
 
@@ -100,66 +103,65 @@ static void updateReferences(const flo_html_node_id parentID,
 flo_html_node_id
 flo_html_prependDocumentNode(const flo_html_node_id parentID,
                              const flo_html_DocumentNode *docNode,
-                             flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
+                             flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
-        flo_html_parseDocumentElement(docNode, parsed, perm);
-    updateReferences(parentID, newNodeID, parsed.dom, perm);
+        flo_html_parseDocumentElement(docNode, dom, perm);
+    updateReferences(parentID, newNodeID, dom, perm);
     return newNodeID;
 }
 
 flo_html_node_id flo_html_prependTextNode(const flo_html_node_id parentID,
                                           const flo_html_String text,
-                                          flo_html_ParsedHTML parsed,
+                                          flo_html_Dom *dom,
                                           flo_html_Arena *perm) {
-    flo_html_node_id newNodeID = flo_html_parseTextElement(text, parsed, perm);
+    flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
 
-    flo_html_node_id child = flo_html_getFirstChild(parentID, parsed.dom);
+    flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
     if (child > 0) {
-        if (flo_html_tryMerge(&parsed.dom->nodes.buf[child],
-                              &parsed.dom->nodes.buf[newNodeID], parsed, false,
-                              perm)) {
-            flo_html_removeNode(newNodeID, parsed.dom);
+        if (flo_html_tryMerge(&dom->nodes.buf[child],
+                              &dom->nodes.buf[newNodeID], dom, false, perm)) {
+            flo_html_removeNode(newNodeID, dom);
             return newNodeID;
         }
     }
 
-    updateReferences(parentID, newNodeID, parsed.dom, perm);
+    updateReferences(parentID, newNodeID, dom, perm);
 
     return newNodeID;
 }
 
-flo_html_node_id flo_html_prependHTMLFromString(
-    const flo_html_node_id parentID, const flo_html_String htmlString,
-    flo_html_ParsedHTML parsed, flo_html_Arena *perm) {
-    flo_html_node_id firstNewAddedNode = parsed.dom->nodes.len;
-    flo_html_parseExtra(htmlString, parsed, perm);
+flo_html_node_id
+flo_html_prependHTMLFromString(const flo_html_node_id parentID,
+                               const flo_html_String htmlString,
+                               flo_html_Dom *dom, flo_html_Arena *perm) {
+    flo_html_node_id firstNewAddedNode = dom->nodes.len;
+    flo_html_parseExtra(htmlString, dom, perm);
 
-    flo_html_node_id firstChild = flo_html_getFirstChild(parentID, parsed.dom);
+    flo_html_node_id firstChild = flo_html_getFirstChild(parentID, dom);
     if (firstChild > 0) {
         flo_html_node_id lastNextNode =
-            flo_html_getLastNext(firstNewAddedNode, parsed.dom);
+            flo_html_getLastNext(firstNewAddedNode, dom);
         if (lastNextNode > firstNewAddedNode) {
-            flo_html_Node *lastAddedNode = &parsed.dom->nodes.buf[lastNextNode];
+            flo_html_Node *lastAddedNode = &dom->nodes.buf[lastNextNode];
             if (lastAddedNode->nodeType == NODE_TYPE_TEXT) {
-                if (flo_html_tryMerge(&parsed.dom->nodes.buf[firstChild],
-                                      lastAddedNode, parsed, false, perm)) {
-                    flo_html_removeNode(lastNextNode, parsed.dom);
+                if (flo_html_tryMerge(&dom->nodes.buf[firstChild],
+                                      lastAddedNode, dom, false, perm)) {
+                    flo_html_removeNode(lastNextNode, dom);
                 }
             }
         } else {
-            flo_html_Node *onlyAddedNode =
-                &parsed.dom->nodes.buf[firstNewAddedNode];
+            flo_html_Node *onlyAddedNode = &dom->nodes.buf[firstNewAddedNode];
             if (onlyAddedNode->nodeType == NODE_TYPE_TEXT) {
-                if (flo_html_tryMerge(&parsed.dom->nodes.buf[firstChild],
-                                      onlyAddedNode, parsed, false, perm)) {
-                    flo_html_removeNode(firstNewAddedNode, parsed.dom);
+                if (flo_html_tryMerge(&dom->nodes.buf[firstChild],
+                                      onlyAddedNode, dom, false, perm)) {
+                    flo_html_removeNode(firstNewAddedNode, dom);
                     return firstChild;
                 }
             }
         }
     }
 
-    updateReferences(parentID, firstNewAddedNode, parsed.dom, perm);
+    updateReferences(parentID, firstNewAddedNode, dom, perm);
 
     return firstNewAddedNode;
 }

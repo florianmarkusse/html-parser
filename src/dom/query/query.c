@@ -87,8 +87,7 @@ ptrdiff_t parseToken(const flo_html_String css, ptrdiff_t currentPosition,
     return currentPosition;
 }
 
-flo_html_QueryStatus getQueryResults(flo_html_String css,
-                                     flo_html_ParsedHTML parsed,
+flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                                      flo_html_Uint16HashSet *set,
                                      flo_html_Arena *perm) {
     flo_html_QueryStatus result = QUERY_SUCCESS;
@@ -117,7 +116,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
 
             flo_html_index_id tagID =
                 flo_html_containsStringHashSet(
-                    &parsed.textStore->tags,
+                    &dom->tags,
                     FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen))
                     .entryIndex;
             if (tagID == 0) {
@@ -172,8 +171,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                                                       ? FLO_HTML_S("class")
                                                       : FLO_HTML_S("id");
                 flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(&parsed.textStore->propKeys,
-                                                   keyBuffer)
+                    flo_html_containsStringHashSet(&dom->propKeys, keyBuffer)
                         .entryIndex;
                 if (propKeyID == 0) {
                     FLO_HTML_PRINT_ERROR("PROP KEY ID 0");
@@ -181,8 +179,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                 }
 
                 flo_html_index_id propValueID =
-                    flo_html_containsStringHashSet(
-                        &parsed.textStore->propValues, token)
+                    flo_html_containsStringHashSet(&dom->propValues, token)
                         .entryIndex;
                 if (propValueID == 0) {
                     FLO_HTML_PRINT_ERROR("PROP VALUE ID 0");
@@ -195,8 +192,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                 filtersLen++;
             } else if (ch == ']') {
                 flo_html_index_id boolPropID =
-                    flo_html_containsStringHashSet(&parsed.textStore->boolProps,
-                                                   token)
+                    flo_html_containsStringHashSet(&dom->boolPropsSet, token)
                         .entryIndex;
                 if (boolPropID == 0) {
                     FLO_HTML_PRINT_ERROR("BOOL PROP ID 0");
@@ -208,8 +204,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                 filtersLen++;
             } else if (ch == '=') {
                 flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(&parsed.textStore->propKeys,
-                                                   token)
+                    flo_html_containsStringHashSet(&dom->propKeys, token)
                         .entryIndex;
                 if (propKeyID == 0) {
                     FLO_HTML_PRINT_ERROR("IN = PROPKEY 0");
@@ -227,8 +222,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
                 ch = flo_html_getChar(css, currentPosition);
 
                 flo_html_index_id propValueID =
-                    flo_html_containsStringHashSet(
-                        &parsed.textStore->propValues, propValue)
+                    flo_html_containsStringHashSet(&dom->propValues, propValue)
                         .entryIndex;
                 if (propValueID == 0) {
                     FLO_HTML_PRINT_ERROR("IN = PROPVALUE 0");
@@ -259,14 +253,14 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
         switch (currentflo_html_Combinator) {
         case NO_COMBINATOR: {
             if (!flo_html_getNodesWithoutflo_html_Combinator(
-                    filters, filtersLen, parsed.dom, set, perm)) {
+                    filters, filtersLen, dom, set, perm)) {
                 return QUERY_MEMORY_ERROR;
             }
             break;
         }
         case ADJACENT: {
             if ((result = flo_html_getFilteredAdjacents(
-                     filters, filtersLen, parsed.dom, 1,
+                     filters, filtersLen, dom, 1,
 
                      set, perm)) != QUERY_SUCCESS) {
                 return result;
@@ -274,8 +268,8 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
             break;
         }
         case CHILD: {
-            if ((result = flo_html_getFilteredDescendants(
-                     filters, filtersLen, parsed.dom, 1, set, perm)) !=
+            if ((result = flo_html_getFilteredDescendants(filters, filtersLen,
+                                                          dom, 1, set, perm)) !=
                 QUERY_SUCCESS) {
                 return result;
             }
@@ -283,16 +277,16 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
         }
         case GENERAL_SIBLING: {
             if ((result = flo_html_getFilteredAdjacents(
-                     filters, filtersLen, parsed.dom, PTRDIFF_MAX, set,
-                     perm)) != QUERY_SUCCESS) {
+                     filters, filtersLen, dom, PTRDIFF_MAX, set, perm)) !=
+                QUERY_SUCCESS) {
                 return result;
             }
             break;
         }
         case DESCENDANT: {
             if ((result = flo_html_getFilteredDescendants(
-                     filters, filtersLen, parsed.dom, PTRDIFF_MAX, set,
-                     perm)) != QUERY_SUCCESS) {
+                     filters, filtersLen, dom, PTRDIFF_MAX, set, perm)) !=
+                QUERY_SUCCESS) {
                 return result;
             }
             break;
@@ -336,7 +330,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css,
 }
 
 flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
-                                               flo_html_ParsedHTML parsed,
+                                               flo_html_Dom *dom,
                                                flo_html_node_id_a *results,
                                                flo_html_Arena *perm) {
     {
@@ -352,7 +346,7 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
         while (from < css.len) {
             flo_html_String iter = flo_html_splitString(css, ',', from);
 
-            if ((result = getQueryResults(iter, parsed, &set, &scratch)) !=
+            if ((result = getQueryResults(iter, dom, &set, &scratch)) !=
                 QUERY_SUCCESS) {
                 FLO_HTML_ERROR_WITH_CODE_ONLY(
                     flo_html_queryingStatusToString(result),
@@ -394,13 +388,13 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String css,
 }
 
 flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
-                                            flo_html_ParsedHTML parsed,
+                                            flo_html_Dom *dom,
                                             flo_html_node_id *result,
                                             flo_html_Arena scratch) {
     flo_html_node_id_a *results = FLO_HTML_NEW(&scratch, flo_html_node_id_a);
 
     flo_html_QueryStatus status =
-        flo_html_querySelectorAll(css, parsed, results, &scratch);
+        flo_html_querySelectorAll(css, dom, results, &scratch);
     if (status != QUERY_SUCCESS) {
         return status;
     }
@@ -418,7 +412,7 @@ flo_html_QueryStatus flo_html_querySelector(flo_html_String css,
                 return QUERY_SUCCESS;
             }
         }
-        currentNode = flo_html_traverseDom(currentNode, parsed.dom);
+        currentNode = flo_html_traverseDom(currentNode, dom);
     }
 
     return status;

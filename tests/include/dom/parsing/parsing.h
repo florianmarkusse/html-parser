@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-#include <flo/html-parser/user.h>
 #include <stddef.h>
 
 bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,

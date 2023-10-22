@@ -107,7 +107,7 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
         return TEST_FAILURE;
     }
 
-    flo_html_removeNode(currentNodeID, comparisonTest.actual.dom);
+    flo_html_removeNode(currentNodeID, comparisonTest.actual);
 
     actual = flo_html_querySelectorAll(
         FLO_HTML_S("title"), comparisonTest.actual, &results, &scratch);

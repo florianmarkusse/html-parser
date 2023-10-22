@@ -1,7 +1,6 @@
 #include <flo/html-parser.h>
 #include <flo/html-parser/dom/comparison.h>
 #include <flo/html-parser/dom/query/query-status.h>
-#include <flo/html-parser/type/element/elements-print.h>
 #include <flo/html-parser/util/memory.h>
 
 #include "comparison-test.h"
@@ -11,20 +10,17 @@ ComparisonTest initComparisonTest(const flo_html_String startFileLocation,
                                   const flo_html_String expectedFileLocation,
                                   flo_html_Arena *perm) {
     ComparisonTest test = {0};
-
-    if (flo_html_fromFile(startFileLocation, &test.actual, perm) !=
-        USER_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to created DOM & TextStore from file %.*s\n",
-            FLO_HTML_S_P(startFileLocation));
+    test.actual = flo_html_createDomFromFile(startFileLocation, perm);
+    if (test.actual == NULL) {
+        FLO_HTML_PRINT_ERROR("Failed to created actual DOM from file %.*s\n",
+                             FLO_HTML_S_P(startFileLocation));
         return test;
     }
 
-    if (flo_html_fromFile(expectedFileLocation, &test.expected, perm) !=
-        USER_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to created DOM & TextStore from file %.*s\n",
-            FLO_HTML_S_P(expectedFileLocation));
+    test.expected = flo_html_createDomFromFile(expectedFileLocation, perm);
+    if (test.expected == NULL) {
+        FLO_HTML_PRINT_ERROR("Failed to created expected DOM from file %.*s\n",
+                             FLO_HTML_S_P(expectedFileLocation));
         return test;
     }
 

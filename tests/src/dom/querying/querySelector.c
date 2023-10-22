@@ -28,17 +28,16 @@ static TestStatus testQuery(const flo_html_String fileLocation,
                             const flo_html_QueryStatus expectedStatus,
                             const flo_html_node_id expectedNode,
                             flo_html_Arena scratch) {
-    flo_html_ParsedHTML parsed;
-    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
-        FLO_HTML_PRINT_ERROR(
-            "Failed to created DOM & TextStore from file %.*s\n",
-            FLO_HTML_S_P(fileLocation));
+    flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
+    if (dom == NULL) {
+        FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",
+                             FLO_HTML_S_P(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
     flo_html_node_id actualNode = 0;
     flo_html_QueryStatus actual =
-        flo_html_querySelector(cssQuery, parsed, &actualNode, scratch);
+        flo_html_querySelector(cssQuery, dom, &actualNode, scratch);
 
     TestStatus result = TEST_FAILURE;
 

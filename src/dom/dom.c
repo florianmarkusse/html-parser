@@ -5,7 +5,6 @@
 #include "flo/html-parser/util/memory.h"
 
 flo_html_Dom *flo_html_createDomFromFile(const flo_html_String fileLocation,
-                                         flo_html_TextStore *textStore,
                                          flo_html_Arena *perm) {
     flo_html_String content;
     flo_html_FileStatus fileStatus =
@@ -17,11 +16,10 @@ flo_html_Dom *flo_html_createDomFromFile(const flo_html_String fileLocation,
         return NULL;
     }
 
-    return flo_html_createDom(content, textStore, perm);
+    return flo_html_createDom(content, perm);
 }
 
 flo_html_Dom *flo_html_createDom(const flo_html_String htmlString,
-                                 flo_html_TextStore *textStore,
                                  flo_html_Arena *perm) {
     flo_html_Dom *result =
         FLO_HTML_NEW(perm, flo_html_Dom, 1, FLO_HTML_ZERO_MEMORY);
@@ -41,9 +39,16 @@ flo_html_Dom *flo_html_createDom(const flo_html_String htmlString,
     *FLO_HTML_PUSH(&result->propValueRegistry, perm) =
         (flo_html_HashElement){0};
 
-    flo_html_parseRoot(
-        htmlString,
-        (flo_html_ParsedHTML){.dom = result, .textStore = textStore}, perm);
+    result->tags =
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+    result->boolPropsSet =
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+    result->propKeys =
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+    result->propValues =
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+
+    flo_html_parseRoot(htmlString, result, perm);
 
     return result;
 }

@@ -67,13 +67,12 @@ void flo_html_removeChildren(const flo_html_node_id nodeID, flo_html_Dom *dom) {
 
 void flo_html_removeBooleanProperty(const flo_html_node_id nodeID,
                                     const flo_html_String boolProp,
-                                    flo_html_ParsedHTML parsed) {
+                                    flo_html_Dom *dom) {
     flo_html_index_id boolPropID =
-        flo_html_containsStringHashSet(&parsed.textStore->boolProps, boolProp)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->boolPropsSet, boolProp).entryIndex;
     if (boolPropID > 0) {
         flo_html_BooleanProperty *prop =
-            flo_html_getBooleanProperty(nodeID, boolPropID, parsed.dom);
+            flo_html_getBooleanProperty(nodeID, boolPropID, dom);
         if (prop != NULL) {
             prop->nodeID = 0;
             prop->propID = 0;
@@ -82,14 +81,11 @@ void flo_html_removeBooleanProperty(const flo_html_node_id nodeID,
 }
 
 void flo_html_removeProperty(const flo_html_node_id nodeID,
-                             const flo_html_String keyProp,
-                             flo_html_ParsedHTML parsed) {
+                             const flo_html_String keyProp, flo_html_Dom *dom) {
     flo_html_index_id keyPropID =
-        flo_html_containsStringHashSet(&parsed.textStore->propKeys, keyProp)
-            .entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, keyProp).entryIndex;
     if (keyPropID > 0) {
-        flo_html_Property *prop =
-            flo_html_getProperty(nodeID, keyPropID, parsed.dom);
+        flo_html_Property *prop = flo_html_getProperty(nodeID, keyPropID, dom);
         if (prop != NULL) {
             prop->nodeID = 0;
             prop->keyID = 0;
