@@ -19,17 +19,6 @@ extern "C" {
 #define FLO_HTML_ERROR_NODE_ID 0U
 #define FLO_HTML_ROOT_NODE_ID 1U
 
-#define FLO_HTML_MAX_TAG_REGISTRATIONS (1U << 10U)
-#define FLO_HTML_MAX_PROP_REGISTRATIONS (1U << 14U)
-
-#define FLO_HTML_MAX_NODES (1U << 14U)
-
-#define FLO_HTML_MAX_PARENT_FIRST_CHILDS (1U << 12U)
-#define FLO_HTML_MAX_PARENT_CHILDS (1U << 14U)
-#define FLO_HTML_MAX_NEXT_NODES (1U << 14U)
-#define FLO_HTML_MAX_BOOL_PROPS (1U << 14U)
-#define FLO_HTML_MAX_PROPS (1U << 14U)
-
 typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_Node) flo_html_Node_d_a;
 typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_ParentChild) flo_html_ParentChild_d_a;
 typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_NextNode) flo_html_NextNode_d_a;
