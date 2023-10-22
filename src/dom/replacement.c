@@ -7,7 +7,6 @@
 #include "flo/html-parser/dom/modification.h"
 #include "flo/html-parser/dom/query/query-status.h"
 #include "flo/html-parser/dom/query/query.h"
-#include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/replacement.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"

@@ -4,7 +4,6 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
-#include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/parser.h"
 #include "flo/html-parser/util/error.h"
 #include <stdbool.h>
@@ -30,18 +29,15 @@ getCreatedPropIDFromString(const PropertyType propertyType,
 
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
-            flo_html_addRegistration(result.hashElement, &dom->boolPropRegistry,
-                                     perm);
+            *FLO_HTML_PUSH(&dom->boolPropRegistry, perm) = result.hashElement;
             break;
         }
         case PROPERTY_TYPE_KEY: {
-            flo_html_addRegistration(result.hashElement, &dom->propKeyRegistry,
-                                     perm);
+            *FLO_HTML_PUSH(&dom->propKeyRegistry, perm) = result.hashElement;
             break;
         }
         case PROPERTY_TYPE_VALUE: {
-            flo_html_addRegistration(result.hashElement,
-                                     &dom->propValueRegistry, perm);
+            *FLO_HTML_PUSH(&dom->propValueRegistry, perm) = result.hashElement;
             break;
         }
         }
@@ -146,8 +142,9 @@ void flo_html_setTagOnDocumentNode(const flo_html_String tag,
         result.entryIndex = flo_html_insertIntoPageWithHash(
             tag, &parsed.textStore->tags.dataPage, &parsed.textStore->tags.set,
             &result.hashElement);
-        flo_html_addTagRegistration(isPaired, result.hashElement, parsed.dom,
-                                    perm);
+        *FLO_HTML_PUSH(&parsed.dom->tagRegistry, perm) =
+            (flo_html_TagRegistration){.hashElement = result.hashElement,
+                                       .isPaired = isPaired};
     }
 
     flo_html_setNodeTagID(nodeID, result.entryIndex, parsed.dom);

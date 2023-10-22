@@ -10,7 +10,6 @@
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/modification.h"
-#include "flo/html-parser/dom/registry.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/node/node.h"
 #include "flo/html-parser/parser.h"

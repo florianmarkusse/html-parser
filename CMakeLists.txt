@@ -40,7 +40,6 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/dom/dom.c"
     "src/dom/writing.c"
     "src/dom/traversal.c"
-    "src/dom/registry.c"
     "src/dom/reading/reading.c"
     "src/dom/reading/reading-util.c"
     "src/dom/modification.c"
