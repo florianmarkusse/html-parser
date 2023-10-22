@@ -50,16 +50,20 @@ static void updateReferences(const flo_html_node_id newNodeID,
                              flo_html_Dom *dom, flo_html_Arena *perm) {
     if (newNodeID > 0 && previousNodeID > 0) {
         if (depthStack->len == 0) {
-            flo_html_addNextNode(previousNodeID, newNodeID, dom, perm);
+            *FLO_HTML_PUSH(&dom->nextNodes, perm) = (flo_html_NextNode){
+                .currentNodeID = previousNodeID, .nextNodeID = newNodeID};
         } else {
             const unsigned int parentNodeID =
                 depthStack->stack[depthStack->len - 1].nodeID;
-            flo_html_addParentChild(parentNodeID, newNodeID, dom, perm);
+            *FLO_HTML_PUSH(&dom->parentChilds, perm) = (flo_html_ParentChild){
+                .parentID = parentNodeID, .childID = newNodeID};
             if (parentNodeID == previousNodeID) {
-                flo_html_addParentFirstChild(parentNodeID, newNodeID, dom,
-                                             perm);
+                *FLO_HTML_PUSH(&dom->parentFirstChilds, perm) =
+                    (flo_html_ParentChild){.parentID = parentNodeID,
+                                           .childID = newNodeID};
             } else {
-                flo_html_addNextNode(previousNodeID, newNodeID, dom, perm);
+                *FLO_HTML_PUSH(&dom->nextNodes, perm) = (flo_html_NextNode){
+                    .currentNodeID = previousNodeID, .nextNodeID = newNodeID};
             }
         }
     }

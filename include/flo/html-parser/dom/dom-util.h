@@ -15,26 +15,6 @@ void flo_html_setNodeTagID(flo_html_node_id nodeID, flo_html_index_id tagID,
 void flo_html_setNodeText(flo_html_node_id nodeID, const flo_html_String text,
                           flo_html_Dom *dom);
 
-void flo_html_addParentFirstChild(flo_html_node_id parentID,
-                                  flo_html_node_id childID, flo_html_Dom *dom,
-                                  flo_html_Arena *perm);
-
-void flo_html_addParentChild(flo_html_node_id parentID,
-                             flo_html_node_id childID, flo_html_Dom *dom,
-                             flo_html_Arena *perm);
-
-void flo_html_addNextNode(flo_html_node_id currentNodeID,
-                          flo_html_node_id nextNodeID, flo_html_Dom *dom,
-                          flo_html_Arena *perm);
-
-void flo_html_addBooleanProperty(flo_html_node_id nodeID,
-                                 flo_html_index_id propID, flo_html_Dom *dom,
-                                 flo_html_Arena *perm);
-
-void flo_html_addProperty(flo_html_node_id nodeID, flo_html_index_id keyID,
-                          flo_html_index_id valueID, flo_html_Dom *dom,
-                          flo_html_Arena *perm);
-
 const flo_html_String flo_html_getTag(flo_html_index_id tagID,
                                       flo_html_ParsedHTML parsed);
 

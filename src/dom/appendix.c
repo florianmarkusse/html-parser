@@ -73,8 +73,11 @@ static void updateReferences(const flo_html_node_id parentID,
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(parentID, dom);
     if (firstChild == NULL) {
-        flo_html_addParentFirstChild(parentID, newNodeID, dom, perm);
-        flo_html_addParentChild(parentID, newNodeID, dom, perm);
+        *FLO_HTML_PUSH(&dom->parentFirstChilds, perm) =
+            (flo_html_ParentChild){.parentID = parentID, .childID = newNodeID};
+        *FLO_HTML_PUSH(&dom->parentChilds, perm) =
+            (flo_html_ParentChild){.parentID = parentID, .childID = newNodeID};
+
         flo_html_connectOtherNodesToParent(parentID, newNodeID, dom, perm);
         return;
     }
@@ -82,8 +85,11 @@ static void updateReferences(const flo_html_node_id parentID,
     flo_html_node_id lastNextNode =
         flo_html_getLastNext(firstChild->childID, dom);
 
-    flo_html_addNextNode(lastNextNode, newNodeID, dom, perm);
-    flo_html_addParentChild(parentID, newNodeID, dom, perm);
+    *FLO_HTML_PUSH(&dom->nextNodes, perm) = (flo_html_NextNode){
+        .currentNodeID = lastNextNode, .nextNodeID = newNodeID};
+    *FLO_HTML_PUSH(&dom->parentChilds, perm) =
+        (flo_html_ParentChild){.parentID = parentID, .childID = newNodeID};
+
     flo_html_connectOtherNodesToParent(parentID, newNodeID, dom, perm);
 }
 

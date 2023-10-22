@@ -58,7 +58,8 @@ void flo_html_addPropertyToNode(const flo_html_node_id nodeID,
         getCreatedPropIDFromString(PROPERTY_TYPE_VALUE, value, parsed.dom,
                                    &parsed.textStore->propValues, perm);
 
-    flo_html_addProperty(nodeID, keyID, valueID, parsed.dom, perm);
+    *FLO_HTML_PUSH(&parsed.dom->props, perm) = (flo_html_Property){
+        .nodeID = nodeID, .keyID = keyID, .valueID = valueID};
 }
 
 void flo_html_addBooleanPropertyToNode(const flo_html_node_id nodeID,
@@ -69,7 +70,8 @@ void flo_html_addBooleanPropertyToNode(const flo_html_node_id nodeID,
         getCreatedPropIDFromString(PROPERTY_TYPE_BOOL, boolProp, parsed.dom,
                                    &parsed.textStore->boolProps, perm);
 
-    flo_html_addBooleanProperty(nodeID, boolPropID, parsed.dom, perm);
+    *FLO_HTML_PUSH(&parsed.dom->boolProps, perm) =
+        (flo_html_BooleanProperty){.nodeID = nodeID, .propID = boolPropID};
 }
 
 bool flo_html_setPropertyValue(const flo_html_node_id nodeID,
@@ -104,8 +106,11 @@ void flo_html_setTextContent(const flo_html_node_id nodeID,
     flo_html_removeChildren(nodeID, parsed.dom);
 
     flo_html_node_id newNodeID = flo_html_parseTextElement(text, parsed, perm);
-    flo_html_addParentFirstChild(nodeID, newNodeID, parsed.dom, perm);
-    flo_html_addParentChild(nodeID, newNodeID, parsed.dom, perm);
+
+    *FLO_HTML_PUSH(&parsed.dom->parentFirstChilds, perm) =
+        (flo_html_ParentChild){.parentID = nodeID, .childID = newNodeID};
+    *FLO_HTML_PUSH(&parsed.dom->parentChilds, perm) =
+        (flo_html_ParentChild){.parentID = nodeID, .childID = newNodeID};
 }
 
 void flo_html_addTextToTextNode(flo_html_Node *node, const flo_html_String text,

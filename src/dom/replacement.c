@@ -101,8 +101,9 @@ static void updateReferences(const flo_html_node_id toReplaceNodeID,
         parentChildNode->childID = newNodeID;
         flo_html_node_id otherNewNodeID = flo_html_getNext(newNodeID, dom);
         while (otherNewNodeID > 0) {
-            flo_html_addParentChild(parentFirstChildNode->parentID,
-                                    otherNewNodeID, dom, perm);
+            *FLO_HTML_PUSH(&dom->parentChilds, perm) =
+                (flo_html_ParentChild){.parentID = parentChildNode->parentID,
+                                       .childID = otherNewNodeID};
             otherNewNodeID = flo_html_getNext(otherNewNodeID, dom);
         }
     }

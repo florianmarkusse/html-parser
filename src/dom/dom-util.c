@@ -33,46 +33,6 @@ void flo_html_setNodeText(const flo_html_node_id nodeID,
     createdNode->text = text;
 }
 
-// TODO: get rid of these functions.
-void flo_html_addParentFirstChild(const flo_html_node_id parentID,
-                                  const flo_html_node_id childID,
-                                  flo_html_Dom *dom, flo_html_Arena *perm) {
-    *FLO_HTML_PUSH(&dom->parentFirstChilds, perm) =
-        (flo_html_ParentChild){.parentID = parentID, .childID = childID};
-}
-
-void flo_html_addParentChild(const flo_html_node_id parentID,
-                             const flo_html_node_id childID, flo_html_Dom *dom,
-                             flo_html_Arena *perm) {
-    *FLO_HTML_PUSH(&dom->parentChilds, perm) =
-        (flo_html_ParentChild){.parentID = parentID, .childID = childID};
-}
-
-// TODO: get rid of these functions.
-void flo_html_addNextNode(const flo_html_node_id currentNodeID,
-                          const flo_html_node_id nextNodeID, flo_html_Dom *dom,
-                          flo_html_Arena *perm) {
-    *FLO_HTML_PUSH(&dom->nextNodes, perm) = (flo_html_NextNode){
-        .currentNodeID = currentNodeID, .nextNodeID = nextNodeID};
-}
-
-// TODO: get rid of these functions.
-void flo_html_addBooleanProperty(const flo_html_node_id nodeID,
-                                 const flo_html_index_id propID,
-                                 flo_html_Dom *dom, flo_html_Arena *perm) {
-    *FLO_HTML_PUSH(&dom->boolProps, perm) =
-        (flo_html_BooleanProperty){.nodeID = nodeID, .propID = propID};
-}
-
-// TODO: get rid of these functions.
-void flo_html_addProperty(const flo_html_node_id nodeID,
-                          const flo_html_index_id keyID,
-                          const flo_html_index_id valueID, flo_html_Dom *dom,
-                          flo_html_Arena *perm) {
-    *FLO_HTML_PUSH(&dom->props, perm) = (flo_html_Property){
-        .nodeID = nodeID, .keyID = keyID, .valueID = valueID};
-}
-
 const flo_html_String flo_html_getTag(const flo_html_index_id tagID,
                                       flo_html_ParsedHTML parsed) {
     flo_html_TagRegistration *tagRegistration =
@@ -122,7 +82,9 @@ void flo_html_connectOtherNodesToParent(const flo_html_node_id parentID,
                                         flo_html_Arena *perm) {
     flo_html_node_id otherNewNodeID = flo_html_getNext(lastAddedChild, dom);
     while (otherNewNodeID > 0) {
-        flo_html_addParentChild(parentID, otherNewNodeID, dom, perm);
+        *FLO_HTML_PUSH(&dom->parentChilds, perm) = (flo_html_ParentChild){
+            .parentID = parentID, .childID = otherNewNodeID};
+
         otherNewNodeID = flo_html_getNext(otherNewNodeID, dom);
     }
 }
