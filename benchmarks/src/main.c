@@ -8,8 +8,8 @@
 #define INPUTS_DIR "benchmarks/inputs/"
 
 bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
-    flo_html_ParsedHTML parsed;
-    if (flo_html_fromFile(fileLocation, &parsed, &scratch) != USER_SUCCESS) {
+    flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
+    if (dom == NULL) {
         return false;
     }
 
