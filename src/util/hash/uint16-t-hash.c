@@ -1,12 +1,11 @@
 #include <string.h>
 
+#include "flo/html-parser/util/hash/hash-constants.h"
 #include "flo/html-parser/util/hash/hashes.h"
 #include "flo/html-parser/util/hash/uint16-t-hash.h"
 #include "flo/html-parser/util/memory.h"
 
 #define MAX_CAPACITY ((1U << 16U) - 1) // Maximum capacity for uint16_t
-
-#define MAX_PROBES (1U << 4U)
 
 flo_html_Uint16HashSet flo_html_initUint16HashSet(uint16_t capacity,
                                                   flo_html_Arena *perm) {
@@ -18,7 +17,6 @@ flo_html_Uint16HashSet flo_html_initUint16HashSet(uint16_t capacity,
     };
 }
 
-// TODO: use setjmp here for failure cases!
 bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
                                   flo_html_Arena *perm) {
     uint16_t newIntHash = flo_html_hash16_xm3(id); // Calculate the hash once
@@ -29,25 +27,18 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
             id) {
             return true;
         }
-        if (newIntProbes < MAX_PROBES) {
-            newIntProbes++;
-        } else {
-            FLO_HTML_PRINT_ERROR(
-                "Maximum number of fdfjdkfdfjdkfkdjprobes %u reached!",
-                MAX_PROBES);
-            return false;
-        }
+        newIntProbes++;
     }
 
     bool didResize = false;
-    if (set->entries >= set->arrayLen * 0.7) {
+    if (set->entries >= set->arrayLen * FLO_HTML_GROWTH_FACTOR) {
         didResize = true;
         // See if it makes sense to grow.
         if (set->arrayLen >= MAX_CAPACITY * 0.9) {
             FLO_HTML_PRINT_ERROR(
                 "Hash set capacity would exceed the maximum capacity "
                 "for uint16_t!\n");
-            return false;
+            __builtin_longjmp(perm->jmp_buf, 1);
         }
 
         ptrdiff_t newCapacity = (set->arrayLen * 2 <= MAX_CAPACITY)
@@ -82,13 +73,7 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
         newIntProbes = 0;
         while (set->array[(newIntHash + newIntProbes) % set->arrayLen].value !=
                0) {
-            if (newIntProbes < MAX_PROBES) {
-                newIntProbes++;
-            } else {
-                FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
-                                     MAX_PROBES);
-                return false;
-            }
+            newIntProbes++;
         }
     }
 

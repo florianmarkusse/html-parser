@@ -12,16 +12,12 @@ extern "C" {
 #include "flo/html-parser/util/memory.h"
 #include "flo/html-parser/util/text/string.h"
 #include "hash-comparison-status.h"
-#include "hash-element.h"
 
 /**
  * Hashing with linear probing for natural values > 0 up until ptrdiff_t max
  * size.
  */
 
-// This seems to be a general structure I would like to have, maybe have
-// hashElement hash type be based on the type tho, maybe have hashElement hash
-// type be based on the type tho
 typedef struct {
     ptrdiff_t entryIndex;
     bool wasInserted;
@@ -48,9 +44,6 @@ flo_html_StringInsert flo_html_insertStringHashSet(flo_html_StringHashSet *set,
 
 ptrdiff_t flo_html_containsStringHashSet(flo_html_StringHashSet *set,
                                          flo_html_String string);
-
-flo_html_String flo_html_getStringFromHashSet(flo_html_StringHashSet *set,
-                                              flo_html_HashElement hashElement);
 
 flo_html_HashComparisonStatus
 flo_html_equalsStringHashSet(flo_html_StringHashSet *set1,

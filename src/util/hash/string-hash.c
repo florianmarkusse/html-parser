@@ -2,14 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "flo/html-parser/util/hash/hash-element.h"
+#include "flo/html-parser/util/hash/hash-constants.h"
 #include "flo/html-parser/util/hash/hashes.h"
 #include "flo/html-parser/util/hash/string-hash.h"
 #include "flo/html-parser/util/memory.h"
 
 #define MAX_CAPACITY ((1U << 18U) - 1)
-
-#define MAX_PROBES (1U << 4U)
 
 flo_html_StringHashSet flo_html_initStringHashSet(ptrdiff_t capacity,
                                                   flo_html_Arena *perm) {
@@ -34,19 +32,12 @@ flo_html_StringInsert flo_html_insertStringHashSet(flo_html_StringHashSet *set,
             return (flo_html_StringInsert){.entryIndex = entry.entryIndex,
                                            .wasInserted = false};
         }
-        if (newStringProbes < MAX_PROBES) {
-            newStringProbes++;
-        } else {
-            FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
-                                 MAX_PROBES);
-            __builtin_longjmp(perm->jmp_buf, 1);
-        }
+        newStringProbes++;
     }
 
     bool didResize = false;
-    if (set->entries >= set->arrayLen * 0.7) {
+    if (set->entries >= set->arrayLen * FLO_HTML_GROWTH_FACTOR) {
         didResize = true;
-        // See if it makes sense to grow.
         if (set->arrayLen >= MAX_CAPACITY * 0.9) {
             FLO_HTML_PRINT_ERROR(
                 "Hash set capacity would exceed the maximum capacity: %d!\n",
@@ -84,14 +75,7 @@ flo_html_StringInsert flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         newStringProbes = 0;
         while (set->array[(newStringHash + newStringProbes) % set->arrayLen]
                    .string.buf != NULL) {
-            // Don't need to check for equality here since we already did that.
-            if (newStringProbes < MAX_PROBES) {
-                newStringProbes++;
-            } else {
-                FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
-                                     MAX_PROBES);
-                __builtin_longjmp(perm->jmp_buf, 1);
-            }
+            newStringProbes++;
         }
     }
 
@@ -121,13 +105,6 @@ ptrdiff_t flo_html_containsStringHashSet(flo_html_StringHashSet *set,
     }
 
     return 0;
-}
-
-flo_html_String
-flo_html_getStringFromHashSet(flo_html_StringHashSet *set,
-                              flo_html_HashElement hashElement) {
-    return set->array[((hashElement.hash + hashElement.offset) % set->arrayLen)]
-        .string;
 }
 
 flo_html_HashComparisonStatus

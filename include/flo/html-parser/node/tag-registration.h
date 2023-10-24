@@ -8,8 +8,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "flo/html-parser/util/hash/hash-element.h"
-#include "node.h"
+#include "flo/html-parser/util/text/string.h"
 
 typedef struct {
     flo_html_String tag;

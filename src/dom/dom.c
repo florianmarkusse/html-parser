@@ -33,6 +33,8 @@ flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
         .nodeType = NODE_TYPE_ROOT,
     };
 
+    // Insert empty values to start with because otherwise we would need to
+    // constantly do ID - 1.
     *FLO_HTML_PUSH(&result->tagRegistry, perm) = (flo_html_TagRegistration){0};
     *FLO_HTML_PUSH(&result->boolPropRegistry, perm) = FLO_HTML_EMPTY_STRING;
     *FLO_HTML_PUSH(&result->propKeyRegistry, perm) = FLO_HTML_EMPTY_STRING;

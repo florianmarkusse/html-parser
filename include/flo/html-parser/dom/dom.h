@@ -20,7 +20,7 @@ extern "C" {
 #define FLO_HTML_ERROR_NODE_ID 0U
 #define FLO_HTML_ROOT_NODE_ID 1U
 
-#define FLO_HTML_REGISTRY_START_SIZE 1U << 12U
+#define FLO_HTML_REGISTRY_START_SIZE 1U << 8U
 
 typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_Node) flo_html_Node_d_a;
 typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_ParentChild) flo_html_ParentChild_d_a;
@@ -30,7 +30,6 @@ typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_BooleanProperty)
 typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_Property) flo_html_Property_d_a;
 typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_TagRegistration)
     flo_html_TagRegistration_d_a;
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_HashElement) flo_html_HashElement_d_a;
 
 typedef struct {
     // Data containing the node id and associated attriubtes.
@@ -42,12 +41,14 @@ typedef struct {
     flo_html_Property_d_a props;
 
     // Data containing the found strings.
+    // Map from ID -> String
     flo_html_TagRegistration_d_a tagRegistry;
     flo_html_String_d_a boolPropRegistry;
     flo_html_String_d_a propKeyRegistry;
     flo_html_String_d_a propValueRegistry;
 
     // Data containg the acual string values.
+    // Map from String -> ID
     flo_html_StringHashSet tags;
     flo_html_StringHashSet boolPropsSet;
     flo_html_StringHashSet propKeys;
