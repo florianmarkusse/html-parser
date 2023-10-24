@@ -39,7 +39,7 @@ flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
         }
     }
 
-    return result.contains.entryIndex;
+    return result.entryIndex;
 }
 
 void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
@@ -132,5 +132,5 @@ void flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
             (flo_html_TagRegistration){.tag = tag, .isPaired = isPaired};
     }
 
-    dom->nodes.buf[nodeID].tagID = result.contains.entryIndex;
+    dom->nodes.buf[nodeID].tagID = result.entryIndex;
 }

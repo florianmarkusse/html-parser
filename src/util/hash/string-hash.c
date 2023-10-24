@@ -31,8 +31,8 @@ flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         flo_html_StringHashEntry entry =
             set->array[(newStringHash + newStringProbes) % set->arrayLen];
         if (flo_html_stringEquals(entry.string, string)) {
-            return (flo_html_StringHashInsert){.contains = entry.contains,
-                                               .wasInserted = false};
+            return (flo_html_StringHashInsert){
+                .entryIndex = entry.contains.entryIndex, .wasInserted = false};
         }
         if (newStringProbes < MAX_PROBES) {
             newStringProbes++;
@@ -109,7 +109,7 @@ flo_html_insertStringHashSet(flo_html_StringHashSet *set,
     set->array[finalIndex] = (flo_html_StringHashEntry){
         .string = string, .contains = containsResult};
 
-    return (flo_html_StringHashInsert){.contains = containsResult,
+    return (flo_html_StringHashInsert){.entryIndex = containsResult.entryIndex,
                                        .wasInserted = true};
 }
 

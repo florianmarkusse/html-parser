@@ -41,8 +41,7 @@ typedef struct {
     flo_html_BooleanProperty_d_a boolProps;
     flo_html_Property_d_a props;
 
-    // Data containing the ID and associated hash
-    // TODO: what to do when underlying set has rehashed?
+    // Data containing the found strings.
     flo_html_TagRegistration_d_a tagRegistry;
     flo_html_String_d_a boolPropRegistry;
     flo_html_String_d_a propKeyRegistry;

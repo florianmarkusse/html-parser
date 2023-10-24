@@ -39,7 +39,7 @@ typedef struct {
 } flo_html_StringHashSet;
 
 typedef struct {
-    flo_html_Contains contains;
+    ptrdiff_t entryIndex;
     bool wasInserted;
 } flo_html_StringHashInsert;
 
