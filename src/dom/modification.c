@@ -20,33 +20,29 @@ flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
                                              flo_html_Dom *dom,
                                              flo_html_StringHashSet *set,
                                              flo_html_Arena *perm) {
-    // TODO: make string hash support insert with getting entry back and whether
-    // or not it was inserted.
-    flo_html_Contains result = flo_html_containsStringHashSet(set, prop);
-    if (!result.entryIndex) {
-        result.entryIndex = flo_html_insertStringHashSet(set, prop, perm);
-
+    flo_html_StringHashInsert result =
+        flo_html_insertStringHashSet(set, prop, perm);
+    if (result.wasInserted) {
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
-            *FLO_HTML_PUSH(&dom->boolPropRegistry, perm) = result.hashElement;
+            *FLO_HTML_PUSH(&dom->boolPropRegistry, perm) = prop;
             break;
         }
         case PROPERTY_TYPE_KEY: {
-            *FLO_HTML_PUSH(&dom->propKeyRegistry, perm) = result.hashElement;
+            *FLO_HTML_PUSH(&dom->propKeyRegistry, perm) = prop;
             break;
         }
         case PROPERTY_TYPE_VALUE: {
-            *FLO_HTML_PUSH(&dom->propValueRegistry, perm) = result.hashElement;
+            *FLO_HTML_PUSH(&dom->propValueRegistry, perm) = prop;
             break;
         }
         }
     }
 
-    return result.entryIndex;
+    return result.contains.entryIndex;
 }
 
-void flo_html_addPropertyToNode(flo_html_node_id nodeID,
-                                flo_html_String key,
+void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
                                 flo_html_String value, flo_html_Dom *dom,
                                 flo_html_Arena *perm) {
     flo_html_index_id keyID = getCreatedPropIDFromString(
@@ -70,10 +66,9 @@ void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
         (flo_html_BooleanProperty){.nodeID = nodeID, .propID = boolPropID};
 }
 
-bool flo_html_setPropertyValue(flo_html_node_id nodeID,
-                               flo_html_String key,
-                               flo_html_String newValue,
-                               flo_html_Dom *dom, flo_html_Arena *perm) {
+bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
+                               flo_html_String newValue, flo_html_Dom *dom,
+                               flo_html_Arena *perm) {
     flo_html_index_id keyID =
         flo_html_containsStringHashSet(&dom->propKeys, key).entryIndex;
     if (keyID == 0) {
@@ -93,9 +88,8 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID,
     return true;
 }
 
-void flo_html_setTextContent(flo_html_node_id nodeID,
-                             flo_html_String text, flo_html_Dom *dom,
-                             flo_html_Arena *perm) {
+void flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
+                             flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_removeChildren(nodeID, dom);
 
     flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
@@ -106,9 +100,9 @@ void flo_html_setTextContent(flo_html_node_id nodeID,
         (flo_html_ParentChild){.parentID = nodeID, .childID = newNodeID};
 }
 
-void flo_html_addTextToTextNode(flo_html_node_id nodeID,
-                                flo_html_String text, flo_html_Dom *dom,
-                                bool isAppend, flo_html_Arena *perm) {
+void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
+                                flo_html_Dom *dom, bool isAppend,
+                                flo_html_Arena *perm) {
     flo_html_String prevText = dom->nodes.buf[nodeID].text;
     ptrdiff_t mergedLen =
         prevText.len + text.len + 1; // Adding a whitespace in between.
@@ -128,18 +122,15 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID,
     dom->nodes.buf[nodeID].text = FLO_HTML_S_LEN(newText, mergedLen);
 }
 
-void flo_html_setTagOnDocumentNode(flo_html_String tag,
-                                   flo_html_node_id nodeID,
+void flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
                                    bool isPaired, flo_html_Dom *dom,
                                    flo_html_Arena *perm) {
-    // TODO: make string hash support insert with getting entry back and whether
-    // or not it was inserted.
-    flo_html_Contains result = flo_html_containsStringHashSet(&dom->tags, tag);
-    if (!result.entryIndex) {
-        result.entryIndex = flo_html_insertStringHashSet(&dom->tags, tag, perm);
-        *FLO_HTML_PUSH(&dom->tagRegistry, perm) = (flo_html_TagRegistration){
-            .hashElement = result.hashElement, .isPaired = isPaired};
+    flo_html_StringHashInsert result =
+        flo_html_insertStringHashSet(&dom->tags, tag, perm);
+    if (result.wasInserted) {
+        *FLO_HTML_PUSH(&dom->tagRegistry, perm) =
+            (flo_html_TagRegistration){.tag = tag, .isPaired = isPaired};
     }
 
-    dom->nodes.buf[nodeID].tagID = result.entryIndex;
+    dom->nodes.buf[nodeID].tagID = result.contains.entryIndex;
 }

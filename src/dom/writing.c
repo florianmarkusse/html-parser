@@ -29,17 +29,15 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
         return;
     }
 
-    flo_html_String tag = flo_html_getStringFromHashSet(
-        &dom->tags, dom->tagRegistry.buf[node.tagID].hashElement);
+    flo_html_String tag = dom->tagRegistry.buf[node.tagID].tag;
     fprintf(output, "<%.*s", FLO_HTML_S_P(tag));
 
     for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
         flo_html_BooleanProperty boolProp = dom->boolProps.buf[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            flo_html_String prop = flo_html_getStringFromHashSet(
-                &dom->boolPropsSet, dom->boolPropRegistry.buf[boolProp.propID]);
-            fprintf(output, " %.*s", FLO_HTML_S_P(prop));
+            fprintf(output, " %.*s",
+                    FLO_HTML_S_P(dom->boolPropRegistry.buf[boolProp.propID]));
         }
     }
 
@@ -47,12 +45,9 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
         flo_html_Property prop = dom->props.buf[i];
 
         if (prop.nodeID == node.nodeID) {
-            flo_html_String key = flo_html_getStringFromHashSet(
-                &dom->propKeys, dom->propKeyRegistry.buf[prop.keyID]);
-            flo_html_String value = flo_html_getStringFromHashSet(
-                &dom->propValues, dom->propValueRegistry.buf[prop.valueID]);
-            fprintf(output, " %.*s=\"%.*s\"", FLO_HTML_S_P(key),
-                    FLO_HTML_S_P(value));
+            fprintf(output, " %.*s=\"%.*s\"",
+                    FLO_HTML_S_P(dom->propKeyRegistry.buf[prop.keyID]),
+                    FLO_HTML_S_P(dom->propValueRegistry.buf[prop.valueID]));
         }
     }
 
@@ -111,17 +106,13 @@ flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
 }
 
 void printflo_html_BasicRegistry(flo_html_String registryName,
-                                 flo_html_HashElement_d_a *hashElements,
-                                 flo_html_StringHashSet *set) {
+                                 flo_html_String_d_a *strings) {
     printf("%-20.*s\nregistration nodes inside DOM...\n",
            FLO_HTML_S_P(registryName));
-    printf("total number of nodes: %zu\n", hashElements->len);
-    for (ptrdiff_t i = 0; i < hashElements->len; i++) {
-        flo_html_HashElement hashElement = hashElements->buf[i];
-        flo_html_String value =
-            flo_html_getStringFromHashSet(set, hashElement);
-        printf("ID: %zu value: %-20.*s hash: %zu offset: %u\n", i,
-               FLO_HTML_S_P(value), hashElement.hash, hashElement.offset);
+    printf("total number of nodes: %zu\n", strings->len);
+    for (ptrdiff_t i = 0; i < strings->len; i++) {
+        flo_html_String string = strings->buf[i];
+        printf("ID: %zu value: %-20.*s\n", i, FLO_HTML_S_P(string));
     }
     printf("\n");
 }
@@ -176,21 +167,16 @@ void flo_html_printDomStatus(flo_html_Dom *dom) {
            dom->tagRegistry.len);
     for (ptrdiff_t i = 0; i < dom->tagRegistry.len; i++) {
         flo_html_TagRegistration tagRegistration = dom->tagRegistry.buf[i];
-        flo_html_String tag = flo_html_getStringFromHashSet(
-            &dom->tags, tagRegistration.hashElement);
-        printf("tag ID: %-5td tag: %-20.*s isPaired: %d hash: %zu offset: %u\n",
-               i, FLO_HTML_S_P(tag), tagRegistration.isPaired,
-               tagRegistration.hashElement.hash,
-               tagRegistration.hashElement.offset);
+        printf("tag ID: %-5td tag: %-20.*s isPaired: %d\n", i,
+               FLO_HTML_S_P(tagRegistration.tag), tagRegistration.isPaired);
     }
     printf("\n");
 
     printflo_html_BasicRegistry(FLO_HTML_S("bool props"),
-                                &dom->boolPropRegistry, &dom->boolPropsSet);
-    printflo_html_BasicRegistry(FLO_HTML_S("key props"), &dom->propKeyRegistry,
-                                &dom->propKeys);
+                                &dom->boolPropRegistry);
+    printflo_html_BasicRegistry(FLO_HTML_S("key props"), &dom->propKeyRegistry);
     printflo_html_BasicRegistry(FLO_HTML_S("value props"),
-                                &dom->propValueRegistry, &dom->propValues);
+                                &dom->propValueRegistry);
 
     printf("boolean property nodes inside DOM...\n");
     printf("total number of boolean properties: %zu\n", dom->boolProps.len);

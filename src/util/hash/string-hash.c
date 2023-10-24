@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -19,9 +20,9 @@ flo_html_StringHashSet flo_html_initStringHashSet(ptrdiff_t capacity,
                               FLO_HTML_ZERO_MEMORY)};
 }
 
-ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
-                                       flo_html_String string,
-                                       flo_html_Arena *perm) {
+flo_html_StringHashInsert
+flo_html_insertStringHashSet(flo_html_StringHashSet *set,
+                             flo_html_String string, flo_html_Arena *perm) {
     size_t newStringHash = flo_html_hashString(string);
     ptrdiff_t newStringProbes = 0;
 
@@ -30,14 +31,15 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         flo_html_StringHashEntry entry =
             set->array[(newStringHash + newStringProbes) % set->arrayLen];
         if (flo_html_stringEquals(entry.string, string)) {
-            return entry.contains.entryIndex;
+            return (flo_html_StringHashInsert){.contains = entry.contains,
+                                               .wasInserted = false};
         }
         if (newStringProbes < MAX_PROBES) {
             newStringProbes++;
         } else {
             FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
                                  MAX_PROBES);
-            return 0;
+            __builtin_longjmp(perm->jmp_buf, 1);
         }
     }
 
@@ -49,7 +51,7 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
             FLO_HTML_PRINT_ERROR(
                 "Hash set capacity would exceed the maximum capacity: %d!\n",
                 MAX_CAPACITY);
-            return 0;
+            __builtin_longjmp(perm->jmp_buf, 1);
         }
 
         ptrdiff_t newCapacity = (set->arrayLen * 2 <= MAX_CAPACITY)
@@ -90,7 +92,7 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
             } else {
                 FLO_HTML_PRINT_ERROR("Maximum number of probes %u reached!",
                                      MAX_PROBES);
-                return 0;
+                __builtin_longjmp(perm->jmp_buf, 1);
             }
         }
     }
@@ -98,20 +100,21 @@ ptrdiff_t flo_html_insertStringHashSet(flo_html_StringHashSet *set,
     // increment entries before setting the entry index - 0 used as not found.
     set->entries++;
 
+    flo_html_Contains containsResult = (flo_html_Contains){
+        .entryIndex = set->entries,
+        .hashElement = (flo_html_HashElement){.hash = newStringHash,
+                                              .offset = newStringProbes}};
+
     ptrdiff_t finalIndex = (newStringHash + newStringProbes) % set->arrayLen;
     set->array[finalIndex] = (flo_html_StringHashEntry){
-        .string = string,
-        .contains = (flo_html_Contains){
-            .entryIndex = set->entries,
-            .hashElement = (flo_html_HashElement){.hash = newStringHash,
-                                                  .offset = newStringProbes}}};
+        .string = string, .contains = containsResult};
 
-    return set->entries;
+    return (flo_html_StringHashInsert){.contains = containsResult,
+                                       .wasInserted = true};
 }
 
-flo_html_Contains
-flo_html_containsStringHashSet(flo_html_StringHashSet *set,
-                               flo_html_String string) {
+flo_html_Contains flo_html_containsStringHashSet(flo_html_StringHashSet *set,
+                                                 flo_html_String string) {
     size_t hash = flo_html_hashString(string);
 
     ptrdiff_t probes = 0;

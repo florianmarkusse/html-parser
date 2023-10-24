@@ -44,9 +44,9 @@ typedef struct {
     // Data containing the ID and associated hash
     // TODO: what to do when underlying set has rehashed?
     flo_html_TagRegistration_d_a tagRegistry;
-    flo_html_HashElement_d_a boolPropRegistry;
-    flo_html_HashElement_d_a propKeyRegistry;
-    flo_html_HashElement_d_a propValueRegistry;
+    flo_html_String_d_a boolPropRegistry;
+    flo_html_String_d_a propKeyRegistry;
+    flo_html_String_d_a propValueRegistry;
 
     // Data containg the acual string values.
     flo_html_StringHashSet tags;

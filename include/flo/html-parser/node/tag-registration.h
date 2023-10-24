@@ -12,7 +12,7 @@ extern "C" {
 #include "node.h"
 
 typedef struct {
-    flo_html_HashElement hashElement;
+    flo_html_String tag;
     bool isPaired;
 } flo_html_TagRegistration;
 

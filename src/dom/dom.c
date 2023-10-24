@@ -34,10 +34,9 @@ flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
     };
 
     *FLO_HTML_PUSH(&result->tagRegistry, perm) = (flo_html_TagRegistration){0};
-    *FLO_HTML_PUSH(&result->boolPropRegistry, perm) = (flo_html_HashElement){0};
-    *FLO_HTML_PUSH(&result->propKeyRegistry, perm) = (flo_html_HashElement){0};
-    *FLO_HTML_PUSH(&result->propValueRegistry, perm) =
-        (flo_html_HashElement){0};
+    *FLO_HTML_PUSH(&result->boolPropRegistry, perm) = FLO_HTML_EMPTY_STRING;
+    *FLO_HTML_PUSH(&result->propKeyRegistry, perm) = FLO_HTML_EMPTY_STRING;
+    *FLO_HTML_PUSH(&result->propValueRegistry, perm) = FLO_HTML_EMPTY_STRING;
 
     result->tags =
         flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),

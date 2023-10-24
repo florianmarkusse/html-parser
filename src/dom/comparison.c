@@ -27,15 +27,12 @@ flo_html_ComparisonStatus convertHashComparisonToComparison(
     }
 }
 
-void printAttributes(flo_html_index_id tagID1,
-                     flo_html_StringHashSet *set1, flo_html_Dom *dom1,
-                     flo_html_index_id tagID2,
+void printAttributes(flo_html_index_id tagID1, flo_html_StringHashSet *set1,
+                     flo_html_Dom *dom1, flo_html_index_id tagID2,
                      flo_html_StringHashSet *set2, flo_html_Dom *dom2) {
-    flo_html_String tag1 = flo_html_getStringFromHashSet(
-        &dom1->tags, dom1->tagRegistry.buf[tagID1].hashElement);
     FLO_HTML_PRINT_ERROR(
         "Printing certain attributes of node 1 with tag %.*s:\n",
-        FLO_HTML_S_P(tag1));
+        FLO_HTML_S_P(dom1->tagRegistry.buf[tagID1].tag));
 
     flo_html_StringHashSetIterator iterator =
         (flo_html_StringHashSetIterator){.set = set1, .index = 0};
@@ -45,11 +42,9 @@ void printAttributes(flo_html_index_id tagID1,
         FLO_HTML_PRINT_ERROR("%.*s\n", FLO_HTML_S_P(attribute));
     }
 
-    flo_html_String tag2 = flo_html_getStringFromHashSet(
-        &dom2->tags, dom2->tagRegistry.buf[tagID2].hashElement);
     FLO_HTML_PRINT_ERROR(
         "Printing certain attributes of node 2 with tag %.*s:\n",
-        FLO_HTML_S_P(tag2));
+        FLO_HTML_S_P(dom2->tagRegistry.buf[tagID2].tag));
 
     iterator = (flo_html_StringHashSetIterator){.set = set2, .index = 0};
     while ((attribute = flo_html_nextStringHashSetIterator(&iterator)).len !=
@@ -58,7 +53,7 @@ void printAttributes(flo_html_index_id tagID1,
     }
 }
 
-bool createPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
+void createPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
                     flo_html_StringHashSet *keySet,
                     flo_html_StringHashSet *valueSet, flo_html_Arena *perm) {
     *keySet = flo_html_initStringHashSet(FLO_HTML_MAX_PROPERTIES * 2, perm);
@@ -68,50 +63,30 @@ bool createPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
     for (ptrdiff_t i = 0; i < dom->props.len; i++) {
         if (dom->props.buf[i].nodeID == nodeID) {
             flo_html_index_id keyID = dom->props.buf[i].keyID;
-            flo_html_String propKey = flo_html_getStringFromHashSet(
-                &dom->propKeys, dom->propKeyRegistry.buf[keyID]);
-            if (!flo_html_insertStringHashSet(keySet, propKey, perm)) {
-                FLO_HTML_PRINT_ERROR(
-                    "Failed to insert \"%.*s\" into key hash set\n",
-                    FLO_HTML_S_P(propKey));
-                return false;
-            }
+            flo_html_insertStringHashSet(keySet,
+                                         dom->propKeyRegistry.buf[keyID], perm);
 
             flo_html_index_id valueID = dom->props.buf[i].valueID;
-            flo_html_String propValue = flo_html_getStringFromHashSet(
-                &dom->propValues, dom->propValueRegistry.buf[valueID]);
-            if (!flo_html_insertStringHashSet(keySet, propValue, perm)) {
-                FLO_HTML_PRINT_ERROR(
-                    "Failed to insert \"%.*s\" into value hash set\n",
-                    FLO_HTML_S_P(propValue));
-                return false;
-            }
+            flo_html_insertStringHashSet(
+                keySet, dom->propValueRegistry.buf[valueID], perm);
         }
     }
-
-    return true;
 }
 
 // TODO: this function does not correct compare properties
 // e.g. <a thing="a", foo="bar" /> IS NOT EQUAL TO
 //      <a foo="a", thing="bar" />
-flo_html_ComparisonStatus
-compareProps(flo_html_Node node1, flo_html_Dom *dom1,
-             flo_html_Node node2, flo_html_Dom *dom2,
-             bool printDifferences, flo_html_Arena scratch) {
+flo_html_ComparisonStatus compareProps(flo_html_Node node1, flo_html_Dom *dom1,
+                                       flo_html_Node node2, flo_html_Dom *dom2,
+                                       bool printDifferences,
+                                       flo_html_Arena scratch) {
     flo_html_StringHashSet keySet1;
     flo_html_StringHashSet valueSet1;
-    if (!createPropsSet(node1.nodeID, dom1, &keySet1, &valueSet1, &scratch)) {
-        FLO_HTML_PRINT_ERROR("Failed to create hash sets for node 1\n");
-        return COMPARISON_MEMORY;
-    }
+    createPropsSet(node1.nodeID, dom1, &keySet1, &valueSet1, &scratch);
 
     flo_html_StringHashSet keySet2;
     flo_html_StringHashSet valueSet2;
-    if (!createPropsSet(node2.nodeID, dom2, &keySet2, &valueSet2, &scratch)) {
-        FLO_HTML_PRINT_ERROR("Failed to create hash sets for node 2\n");
-        return COMPARISON_MEMORY;
-    }
+    createPropsSet(node2.nodeID, dom2, &keySet2, &valueSet2, &scratch);
 
     flo_html_HashComparisonStatus result =
         flo_html_equalsStringHashSet(&keySet1, &keySet2);
@@ -151,13 +126,8 @@ bool createBoolPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
     for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
         if (dom->boolProps.buf[i].nodeID == nodeID) {
             flo_html_index_id propID = dom->boolProps.buf[i].propID;
-            flo_html_String boolProp = flo_html_getStringFromHashSet(
-                &dom->boolPropsSet, dom->boolPropRegistry.buf[propID]);
-            if (!flo_html_insertStringHashSet(boolPropsSet, boolProp, perm)) {
-                FLO_HTML_PRINT_ERROR("Failed to insert %.*s into hash set",
-                                     FLO_HTML_S_P(boolProp));
-                return false;
-            }
+            flo_html_insertStringHashSet(
+                boolPropsSet, dom->boolPropRegistry.buf[propID], perm);
         }
     }
 
@@ -165,9 +135,9 @@ bool createBoolPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
 }
 
 flo_html_ComparisonStatus
-compareBoolProps(flo_html_Node node1, flo_html_Dom *dom1,
-                 flo_html_Node node2, flo_html_Dom *dom2,
-                 bool printDifferences, flo_html_Arena scratch) {
+compareBoolProps(flo_html_Node node1, flo_html_Dom *dom1, flo_html_Node node2,
+                 flo_html_Dom *dom2, bool printDifferences,
+                 flo_html_Arena scratch) {
     flo_html_StringHashSet set1;
     if (!(createBoolPropsSet(node1.nodeID, dom1, &set1, &scratch))) {
         FLO_HTML_PRINT_ERROR("Failed to create hash set 1");
@@ -193,21 +163,8 @@ compareBoolProps(flo_html_Node node1, flo_html_Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-bool tagStringEquals(flo_html_TagRegistration *tagRegistration1,
-                     flo_html_Dom *dom1,
-                     flo_html_TagRegistration *tagRegistration2,
-                     flo_html_Dom *dom2) {
-    flo_html_String string1 = flo_html_getStringFromHashSet(
-        &dom1->tags, tagRegistration1->hashElement);
-    flo_html_String string2 = flo_html_getStringFromHashSet(
-        &dom2->tags, tagRegistration2->hashElement);
-    return flo_html_stringEquals(string1, string2);
-}
-
-flo_html_ComparisonStatus compareTags(flo_html_Node node1,
-                                      flo_html_Dom *dom1,
-                                      flo_html_Node node2,
-                                      flo_html_Dom *dom2,
+flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
+                                      flo_html_Node node2, flo_html_Dom *dom2,
                                       bool printDifferences) {
     if (node1.nodeType != node2.nodeType) {
         if (printDifferences) {
@@ -253,31 +210,24 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1,
                     singleNode++;
                 }
 
-                flo_html_String tag1 = flo_html_getStringFromHashSet(
-                    &dom1->tags, tagRegistration1->hashElement);
-                flo_html_String tag2 = flo_html_getStringFromHashSet(
-                    &dom2->tags, tagRegistration2->hashElement);
                 FLO_HTML_PRINT_ERROR(
                     "Uncomparable nodes: single node and paired node.\nFound "
                     "single node in node %c.\n"
                     "node 1 tag: %.*s\nnode 2 tag: %.*s\n",
-                    singleNode, FLO_HTML_S_P(tag1), FLO_HTML_S_P(tag2));
+                    singleNode, FLO_HTML_S_P(tagRegistration1->tag),
+                    FLO_HTML_S_P(tagRegistration2->tag));
             }
             return COMPARISON_DIFFERENT_NODE_TYPE;
         }
 
-        if (!tagStringEquals(tagRegistration1, dom1, tagRegistration2, dom2)) {
+        if (!flo_html_stringEquals(tagRegistration1->tag,
+                                   tagRegistration2->tag)) {
             if (printDifferences) {
-                flo_html_String tag1 = flo_html_getStringFromHashSet(
-                    &dom1->tags,
-                    dom1->tagRegistry.buf[node1.nodeID].hashElement);
-                flo_html_String tag2 = flo_html_getStringFromHashSet(
-                    &dom2->tags,
-                    dom2->tagRegistry.buf[node2.nodeID].hashElement);
                 FLO_HTML_PRINT_ERROR(
                     "Nodes have different tags.\nnode 1 tag: %.*s\nnode "
                     "2 tag: %.*s\n",
-                    FLO_HTML_S_P(tag1), FLO_HTML_S_P(tag2));
+                    FLO_HTML_S_P(tagRegistration1->tag),
+                    FLO_HTML_S_P(tagRegistration2->tag));
             }
             return COMPARISON_DIFFERENT_CONTENT;
         }
@@ -382,10 +332,9 @@ flo_html_ComparisonResult flo_html_equals(flo_html_Dom *dom1,
     return result;
 }
 
-void flo_html_printFirstDifference(flo_html_node_id nodeID1,
-                                   flo_html_Dom *dom1,
-                                   flo_html_node_id nodeID2,
-                                   flo_html_Dom *dom2, flo_html_Arena scratch) {
+void flo_html_printFirstDifference(flo_html_node_id nodeID1, flo_html_Dom *dom1,
+                                   flo_html_node_id nodeID2, flo_html_Dom *dom2,
+                                   flo_html_Arena scratch) {
     flo_html_Node node1 = dom1->nodes.buf[nodeID1];
     flo_html_Node node2 = dom2->nodes.buf[nodeID2];
 
