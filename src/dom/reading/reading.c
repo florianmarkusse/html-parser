@@ -11,7 +11,7 @@
 bool flo_html_hasBoolProp(flo_html_node_id nodeID, flo_html_String boolProp,
                           flo_html_Dom *dom) {
     flo_html_index_id boolPropID =
-        flo_html_containsStringHashSet(&dom->boolPropsSet, boolProp).entryIndex;
+        flo_html_containsStringHashSet(&dom->boolPropsSet, boolProp);
     if (boolPropID == 0) {
         return false;
     }
@@ -29,7 +29,7 @@ bool flo_html_hasBoolProp(flo_html_node_id nodeID, flo_html_String boolProp,
 bool flo_html_hasPropKey(flo_html_node_id nodeID, flo_html_String propKey,
                          flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
-        flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, propKey);
     if (propKeyID == 0) {
         return false;
     }
@@ -46,7 +46,7 @@ bool flo_html_hasPropKey(flo_html_node_id nodeID, flo_html_String propKey,
 bool flo_html_hasPropValue(flo_html_node_id nodeID, flo_html_String propValue,
                            flo_html_Dom *dom) {
     flo_html_index_id propValueID =
-        flo_html_containsStringHashSet(&dom->propValues, propValue).entryIndex;
+        flo_html_containsStringHashSet(&dom->propValues, propValue);
     if (propValueID == 0) {
         return false;
     }
@@ -63,13 +63,13 @@ bool flo_html_hasPropValue(flo_html_node_id nodeID, flo_html_String propValue,
 bool flo_html_hasProperty(flo_html_node_id nodeID, flo_html_String propKey,
                           flo_html_String propValue, flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
-        flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, propKey);
     if (propKeyID == 0) {
         return false;
     }
 
     flo_html_index_id propValueID =
-        flo_html_containsStringHashSet(&dom->propValues, propValue).entryIndex;
+        flo_html_containsStringHashSet(&dom->propValues, propValue);
     if (propKeyID == 0) {
         return false;
     }
@@ -105,7 +105,7 @@ flo_html_String_d_a flo_html_getTextContent(flo_html_node_id nodeID,
 flo_html_String flo_html_getValue(flo_html_node_id nodeID,
                                   flo_html_String propKey, flo_html_Dom *dom) {
     flo_html_index_id propKeyID =
-        flo_html_containsStringHashSet(&dom->propKeys, propKey).entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, propKey);
     if (propKeyID == 0) {
         return FLO_HTML_EMPTY_STRING;
     }

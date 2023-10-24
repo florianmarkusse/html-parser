@@ -133,6 +133,8 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
         return TEST_FAILURE;
     }
 
+    flo_html_printHTML(comparisonTest.actual);
+
     return compareAndEndTest(&comparisonTest, scratch);
 }
 

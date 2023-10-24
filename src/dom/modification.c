@@ -20,7 +20,7 @@ flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
                                              flo_html_Dom *dom,
                                              flo_html_StringHashSet *set,
                                              flo_html_Arena *perm) {
-    flo_html_StringHashInsert result =
+    flo_html_StringInsert result =
         flo_html_insertStringHashSet(set, prop, perm);
     if (result.wasInserted) {
         switch (propertyType) {
@@ -70,7 +70,7 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
                                flo_html_String newValue, flo_html_Dom *dom,
                                flo_html_Arena *perm) {
     flo_html_index_id keyID =
-        flo_html_containsStringHashSet(&dom->propKeys, key).entryIndex;
+        flo_html_containsStringHashSet(&dom->propKeys, key);
     if (keyID == 0) {
         FLO_HTML_PRINT_ERROR("Could not find key in stored prop keys\n");
         return false;
@@ -125,7 +125,7 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
 void flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
                                    bool isPaired, flo_html_Dom *dom,
                                    flo_html_Arena *perm) {
-    flo_html_StringHashInsert result =
+    flo_html_StringInsert result =
         flo_html_insertStringHashSet(&dom->tags, tag, perm);
     if (result.wasInserted) {
         *FLO_HTML_PUSH(&dom->tagRegistry, perm) =

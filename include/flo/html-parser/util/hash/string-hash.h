@@ -24,11 +24,12 @@ extern "C" {
 // type be based on the type tho
 typedef struct {
     ptrdiff_t entryIndex;
-    flo_html_HashElement hashElement;
-} flo_html_Contains;
+    bool wasInserted;
+} flo_html_StringInsert;
 
 typedef struct {
-    flo_html_Contains contains;
+    ptrdiff_t entryIndex;
+    size_t hash;
     flo_html_String string;
 } flo_html_StringHashEntry;
 
@@ -38,20 +39,15 @@ typedef struct {
     ptrdiff_t entries;
 } flo_html_StringHashSet;
 
-typedef struct {
-    ptrdiff_t entryIndex;
-    bool wasInserted;
-} flo_html_StringHashInsert;
-
 flo_html_StringHashSet flo_html_initStringHashSet(ptrdiff_t capacity,
                                                   flo_html_Arena *perm);
 
-flo_html_StringHashInsert
-flo_html_insertStringHashSet(flo_html_StringHashSet *set,
-                             flo_html_String string, flo_html_Arena *perm);
+flo_html_StringInsert flo_html_insertStringHashSet(flo_html_StringHashSet *set,
+                                                   flo_html_String string,
+                                                   flo_html_Arena *perm);
 
-flo_html_Contains flo_html_containsStringHashSet(flo_html_StringHashSet *set,
-                                                 flo_html_String string);
+ptrdiff_t flo_html_containsStringHashSet(flo_html_StringHashSet *set,
+                                         flo_html_String string);
 
 flo_html_String flo_html_getStringFromHashSet(flo_html_StringHashSet *set,
                                               flo_html_HashElement hashElement);

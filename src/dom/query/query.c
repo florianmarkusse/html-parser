@@ -46,9 +46,7 @@ bool isSpecifiedCombinator(char ch) {
     return ch == '>' || ch == '+' || ch == '~';
 }
 
-bool isCombinator(char ch) {
-    return ch == ' ' || isSpecifiedCombinator(ch);
-}
+bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
 
 bool endOfCurrentFilter(char ch) {
     return isCombinator(ch) || flo_html_isSpecialSpace(ch) || ch == '[' ||
@@ -114,11 +112,9 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             }
             ptrdiff_t tagLen = currentPosition - tagStart;
 
-            flo_html_index_id tagID =
-                flo_html_containsStringHashSet(
-                    &dom->tags,
-                    FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen))
-                    .entryIndex;
+            flo_html_index_id tagID = flo_html_containsStringHashSet(
+                &dom->tags,
+                FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen));
             if (tagID == 0) {
                 return QUERY_NOT_SEEN_BEFORE;
             }
@@ -168,19 +164,17 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             // but it is correct (I think).
             if (currentSelector == CLASS || currentSelector == ID) {
                 flo_html_String keyBuffer = currentSelector == CLASS
-                                                      ? FLO_HTML_S("class")
-                                                      : FLO_HTML_S("id");
+                                                ? FLO_HTML_S("class")
+                                                : FLO_HTML_S("id");
                 flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(&dom->propKeys, keyBuffer)
-                        .entryIndex;
+                    flo_html_containsStringHashSet(&dom->propKeys, keyBuffer);
                 if (propKeyID == 0) {
                     FLO_HTML_PRINT_ERROR("PROP KEY ID 0");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 flo_html_index_id propValueID =
-                    flo_html_containsStringHashSet(&dom->propValues, token)
-                        .entryIndex;
+                    flo_html_containsStringHashSet(&dom->propValues, token);
                 if (propValueID == 0) {
                     FLO_HTML_PRINT_ERROR("PROP VALUE ID 0");
                     return QUERY_NOT_SEEN_BEFORE;
@@ -192,8 +186,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 filtersLen++;
             } else if (ch == ']') {
                 flo_html_index_id boolPropID =
-                    flo_html_containsStringHashSet(&dom->boolPropsSet, token)
-                        .entryIndex;
+                    flo_html_containsStringHashSet(&dom->boolPropsSet, token);
                 if (boolPropID == 0) {
                     FLO_HTML_PRINT_ERROR("BOOL PROP ID 0");
                     return QUERY_NOT_SEEN_BEFORE;
@@ -204,8 +197,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 filtersLen++;
             } else if (ch == '=') {
                 flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(&dom->propKeys, token)
-                        .entryIndex;
+                    flo_html_containsStringHashSet(&dom->propKeys, token);
                 if (propKeyID == 0) {
                     FLO_HTML_PRINT_ERROR("IN = PROPKEY 0");
                     return QUERY_NOT_SEEN_BEFORE;
@@ -222,8 +214,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 ch = flo_html_getChar(css, currentPosition);
 
                 flo_html_index_id propValueID =
-                    flo_html_containsStringHashSet(&dom->propValues, propValue)
-                        .entryIndex;
+                    flo_html_containsStringHashSet(&dom->propValues, propValue);
                 if (propValueID == 0) {
                     FLO_HTML_PRINT_ERROR("IN = PROPVALUE 0");
                     return QUERY_NOT_SEEN_BEFORE;

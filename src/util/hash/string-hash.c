@@ -20,9 +20,9 @@ flo_html_StringHashSet flo_html_initStringHashSet(ptrdiff_t capacity,
                               FLO_HTML_ZERO_MEMORY)};
 }
 
-flo_html_StringHashInsert
-flo_html_insertStringHashSet(flo_html_StringHashSet *set,
-                             flo_html_String string, flo_html_Arena *perm) {
+flo_html_StringInsert flo_html_insertStringHashSet(flo_html_StringHashSet *set,
+                                                   flo_html_String string,
+                                                   flo_html_Arena *perm) {
     size_t newStringHash = flo_html_hashString(string);
     ptrdiff_t newStringProbes = 0;
 
@@ -31,8 +31,8 @@ flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         flo_html_StringHashEntry entry =
             set->array[(newStringHash + newStringProbes) % set->arrayLen];
         if (flo_html_stringEquals(entry.string, string)) {
-            return (flo_html_StringHashInsert){
-                .entryIndex = entry.contains.entryIndex, .wasInserted = false};
+            return (flo_html_StringInsert){.entryIndex = entry.entryIndex,
+                                           .wasInserted = false};
         }
         if (newStringProbes < MAX_PROBES) {
             newStringProbes++;
@@ -65,17 +65,15 @@ flo_html_insertStringHashSet(flo_html_StringHashSet *set,
         for (ptrdiff_t i = 0; i < set->arrayLen; i++) {
             if (set->array[i].string.buf != NULL) {
                 ptrdiff_t probes = 0;
-                ptrdiff_t hash = oldArray[i].contains.hashElement.hash;
+                ptrdiff_t hash = oldArray[i].hash;
                 while (set->array[(hash + probes) % newCapacity].string.buf !=
                        NULL) {
                     probes++;
                 }
                 ptrdiff_t finalIndex = (hash + probes) % newCapacity;
                 set->array[finalIndex].string = oldArray[i].string;
-                set->array[finalIndex].contains.entryIndex =
-                    oldArray[i].contains.entryIndex;
-                set->array[finalIndex].contains.hashElement.hash = hash;
-                set->array[finalIndex].contains.hashElement.offset = probes;
+                set->array[finalIndex].entryIndex = oldArray[i].entryIndex;
+                set->array[finalIndex].hash = hash;
             }
         }
 
@@ -100,21 +98,16 @@ flo_html_insertStringHashSet(flo_html_StringHashSet *set,
     // increment entries before setting the entry index - 0 used as not found.
     set->entries++;
 
-    flo_html_Contains containsResult = (flo_html_Contains){
-        .entryIndex = set->entries,
-        .hashElement = (flo_html_HashElement){.hash = newStringHash,
-                                              .offset = newStringProbes}};
-
     ptrdiff_t finalIndex = (newStringHash + newStringProbes) % set->arrayLen;
     set->array[finalIndex] = (flo_html_StringHashEntry){
-        .string = string, .contains = containsResult};
+        .string = string, .hash = newStringHash, .entryIndex = set->entries};
 
-    return (flo_html_StringHashInsert){.entryIndex = containsResult.entryIndex,
-                                       .wasInserted = true};
+    return (flo_html_StringInsert){.entryIndex = set->entries,
+                                   .wasInserted = true};
 }
 
-flo_html_Contains flo_html_containsStringHashSet(flo_html_StringHashSet *set,
-                                                 flo_html_String string) {
+ptrdiff_t flo_html_containsStringHashSet(flo_html_StringHashSet *set,
+                                         flo_html_String string) {
     size_t hash = flo_html_hashString(string);
 
     ptrdiff_t probes = 0;
@@ -122,14 +115,12 @@ flo_html_Contains flo_html_containsStringHashSet(flo_html_StringHashSet *set,
         flo_html_StringHashEntry entry =
             set->array[(hash + probes) % set->arrayLen];
         if (flo_html_stringEquals(entry.string, string)) {
-            return entry.contains;
+            return entry.entryIndex;
         }
         probes++;
     }
 
-    return (flo_html_Contains){
-        .hashElement = (flo_html_HashElement){.hash = hash, .offset = probes},
-        .entryIndex = 0};
+    return 0;
 }
 
 flo_html_String
@@ -151,14 +142,14 @@ flo_html_equalsStringHashSet(flo_html_StringHashSet *set1,
     flo_html_StringHashSetIterator iterator =
         (flo_html_StringHashSetIterator){.set = set1, .index = 0};
     while ((element = flo_html_nextStringHashSetIterator(&iterator)).len != 0) {
-        if (!flo_html_containsStringHashSet(set2, element).entryIndex) {
+        if (!flo_html_containsStringHashSet(set2, element)) {
             return HASH_COMPARISON_DIFFERENT_CONTENT;
         }
     }
 
     iterator = (flo_html_StringHashSetIterator){.set = set2, .index = 0};
     while ((element = flo_html_nextStringHashSetIterator(&iterator)).len != 0) {
-        if (!flo_html_containsStringHashSet(set1, element).entryIndex) {
+        if (!flo_html_containsStringHashSet(set1, element)) {
             return HASH_COMPARISON_DIFFERENT_CONTENT;
         }
     }

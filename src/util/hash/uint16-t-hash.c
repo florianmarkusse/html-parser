@@ -18,8 +18,9 @@ flo_html_Uint16HashSet flo_html_initUint16HashSet(uint16_t capacity,
     };
 }
 
-bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
-                                  uint16_t id, flo_html_Arena *perm) {
+// TODO: use setjmp here for failure cases!
+bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
+                                  flo_html_Arena *perm) {
     uint16_t newIntHash = flo_html_hash16_xm3(id); // Calculate the hash once
     ptrdiff_t newIntProbes = 0;
 
@@ -101,9 +102,8 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set,
     return true;
 }
 
-flo_html_uint16_t_a
-flo_html_uint16HashSetToArray(flo_html_Uint16HashSet *set,
-                              flo_html_Arena *perm) {
+flo_html_uint16_t_a flo_html_uint16HashSetToArray(flo_html_Uint16HashSet *set,
+                                                  flo_html_Arena *perm) {
     flo_html_uint16_t_a result;
     result.buf = FLO_HTML_NEW(perm, uint16_t, set->entries);
     result.len = set->entries;
@@ -118,8 +118,7 @@ flo_html_uint16HashSetToArray(flo_html_Uint16HashSet *set,
     return result;
 }
 
-bool flo_html_containsUint16HashSet(flo_html_Uint16HashSet *set,
-                                    uint16_t id) {
+bool flo_html_containsUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id) {
     ptrdiff_t index = flo_html_hash16_xm3(id) % set->arrayLen;
 
     while (set->array[index].value != 0) {
