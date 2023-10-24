@@ -43,13 +43,14 @@ flo_html_strcpy(flo_html_String dest, flo_html_String src) {
 }
 __attribute__((unused)) static inline unsigned char
 flo_html_getChar(flo_html_String str, ptrdiff_t index) {
-    FLO_HTML_ASSERT(index >= 0 && index <= str.len);
+    FLO_HTML_ASSERT(index >= 0 && index < str.len);
 
     return str.buf[index];
 }
+
 __attribute__((unused)) static inline unsigned char *
 flo_html_getCharPtr(flo_html_String str, ptrdiff_t index) {
-    FLO_HTML_ASSERT(index >= 0 && index <= str.len);
+    FLO_HTML_ASSERT(index >= 0 && index < str.len);
 
     return &str.buf[index];
 }
@@ -65,7 +66,7 @@ flo_html_containsChar(flo_html_String s, unsigned char ch) {
 
 __attribute__((unused)) static inline flo_html_String
 flo_html_splitString(flo_html_String s, unsigned char token, ptrdiff_t from) {
-    FLO_HTML_ASSERT(from >= 0 && from <= s.len);
+    FLO_HTML_ASSERT(from >= 0 && from < s.len);
 
     for (ptrdiff_t i = from; i < s.len; i++) {
         if (s.buf[i] == token) {
@@ -81,7 +82,7 @@ flo_html_splitString(flo_html_String s, unsigned char token, ptrdiff_t from) {
 __attribute__((unused)) static inline ptrdiff_t
 flo_html_firstOccurenceOfFrom(flo_html_String s, unsigned char ch,
                               ptrdiff_t from) {
-    FLO_HTML_ASSERT(from >= 0 && from <= s.len);
+    FLO_HTML_ASSERT(from >= 0 && from < s.len);
 
     for (ptrdiff_t i = from; i < s.len; i++) {
         if (s.buf[i] == ch) {

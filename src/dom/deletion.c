@@ -68,6 +68,7 @@ void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom) {
 void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
                                     flo_html_String boolProp,
                                     flo_html_Dom *dom) {
+    // TODO: This is an example of the casting.
     flo_html_index_id boolPropID =
         flo_html_containsStringHashSet(&dom->boolPropsSet, boolProp);
     if (boolPropID > 0) {
