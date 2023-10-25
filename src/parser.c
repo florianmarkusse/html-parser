@@ -18,6 +18,53 @@
 #include "flo/html-parser/util/raw-data.h"
 #include "flo/html-parser/util/text/char.h"
 
+#define HTML_COMMENT_START_LENGTH 4
+
+typedef struct {
+    flo_html_String text;
+    ptrdiff_t idx;
+} ParseStatus;
+
+#define NEXT_CHAR(parseStatus)                                                 \
+    if ((parseStatus).idx < (parseStatus).text.len - 1) {                      \
+        ++(parseStatus).idx;                                                   \
+    }
+
+#define SKIP_CHARS(parseStatus, increase)                                      \
+                                                                               \
+    if ((parseStatus).idx < (parseStatus).text.len - (increase)) {             \
+        (parseStatus).idx += (increase);                                       \
+    }
+
+#define NEXT_CHAR_WHILE(parseStatus, condition)                                \
+    for (unsigned char ch =                                                    \
+             flo_html_getChar((parseStatus).text, (parseStatus).idx);          \
+         (parseStatus).idx < (parseStatus).text.len - 1 && (condition);        \
+         ch = flo_html_getChar((parseStatus).text, ++(parseStatus).idx))
+
+#define NEXT_CHAR_UNTIL(parseStatus, condition)                                \
+    for (unsigned char ch =                                                    \
+             flo_html_getChar((parseStatus).text, (parseStatus).idx);          \
+         (parseStatus).idx < (parseStatus).text.len - 1 && !(condition);       \
+         ch = flo_html_getChar((parseStatus).text, ++(parseStatus).idx))
+
+#define SKIP_EMPTY_SPACE(parseStatus)                                          \
+    NEXT_CHAR_WHILE(parseStatus, (ch == ' ' || flo_html_isSpecialSpace(ch)))
+
+#define SKIP_COMMENT(parseStatus)                                              \
+    SKIP_CHARS(ps, HTML_COMMENT_START_LENGTH);                                 \
+    NEXT_CHAR_UNTIL(                                                           \
+        ps,                                                                    \
+        (ch == '>' &&                                                          \
+         flo_html_stringEquals(                                                \
+             FLO_HTML_S("--"),                                                 \
+             FLO_HTML_S_LEN(flo_html_getCharPtr(ps.text, ps.idx - 2), 2))))    \
+    NEXT_CHAR(ps);
+
+inline unsigned char currentChar(ParseStatus ps) {
+    return flo_html_getChar(ps.text, ps.idx);
+}
+
 typedef enum {
     BASIC_CONTEXT,
     SCRIPT_CONTEXT,
@@ -44,8 +91,8 @@ bool isVoidElement(flo_html_String str) {
 
 static void updateReferences(flo_html_node_id newNodeID,
                              flo_html_node_id previousNodeID,
-                             flo_html_NodeDepth *depthStack,
-                             flo_html_Dom *dom, flo_html_Arena *perm) {
+                             flo_html_NodeDepth *depthStack, flo_html_Dom *dom,
+                             flo_html_Arena *perm) {
     if (newNodeID > 0 && previousNodeID > 0) {
         if (depthStack->len == 0) {
             *FLO_HTML_PUSH(&dom->nextNodes, perm) = (flo_html_NextNode){
@@ -67,12 +114,10 @@ static void updateReferences(flo_html_node_id newNodeID,
     }
 }
 
-unsigned char textNodeContinue(char ch, flo_html_String htmlString,
-                               ptrdiff_t currentPosition) {
+unsigned char textNodeContinue(unsigned char ch, ParseStatus ps) {
     return (!flo_html_isSpecialSpace(ch) &&
             (ch != ' ' ||
-             (currentPosition > 0 &&
-              flo_html_getChar(htmlString, currentPosition - 1) != ' ')));
+             (ps.idx > 0 && flo_html_getChar(ps.text, ps.idx - 1) != ' ')));
 }
 
 typedef struct {
@@ -108,59 +153,52 @@ static ptrdiff_t parseEmptyContent(flo_html_String html, ptrdiff_t start) {
     return end;
 }
 
-flo_html_NodeParseResult parseComment(flo_html_String html, ptrdiff_t start) {
+flo_html_NodeParseResult parseComment(ParseStatus ps) {
     flo_html_NodeParseResult result;
-    ptrdiff_t end = start;
-    unsigned char ch = flo_html_getChar(html, end);
-    while (end < html.len &&
-           !(ch == '>' &&
+
+    NEXT_CHAR_UNTIL(
+        ps, (ch == '>' &&
              flo_html_stringEquals(
                  FLO_HTML_S("--"),
-                 FLO_HTML_S_LEN(flo_html_getCharPtr(html, end - 2), 2)))) {
-        ch = flo_html_getChar(html, ++end);
-    }
+                 FLO_HTML_S_LEN(flo_html_getCharPtr(ps.text, ps.idx - 2), 2))))
 
-    if (end < html.len) {
-        end++;
-    }
-    result.nextPosition = end;
+    NEXT_CHAR(ps);
 
     return result;
 }
 
-bool isCommentTag(flo_html_String html, ptrdiff_t currentPosition) {
-    return currentPosition < html.len - 3 &&
+inline bool isCommentTag(ParseStatus ps) {
+    return ps.idx < ps.text.len - HTML_COMMENT_START_LENGTH &&
            flo_html_stringEquals(
                FLO_HTML_S("!--"),
-               FLO_HTML_S_LEN(flo_html_getCharPtr(html, currentPosition + 1),
-                              3));
+               FLO_HTML_S_LEN(flo_html_getCharPtr(ps.text, ps.idx + 1), 3));
 }
 
-bool isEndOfTextNode(flo_html_String html, ptrdiff_t currentIndex,
-                     flo_html_String closeToken) {
-    unsigned char nextCh = flo_html_getChar(html, currentIndex + 1);
+inline bool isEndOfTextNode(ParseStatus ps, flo_html_String closeToken) {
+    NEXT_CHAR(ps);
+    unsigned char ch = currentChar(ps);
 
-    if ((flo_html_isAlphaBetical(nextCh) || nextCh == '!' || nextCh == '/') &&
-        currentIndex + closeToken.len <= html.len) {
+    if ((flo_html_isAlphaBetical(ch) || ch == '!' || ch == '/') &&
+        ps.idx + closeToken.len < ps.text.len) {
         flo_html_String possibleCloseToken = FLO_HTML_S_LEN(
-            flo_html_getCharPtr(html, currentIndex + 1), closeToken.len);
+            flo_html_getCharPtr(ps.text, ps.idx), closeToken.len);
         return flo_html_stringEquals(possibleCloseToken, closeToken);
     }
 
     return false;
 }
 
-flo_html_NodeParseResult parseTextNode(flo_html_String html,
-                                       ptrdiff_t textStart,
+flo_html_NodeParseResult parseTextNode(ParseStatus ps,
                                        flo_html_String parentTag,
                                        flo_html_Dom *dom,
                                        flo_html_Arena *perm) {
     flo_html_node_id nodeID = flo_html_createNode(NODE_TYPE_TEXT, dom, perm);
 
-    ptrdiff_t textEnd =
-        textStart + 1; // Always consume at least a single character, otherwise
-                       // problematic if we have a roque opening tag.
-    unsigned char ch = flo_html_getChar(html, textEnd);
+    ptrdiff_t textStart = ps.idx;
+    NEXT_CHAR(ps);
+    // Always consume at least a single character, otherwise
+    // problematic if we have a roque opening tag.
+    ptrdiff_t textLen = 1;
 
     flo_html_String closeToken = FLO_HTML_EMPTY_STRING;
     if (flo_html_stringEquals(parentTag, FLO_HTML_S("style"))) {
@@ -173,24 +211,22 @@ flo_html_NodeParseResult parseTextNode(flo_html_String html,
     flo_html_RawData raw = {0};
     flo_html_String whiteSpace = FLO_HTML_S(" ");
     bool isAppend = false;
-    // Continue until the end of the text node.
-    while (textEnd < html.len &&
-           !(ch == '<' && isEndOfTextNode(html, textEnd, closeToken) &&
-             !isCommentTag(html, textEnd))) {
-        if (ch == '<' && isCommentTag(html, textEnd)) {
-            flo_html_NodeParseResult commentNode =
-                parseComment(html, textEnd + 4);
-            textStart = parseEmptyContent(html, commentNode.nextPosition);
+
+    NEXT_CHAR_UNTIL(ps, (ch == '<' && isEndOfTextNode(ps, closeToken) &&
+                         !isCommentTag(ps))) {
+        if (ch == '<' && isCommentTag(ps)) {
+            SKIP_COMMENT(ps);
         } else {
             // Continue until we encounter extra space or the end of the text
             // node.
-            while (textEnd < html.len && textNodeContinue(ch, html, textEnd) &&
-                   !(ch == '<' && isEndOfTextNode(html, textEnd, closeToken))) {
-                ch = flo_html_getChar(html, ++(textEnd));
+            NEXT_CHAR_WHILE(
+                ps, textNodeContinue(ch, ps) &&
+                        !(ch == '<' && isEndOfTextNode(ps, closeToken))) {
+                textLen++;
             }
 
-            ptrdiff_t textLen = textEnd - textStart;
-            if (flo_html_getChar(html, textEnd - 1) == ' ') {
+            // If we encountered '  ' we want to subtract 1 from the length.
+            if (ps.idx > 0 && flo_html_getChar(ps.text, ps.idx - 1)) {
                 textLen--;
             }
 
@@ -201,129 +237,109 @@ flo_html_NodeParseResult parseTextNode(flo_html_String html,
 
             flo_html_addRawData(
                 &raw,
-                FLO_HTML_S_LEN(flo_html_getCharPtr(html, textStart), textLen),
+                FLO_HTML_S_LEN(flo_html_getCharPtr(ps.text, textStart),
+                               textLen),
                 perm);
-
-            textStart = parseEmptyContent(html, textEnd);
         }
-        textEnd = textStart;
-        ch = flo_html_getChar(html, textEnd);
+        SKIP_EMPTY_SPACE(ps);
     }
 
     dom->nodes.buf[nodeID].text = FLO_HTML_S_LEN(raw.buf, raw.len);
 
     return (flo_html_NodeParseResult){
-        .nodeID = nodeID, .canHaveChildren = false, .nextPosition = textEnd};
+        .nodeID = nodeID, .canHaveChildren = false, .nextPosition = ps.idx};
 }
 
-ptrdiff_t parseProp(flo_html_String html, ptrdiff_t propStart,
-                    flo_html_String *prop) {
-    ptrdiff_t propEnd = propStart;
-    ptrdiff_t nextChar = propStart;
-    unsigned ch = flo_html_getChar(html, propEnd);
+flo_html_String parseProp(ParseStatus *ps) {
+    ptrdiff_t propStart = ps->idx;
 
+    unsigned ch = currentChar(*ps);
+    ptrdiff_t propLen;
     if (ch == '\'' || ch == '"') {
         unsigned char quote = ch;
 
         ptrdiff_t quoteCount = 0;
-        while (propEnd < html.len && quoteCount < 2) {
-            quoteCount += (ch == quote); // Be gone branches.
-            ch = flo_html_getChar(html, ++nextChar);
+        propLen = -2; // 2 quotes so we start at -2.
+        NEXT_CHAR_UNTIL(*ps, quoteCount < 2) {
+            quoteCount += (ch == quote);
+            propLen++;
         }
-
-        propStart++;
-        propEnd = nextChar - 1;
     } else {
-        while (propEnd < html.len && ch != ' ' &&
-               !flo_html_isSpecialSpace(ch) && ch != '>' && ch != '=') {
-            ch = flo_html_getChar(html, ++nextChar);
-        }
-        propEnd = nextChar;
+        propLen = 0;
+        NEXT_CHAR_UNTIL(*ps,
+                        ch == ' ' || flo_html_isSpecialSpace(ch) || ch == '=');
+        { propLen++; }
     }
-    ptrdiff_t propLen = propEnd - propStart;
-    *prop = FLO_HTML_S_LEN(flo_html_getCharPtr(html, propStart), propLen);
+    FLO_HTML_ASSERT(propLen >= 0);
 
-    return nextChar;
+    return FLO_HTML_S_LEN(flo_html_getCharPtr(ps->text, propStart), propLen);
 }
 
-flo_html_NodeParseResult parseDocumentNode(flo_html_String html,
-                                           ptrdiff_t tagStart, bool exclamTag,
+flo_html_NodeParseResult parseDocumentNode(ParseStatus ps, bool exclamTag,
                                            flo_html_Dom *dom,
                                            flo_html_Arena *perm) {
     flo_html_NodeParseResult result;
     flo_html_node_id nodeID =
         flo_html_createNode(NODE_TYPE_DOCUMENT, dom, perm);
 
-    ptrdiff_t parsedChars = tagStart;
-    unsigned char ch = flo_html_getChar(html, parsedChars);
-    // Read until end of tag (mostly, we may do some correcting afterwards)
-    while (parsedChars < html.len && ch != '>' && ch != ' ' &&
-           !flo_html_isSpecialSpace(ch)) {
-        ch = flo_html_getChar(html, ++(parsedChars));
-    }
-    ptrdiff_t tagSize = parsedChars - tagStart;
+    ptrdiff_t tagStart = ps.idx;
+    NEXT_CHAR_UNTIL(ps, ch == '>' || ch == ' ' || flo_html_isSpecialSpace(ch));
+    ptrdiff_t tagSize = ps.idx - tagStart;
 
     bool canHaveChildren = !exclamTag;
 
     // For example <input/>.
-    if (ch == '>' && flo_html_getChar(html, parsedChars - 1) == '/') {
+    if (currentChar(ps) == '>' &&
+        flo_html_getChar(ps.text, ps.idx - 1) == '/') {
         canHaveChildren = false;
         tagSize--;
     }
 
     flo_html_String documentTag =
-        FLO_HTML_S_LEN(flo_html_getCharPtr(html, tagStart), tagSize);
+        FLO_HTML_S_LEN(flo_html_getCharPtr(ps.text, tagStart), tagSize);
     // For example <br>.
     if (isVoidElement(documentTag)) {
         canHaveChildren = false;
     }
 
-    parsedChars = parseEmptyContent(html, parsedChars);
-    ch = flo_html_getChar(html, parsedChars);
-    while (parsedChars < html.len && ch != '>') {
+    SKIP_EMPTY_SPACE(ps);
+
+    NEXT_CHAR_UNTIL(ps, ch == '>') {
         if (ch == '/') {
             canHaveChildren = false;
-            parsedChars++;
-        }
-        // Found a property.
-        // Not sure yet if it is a boolean or key-value property.
-        // Accepted values:
-        // 'property' / "property" / property
-        else {
-            flo_html_String propKey;
-            parsedChars = parseProp(html, parsedChars, &propKey);
-            ch = flo_html_getChar(html, parsedChars);
+        } else if (ch != ' ' && !flo_html_isSpecialSpace(ch)) {
+            // Found a property.
+            // Not sure yet if it is a boolean or key-value property.
+            // Accepted values:
+            // 'property' / "property" / property
+            flo_html_String propKey = parseProp(&ps);
             // Check for key-value property
-            if (ch == '=') {
+            if (currentChar(ps) == '=') {
                 // Expected syntax: key="value" OR
                 // Expected syntax: key='value' OR
                 // Expected syntax: key=value (This is invalid html, but
                 // will still support it) We can do some more interesting
                 // stuff but currently not required.
-                flo_html_String propValue;
-                parsedChars =
-                    parseProp(html, parsedChars + 1, &propValue); // skip '='
-                ch = flo_html_getChar(html, parsedChars);
-
+                NEXT_CHAR(ps); // skip '='
+                flo_html_String propValue = parseProp(&ps);
                 flo_html_addPropertyToNode(nodeID, propKey, propValue, dom,
                                            perm);
             } else {
                 flo_html_addBooleanPropertyToNode(nodeID, propKey, dom, perm);
             }
         }
-        parsedChars = parseEmptyContent(html, parsedChars);
-        ch = flo_html_getChar(html, parsedChars);
     }
 
     flo_html_setTagOnDocumentNode(documentTag, nodeID, canHaveChildren, dom,
                                   perm);
 
+    NEXT_CHAR(ps); // Skip '>', we basically already parsed it by adding
+                   // the tag to the node ID.
+
     result.nodeID = nodeID;
     result.canHaveChildren = canHaveChildren;
     result.tag = documentTag;
-    result.nextPosition =
-        parsedChars + 1; // Skip '>', we basically already parsed it by adding
-                         // the tag to the node ID.
+    result.nextPosition = ps.idx;
 
     return result;
 }
@@ -331,25 +347,27 @@ flo_html_NodeParseResult parseDocumentNode(flo_html_String html,
 void flo_html_parse(flo_html_String html, flo_html_Dom *dom,
                     flo_html_node_id prevNodeID, flo_html_NodeDepth *nodeStack,
                     flo_html_Arena *perm) {
+    ParseStatus ps = {.idx = 0, .text = html};
     ptrdiff_t nodeStartLen = nodeStack->len;
 
-    ptrdiff_t currentPosition = parseEmptyContent(html, 0);
-    unsigned char ch = flo_html_getChar(html, currentPosition);
-    while (currentPosition < html.len) {
+    SKIP_EMPTY_SPACE(ps);
+
+    while (ps.idx < ps.text.len) {
         flo_html_NodeParseResult parseResult;
         // Open document node.
-        if (ch == '<' && currentPosition < html.len - 1) {
-            if (isCommentTag(html, currentPosition)) {
-                parseResult = parseComment(html, currentPosition + 4);
-                parseResult.nodeID = prevNodeID;
+        if (currentChar(ps) == '<' &&
+            ps.idx < ps.text.len - 1) { // TODO: Can we remove this  ps.idx
+                                        // < ps.text.len - 1
+            if (isCommentTag(ps)) {
+                SKIP_COMMENT(ps)
+                // TODO: what to do with parseResult updateR??
             } else {
-                unsigned char nextCh =
-                    flo_html_getChar(html, currentPosition + 1);
+                NEXT_CHAR(ps);
+                unsigned char ch = currentChar(ps);
 
-                if (flo_html_isAlphaBetical(nextCh) || nextCh == '!') {
+                if (flo_html_isAlphaBetical(ch) || ch == '!') {
                     // standard opening tag or !DOCTYPE and friends
-                    parseResult = parseDocumentNode(html, currentPosition + 1,
-                                                    nextCh == '!', dom, perm);
+                    parseResult = parseDocumentNode(ps, ch == '!', dom, perm);
 
                     updateReferences(parseResult.nodeID, prevNodeID, nodeStack,
                                      dom, perm);
@@ -363,25 +381,27 @@ void flo_html_parse(flo_html_String html, flo_html_Dom *dom,
                         nodeStack->stack[nodeStack->len].tag = parseResult.tag;
                         nodeStack->len++;
                     }
+                    // TODO: what to do with updated ps ????
                 } else {
-                    if (nextCh == '/') {
+                    if (ch == '/') {
                         if (nodeStack->len > nodeStartLen) {
                             nodeStack->len--;
                             prevNodeID =
                                 nodeStack->stack[nodeStack->len].nodeID;
                         }
-                        parseResult = parseCloseTag(html, currentPosition + 2);
-                        parseResult.nodeID = prevNodeID;
+                        NEXT_CHAR_UNTIL(ps, (ch == '>'));
+                        NEXT_CHAR(ps);
+                        // TODO: what to do with parseResult updateR??
                     } else {
                         // Rogue open tag -> Text node.
                         flo_html_String parentTag =
                             nodeStack->len > 0
                                 ? nodeStack->stack[nodeStack->len - 1].tag
                                 : FLO_HTML_EMPTY_STRING;
-                        parseResult = parseTextNode(html, currentPosition,
-                                                    parentTag, dom, perm);
+                        parseResult = parseTextNode(ps, parentTag, dom, perm);
                         updateReferences(parseResult.nodeID, prevNodeID,
                                          nodeStack, dom, perm);
+                        // TODO: what to do with parseResult updateR??
                     }
                 }
             }
@@ -391,17 +411,15 @@ void flo_html_parse(flo_html_String html, flo_html_Dom *dom,
             flo_html_String parentTag =
                 nodeStack->len > 0 ? nodeStack->stack[nodeStack->len - 1].tag
                                    : FLO_HTML_EMPTY_STRING;
-            parseResult =
-                parseTextNode(html, currentPosition, parentTag, dom, perm);
+            parseResult = parseTextNode(ps, parentTag, dom, perm);
             updateReferences(parseResult.nodeID, prevNodeID, nodeStack, dom,
                              perm);
+            // TODO: what to do with parseResult updateR??
         }
 
         prevNodeID = parseResult.nodeID;
-        currentPosition = parseResult.nextPosition;
-
-        currentPosition = parseEmptyContent(html, currentPosition);
-        ch = flo_html_getChar(html, currentPosition);
+        ps.idx = parseResult.nextPosition;
+        SKIP_EMPTY_SPACE(ps);
     }
 }
 
