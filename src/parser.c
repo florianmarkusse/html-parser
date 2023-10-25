@@ -143,30 +143,6 @@ flo_html_NodeParseResult parseCloseTag(flo_html_String html, ptrdiff_t start) {
     return result;
 }
 
-static ptrdiff_t parseEmptyContent(flo_html_String html, ptrdiff_t start) {
-    ptrdiff_t end = start;
-    unsigned char ch = flo_html_getChar(html, end);
-    while (end < html.len && (ch == ' ' || flo_html_isSpecialSpace(ch))) {
-        ch = flo_html_getChar(html, ++end);
-    }
-
-    return end;
-}
-
-flo_html_NodeParseResult parseComment(ParseStatus ps) {
-    flo_html_NodeParseResult result;
-
-    NEXT_CHAR_UNTIL(
-        ps, (ch == '>' &&
-             flo_html_stringEquals(
-                 FLO_HTML_S("--"),
-                 FLO_HTML_S_LEN(flo_html_getCharPtr(ps.text, ps.idx - 2), 2))))
-
-    NEXT_CHAR(ps);
-
-    return result;
-}
-
 inline bool isCommentTag(ParseStatus ps) {
     return ps.idx < ps.text.len - HTML_COMMENT_START_LENGTH &&
            flo_html_stringEquals(
