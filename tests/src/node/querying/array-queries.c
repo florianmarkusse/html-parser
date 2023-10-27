@@ -34,8 +34,7 @@ static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 static TestStatus testQuery(flo_html_String fileLocation,
                             flo_html_String cssQuery,
                             ArrayFunctionType functionType,
-                            ptrdiff_t expectedResult,
-                            flo_html_Arena scratch) {
+                            ptrdiff_t expectedResult, flo_html_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",
