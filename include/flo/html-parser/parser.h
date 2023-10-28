@@ -8,7 +8,7 @@ extern "C" {
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/node/document-node.h"
 
-#define FLO_HTML_MAX_NODE_DEPTH 1U << 7U
+#define FLO_HTML_MAX_NODE_DEPTH 1U << 8U
 #define FLO_HTML_MAX_PROPERTIES 1U << 7U
 
 typedef struct {

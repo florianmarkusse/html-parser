@@ -1,13 +1,9 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/util/memory.h"
+#include "flo/html-parser/util/parse.h"
 #include "flo/html-parser/util/text/char.h"
 #include "flo/html-parser/util/text/string.h"
 
@@ -34,60 +30,51 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
         }                                                                      \
     } while (0)
 
-bool isTagStartChar(char ch) {
+static inline bool isTagStartChar(char ch) {
     return flo_html_isAlphaBetical(ch) || ch == '!';
 }
 
-bool isElementStartChar(char ch) {
+static inline bool isElementStartChar(char ch) {
     return isTagStartChar(ch) || ch == '.' || ch == '#';
 }
 
-bool isSpecifiedCombinator(char ch) {
+static inline bool isSpecifiedCombinator(char ch) {
     return ch == '>' || ch == '+' || ch == '~';
 }
 
-bool isCombinator(char ch) { return ch == ' ' || isSpecifiedCombinator(ch); }
+static inline bool isCombinator(char ch) {
+    return ch == ' ' || isSpecifiedCombinator(ch);
+}
 
-bool endOfCurrentFilter(char ch) {
+static inline bool endOfCurrentFilter(char ch) {
     return isCombinator(ch) || flo_html_isSpecialSpace(ch) || ch == '[' ||
            ch == '.' || ch == '#';
 }
 
-static ptrdiff_t parseEmptyContent(flo_html_String css, ptrdiff_t start) {
-    ptrdiff_t end = start;
-    unsigned char ch = flo_html_getChar(css, end);
+#define PARSE_EMPTY_CONTENT(ps)                                                \
+    FLO_PARSE_NEXT_CHAR_UNTIL(ps, isElementStartChar(ch) || ch == '[' ||       \
+                                      ch == '*')
 
-    while (end < css.len && !isElementStartChar(ch) && ch != '[' && ch != '*') {
-        ch = flo_html_getChar(css, ++end);
-    }
+flo_html_String parseToken(flo_parse_Status *ps) {
+    ptrdiff_t tokenStart = ps->idx;
+    FLO_PARSE_NEXT_CHAR_UNTIL(*ps, ch == ' ' || flo_html_isSpecialSpace(ch) ||
+                                       ch == '=' || ch == ']');
+    ptrdiff_t tokenLength = ps->idx - tokenStart;
 
-    return end;
-}
+    flo_html_String token = (flo_html_String){
+        .buf = flo_html_getCharPtr(ps->text, tokenStart), .len = tokenLength};
 
-ptrdiff_t parseToken(flo_html_String css, ptrdiff_t currentPosition,
-                     flo_html_String *token) {
-    ptrdiff_t tokenStart = currentPosition;
-    unsigned char ch = flo_html_getChar(css, currentPosition);
-    while (currentPosition < css.len && ch != ' ' &&
-           !flo_html_isSpecialSpace(ch) && ch != '=' && ch != ']') {
-        ch = flo_html_getChar(css, ++currentPosition);
-    }
-    ptrdiff_t tokenLength = currentPosition - tokenStart;
+    FLO_PARSE_NEXT_CHAR_UNTIL(*ps,
+                              ch == '=' || ch == ']' || ch == '.' || ch == '#');
 
-    (*token).buf = flo_html_getCharPtr(css, tokenStart);
-    (*token).len = tokenLength;
-
-    while (currentPosition < css.len && ch != '=' && ch != ']' && ch != '.' &&
-           ch != '#') {
-        ch = flo_html_getChar(css, ++currentPosition);
-    }
-
-    return currentPosition;
+    return token;
 }
 
 flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                                      flo_html_Uint16HashSet *set,
                                      flo_html_Arena *perm) {
+    flo_parse_Status ps = (flo_parse_Status){.idx = 0, .text = css};
+
     flo_html_QueryStatus result = QUERY_SUCCESS;
 
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT];
@@ -96,21 +83,16 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
     flo_html_Combinator currentflo_html_Combinator = NO_COMBINATOR;
     Selector currentSelector = NORMAL;
 
-    ptrdiff_t currentPosition = 0;
-    currentPosition = parseEmptyContent(css, currentPosition);
+    PARSE_EMPTY_CONTENT(ps);
 
-    unsigned char ch;
-    while (currentPosition < css.len) {
-        ch = flo_html_getChar(css, currentPosition);
-
+    while (ps.idx < ps.text.len) {
+        unsigned ch = flo_parse_currentChar(ps);
         if (isTagStartChar(ch)) {
             CHECK_FILTERS_LIMIT(filtersLen);
 
-            ptrdiff_t tagStart = currentPosition;
-            while (currentPosition < css.len && !endOfCurrentFilter(ch)) {
-                ch = flo_html_getChar(css, ++currentPosition);
-            }
-            ptrdiff_t tagLen = currentPosition - tagStart;
+            ptrdiff_t tagStart = ps.idx;
+            FLO_PARSE_NEXT_CHAR_UNTIL(ps, endOfCurrentFilter(ch));
+            ptrdiff_t tagLen = ps.idx - tagStart;
 
             flo_html_index_id tagID = flo_html_containsStringHashSet(
                 &dom->tags,
@@ -124,16 +106,13 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             filtersLen++;
         } else if (ch == '*') {
             CHECK_FILTERS_LIMIT(filtersLen);
-
-            while (currentPosition < css.len && !endOfCurrentFilter(ch)) {
-                ch = flo_html_getChar(css, ++currentPosition);
-            }
+            FLO_PARSE_NEXT_CHAR_UNTIL(ps, endOfCurrentFilter(ch));
 
             filters[filtersLen].attributeSelector = ALL_NODES;
             filtersLen++;
         }
 
-        while (ch == '[' || ch == '.' || ch == '#') {
+        FLO_PARSE_PARSE_CHAR_WHILE(ps, ch == '[' || ch == '.' || ch == '#', {
             CHECK_FILTERS_LIMIT(filtersLen);
 
             switch (ch) {
@@ -151,13 +130,9 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             }
             }
 
-            while (currentPosition < css.len && !isTagStartChar(ch)) {
-                ch = flo_html_getChar(css, ++currentPosition);
-            }
-
-            flo_html_String token;
-            currentPosition = parseToken(css, currentPosition, &token);
-            ch = flo_html_getChar(css, currentPosition);
+            FLO_PARSE_NEXT_CHAR_UNTIL(ps, isTagStartChar(ch));
+            flo_html_String token = parseToken(&ps);
+            ch = flo_parse_currentChar(ps);
 
             // If ch == '.' or ch == '#', it means we had to have had '.' or '#'
             // at the beginnging. This is a bit of a funky inference to make,
@@ -169,14 +144,14 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 flo_html_index_id propKeyID =
                     flo_html_containsStringHashSet(&dom->propKeys, keyBuffer);
                 if (propKeyID == 0) {
-                    FLO_HTML_PRINT_ERROR("PROP KEY ID 0");
+                    FLO_HTML_PRINT_ERROR("PROP KEY ID 0\n");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 flo_html_index_id propValueID =
                     flo_html_containsStringHashSet(&dom->propValues, token);
                 if (propValueID == 0) {
-                    FLO_HTML_PRINT_ERROR("PROP VALUE ID 0");
+                    FLO_HTML_PRINT_ERROR("PROP VALUE ID 0\n");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -188,7 +163,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 flo_html_index_id boolPropID =
                     flo_html_containsStringHashSet(&dom->boolPropsSet, token);
                 if (boolPropID == 0) {
-                    FLO_HTML_PRINT_ERROR("BOOL PROP ID 0");
+                    FLO_HTML_PRINT_ERROR("BOOL PROP ID 0\n");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -199,24 +174,21 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 flo_html_index_id propKeyID =
                     flo_html_containsStringHashSet(&dom->propKeys, token);
                 if (propKeyID == 0) {
-                    FLO_HTML_PRINT_ERROR("IN = PROPKEY 0");
+                    FLO_HTML_PRINT_ERROR("IN = PROPKEY 0\n");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
                 // Skip the '='
-                ch = flo_html_getChar(css, ++currentPosition);
-                while (currentPosition < css.len && !isTagStartChar(ch)) {
-                    ch = flo_html_getChar(css, ++currentPosition);
-                }
+                ps.idx++;
+                FLO_PARSE_NEXT_CHAR_UNTIL(ps, isTagStartChar(ch));
 
-                flo_html_String propValue;
-                currentPosition = parseToken(css, currentPosition, &propValue);
-                ch = flo_html_getChar(css, currentPosition);
+                flo_html_String propValue = parseToken(&ps);
+                ch = flo_parse_currentChar(ps);
 
                 flo_html_index_id propValueID =
                     flo_html_containsStringHashSet(&dom->propValues, propValue);
                 if (propValueID == 0) {
-                    FLO_HTML_PRINT_ERROR("IN = PROPVALUE 0");
+                    FLO_HTML_PRINT_ERROR("IN = PROPVALUE 0\n");
                     return QUERY_NOT_SEEN_BEFORE;
                 }
 
@@ -230,9 +202,9 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             }
 
             if (ch == ']') {
-                ch = flo_html_getChar(css, ++currentPosition);
+                ps.idx++;
             }
-        }
+        });
 
         if (filtersLen < 1) {
             FLO_HTML_PRINT_ERROR(
@@ -289,13 +261,11 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
         // Swoop up any possible next combinator and move on to a potentially
         // next element.
         char combinator = ' ';
-        while (currentPosition < css.len && !isElementStartChar(ch) &&
-               ch != '[') {
+        FLO_PARSE_NEXT_CHAR_UNTIL(ps, isElementStartChar(ch) || ch == '[', {
             if (isSpecifiedCombinator(ch)) {
                 combinator = ch;
             }
-            ch = flo_html_getChar(css, ++currentPosition);
-        }
+        });
 
         switch (combinator) {
         case ' ': {
