@@ -21,7 +21,7 @@ typedef struct {
 // TODO: Do I care about these checks at all? When accessing ch, we should
 // always go through a macro right?
 #define NEXT_CHAR(parseStatus)                                                 \
-    if ((parseStatus).idx < (parseStatus).text.len - 1) {                      \
+    if ((parseStatus).idx < (parseStatus).text.len) {                          \
         ++(parseStatus).idx;                                                   \
     }
 

@@ -187,8 +187,7 @@ static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testAppendix(flo_html_String fileLocation1,
                                flo_html_String fileLocation2,
-                               flo_html_String cssQuery,
-                               AppendType appendType,
+                               flo_html_String cssQuery, AppendType appendType,
                                AppendInput *appendInput,
                                flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
