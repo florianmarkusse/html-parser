@@ -26,5 +26,5 @@ jobs:
       run: valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 --track-origins=yes build/tests/html-parser-tests-Release
 
     - name: Memory check benchmarks
-      run: valgrind --leak-check=full ---show-leak-kinds=all --error-exitcode=1 --track-origins=yes build/benchmarks/html-parser-benchmarks-Release
+      run: valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 --track-origins=yes build/benchmarks/html-parser-benchmarks-Release
 
