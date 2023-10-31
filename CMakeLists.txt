@@ -13,7 +13,7 @@ option(BUILD_TESTS "Build the test executable" OFF)
 option(BUILD_BENCHMARKS "Build the benchmark executable" OFF)
 
 ### Flags ###
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion -Wno-sign-conversion -Wno-missing-field-initializers -Wdouble-promotion -Wvla -W")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Profiling")
     SET(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -pg")
@@ -52,7 +52,7 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
 
 
 target_compile_options(${LIBRARY_NAME} PRIVATE
-    $<$<CONFIG:Debug>:-O0 -g>
+    $<$<CONFIG:Debug>:-O0 -g3>
     $<$<CONFIG:Release>:-O3>
     $<$<CONFIG:Profiling>:-O2 -pg>
 )

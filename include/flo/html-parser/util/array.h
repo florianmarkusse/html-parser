@@ -34,8 +34,10 @@ __attribute((unused)) static void flo_html_grow(void *slice, ptrdiff_t size,
     if (replica.buf == NULL) {
         replica.cap = 1;
         replica.buf = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
-    } else if (a->end == replica.buf - size * replica.cap) {
-        flo_html_alloc(a, size, 1, replica.cap, flags);
+    } else if (replica.buf == a->end) {
+        void *buf = flo_html_alloc(a, size, align, replica.cap, flags);
+        memcpy(buf, replica.buf, size * replica.len);
+        replica.buf = buf;
     } else {
         void *buf = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
         memcpy(buf, replica.buf, size * replica.len);
@@ -43,7 +45,7 @@ __attribute((unused)) static void flo_html_grow(void *slice, ptrdiff_t size,
     }
 
     replica.cap *= 2;
-    memcpy(slice, &replica, sizeof(replica));
+    memcpy(slice, &replica, FLO_HTML_SIZEOF(replica));
 }
 
 #define FLO_HTML_PUSH_2(s, a)                                                  \

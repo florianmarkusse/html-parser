@@ -5,11 +5,12 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 
 // Function to check if ANSI escape codes are supported
-static inline unsigned char supportsAnsiEscapeCodes() {
+__attribute__((unused)) static inline bool supportsAnsiEscapeCodes() {
 #ifdef _WIN32
     // Check for Windows console support
     DWORD consoleMode;

@@ -21,10 +21,10 @@ typedef struct {
     ptrdiff_t len;
 } flo_html_NodeDepth;
 
-void flo_html_parseRoot(flo_html_String html, flo_html_Dom *dom,
-                        flo_html_Arena *perm);
-void flo_html_parseExtra(flo_html_String html, flo_html_Dom *dom,
-                         flo_html_Arena *perm);
+flo_html_Dom *flo_html_parseRoot(flo_html_String html, flo_html_Dom *dom,
+                                 flo_html_Arena *perm);
+flo_html_Dom *flo_html_parseExtra(flo_html_String html, flo_html_Dom *dom,
+                                  flo_html_Arena *perm);
 
 flo_html_node_id
 flo_html_parseDocumentElement(flo_html_DocumentNode *documentNode,

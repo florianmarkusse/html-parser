@@ -34,3 +34,7 @@ Makefile
 
 # callgrind
 callgrind.out.*
+
+# fuzzing
+./fuzzer
+fuzz-output/

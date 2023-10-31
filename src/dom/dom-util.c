@@ -12,9 +12,12 @@
 
 flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom, flo_html_Arena *perm) {
+    if (dom->nodes.len > FLO_HTML_MAX_NODE_ID - 1) {
+        return 0;
+    }
     flo_html_Node node;
     node.nodeType = nodeType;
-    node.nodeID = dom->nodes.len;
+    node.nodeID = (flo_html_node_id)dom->nodes.len;
 
     *FLO_HTML_PUSH(&dom->nodes, perm) = node;
 

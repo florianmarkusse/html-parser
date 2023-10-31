@@ -2,9 +2,8 @@
 #include "flo/html-parser/dom/traversal.h"
 
 // TODO(florian): make faster.
-flo_html_ParentChild *
-flo_html_getFirstChildNode(flo_html_node_id currentNodeID,
-                           flo_html_Dom *dom) {
+flo_html_ParentChild *flo_html_getFirstChildNode(flo_html_node_id currentNodeID,
+                                                 flo_html_Dom *dom) {
     for (flo_html_node_id i = 0; i < dom->parentFirstChilds.len; i++) {
         if (dom->parentFirstChilds.buf[i].parentID == currentNodeID) {
             return &dom->parentFirstChilds.buf[i];
@@ -46,9 +45,8 @@ flo_html_node_id flo_html_getNext(flo_html_node_id currentNodeID,
 }
 
 // TODO(florian): make faster.
-flo_html_ParentChild *
-flo_html_getParentNode(flo_html_node_id currentNodeID,
-                       flo_html_Dom *dom) {
+flo_html_ParentChild *flo_html_getParentNode(flo_html_node_id currentNodeID,
+                                             flo_html_Dom *dom) {
     for (ptrdiff_t i = 0; i < dom->parentChilds.len; i++) {
         flo_html_ParentChild *node = &dom->parentChilds.buf[i];
         if (node->childID == currentNodeID) {
@@ -68,9 +66,8 @@ flo_html_node_id flo_html_getParent(flo_html_node_id currentNodeID,
     return parentChildNode->parentID;
 }
 
-flo_html_NextNode *
-flo_html_getPreviousNode(flo_html_node_id currentNodeID,
-                         flo_html_Dom *dom) {
+flo_html_NextNode *flo_html_getPreviousNode(flo_html_node_id currentNodeID,
+                                            flo_html_Dom *dom) {
     for (flo_html_node_id i = 0; i < dom->nextNodes.len; i++) {
         if (dom->nextNodes.buf[i].nextNodeID == currentNodeID) {
             return &dom->nextNodes.buf[i];

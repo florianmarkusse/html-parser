@@ -42,7 +42,7 @@ typedef enum {
 
 typedef union {
     flo_html_DocumentNode documentNode;
-    char *text;
+    flo_html_String text;
 } ReplacementInput;
 
 typedef struct {
@@ -175,12 +175,10 @@ static TestFile testFiles[] = {
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testReplacements(flo_html_String fileLocation1,
-                                   flo_html_String fileLocation2,
-                                   flo_html_String cssQuery,
-                                   ReplacementType replacementType,
-                                   ReplacementInput *replacementInput,
-                                   flo_html_Arena scratch) {
+static TestStatus
+testReplacements(flo_html_String fileLocation1, flo_html_String fileLocation2,
+                 flo_html_String cssQuery, ReplacementType replacementType,
+                 ReplacementInput *replacementInput, flo_html_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -205,18 +203,12 @@ static TestStatus testReplacements(flo_html_String fileLocation1,
     }
     case REPLACEMENT_TEXT_NODE: {
         replacedNodeID = flo_html_replaceWithTextNode(
-            foundNode,
-            FLO_HTML_S_LEN(replacementInput->text,
-                           strlen(replacementInput->text)),
-            comparisonTest.actual, &scratch);
+            foundNode, replacementInput->text, comparisonTest.actual, &scratch);
         break;
     }
     case REPLACEMENT_FROM_STRING: {
         replacedNodeID = flo_html_replaceWithHTMLFromString(
-            foundNode,
-            FLO_HTML_S_LEN(replacementInput->text,
-                           strlen(replacementInput->text)),
-            comparisonTest.actual, &scratch);
+            foundNode, replacementInput->text, comparisonTest.actual, &scratch);
         break;
     }
     default: {

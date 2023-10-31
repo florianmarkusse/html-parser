@@ -41,15 +41,13 @@ flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
     *FLO_HTML_PUSH(&result->propValueRegistry, perm) = FLO_HTML_EMPTY_STRING;
 
     result->tags =
-        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
     result->boolPropsSet =
-        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
     result->propKeys =
-        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
     result->propValues =
-        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm),
+        flo_html_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
 
-    flo_html_parseRoot(htmlString, result, perm);
-
-    return result;
+    return flo_html_parseRoot(htmlString, result, perm);
 }

@@ -24,8 +24,7 @@ extern "C" {
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-void flo_html_addPropertyToNode(flo_html_node_id nodeID,
-                                flo_html_String key,
+bool flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
                                 flo_html_String value, flo_html_Dom *dom,
                                 flo_html_Arena *perm);
 
@@ -44,7 +43,7 @@ void flo_html_addPropertyToNode(flo_html_node_id nodeID,
  * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
+bool flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
                                        flo_html_String boolProp,
                                        flo_html_Dom *dom, flo_html_Arena *perm);
 
@@ -64,10 +63,9 @@ void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
  * @return  The status of the property update (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-bool flo_html_setPropertyValue(flo_html_node_id nodeID,
-                               flo_html_String key,
-                               flo_html_String newValue,
-                               flo_html_Dom *dom, flo_html_Arena *perm);
+bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
+                               flo_html_String newValue, flo_html_Dom *dom,
+                               flo_html_Arena *perm);
 
 /**
  * @brief Set the text content of an HTML element.
@@ -84,9 +82,8 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID,
  * @return  The status of the text content update (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-void flo_html_setTextContent(flo_html_node_id nodeID,
-                             flo_html_String text, flo_html_Dom *dom,
-                             flo_html_Arena *perm);
+bool flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
+                             flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
  * @brief Add text to a text node within an HTML element.
@@ -105,9 +102,9 @@ void flo_html_setTextContent(flo_html_node_id nodeID,
  * @return  The status of the text addition (ELEMENT_SUCCESS if successful,
  *          an error code otherwise).
  */
-void flo_html_addTextToTextNode(flo_html_node_id nodeID,
-                                flo_html_String text, flo_html_Dom *dom,
-                                bool isAppend, flo_html_Arena *perm);
+void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
+                                flo_html_Dom *dom, bool isAppend,
+                                flo_html_Arena *perm);
 
 /**
  * @brief Set the tag on a DocumentNode within the DOM.
@@ -126,9 +123,9 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID,
  * @return  The status of the tag setting operation (DOM_SUCCESS if successful,
  *          an error code otherwise).
  */
-void flo_html_setTagOnDocumentNode(flo_html_String tag,
-                                   flo_html_node_id nodeID, bool isPaired,
-                                   flo_html_Dom *dom, flo_html_Arena *perm);
+bool flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
+                                   bool isPaired, flo_html_Dom *dom,
+                                   flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

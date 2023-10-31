@@ -36,9 +36,10 @@ flo_html_StringInsert flo_html_insertStringHashSet(flo_html_StringHashSet *set,
     }
 
     bool didResize = false;
-    if (set->entries >= set->arrayLen * FLO_HTML_GROWTH_FACTOR) {
+    if ((double)set->entries >=
+        (double)set->arrayLen * FLO_HTML_GROWTH_FACTOR) {
         didResize = true;
-        if (set->arrayLen >= MAX_CAPACITY * 0.9) {
+        if ((double)set->arrayLen >= MAX_CAPACITY * 0.9) {
             FLO_HTML_PRINT_ERROR(
                 "Hash set capacity would exceed the maximum capacity: %d!\n",
                 MAX_CAPACITY);

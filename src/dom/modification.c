@@ -15,13 +15,21 @@ typedef enum {
     PROPERTY_TYPE_VALUE,
 } PropertyType;
 
-flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
-                                             flo_html_String prop,
-                                             flo_html_Dom *dom,
-                                             flo_html_StringHashSet *set,
-                                             flo_html_Arena *perm) {
+typedef struct {
+    bool isSuccess;
+    flo_html_index_id entryIndex;
+} flo_html_CreatedPropID;
+
+flo_html_CreatedPropID getCreatedPropIDFromString(PropertyType propertyType,
+                                                  flo_html_String prop,
+                                                  flo_html_Dom *dom,
+                                                  flo_html_StringHashSet *set,
+                                                  flo_html_Arena *perm) {
     flo_html_StringInsert result =
         flo_html_insertStringHashSet(set, prop, perm);
+    if (result.entryIndex > FLO_HTML_MAX_NODE_ID) {
+        return (flo_html_CreatedPropID){.isSuccess = false};
+    }
     if (result.wasInserted) {
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
@@ -39,38 +47,54 @@ flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
         }
     }
 
-    return result.entryIndex;
+    return (flo_html_CreatedPropID){
+        .isSuccess = true, .entryIndex = (flo_html_index_id)result.entryIndex};
 }
 
-void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
+bool flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
                                 flo_html_String value, flo_html_Dom *dom,
                                 flo_html_Arena *perm) {
-    flo_html_index_id keyID = getCreatedPropIDFromString(
+    flo_html_CreatedPropID keyProp = getCreatedPropIDFromString(
         PROPERTY_TYPE_KEY, key, dom, &dom->propKeys, perm);
+    if (!keyProp.isSuccess) {
+        return false;
+    }
 
-    flo_html_index_id valueID = getCreatedPropIDFromString(
+    flo_html_CreatedPropID valueProp = getCreatedPropIDFromString(
         PROPERTY_TYPE_VALUE, value, dom, &dom->propValues, perm);
+    if (!valueProp.isSuccess) {
+        return false;
+    }
 
-    *FLO_HTML_PUSH(&dom->props, perm) = (flo_html_Property){
-        .nodeID = nodeID, .keyID = keyID, .valueID = valueID};
+    *FLO_HTML_PUSH(&dom->props, perm) =
+        (flo_html_Property){.nodeID = nodeID,
+                            .keyID = keyProp.entryIndex,
+                            .valueID = valueProp.entryIndex};
+
+    return true;
 }
 
-void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
+bool flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
                                        flo_html_String boolProp,
                                        flo_html_Dom *dom,
                                        flo_html_Arena *perm) {
-    flo_html_index_id boolPropID = getCreatedPropIDFromString(
+    flo_html_CreatedPropID createdBoolProp = getCreatedPropIDFromString(
         PROPERTY_TYPE_BOOL, boolProp, dom, &dom->boolPropsSet, perm);
+    if (!createdBoolProp.isSuccess) {
+        return false;
+    }
 
-    *FLO_HTML_PUSH(&dom->boolProps, perm) =
-        (flo_html_BooleanProperty){.nodeID = nodeID, .propID = boolPropID};
+    *FLO_HTML_PUSH(&dom->boolProps, perm) = (flo_html_BooleanProperty){
+        .nodeID = nodeID, .propID = createdBoolProp.entryIndex};
+
+    return true;
 }
 
 bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
                                flo_html_String newValue, flo_html_Dom *dom,
                                flo_html_Arena *perm) {
     flo_html_index_id keyID =
-        flo_html_containsStringHashSet(&dom->propKeys, key);
+        (flo_html_index_id)flo_html_containsStringHashSet(&dom->propKeys, key);
     if (keyID == 0) {
         FLO_HTML_PRINT_ERROR("Could not find key in stored prop keys\n");
         return false;
@@ -81,23 +105,31 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
         return false;
     }
 
-    flo_html_index_id newValueID = getCreatedPropIDFromString(
+    flo_html_CreatedPropID createdNewValue = getCreatedPropIDFromString(
         PROPERTY_TYPE_VALUE, newValue, dom, &dom->propValues, perm);
-    prop->valueID = newValueID;
+    if (!createdNewValue.isSuccess) {
+        return false;
+    }
+    prop->valueID = createdNewValue.entryIndex;
 
     return true;
 }
 
-void flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
+bool flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
                              flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_removeChildren(nodeID, dom);
 
     flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
+    if (newNodeID == 0) {
+        return false;
+    }
 
     *FLO_HTML_PUSH(&dom->parentFirstChilds, perm) =
         (flo_html_ParentChild){.parentID = nodeID, .childID = newNodeID};
     *FLO_HTML_PUSH(&dom->parentChilds, perm) =
         (flo_html_ParentChild){.parentID = nodeID, .childID = newNodeID};
+
+    return true;
 }
 
 void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
@@ -122,15 +154,20 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
     dom->nodes.buf[nodeID].text = FLO_HTML_S_LEN(newText, mergedLen);
 }
 
-void flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
+bool flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
                                    bool isPaired, flo_html_Dom *dom,
                                    flo_html_Arena *perm) {
     flo_html_StringInsert result =
         flo_html_insertStringHashSet(&dom->tags, tag, perm);
+    if (result.entryIndex > FLO_HTML_MAX_INDEX_ID) {
+        return false;
+    }
     if (result.wasInserted) {
         *FLO_HTML_PUSH(&dom->tagRegistry, perm) =
             (flo_html_TagRegistration){.tag = tag, .isPaired = isPaired};
     }
 
-    dom->nodes.buf[nodeID].tagID = result.entryIndex;
+    dom->nodes.buf[nodeID].tagID = (flo_html_index_id)result.entryIndex;
+
+    return true;
 }

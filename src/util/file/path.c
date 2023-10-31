@@ -5,8 +5,7 @@
 
 #define FULL_ACCESS 0700
 
-void flo_html_createPath(flo_html_String fileLocation,
-                         flo_html_Arena scratch) {
+void flo_html_createPath(flo_html_String fileLocation, flo_html_Arena scratch) {
     ptrdiff_t currentIndex = 0;
     ptrdiff_t slashIndex =
         flo_html_firstOccurenceOfFrom(fileLocation, '/', currentIndex);

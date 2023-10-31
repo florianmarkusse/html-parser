@@ -18,7 +18,6 @@ typedef FLO_HTML_ARRAY(uint16_t) flo_html_uint16_t_a;
 typedef struct {
     uint16_t value;
     uint16_t hash;
-    uint8_t probes;
 } flo_html_Uint16Entry;
 
 /**
@@ -36,12 +35,10 @@ flo_html_Uint16HashSet flo_html_initUint16HashSet(uint16_t capacity,
 
 bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
                                   flo_html_Arena *perm);
-flo_html_uint16_t_a
-flo_html_uint16HashSetToArray(flo_html_Uint16HashSet *set,
-                              flo_html_Arena *perm);
+flo_html_uint16_t_a flo_html_uint16HashSetToArray(flo_html_Uint16HashSet *set,
+                                                  flo_html_Arena *perm);
 
-bool flo_html_containsUint16HashSet(flo_html_Uint16HashSet *set,
-                                    uint16_t id);
+bool flo_html_containsUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id);
 
 flo_html_Uint16HashSet
 flo_html_copyUint16HashSet(flo_html_Uint16HashSet *originalSet,

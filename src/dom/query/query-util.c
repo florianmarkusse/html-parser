@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,8 +7,7 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/util/error.h"
 
-bool flo_html_filterNode(flo_html_node_id nodeID,
-                         flo_html_FilterType *filters,
+bool flo_html_filterNode(flo_html_node_id nodeID, flo_html_FilterType *filters,
                          ptrdiff_t filterslen, flo_html_Dom *dom) {
     for (ptrdiff_t i = 0; i < filterslen; i++) {
         flo_html_FilterType filterType = filters[i];
@@ -63,8 +63,8 @@ bool flo_html_filterNode(flo_html_node_id nodeID,
 
 bool flo_html_getNodesWithoutflo_html_Combinator(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, flo_html_Dom *dom,
-    flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
+    ptrdiff_t filtersLen, flo_html_Dom *dom, flo_html_Uint16HashSet *set,
+    flo_html_Arena *perm) {
     for (ptrdiff_t i = 0; i < dom->nodes.len; i++) {
         if (flo_html_filterNode(dom->nodes.buf[i].nodeID, filters, filtersLen,
                                 dom)) {
@@ -81,11 +81,10 @@ bool flo_html_getNodesWithoutflo_html_Combinator(
 // TODO: only the end result is required on the perm arena.
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, flo_html_Dom *dom,
-    ptrdiff_t numberOfSiblings, flo_html_Uint16HashSet *set,
-    flo_html_Arena *perm) {
+    ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t numberOfSiblings,
+    flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
     flo_html_Uint16HashSet filteredAdjacents =
-        flo_html_initUint16HashSet(set->arrayLen, perm);
+        flo_html_initUint16HashSet((flo_html_node_id)set->arrayLen, perm);
     flo_html_Uint16HashSetIterator iterator =
         (flo_html_Uint16HashSetIterator){.set = set, .index = 0};
 
@@ -123,8 +122,8 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
         flo_html_copyUint16HashSet(set, perm);
     flo_html_resetUint16HashSet(set);
 
-    flo_html_Uint16HashSet secondDescendants =
-        flo_html_initUint16HashSet(firstDescendants.arrayLen, perm);
+    flo_html_Uint16HashSet secondDescendants = flo_html_initUint16HashSet(
+        (flo_html_node_id)firstDescendants.arrayLen, perm);
 
     bool isFirstFilled = true;
     flo_html_Uint16HashSet *toBeFilledSet = &secondDescendants;

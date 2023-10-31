@@ -9,24 +9,29 @@
 #include "test.h"
 
 #define INPUTS_DIR "tests/src/dom/parsing/inputs/"
+#define FUZZ_INPUTS_DIR "tests/src/dom/parsing/fuzz-inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
 bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
-    if (flo_html_createDomFromFile(fileLocation, &scratch) == NULL) {
+    flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
+    if (dom == NULL) {
         return false;
     }
+
+    flo_html_printHTML(dom);
+    flo_html_printDomStatus(dom);
 
     return true;
 }
 
 static inline void testAndCount(ptrdiff_t *localSuccesses,
-                                ptrdiff_t *localFailures,
+                                ptrdiff_t *localFailures, char *directory,
                                 flo_html_Arena scratch) {
     DIR *dir = NULL;
     struct dirent *ent = NULL;
-    if ((dir = opendir(INPUTS_DIR)) == NULL) {
+    if ((dir = opendir(directory)) == NULL) {
         (*localFailures)++;
-        printf("Failed to open test directory: %s\n", INPUTS_DIR);
+        printf("Failed to open test directory: %s\n", directory);
         return;
     }
 
@@ -35,7 +40,7 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
             continue;
         }
         char fileLocation[1024];
-        snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
+        snprintf(fileLocation, sizeof(fileLocation), "%s%s", directory,
                  ent->d_name);
         printTestStart(fileLocation);
         if (!parseFile(FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)),
@@ -60,7 +65,8 @@ bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
-    testAndCount(&localSuccesses, &localFailures, scratch);
+    testAndCount(&localSuccesses, &localFailures, FUZZ_INPUTS_DIR, scratch);
+    // testAndCount(&localSuccesses, &localFailures, INPUTS_DIR, scratch);
 
     printTestScore(localSuccesses, localFailures);
 

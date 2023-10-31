@@ -38,17 +38,17 @@ flo_html_prependDocumentNodeWithQuery(flo_html_String cssQuery,
                                 flo_html_prependDocumentNode);
 }
 
-flo_html_node_id
-flo_html_prependTextNodeWithQuery(flo_html_String cssQuery,
-                                  flo_html_String text, flo_html_Dom *dom,
-                                  flo_html_Arena *perm) {
+flo_html_node_id flo_html_prependTextNodeWithQuery(flo_html_String cssQuery,
+                                                   flo_html_String text,
+                                                   flo_html_Dom *dom,
+                                                   flo_html_Arena *perm) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, text, dom, perm,
                                 flo_html_prependTextNode);
 }
 
 flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
-    flo_html_String cssQuery, flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_Arena *perm) {
+    flo_html_String cssQuery, flo_html_String htmlString, flo_html_Dom *dom,
+    flo_html_Arena *perm) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, perm,
                                 flo_html_prependHTMLFromString);
 }
@@ -72,8 +72,8 @@ flo_html_prependHTMLFromFileWithQuery(flo_html_String cssQuery,
 }
 
 static void updateReferences(flo_html_node_id parentID,
-                             flo_html_node_id firstNewNodeID,
-                             flo_html_Dom *dom, flo_html_Arena *perm) {
+                             flo_html_node_id firstNewNodeID, flo_html_Dom *dom,
+                             flo_html_Arena *perm) {
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(parentID, dom);
     if (firstChild == NULL) {
@@ -100,12 +100,15 @@ static void updateReferences(flo_html_node_id parentID,
     flo_html_connectOtherNodesToParent(parentID, firstNewNodeID, dom, perm);
 }
 
-flo_html_node_id
-flo_html_prependDocumentNode(flo_html_node_id parentID,
-                             flo_html_DocumentNode *docNode,
-                             flo_html_Dom *dom, flo_html_Arena *perm) {
+flo_html_node_id flo_html_prependDocumentNode(flo_html_node_id parentID,
+                                              flo_html_DocumentNode *docNode,
+                                              flo_html_Dom *dom,
+                                              flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
         flo_html_parseDocumentElement(docNode, dom, perm);
+    if (newNodeID == 0) {
+        return 0;
+    }
     updateReferences(parentID, newNodeID, dom, perm);
     return newNodeID;
 }
@@ -115,6 +118,9 @@ flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
                                           flo_html_Dom *dom,
                                           flo_html_Arena *perm) {
     flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
+    if (newNodeID == 0) {
+        return 0;
+    }
 
     flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
     if (child > 0) {
@@ -129,12 +135,15 @@ flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
     return newNodeID;
 }
 
-flo_html_node_id
-flo_html_prependHTMLFromString(flo_html_node_id parentID,
-                               flo_html_String htmlString,
-                               flo_html_Dom *dom, flo_html_Arena *perm) {
-    flo_html_node_id firstNewAddedNode = dom->nodes.len;
-    flo_html_parseExtra(htmlString, dom, perm);
+flo_html_node_id flo_html_prependHTMLFromString(flo_html_node_id parentID,
+                                                flo_html_String htmlString,
+                                                flo_html_Dom *dom,
+                                                flo_html_Arena *perm) {
+    flo_html_node_id firstNewAddedNode = (flo_html_node_id)dom->nodes.len;
+    dom = flo_html_parseExtra(htmlString, dom, perm);
+    if (dom == NULL) {
+        return 0;
+    }
 
     flo_html_node_id firstChild = flo_html_getFirstChild(parentID, dom);
     if (firstChild > 0) {

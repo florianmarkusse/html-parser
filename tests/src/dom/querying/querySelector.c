@@ -76,7 +76,8 @@ unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures,
         if (testQuery(FLO_HTML_S_LEN(testFile.fileLocation,
                                      strlen(testFile.fileLocation)),
                       testFile.cssQuery, testFile.expectedStatus,
-                      testFile.expectedResult, scratch) != TEST_SUCCESS) {
+                      (flo_html_node_id)testFile.expectedResult,
+                      scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

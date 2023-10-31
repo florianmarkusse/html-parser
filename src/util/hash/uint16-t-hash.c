@@ -31,10 +31,11 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
     }
 
     bool didResize = false;
-    if (set->entries >= set->arrayLen * FLO_HTML_GROWTH_FACTOR) {
+    if ((double)set->entries >=
+        (double)set->arrayLen * FLO_HTML_GROWTH_FACTOR) {
         didResize = true;
         // See if it makes sense to grow.
-        if (set->arrayLen >= MAX_CAPACITY * 0.9) {
+        if ((double)set->arrayLen >= MAX_CAPACITY * 0.9) {
             FLO_HTML_PRINT_ERROR(
                 "Hash set capacity would exceed the maximum capacity "
                 "for uint16_t!\n");
@@ -62,7 +63,6 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
 
                 set->array[finalIndex].value = oldArray[i].value;
                 set->array[finalIndex].hash = oldArray[i].hash;
-                set->array[finalIndex].probes = probes;
             }
         }
 
@@ -80,7 +80,6 @@ bool flo_html_insertUint16HashSet(flo_html_Uint16HashSet *set, uint16_t id,
     ptrdiff_t finalIndex = (newIntHash + newIntProbes) % set->arrayLen;
     set->array[finalIndex].value = id;
     set->array[finalIndex].hash = newIntHash;
-    set->array[finalIndex].probes = newIntProbes;
 
     set->entries++;
 
@@ -120,7 +119,7 @@ flo_html_Uint16HashSet
 flo_html_copyUint16HashSet(flo_html_Uint16HashSet *originalSet,
                            flo_html_Arena *perm) {
     flo_html_Uint16HashSet copy =
-        flo_html_initUint16HashSet(originalSet->arrayLen, perm);
+        flo_html_initUint16HashSet((uint16_t)originalSet->arrayLen, perm);
     memcpy(copy.array, originalSet->array,
            originalSet->arrayLen * sizeof(flo_html_Uint16Entry));
     copy.entries = originalSet->entries;

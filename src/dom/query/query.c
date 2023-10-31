@@ -6,6 +6,7 @@
 #include "flo/html-parser/util/parse.h"
 #include "flo/html-parser/util/text/char.h"
 #include "flo/html-parser/util/text/string.h"
+#include <stdint.h>
 
 /**
  * Css queries are built up of 2 parts:
@@ -30,23 +31,32 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
         }                                                                      \
     } while (0)
 
-static inline bool isTagStartChar(char ch) {
+#define GET_PROPERTY_ID_OR_RETURN(variable, set, key)                          \
+    do {                                                                       \
+        (variable) =                                                           \
+            (flo_html_index_id)flo_html_containsStringHashSet(set, key);       \
+        if ((variable) == 0) {                                                 \
+            return QUERY_NOT_SEEN_BEFORE;                                      \
+        }                                                                      \
+    } while (0)
+
+static inline bool isTagStartChar(unsigned char ch) {
     return flo_html_isAlphaBetical(ch) || ch == '!';
 }
 
-static inline bool isElementStartChar(char ch) {
+static inline bool isElementStartChar(unsigned char ch) {
     return isTagStartChar(ch) || ch == '.' || ch == '#';
 }
 
-static inline bool isSpecifiedCombinator(char ch) {
+static inline bool isSpecifiedCombinator(unsigned char ch) {
     return ch == '>' || ch == '+' || ch == '~';
 }
 
-static inline bool isCombinator(char ch) {
+static inline bool isCombinator(unsigned char ch) {
     return ch == ' ' || isSpecifiedCombinator(ch);
 }
 
-static inline bool endOfCurrentFilter(char ch) {
+static inline bool endOfCurrentFilter(unsigned char ch) {
     return isCombinator(ch) || flo_html_isSpecialSpace(ch) || ch == '[' ||
            ch == '.' || ch == '#';
 }
@@ -86,7 +96,7 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
     PARSE_EMPTY_CONTENT(ps);
 
     while (ps.idx < ps.text.len) {
-        unsigned ch = flo_parse_currentChar(ps);
+        unsigned char ch = flo_parse_currentChar(ps);
         if (isTagStartChar(ch)) {
             CHECK_FILTERS_LIMIT(filtersLen);
 
@@ -94,12 +104,10 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
             FLO_PARSE_NEXT_CHAR_UNTIL(ps, endOfCurrentFilter(ch));
             ptrdiff_t tagLen = ps.idx - tagStart;
 
-            flo_html_index_id tagID = flo_html_containsStringHashSet(
-                &dom->tags,
+            flo_html_index_id tagID;
+            GET_PROPERTY_ID_OR_RETURN(
+                tagID, &dom->tags,
                 FLO_HTML_S_LEN(flo_html_getCharPtr(css, tagStart), tagLen));
-            if (tagID == 0) {
-                return QUERY_NOT_SEEN_BEFORE;
-            }
 
             filters[filtersLen].attributeSelector = TAG;
             filters[filtersLen].data.tagID = tagID;
@@ -141,42 +149,27 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 flo_html_String keyBuffer = currentSelector == CLASS
                                                 ? FLO_HTML_S("class")
                                                 : FLO_HTML_S("id");
-                flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(&dom->propKeys, keyBuffer);
-                if (propKeyID == 0) {
-                    FLO_HTML_PRINT_ERROR("PROP KEY ID 0\n");
-                    return QUERY_NOT_SEEN_BEFORE;
-                }
+                flo_html_index_id propKeyID;
+                GET_PROPERTY_ID_OR_RETURN(propKeyID, &dom->propKeys, keyBuffer);
 
-                flo_html_index_id propValueID =
-                    flo_html_containsStringHashSet(&dom->propValues, token);
-                if (propValueID == 0) {
-                    FLO_HTML_PRINT_ERROR("PROP VALUE ID 0\n");
-                    return QUERY_NOT_SEEN_BEFORE;
-                }
+                flo_html_index_id propValueID;
+                GET_PROPERTY_ID_OR_RETURN(propValueID, &dom->propValues, token);
 
                 filters[filtersLen].attributeSelector = PROPERTY;
                 filters[filtersLen].data.keyValuePair.keyID = propKeyID;
                 filters[filtersLen].data.keyValuePair.valueID = propValueID;
                 filtersLen++;
             } else if (ch == ']') {
-                flo_html_index_id boolPropID =
-                    flo_html_containsStringHashSet(&dom->boolPropsSet, token);
-                if (boolPropID == 0) {
-                    FLO_HTML_PRINT_ERROR("BOOL PROP ID 0\n");
-                    return QUERY_NOT_SEEN_BEFORE;
-                }
+                flo_html_index_id boolPropID;
+                GET_PROPERTY_ID_OR_RETURN(boolPropID, &dom->boolPropsSet,
+                                          token);
 
                 filters[filtersLen].attributeSelector = BOOLEAN_PROPERTY;
                 filters[filtersLen].data.propID = boolPropID;
                 filtersLen++;
             } else if (ch == '=') {
-                flo_html_index_id propKeyID =
-                    flo_html_containsStringHashSet(&dom->propKeys, token);
-                if (propKeyID == 0) {
-                    FLO_HTML_PRINT_ERROR("IN = PROPKEY 0\n");
-                    return QUERY_NOT_SEEN_BEFORE;
-                }
+                flo_html_index_id propKeyID;
+                GET_PROPERTY_ID_OR_RETURN(propKeyID, &dom->propKeys, token);
 
                 // Skip the '='
                 ps.idx++;
@@ -185,12 +178,9 @@ flo_html_QueryStatus getQueryResults(flo_html_String css, flo_html_Dom *dom,
                 flo_html_String propValue = parseToken(&ps);
                 ch = flo_parse_currentChar(ps);
 
-                flo_html_index_id propValueID =
-                    flo_html_containsStringHashSet(&dom->propValues, propValue);
-                if (propValueID == 0) {
-                    FLO_HTML_PRINT_ERROR("IN = PROPVALUE 0\n");
-                    return QUERY_NOT_SEEN_BEFORE;
-                }
+                flo_html_index_id propValueID;
+                GET_PROPERTY_ID_OR_RETURN(propValueID, &dom->propValues,
+                                          propValue);
 
                 filters[filtersLen].attributeSelector = PROPERTY;
                 filters[filtersLen].data.keyValuePair.keyID = propKeyID;

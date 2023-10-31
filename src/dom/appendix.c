@@ -37,17 +37,17 @@ flo_html_appendDocumentNodeWithQuery(flo_html_String cssQuery,
                                flo_html_appendDocumentNode);
 }
 
-flo_html_node_id
-flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
-                                 flo_html_String text, flo_html_Dom *dom,
-                                 flo_html_Arena *perm) {
+flo_html_node_id flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
+                                                  flo_html_String text,
+                                                  flo_html_Dom *dom,
+                                                  flo_html_Arena *perm) {
     APPEND_USING_QUERYSELECTOR(cssQuery, text, dom, perm,
                                flo_html_appendTextNode);
 }
 
 flo_html_node_id flo_html_appendHTMLFromStringWithQuery(
-    flo_html_String cssQuery, flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_Arena *perm) {
+    flo_html_String cssQuery, flo_html_String htmlString, flo_html_Dom *dom,
+    flo_html_Arena *perm) {
     APPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, perm,
                                flo_html_appendHTMLFromString);
 }
@@ -71,8 +71,8 @@ flo_html_appendHTMLFromFileWithQuery(flo_html_String cssQuery,
 }
 
 static void updateReferences(flo_html_node_id parentID,
-                             flo_html_node_id newNodeID,
-                             flo_html_Dom *dom, flo_html_Arena *perm) {
+                             flo_html_node_id newNodeID, flo_html_Dom *dom,
+                             flo_html_Arena *perm) {
     flo_html_ParentChild *firstChild =
         flo_html_getFirstChildNode(parentID, dom);
     if (firstChild == NULL) {
@@ -96,12 +96,15 @@ static void updateReferences(flo_html_node_id parentID,
     flo_html_connectOtherNodesToParent(parentID, newNodeID, dom, perm);
 }
 
-flo_html_node_id
-flo_html_appendDocumentNode(flo_html_node_id parentID,
-                            flo_html_DocumentNode *docNode,
-                            flo_html_Dom *dom, flo_html_Arena *perm) {
+flo_html_node_id flo_html_appendDocumentNode(flo_html_node_id parentID,
+                                             flo_html_DocumentNode *docNode,
+                                             flo_html_Dom *dom,
+                                             flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
         flo_html_parseDocumentElement(docNode, dom, perm);
+    if (newNodeID == 0) {
+        return 0;
+    }
     updateReferences(parentID, newNodeID, dom, perm);
     return newNodeID;
 }
@@ -111,6 +114,9 @@ flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
                                          flo_html_Dom *dom,
                                          flo_html_Arena *perm) {
     flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
+    if (newNodeID == 0) {
+        return 0;
+    }
 
     flo_html_node_id child = flo_html_getFirstChild(parentID, dom);
     if (child > 0) {
@@ -129,8 +135,11 @@ flo_html_node_id flo_html_appendHTMLFromString(flo_html_node_id parentID,
                                                flo_html_String htmlString,
                                                flo_html_Dom *dom,
                                                flo_html_Arena *perm) {
-    flo_html_node_id firstNewAddedNodeID = dom->nodes.len;
-    flo_html_parseExtra(htmlString, dom, perm);
+    flo_html_node_id firstNewAddedNodeID = (flo_html_node_id)dom->nodes.len;
+    dom = flo_html_parseExtra(htmlString, dom, perm);
+    if (dom == NULL) {
+        return 0;
+    }
 
     flo_html_node_id firstChild = flo_html_getFirstChild(parentID, dom);
     if (firstChild > 0) {
@@ -144,7 +153,7 @@ flo_html_node_id flo_html_appendHTMLFromString(flo_html_node_id parentID,
                     flo_html_getLastNext(firstChild, dom);
                 if (flo_html_tryMerge(lastNext, firstAddedNode->nodeID, dom,
                                       true, perm)) {
-                    ptrdiff_t secondNewAddedNode =
+                    flo_html_node_id secondNewAddedNode =
                         flo_html_getNext(firstNewAddedNodeID, dom);
                     flo_html_removeNode(firstNewAddedNodeID, dom);
                     firstNewAddedNodeID = secondNewAddedNode;

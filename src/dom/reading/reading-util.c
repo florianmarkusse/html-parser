@@ -17,8 +17,7 @@ flo_html_Property *flo_html_getProperty(flo_html_node_id nodeID,
 
 flo_html_BooleanProperty *
 flo_html_getBooleanProperty(flo_html_node_id nodeID,
-                            flo_html_index_id boolPropID,
-                            flo_html_Dom *dom) {
+                            flo_html_index_id boolPropID, flo_html_Dom *dom) {
     for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
         flo_html_BooleanProperty *prop = &dom->boolProps.buf[i];
 
