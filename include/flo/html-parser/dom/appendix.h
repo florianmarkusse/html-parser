@@ -19,13 +19,12 @@ extern "C" {
  * using the provided CSS query `cssQuery`. The operation modifies the DOM
  * structure in place.
  *
- * @param[in]   cssQuery        The CSS query to select the insertion point.
- * @param[in]   docNode         The `DocumentNode` to append.
- * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   cssQuery    The CSS query to select the insertion point.
+ * @param[in]   docNode     The `DocumentNode` to append.
+ * @param[in]   dom         The DOM structure.
+ * @param[in]   perm        The memory arena for permanent allocations.
  *
- * @return  The status of the append operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the appended node, or 0 if the operation failed.
  */
 flo_html_node_id
 flo_html_appendDocumentNodeWithQuery(flo_html_String cssQuery,
@@ -39,18 +38,17 @@ flo_html_appendDocumentNodeWithQuery(flo_html_String cssQuery,
  * using the provided CSS query `cssQuery`. The operation modifies the DOM
  * structure in place.
  *
- * @param[in]   cssQuery        The CSS query to select the insertion point.
- * @param[in]   text            The text content to append.
- * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   cssQuery    The CSS query to select the insertion point.
+ * @param[in]   text        The text content to append.
+ * @param[in]   dom         The DOM structure.
+ * @param[in]   perm        The memory arena for permanent allocations.
  *
- * @return  The status of the append operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the appended text node, or 0 if the operation failed.
  */
-flo_html_node_id
-flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
-                                 flo_html_String text, flo_html_Dom *dom,
-                                 flo_html_Arena *perm);
+flo_html_node_id flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
+                                                  flo_html_String text,
+                                                  flo_html_Dom *dom,
+                                                  flo_html_Arena *perm);
 
 /**
  * @brief Append HTML content from a string to the DOM using a CSS query.
@@ -59,13 +57,12 @@ flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
  * using the provided CSS query `cssQuery`. The operation modifies the DOM
  * structure in place.
  *
- * @param[in]   cssQuery        The CSS query to select the insertion point.
- * @param[in]   htmlString      The HTML content as a string to append.
- * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   cssQuery    The CSS query to select the insertion point.
+ * @param[in]   htmlString  The HTML content as a string to append.
+ * @param[in]   dom         The DOM structure.
+ * @param[in]   perm        The memory arena for permanent allocations.
  *
- * @return  The status of the append operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first appended node, or 0 if the operation failed.
  */
 flo_html_node_id
 flo_html_appendHTMLFromStringWithQuery(flo_html_String cssQuery,
@@ -82,10 +79,9 @@ flo_html_appendHTMLFromStringWithQuery(flo_html_String cssQuery,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   fileLocation    The file location of the HTML content to append.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the append operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first appended node, or 0 if the operation failed.
  */
 flo_html_node_id
 flo_html_appendHTMLFromFileWithQuery(flo_html_String cssQuery,
@@ -98,19 +94,18 @@ flo_html_appendHTMLFromFileWithQuery(flo_html_String cssQuery,
  * This function appends a `DocumentNode` specified by `docNode` to the DOM.
  * The operation modifies the DOM structure in place.
  *
- * @param[in]   parentID        The ID of the parent node where the
- *                              `DocumentNode` will be appended.
- * @param[in]   docNode         The `DocumentNode` to append.
- * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   parentID    The ID of the parent node where the
+ *                          `DocumentNode` will be appended.
+ * @param[in]   docNode     The `DocumentNode` to append.
+ * @param[in]   dom         The DOM structure.
+ * @param[in]   perm        The memory arena for permanent allocations.
  *
- * @return  The status of the append operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the appended node, or 0 if the operation failed.
  */
-flo_html_node_id
-flo_html_appendDocumentNode(flo_html_node_id parentID,
-                            flo_html_DocumentNode *docNode,
-                            flo_html_Dom *dom, flo_html_Arena *perm);
+flo_html_node_id flo_html_appendDocumentNode(flo_html_node_id parentID,
+                                             flo_html_DocumentNode *docNode,
+                                             flo_html_Dom *dom,
+                                             flo_html_Arena *perm);
 
 /**
  * @brief Append a text node to the DOM.
@@ -118,14 +113,13 @@ flo_html_appendDocumentNode(flo_html_node_id parentID,
  * This function appends a text node with the specified `text` to the DOM.
  * The operation modifies the DOM structure in place.
  *
- * @param[in]   parentID        The ID of the parent node where the text node
- *                              will be appended.
- * @param[in]   text            The text content to append.
- * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   parentID    The ID of the parent node where the text node
+ *                          will be appended.
+ * @param[in]   text        The text content to append.
+ * @param[in]   dom         The DOM structure.
+ * @param[in]   perm        The memory arena for permanent allocations.
  *
- * @return  The status of the append operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the appended text node, or 0 if the operation failed.
  */
 flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
                                          flo_html_String text,
@@ -138,14 +132,13 @@ flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
  * This function appends HTML content specified by `htmlString` to the DOM.
  * The operation modifies the DOM structure in place.
  *
- * @param[in]   parentID        The ID of the parent node where the HTML nodes
- *                              will be appended.
- * @param[in]   htmlString      The HTML content as a string to append.
- * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   parentID    The ID of the parent node where the HTML nodes
+ *                          will be appended.
+ * @param[in]   htmlString  The HTML content as a string to append.
+ * @param[in]   dom         The DOM structure.
+ * @param[in]   perm        The memory arena for permanent allocations.
  *
- * @return  The status of the append operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first appended node, or 0 if the operation failed.
  */
 flo_html_node_id flo_html_appendHTMLFromString(flo_html_node_id parentID,
                                                flo_html_String htmlString,

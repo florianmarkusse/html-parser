@@ -22,14 +22,13 @@ extern "C" {
  * @param[in]   cssQuery        The CSS query to select the element to replace.
  * @param[in]   docNode         The `DocumentNode` to replace with.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the replacement operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithDocumentNodeWithQuery(
-    flo_html_String cssQuery, flo_html_DocumentNode *docNode,
-    flo_html_Dom *dom, flo_html_Arena *perm);
+    flo_html_String cssQuery, flo_html_DocumentNode *docNode, flo_html_Dom *dom,
+    flo_html_Arena *perm);
 
 /**
  * @brief Replace an HTML element with a text node using a CSS query.
@@ -41,15 +40,14 @@ flo_html_node_id flo_html_replaceWithDocumentNodeWithQuery(
  * @param[in]   cssQuery        The CSS query to select the element to replace.
  * @param[in]   text            The text content for the replacement text node.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the replacement operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the replacement node, or 0 if the operation fails.
  */
-flo_html_node_id
-flo_html_replaceWithTextNodeWithQuery(flo_html_String cssQuery,
-                                      flo_html_String text,
-                                      flo_html_Dom *dom, flo_html_Arena *perm);
+flo_html_node_id flo_html_replaceWithTextNodeWithQuery(flo_html_String cssQuery,
+                                                       flo_html_String text,
+                                                       flo_html_Dom *dom,
+                                                       flo_html_Arena *perm);
 
 /**
  * @brief Replace an HTML element with HTML content from a string using a CSS
@@ -62,14 +60,13 @@ flo_html_replaceWithTextNodeWithQuery(flo_html_String cssQuery,
  * @param[in]   cssQuery        The CSS query to select the element to replace.
  * @param[in]   htmlString      The HTML content as a string for replacement.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the replacement operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithHTMLFromStringWithQuery(
-    flo_html_String cssQuery, flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_Arena *perm);
+    flo_html_String cssQuery, flo_html_String htmlString, flo_html_Dom *dom,
+    flo_html_Arena *perm);
 
 /**
  * @brief Replace an HTML element with HTML content from a file using a CSS
@@ -83,14 +80,13 @@ flo_html_node_id flo_html_replaceWithHTMLFromStringWithQuery(
  * @param[in]   fileLocation    The file location of the HTML content for
  *                              replacement.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the replacement operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
-    flo_html_String cssQuery, flo_html_String fileLocation,
-    flo_html_Dom *dom, flo_html_Arena *perm);
+    flo_html_String cssQuery, flo_html_String fileLocation, flo_html_Dom *dom,
+    flo_html_Arena *perm);
 
 /**
  * @brief Replace an HTML element with a DocumentNode.
@@ -102,10 +98,9 @@ flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
  * @param[in]   toReplaceNodeID The ID of the HTML element to replace.
  * @param[in]   docNode         The `DocumentNode` to replace with.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the replacement operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the replacement node, or 0 if the operation fails.
  */
 flo_html_node_id
 flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
@@ -122,10 +117,9 @@ flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
  * @param[in]   toReplaceNodeID The ID of the HTML element to replace.
  * @param[in]   text            The text content for the replacement text node.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the replacement operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
                                               flo_html_String text,
@@ -142,10 +136,9 @@ flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
  * @param[in]   toReplaceNodeID The ID of the HTML element to replace.
  * @param[in]   htmlString      The HTML content as a string for replacement.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the replacement operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first replacement node, or 0 if the operation fails.
  */
 flo_html_node_id
 flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,

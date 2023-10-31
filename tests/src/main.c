@@ -34,35 +34,35 @@ int main() {
     testflo_html_DomParsings(&successes, &failures, arena);
     printf("\n");
 
-    //    testflo_html_DomComparisons(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomQueries(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testNodeQueries(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomDeletions(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testNodeModifications(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testNodeDeletions(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomAppendices(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomPrependices(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomReplacements(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testIntegrations(&successes, &failures, arena);
-    //    printf("\n");
+    testflo_html_DomComparisons(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomQueries(&successes, &failures, arena);
+    printf("\n");
+
+    testNodeQueries(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomDeletions(&successes, &failures, arena);
+    printf("\n");
+
+    testNodeModifications(&successes, &failures, arena);
+    printf("\n");
+
+    testNodeDeletions(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomAppendices(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomPrependices(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomReplacements(&successes, &failures, arena);
+    printf("\n");
+
+    testIntegrations(&successes, &failures, arena);
+    printf("\n");
 
     flo_html_destroyArena(&arena);
 

@@ -39,7 +39,6 @@ void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom);
  *                              property.
  * @param[in]   boolProp        The name of the boolean property to remove.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
  */
 void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
                                     flo_html_String boolProp,
@@ -55,10 +54,9 @@ void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
  *                              property.
  * @param[in]   keyProp         The key of the property to remove.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
  */
-void flo_html_removeProperty(flo_html_node_id nodeID,
-                             flo_html_String keyProp, flo_html_Dom *dom);
+void flo_html_removeProperty(flo_html_node_id nodeID, flo_html_String keyProp,
+                             flo_html_Dom *dom);
 
 #ifdef __cplusplus
 }

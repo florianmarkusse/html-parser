@@ -18,9 +18,6 @@ bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
         return false;
     }
 
-    flo_html_printHTML(dom);
-    flo_html_printDomStatus(dom);
-
     return true;
 }
 
@@ -65,8 +62,8 @@ bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
-    testAndCount(&localSuccesses, &localFailures, FUZZ_INPUTS_DIR, scratch);
-    // testAndCount(&localSuccesses, &localFailures, INPUTS_DIR, scratch);
+    // testAndCount(&localSuccesses, &localFailures, FUZZ_INPUTS_DIR, scratch);
+    testAndCount(&localSuccesses, &localFailures, INPUTS_DIR, scratch);
 
     printTestScore(localSuccesses, localFailures);
 

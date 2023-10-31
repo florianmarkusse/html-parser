@@ -19,7 +19,6 @@ extern "C" {
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   boolProp        The name of the boolean property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
  *
  * @return  True if the property exists and is true, otherwise false.
  */
@@ -35,7 +34,6 @@ bool flo_html_hasBoolProp(flo_html_node_id nodeID, flo_html_String boolProp,
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   propKey         The key of the property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
  *
  * @return  True if a property with the key exists, otherwise false.
  */
@@ -51,7 +49,6 @@ bool flo_html_hasPropKey(flo_html_node_id nodeID, flo_html_String propKey,
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   propValue       The value of the property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
  *
  * @return  True if a property with the value exists, otherwise false.
  */
@@ -68,7 +65,6 @@ bool flo_html_hasPropValue(flo_html_node_id nodeID, flo_html_String propValue,
  * @param[in]   propKey         The key of the property to check.
  * @param[in]   propValue       The value of the property to check.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
  *
  * @return  True if a property with the specified key and value exists,
  *          otherwise false.
@@ -85,7 +81,6 @@ bool flo_html_hasProperty(flo_html_node_id nodeID, flo_html_String propKey,
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   propKey         The key of the property to retrieve.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
  *
  * @return  The value of the property if it exists, or NULL if not found.
  */
@@ -100,12 +95,9 @@ flo_html_String flo_html_getValue(flo_html_node_id nodeID,
  *
  * @param[in]   nodeID          The ID of the node to query.
  * @param[in]   dom             The DOM structure.
- * @param[out]  results         A pointer to an array of strings to store
- *                              results.
- * @param[out]  resultsLen      The length of the results array.
+ * @param[in]   perm            The permanent memory arena.
  *
- * @return  The query status (QUERY_SUCCESS if successful, an error code
- * otherwise).
+ * @return  An array containing all the text element children of the node ID.
  *
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.

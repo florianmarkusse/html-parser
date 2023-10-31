@@ -19,10 +19,10 @@ extern "C" {
  * @param[in]   key             The buffer containing the property key.
  * @param[in]   value           The buffer containing the property value.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  True if the property was successfully added, false if the operation
+ * failed.
  */
 bool flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
                                 flo_html_String value, flo_html_Dom *dom,
@@ -38,10 +38,10 @@ bool flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
  *                              property will be added.
  * @param[in]   boolProp        The boolean property.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the property addition (ELEMENT_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  True if the property was successfully added, false if the operation
+ * failed.
  */
 bool flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
                                        flo_html_String boolProp,
@@ -58,10 +58,10 @@ bool flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
  * @param[in]   key             The key of the property to update.
  * @param[in]   newValue        The new value of the property.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the property update (ELEMENT_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  True if the property was successfully updated, false if the
+ * operation failed.
  */
 bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
                                flo_html_String newValue, flo_html_Dom *dom,
@@ -77,10 +77,10 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
  * @param[in]   nodeID          The ID of the HTML element to update.
  * @param[in]   text            The new text content.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the text content update (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  True if the text content was successfully updated, false if the
+ * operation failed.
  */
 bool flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
                              flo_html_Dom *dom, flo_html_Arena *perm);
@@ -95,12 +95,9 @@ bool flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
  * @param[in]   node            The HTML element containing the text node.
  * @param[in]   text            The text you want to add.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
  * @param[in]   isAppend        Flag indicating whether to append or prepend the
  *                              text content.
- *
- * @return  The status of the text addition (ELEMENT_SUCCESS if successful,
- *          an error code otherwise).
+ * @param[in]   perm            The memory arena for permanent allocations.
  */
 void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
                                 flo_html_Dom *dom, bool isAppend,
@@ -118,10 +115,9 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
  * @param[in]   isPaired        Flag indicating whether the tag is paired or
  *                              not.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore       The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the tag setting operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  True if the tag was successfully set, false if the operation failed.
  */
 bool flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
                                    bool isPaired, flo_html_Dom *dom,

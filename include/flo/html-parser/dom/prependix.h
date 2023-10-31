@@ -22,10 +22,9 @@ extern "C" {
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   docNode         The `DocumentNode` to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the prepend operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the prepended DocumentNode, or 0 if the operation failed.
  */
 flo_html_node_id
 flo_html_prependDocumentNodeWithQuery(flo_html_String cssQuery,
@@ -42,15 +41,14 @@ flo_html_prependDocumentNodeWithQuery(flo_html_String cssQuery,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   text            The text content to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the prepend operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the prepended text node, or 0 if the operation failed.
  */
-flo_html_node_id
-flo_html_prependTextNodeWithQuery(flo_html_String cssQuery,
-                                  flo_html_String text, flo_html_Dom *dom,
-                                  flo_html_Arena *perm);
+flo_html_node_id flo_html_prependTextNodeWithQuery(flo_html_String cssQuery,
+                                                   flo_html_String text,
+                                                   flo_html_Dom *dom,
+                                                   flo_html_Arena *perm);
 
 /**
  * @brief Prepend HTML content from a string to the DOM using a CSS query.
@@ -62,14 +60,13 @@ flo_html_prependTextNodeWithQuery(flo_html_String cssQuery,
  * @param[in]   cssQuery        The CSS query to select the insertion point.
  * @param[in]   htmlString      The HTML content as a string to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the prepend operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first prepended node, or 0 if the operation failed.
  */
 flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
-    flo_html_String cssQuery, flo_html_String htmlString,
-    flo_html_Dom *dom, flo_html_Arena *perm);
+    flo_html_String cssQuery, flo_html_String htmlString, flo_html_Dom *dom,
+    flo_html_Arena *perm);
 
 /**
  * @brief Prepend HTML content from a file to the DOM using a CSS query.
@@ -82,10 +79,9 @@ flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
  * @param[in]   fileLocation    The file location of the HTML content to
  *                              prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the prepend operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first prepended node, or 0 if the operation failed.
  */
 flo_html_node_id
 flo_html_prependHTMLFromFileWithQuery(flo_html_String cssQuery,
@@ -102,15 +98,14 @@ flo_html_prependHTMLFromFileWithQuery(flo_html_String cssQuery,
  *                              `DocumentNode` will be prepended.
  * @param[in]   docNode         The `DocumentNode` to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the prepend operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the prepended DocumentNode, or 0 if the operation failed.
  */
-flo_html_node_id
-flo_html_prependDocumentNode(flo_html_node_id parentID,
-                             flo_html_DocumentNode *docNode,
-                             flo_html_Dom *dom, flo_html_Arena *perm);
+flo_html_node_id flo_html_prependDocumentNode(flo_html_node_id parentID,
+                                              flo_html_DocumentNode *docNode,
+                                              flo_html_Dom *dom,
+                                              flo_html_Arena *perm);
 
 /**
  * @brief Prepend a text node to the DOM.
@@ -122,10 +117,9 @@ flo_html_prependDocumentNode(flo_html_node_id parentID,
  *                              will be prepended.
  * @param[in]   text            The text content to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the prepend operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the prepended text node, or 0 if the operation failed.
  */
 flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
                                           flo_html_String text,
@@ -142,15 +136,14 @@ flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
  *                              will be prepended.
  * @param[in]   htmlString      The HTML content as a string to prepend.
  * @param[in]   dom             The DOM structure.
- * @param[in]   textStore   The text store.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the prepend operation (DOM_SUCCESS if successful,
- *          an error code otherwise).
+ * @return  The ID of the first prepended node, or 0 if the operation failed.
  */
-flo_html_node_id
-flo_html_prependHTMLFromString(flo_html_node_id parentID,
-                               flo_html_String htmlString,
-                               flo_html_Dom *dom, flo_html_Arena *perm);
+flo_html_node_id flo_html_prependHTMLFromString(flo_html_node_id parentID,
+                                                flo_html_String htmlString,
+                                                flo_html_Dom *dom,
+                                                flo_html_Arena *perm);
 
 #ifdef __cplusplus
 }

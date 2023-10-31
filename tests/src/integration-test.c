@@ -42,13 +42,23 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
         printTestDemarcation();
         return TEST_FAILURE;
     }
-    flo_html_setTextContent(results.buf[0], FLO_HTML_S("FOURTH"),
-                            comparisonTest.actual, &scratch);
-    flo_html_addBooleanPropertyToNode(results.buf[0], FLO_HTML_S("the-fourth"),
-                                      comparisonTest.actual, &scratch);
-    flo_html_addPropertyToNode(results.buf[0], FLO_HTML_S("the-property"),
-                               FLO_HTML_S("my value"), comparisonTest.actual,
-                               &scratch);
+    if (!flo_html_setTextContent(results.buf[0], FLO_HTML_S("FOURTH"),
+                                 comparisonTest.actual, &scratch)) {
+        printf("Failed to set text content.\n");
+        return TEST_FAILURE;
+    }
+    if (!flo_html_addBooleanPropertyToNode(results.buf[0],
+                                           FLO_HTML_S("the-fourth"),
+                                           comparisonTest.actual, &scratch)) {
+        printf("Failed to add boolean property.\n");
+        return TEST_FAILURE;
+    }
+    if (!flo_html_addPropertyToNode(results.buf[0], FLO_HTML_S("the-property"),
+                                    FLO_HTML_S("my value"),
+                                    comparisonTest.actual, &scratch)) {
+        printf("Failed to add boolean property.\n");
+        return TEST_FAILURE;
+    }
 
     flo_html_node_id currentNodeID = 0;
     actual = flo_html_querySelector(FLO_HTML_S("head"), comparisonTest.actual,
@@ -63,12 +73,15 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
         return TEST_FAILURE;
     }
 
-    flo_html_prependHTMLFromString(
-        currentNodeID,
-        FLO_HTML_S("<title "
-                   "id=\"first-title-tag\"></title><title>FIRST</"
-                   "title><title>SECOND</title><title>THIRD</title>"),
-        comparisonTest.actual, &scratch);
+    if (flo_html_prependHTMLFromString(
+            currentNodeID,
+            FLO_HTML_S("<title "
+                       "id=\"first-title-tag\"></title><title>FIRST</"
+                       "title><title>SECOND</title><title>THIRD</title>"),
+            comparisonTest.actual, &scratch) == 0) {
+        printf("Failed to prepend HTML from string.\n");
+        return TEST_FAILURE;
+    }
 
     actual = flo_html_querySelectorAll(
         FLO_HTML_S("title"), comparisonTest.actual, &results, &scratch);

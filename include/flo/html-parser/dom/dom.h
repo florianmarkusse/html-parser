@@ -59,17 +59,12 @@ typedef struct {
  * @brief Create a DOM structure from an HTML string.
  *
  * This function parses the provided `htmlString` and builds the `dom`
- * structure with the parsed DOM representation and populates the
- * `textStore` with all the text values.
+ * structure with the parsed DOM representation.
  *
  * @param[in]   htmlString      The HTML string to parse.
- * @param[out]  dom             The DOM structure to build.
- * @param[in]   textStore   The text store to populate.
- * values
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
- * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
- *          an error code otherwise). See @ref
- *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
+ * @return  The DOM of the html string, NULL if unsuccessful.
  */
 flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
                                  flo_html_Arena *perm);
@@ -78,16 +73,13 @@ flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
  * @brief Create a DOM structure from an HTML file.
  *
  * This function reads the HTML content from the specified `fileLocation`,
- * parses it, and and builds the `dom` structure with the parsed DOM
- * representation and populates the `textStore` with all the text values.
+ * parses it, and builds the `dom` structure with the parsed DOM
+ * representation.
  *
  * @param[in]   fileLocation    The file location of the HTML content to parse.
  * @param[out]  dom             The DOM structure to build.
- * @param[in]   textStore   The text store to populate.
  *
- * @return  The status of the DOM creation operation (DOM_SUCCESS if completed,
- *          an error code otherwise). See @ref
- *          "flo/html-parser/dom/dom-status.h#flo_html_DomStatus".
+ * @return  The DOM of the html string, NULL if unsuccessful.
  */
 flo_html_Dom *flo_html_createDomFromFile(flo_html_String fileLocation,
                                          flo_html_Arena *perm);

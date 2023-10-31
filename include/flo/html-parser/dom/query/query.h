@@ -24,10 +24,9 @@ typedef FLO_HTML_ARRAY(uint16_t) flo_html_node_id_a;
  *
  * @param[in]   cssQuery        The CSS selector query to match elements.
  * @param[in]   dom             The DOM structure to query.
- * @param[in]   textStore   The text store for the DOM.
  * @param[out]  results         An array of node IDs representing matching
  *                              elements.
- * @param[out]  resultsLen      The number of matching elements found.
+ * @param[in]   perm            The memory arena for permanent allocations.
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
  *          otherwise). See @ref
@@ -50,8 +49,8 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String cssQuery,
  *
  * @param[in]   cssQuery        The CSS selector query to match the element.
  * @param[in]   dom             The DOM structure to query.
- * @param[in]   textStore   The text store for the DOM.
  * @param[out]  result          The node ID of the first matching element.
+ * @param[in]   scratch         The memory arena for temporary allocations.
  *
  * @return  The query status (QUERY_SUCCESS if completed, different
  *          otherwise). See @ref

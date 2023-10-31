@@ -16,7 +16,6 @@ extern "C" {
  * DOM.
  *
  * @param[in]   dom             The DOM structure to print status for.
- * @param[in]   textStore   The text store associated with the DOM.
  */
 void flo_html_printDomStatus(flo_html_Dom *dom);
 
@@ -28,7 +27,6 @@ void flo_html_printDomStatus(flo_html_Dom *dom);
  * for inspecting the parsed HTML document.
  *
  * @param[in]   dom             The DOM structure to print as minified HTML.
- * @param[in]   textStore   The text store associated with the DOM.
  */
 void flo_html_printHTML(flo_html_Dom *dom);
 
@@ -40,9 +38,9 @@ void flo_html_printHTML(flo_html_Dom *dom);
  * document to a file.
  *
  * @param[in]   dom             The DOM structure to write as minified HTML.
- * @param[in]   textStore   The text store associated with the DOM.
  * @param[in]   filePath        The file path where the HTML content will be
  *                              saved.
+ * @param[in]   scratch            The memory arena for temporary allocations.
  *
  * @return  The status of the file writing operation (FILE_SUCCESS if
  *          completed, an error code otherwise). See @ref

@@ -17,18 +17,11 @@ typedef struct {
 /**
  * @brief Compare two DOM structures.
  *
- * This function compares two DOM structures specified by `dom1` and `dom2`. It
- * also requires the respective `TextStore` instances for each DOM. The
- * comparison checks if the two DOM structures are equal.
+ * This function compares two DOM structures specified by `dom1` and `dom2`.
  *
  * @param[in]   dom1                The first DOM structure to compare.
- * @param[in]   textStore1      The text store for the first DOM.
  * @param[in]   dom2                The second DOM structure to compare.
- * @param[in]   textStore2      The text store for the second DOM.
- *
- * @return  The comparison status (COMPARISON_SUCCESS if equal, different
- *          otherwise). See @ref
- *          "flo/html-parser/comparison-status.h#flo_html_ComparisonStatus".
+ * @param[in]   scratch            The memory arena for temporary allocations.
  */
 flo_html_ComparisonResult
 flo_html_equals(flo_html_Dom *dom1, flo_html_Dom *dom2, flo_html_Arena scratch);
@@ -41,10 +34,9 @@ flo_html_equals(flo_html_Dom *dom1, flo_html_Dom *dom2, flo_html_Arena scratch);
  *
  * @param[in]   nodeID1             The node ID in the first DOM.
  * @param[in]   dom1                The first DOM structure to compare.
- * @param[in]   textStore1      The text store for the first DOM.
  * @param[in]   nodeID2             The node ID in the second DOM.
  * @param[in]   dom2                The second DOM structure to compare.
- * @param[in]   textStore2      The text store for the second DOM.
+ * @param[in]   scratch            The memory arena for temporary allocations.
  */
 void flo_html_printFirstDifference(flo_html_node_id nodeID1, flo_html_Dom *dom1,
                                    flo_html_node_id nodeID2, flo_html_Dom *dom2,
