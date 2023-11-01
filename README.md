@@ -14,6 +14,10 @@ Are you ready to dive into the world of effortless HTML parsing? Look no further
 
 - **Fast**: `html-parser` is designed for speed. Find benchmark results on [html-parser-benchmarks](https://github.com/florianmarkusse/html-parser-benchmarks)!
 
+## Platform Flexibility
+
+While `html-parser` currently operates seamlessly on Unix systems due to its utilization of specific memory allocation headers, we're all about inclusivity. If you're eager to extend its compatibility to Windows or other platforms, we welcome your contributions! Feel free to open a pull request :).
+
 ## Table of Contents
 
 - [Demo Projects](#demo-projects)
