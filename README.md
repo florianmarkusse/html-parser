@@ -12,7 +12,23 @@ Are you ready to dive into the world of effortless HTML parsing? Look no further
 
 - **Robust & Reliable**: `html-parser` is built with robustness in mind. It can gracefully handle even the most lenient HTML documents, so you can focus on your project without worrying about parsing quirks.
 
-- **Fast**: `html-parser` is designed for speed. Competitive benchmarks pending!
+- **Fast**: `html-parser` is designed for speed. Find benchmark results on [html-parser-benchmarks](https://github.com/florianmarkusse/html-parser-benchmarks)!
+
+## Table of Contents
+
+- [Demo Projects](#demo-projects)
+- [Quick Example](#quick-example)
+- [Functionalities](#functionalities)
+- [Extending and Building Upon](#extending-and-building-upon)
+- [Feedback & Assistance](#feedback--assistance)
+- [Under the Hood](#under-the-hood)
+- [Querying](#querying)
+- [Traversal](#traversal)
+- [Modifying](#modifying)
+- [Printing & Writing](#printing-%26-writing)
+- [Contributing](#contributing)
+- [License](#license)
+
 
 ## Demo Projects
 
@@ -66,50 +82,54 @@ Here's a comprehensive example showcasing how to use the html-parser library to 
 #include <stdio.h>
 
 int main() {
-    // Initialize a text store to manage memory
-    flo_html_TextStore textStore;
-    if (flo_html_createTextStore(&textStore) != ELEMENT_SUCCESS) {
-        fprintf(stderr, "Failed to create text store!\n");
+    // Create the memory arena. This should not be done often.
+    flo_html_Arena arena = flo_html_newArena(1U << 27U);
+    // Set the jump buffer used to jump to this place of the code in case 
+    // of OOM errors during allocations.
+    void *jmp_buf[5];
+    if (__builtin_setjmp(jmp_buf)) {
+        flo_html_destroyArena(&arena);
+        FLO_HTML_PRINT_ERROR("OOM in arena!\n");
+        return 1;
+    }
+    arena.jmp_buf = jmp_buf;
+
+
+    flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &arena);
+    if (dom == NULL) {
         return 1;
     }
 
-    // Initialize a DOM structure
-    flo_html_Dom dom;
-    if (flo_html_createDomFromFile("test-file.html", &dom, &textStore) != DOM_SUCCESS) {
-        flo_html_destroyTextStore(&textStore);
-        fprintf(stderr, "Failed to parse DOM from file!\n");
-        return 1;
-    }
+    printf("Before modification\n\n");
+    flo_html_printHTML(dom);
 
     // Find the ID of the <body> element
     flo_html_node_id bodyNodeID = 0;
-    if (flo_html_querySelector("body", &dom, &textStore, &bodyNodeID) != QUERY_SUCCESS) {
-        flo_html_destroyDom(&dom);
-        flo_html_destroyTextStore(&textStore);
+    if (flo_html_querySelector(FLO_HTML_S("body"), dom, &bodyNodeID, arena) !=
+        QUERY_SUCCESS) {
         fprintf(stderr, "Failed to query DOM!\n");
         return 1;
     }
 
     // Check if the body element has a specific boolean property
     // In other words: "<body add-extra-p-element> ... </body>"
-    if (flo_html_hasBoolProp(bodyNodeID, "add-extra-p-element", &dom, &textStore)) {
+    if (flo_html_hasBoolProp(bodyNodeID, FLO_HTML_S("add-extra-p-element"),
+                             dom)) {
         // Append HTML content to the <body> element
-        if (flo_html_appendHTMLFromStringWithQuery("body", "<p>I am appended</p>", &dom,
-                                          &textStore) != DOM_SUCCESS) {
-            flo_html_destroyDom(&dom);
-            flo_html_destroyTextStore(&textStore);
+        if (!flo_html_appendHTMLFromStringWithQuery(
+                FLO_HTML_S("body"), FLO_HTML_S("<p>I am appended</p>"), dom,
+                &arena)) {
             fprintf(stderr, "Failed to append to DOM!\n");
             return 1;
         }
     }
 
     // Print the modified HTML
-    flo_html_printHTML(&dom, &textStore);
+    printf("After modification\n\n");
+    flo_html_printHTML(dom);
 
-    // Cleanup: Free memory and resources
-    flo_html_destroyDom(&dom);
-    flo_html_destroyTextStore(&textStore);
-
+    // The created memory arena is automatically destroyed by the operating system.
+    // But if you want to do it manually, you can call: flo_html_destroyArena(&arena);
     return 0;
 }
 ```
@@ -118,8 +138,8 @@ int main() {
 
 This example demonstrates how to use the `html-parser` library to parse and manipulate an HTML document using C. Let's break down the code step by step:
 
-- **Text Store Initialization:**
-  We initialize a `TextStore` to manage the text content of the HTML file.
+- **Memory arena initialization:**
+  We initialize an `flo_html_Arena` to manage the memory allocations of the program.
 
 - **DOM Initialization:**
   We create a `flo_html_Dom` structure and parse an HTML file named "test-file.html" using `flo_html_createDomFromFile`. The parsed DOM is stored in the `dom` structure.
@@ -135,9 +155,6 @@ This example demonstrates how to use the `html-parser` library to parse and mani
 
 - **Printing the Modified HTML:**
   We print the modified HTML, showing the changes made to the document.
-
-- **Cleanup:**
-  To prevent memory leaks, we destroy the `dom` structure and the `TextStore` to free up resources.
 
 This example provides a practical demonstration of the `html-parser` library's capabilities for parsing and manipulating HTML documents in a C program.
 
@@ -210,47 +227,51 @@ The parser differentiates between two types of properties:
 
 The HTML string is parsed into a `flo_html_Dom`. Instead of a traditional tree structure of nodes, the `flo_html_Dom` follows a data-oriented pattern. The `flo_html_Dom` comprises several tables, each serving a specific purpose:
 
-##### Node Table (`node`)
+##### Node Table (`nodes`)
 - `nodeID` | `nodeType` | `tagID/text` 
   - *Notes:* Whether the third column contains a tagID or text is based on the nodeType of the node. If it is a document node, it contains a tagID. If it is a text node, it contains the pointer to the text.
 
-##### Parent-First-Child Relationship Table (`parent-first-child`)
+##### Parent-First-Child Relationship Table (`parentFirstChilds`)
+- `parentID` | `childID`
+  - *Notes:* Represents parent and their first child relationships.
+
+##### Parent-Child Relationship Table (`parentChilds`)
 - `parentID` | `childID`
   - *Notes:* Represents parent-child relationships.
 
-##### Parent-Child Relationship Table (`parent-child`)
-- `parentID` | `childID`
-  - *Notes:* Represents parent-child relationships (alternative table).
-
-##### Next Node Sequence Table (`next-node`)
+##### Next Node Sequence Table (`nextNodes`)
 - `currentNodeID` | `nextNodeID`  
-  - *Notes:* Tracks the sequence of nodes.
+  - *Notes:* Tracks the sequence of nodes under the same parent.
 
-##### Boolean Property Table (`boolean-property`)
+##### Boolean Property Table (`boolprops`)
 - `nodeID` | `propID`  
   - *Notes:* Records boolean properties of nodes.
 
-##### Tag Registry Table (`tag-registry`)
-- `tagID` | `hashElement` | `isPaired`  
-  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+##### Registries
+`flo_html_Dom` also holds registries that relate the ID to its actual string value.
+- `tagRegistry`: Records all tags seen thusfar. 
+- `boolPropRegistry`: Records all boolean properties seen thusfar.
+- `propKeyRegistry`: Records all key properties seen thusfar.
+- `propValueRegistry`: Records all value properties seen thusfar.
 
-##### Boolean Property Registry Table (`boolean-property-registry`)
-- `indexID` | `hashElement`
-  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+These registries provide a mapping from ID -> string.
 
-##### Property Key Registry Table (`property-key-registry`)
-- `indexID` | `hashElement`
-  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+##### HashSets
+`flo_html_Dom` also holds hashsets to keep track of which tokens have already been parsed:
+- `tags`: Records all tags seen thusfar. 
+- `boolPropsSet`: Records all boolean properties seen thusfar.
+- `propKeys`: Records all key properties seen thusfar.
+- `propValues`: Records all value properties seen thusfar.
 
-##### Property Value Registry Table (`property-value-registry`)
-- `indexID` | `hashElement`
-  - *Notes:* The hashElement contains the values necessary to look up the tag in the tag hash table so we can find the tag even if the hash table reallocated in the meantime.
+These hashsets provide a mapping from string -> ID.
 
 #### Explanation
 
-As you can observe, the `flo_html_Dom` does not directly store text content but rather references `IDs` and `HashElements`. To retrieve textual content, you use the `ID` to look up the corresponding `flo_html_HashElement`, which, in turn, is used to locate the text in a hash table. The `flo_html_TextStore` struct holds all textual content from the parsed HTML.
+As you can observe, the `flo_html_Dom` does not directly store text content but rather references `IDs`. To retrieve textual content, you use the `ID` to look up the corresponding value in the related `registry`.
 
-For instance, if we have a *node* table entry: `{ 4, NODE_TYPE_DOCUMENT, 5 }`, and we want to find the text representation, we first look up the `flo_html_HashElement` of 5 (the `tagID`) in the `tag-registry` table. This yields `{ 194893, 0 }` as the `flo_html_HashElement`. To find the actual text, we perform a lookup in the tag hash table: `(hash + offset) % hash table length`, which in this case is `(194893 + 0 % tagHash.len)`.
+For instance, if we have a *node* table entry: `{ 4, NODE_TYPE_DOCUMENT, 5 }`, and we want to find the text representation, we do `tagRegistry[5]`. This yields `div`, for example, as the actual tag. 
+
+And, when parsing a new document node, say `<div></div>`, we first insert in the `tags` hashset. If this value already exists, the ID is merely returned, `5` in this example. Otherwise, `div` is inserted and a new ID is returned.
 
 Why was this decision made instead of storing all data directly in the `flo_html_Dom`?
 - It allows nodes with the same tag, boolean property, or property to share the same `ID`.
@@ -271,17 +292,9 @@ Querying the `flo_html_Dom` is possible with convenience methods similar to quer
 
 - `querySelectorAll`: Retrieves all elements in the `flo_html_Dom` that match a specified CSS selector. It returns an array of `flo_html_node_id`s. In the latter case, please remember to `free` this array.
 
-- `getElementsByTagName`: Retrieves all elements in the `flo_html_Dom` that have a specified tag name. It returns an array of `flo_html_node_id`s. Don't forget to `free` this array when appropriate.
-
-- `getElementById`: Retrieves an element in the `flo_html_Dom` by its unique ID. It returns a single `flo_html_node_id`.
-
-- `getElementsByClassName`: Retrieves all elements in the `flo_html_Dom` that have a specified class name. It returns an array of `flo_html_node_id`s. Remember to `free` this array as needed.
-
 #### Node
 
 The `html-parser` library provides a set of convenient functions to query and retrieve properties and content from individual nodes within the `flo_html_Dom`. These functions allow you to inspect and work with specific attributes and text content of nodes. Here's a brief overview of the available functions:
-
-- `flo_html_getNodeType`: Retrieves the type of a given node, such as whether it's a document node or a text node.
 
 - `flo_html_hasBoolProp`: Checks if a node has a specified boolean property and returns `true` if the property exists and is true.
 
@@ -378,7 +391,7 @@ Lastly, after making modifications to the parsed HTML content, you may want to o
 
 - `flo_html_writeHTMLToFile`: If you wish to save the parsed HTML document to a file, this function is your solution. It writes the minified HTML representation to the specified `filePath`. The function returns a status code to indicate the success or failure of the file-writing operation, making it easy to handle file I/O errors.
 
-- `flo_html_printDomStatus`: This function allows you to print the status of the `flo_html_Dom` and `flo_html_TextStore`. It provides information about node counts, registrations, and other relevant details. It can be a valuable tool for debugging and gaining insights into the structure of the parsed DOM.
+- `flo_html_printDomStatus`: This function allows you to print the status of the `flo_html_Dom`. It provides information about node counts, registrations, and other relevant details. It can be a valuable tool for debugging and gaining insights into the structure of the parsed DOM.
 
 These printing and writing functions provide essential utilities for interacting with and exporting the parsed HTML content, whether you need to debug, inspect, or save the modified DOM structure to a file for further use.
 
