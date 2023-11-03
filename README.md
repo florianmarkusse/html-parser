@@ -64,16 +64,15 @@ Before you begin, ensure that you have the `html-parser` library installed. Foll
 3. **Build the Project:**
    Use the following commands inside the root folder of the repository to build the project based on your platform:
 
-   - **For All Operating Systems:**
-     ```shell
-     cmake -S . -B build/ -D CMAKE_BUILD_TYPE="Release" -D BUILD_SHARED_LIBS="false" -D BUILD_TESTS="false" -D BUILD_BENCHMARKS="false"
-     cmake --build build/
-     ```
-
    - **For Linux or macOS:**
      If you are on Linux or macOS, you can use the provided `build.sh` script. Run the script with the `-h` flag to view all available build options:
      ```shell
      ./build.sh
+     ```
+     otherwise, u can simply use:
+     ```shell
+     cmake -S . -B build/ -D CMAKE_BUILD_TYPE="Release" -D BUILD_SHARED_LIBS="false" -D BUILD_TESTS="false" -D BUILD_BENCHMARKS="false"
+     cmake --build build/
      ```
 
 See [this section](#running-benchmarks-%26-tests) for more information on building and running the tests and benchmarks.
@@ -237,19 +236,23 @@ The HTML string is parsed into a `flo_html_Dom`. Instead of a traditional tree s
 
 ##### Parent-First-Child Relationship Table (`parentFirstChilds`)
 - `parentID` | `childID`
-  - *Notes:* Represents parent and their first child relationships.
+
+*Represents parent and their first child relationships.*
 
 ##### Parent-Child Relationship Table (`parentChilds`)
 - `parentID` | `childID`
-  - *Notes:* Represents parent-child relationships.
+
+*Represents parent-child relationships.*
 
 ##### Next Node Sequence Table (`nextNodes`)
 - `currentNodeID` | `nextNodeID`  
-  - *Notes:* Tracks the sequence of nodes under the same parent.
+
+*Tracks the sequence of nodes under the same parent.*
 
 ##### Boolean Property Table (`boolprops`)
 - `nodeID` | `propID`  
-  - *Notes:* Records boolean properties of nodes.
+
+*Records boolean properties of nodes.*
 
 ##### Registries
 `flo_html_Dom` also holds registries that relate the ID to its actual string value.
@@ -277,12 +280,23 @@ For instance, if we have a *node* table entry: `{ 4, NODE_TYPE_DOCUMENT, 5 }`, a
 
 And, when parsing a new document node, say `<div></div>`, we first insert in the `tags` hashset. If this value already exists, the ID is merely returned, `5` in this example. Otherwise, `div` is inserted and a new ID is returned.
 
-Why was this decision made instead of storing all data directly in the `flo_html_Dom`?
+Why was this decision made instead of storing all data directly in each node?
 - It allows nodes with the same tag, boolean property, or property to share the same `ID`.
 - It facilitates faster node filtering.
 - The library's maintainer, [Florian Markusse](https://github.com/florianmarkusse), wanted to experiment with data-oriented programming and found this approach both challenging and educational.
 
 This design choice enhances performance, reduces memory overhead, and optimizes node filtering. It also provides an opportunity for developers to explore data-oriented programming concepts.
+
+#### Methods to create a DOM
+
+Creating a `flo_html_Dom` is possible with the following methods:
+
+- `flo_html_createDom`: Creates the `flo_html_Dom` based on the provided HTML string. 
+
+- `flo_html_createDomFromFile`: Creates the `flo_html_Dom` based on the provided file location.
+
+- `flo_html_duplicateDom`: Creates the `flo_html_Dom` based on the provided `flo_html_Dom`.
+
 
 ### Querying
 After parsing, we can query the `flo_html_Dom` for information that we are looking for. This section is split up into two sections: querying the `flo_html_Dom` and querying the contents of an individual node.
@@ -408,16 +422,10 @@ This repository comes with tests and a simple benchmarking tool included. If you
 #### Build the Project:
    Use the following commands to build the project based on your platform:
 
-   - **For All Operating Systems:**
-     ```shell
-     cmake -S . -B build/ -D CMAKE_BUILD_TYPE="Release" -D BUILD_SHARED_LIBS="false" -D BUILD_TESTS="true" -D BUILD_BENCHMARKS="true"
-     cmake --build build/
-     ```
-
    - **For Linux or macOS:**
      If you are on Linux or macOS, you can use the provided `build.sh` script. Run the script with the `-h` flag to view all available build options:
      ```shell
-     ./build.sh -t -b
+     ./build.sh -h
      ```
 
 #### Running Tests

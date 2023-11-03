@@ -148,6 +148,19 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
 
     flo_html_printHTML(comparisonTest.actual);
 
+    flo_html_Dom *duplicatedDom =
+        flo_html_duplicateDom(comparisonTest.actual, &scratch);
+
+    flo_html_ComparisonResult comp =
+        flo_html_equals(comparisonTest.actual, duplicatedDom, scratch);
+    if (comp.status != COMPARISON_SUCCESS) {
+        printTestFailure();
+        printTestDemarcation();
+        printf("Duplication failed!\n");
+        printTestDemarcation();
+        return TEST_FAILURE;
+    }
+
     return compareAndEndTest(&comparisonTest, scratch);
 }
 

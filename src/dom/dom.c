@@ -51,3 +51,36 @@ flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
 
     return flo_html_parseRoot(htmlString, result, perm);
 }
+
+flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_html_Arena *perm) {
+    flo_html_Dom *result = FLO_HTML_NEW(perm, flo_html_Dom, 1);
+
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->nodes, dom->nodes, flo_html_Node, perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->parentFirstChilds,
+                                dom->parentFirstChilds, flo_html_ParentChild,
+                                perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->parentChilds, dom->parentChilds,
+                                flo_html_ParentChild, perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->nextNodes, dom->nextNodes,
+                                flo_html_NextNode, perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->boolProps, dom->boolProps,
+                                flo_html_BooleanProperty, perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->props, dom->props, flo_html_Property,
+                                perm);
+
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->tagRegistry, dom->tagRegistry,
+                                flo_html_TagRegistration, perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->boolPropRegistry, dom->boolPropRegistry,
+                                flo_html_String, perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->propKeyRegistry, dom->propKeyRegistry,
+                                flo_html_String, perm);
+    FLO_HTML_COPY_DYNAMIC_ARRAY(result->propValueRegistry,
+                                dom->propValueRegistry, flo_html_String, perm);
+
+    result->tags = flo_html_copyStringHashSet(&dom->tags, perm);
+    result->boolPropsSet = flo_html_copyStringHashSet(&dom->boolPropsSet, perm);
+    result->propKeys = flo_html_copyStringHashSet(&dom->propKeys, perm);
+    result->propValues = flo_html_copyStringHashSet(&dom->propValues, perm);
+
+    return result;
+}

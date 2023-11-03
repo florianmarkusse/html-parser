@@ -84,6 +84,19 @@ flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
 flo_html_Dom *flo_html_createDomFromFile(flo_html_String fileLocation,
                                          flo_html_Arena *perm);
 
+/**
+ * @brief Create a DOM structure identical to the one provided.
+ *
+ * This function duplicates all the information that is present in the provided
+ * `dom` and creates an idential one.
+ *
+ * @param[out]  dom             The DOM structure to duplicate.
+ * @param[in]   perm            The memory arena for permanent allocations.
+ *
+ * @return  The DOM of the html string.
+ */
+flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_html_Arena *perm);
+
 #ifdef __cplusplus
 }
 #endif

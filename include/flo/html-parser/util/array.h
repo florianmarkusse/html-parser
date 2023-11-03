@@ -20,33 +20,39 @@ extern "C" {
         ptrdiff_t cap;                                                         \
     }
 
+typedef struct {
+    char *buf;
+    ptrdiff_t len;
+    ptrdiff_t cap;
+} Slice;
+
 __attribute((unused)) static void flo_html_grow(void *slice, ptrdiff_t size,
                                                 ptrdiff_t align,
                                                 flo_html_Arena *a,
                                                 unsigned char flags) {
-    struct {
-        char *buf;
-        ptrdiff_t len;
-        ptrdiff_t cap;
-    } replica;
-    memcpy(&replica, slice, FLO_HTML_SIZEOF(replica));
+    Slice *replica = (Slice *)slice;
 
-    if (replica.buf == NULL) {
-        replica.cap = 1;
-        replica.buf = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
-    } else if (replica.buf == a->end) {
-        void *buf = flo_html_alloc(a, size, align, replica.cap, flags);
-        memcpy(buf, replica.buf, size * replica.len);
-        replica.buf = buf;
+    if (replica->buf == NULL) {
+        replica->cap = 1;
+        replica->buf = flo_html_alloc(a, 2 * size, align, replica->cap, flags);
+    } else if (replica->buf == a->end) {
+        void *buf = flo_html_alloc(a, size, align, replica->cap, flags);
+        memcpy(buf, replica->buf, size * replica->len);
+        replica->buf = buf;
     } else {
-        void *buf = flo_html_alloc(a, 2 * size, align, replica.cap, flags);
-        memcpy(buf, replica.buf, size * replica.len);
-        replica.buf = buf;
+        void *buf = flo_html_alloc(a, 2 * size, align, replica->cap, flags);
+        memcpy(buf, replica->buf, size * replica->len);
+        replica->buf = buf;
     }
 
-    replica.cap *= 2;
-    memcpy(slice, &replica, FLO_HTML_SIZEOF(replica));
+    replica->cap *= 2;
 }
+
+#define FLO_HTML_COPY_DYNAMIC_ARRAY(newArr, oldArr, t, a)                      \
+    newArr.buf = FLO_HTML_NEW(a, t, (oldArr).len);                             \
+    memcpy((newArr).buf, (oldArr).buf, (oldArr).len *FLO_HTML_SIZEOF(t));      \
+    (newArr).len = (oldArr).len;                                               \
+    (newArr).cap = (oldArr).len;
 
 #define FLO_HTML_PUSH_2(s, a)                                                  \
     ({                                                                         \

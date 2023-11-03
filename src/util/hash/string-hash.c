@@ -108,6 +108,18 @@ ptrdiff_t flo_html_containsStringHashSet(flo_html_StringHashSet *set,
     return 0;
 }
 
+flo_html_StringHashSet
+flo_html_copyStringHashSet(flo_html_StringHashSet *originalSet,
+                           flo_html_Arena *perm) {
+    flo_html_StringHashSet copy =
+        flo_html_initStringHashSet(originalSet->arrayLen, perm);
+    memcpy(copy.array, originalSet->array,
+           originalSet->arrayLen * sizeof(flo_html_StringHashEntry));
+    copy.entries = originalSet->entries;
+
+    return copy;
+}
+
 flo_html_HashComparisonStatus
 flo_html_equalsStringHashSet(flo_html_StringHashSet *set1,
                              flo_html_StringHashSet *set2) {
