@@ -42,23 +42,13 @@ static TestStatus parseQueryModify(flo_html_Arena scratch) {
         printTestDemarcation();
         return TEST_FAILURE;
     }
-    if (!flo_html_setTextContent(results.buf[0], FLO_HTML_S("FOURTH"),
-                                 comparisonTest.actual, &scratch)) {
-        printf("Failed to set text content.\n");
-        return TEST_FAILURE;
-    }
-    if (!flo_html_addBooleanPropertyToNode(results.buf[0],
-                                           FLO_HTML_S("the-fourth"),
-                                           comparisonTest.actual, &scratch)) {
-        printf("Failed to add boolean property.\n");
-        return TEST_FAILURE;
-    }
-    if (!flo_html_addPropertyToNode(results.buf[0], FLO_HTML_S("the-property"),
-                                    FLO_HTML_S("my value"),
-                                    comparisonTest.actual, &scratch)) {
-        printf("Failed to add boolean property.\n");
-        return TEST_FAILURE;
-    }
+    flo_html_setTextContent(results.buf[0], FLO_HTML_S("FOURTH"),
+                            comparisonTest.actual, &scratch);
+    flo_html_addBooleanPropertyToNode(results.buf[0], FLO_HTML_S("the-fourth"),
+                                      comparisonTest.actual, &scratch);
+    flo_html_addPropertyToNode(results.buf[0], FLO_HTML_S("the-property"),
+                               FLO_HTML_S("my value"), comparisonTest.actual,
+                               &scratch);
 
     flo_html_node_id currentNodeID = 0;
     actual = flo_html_querySelector(FLO_HTML_S("head"), comparisonTest.actual,

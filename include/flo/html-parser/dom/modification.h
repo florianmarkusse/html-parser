@@ -20,11 +20,8 @@ extern "C" {
  * @param[in]   value           The buffer containing the property value.
  * @param[in]   dom             The DOM structure.
  * @param[in]   perm            The memory arena for permanent allocations.
- *
- * @return  True if the property was successfully added, false if the operation
- * failed.
  */
-bool flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
+void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
                                 flo_html_String value, flo_html_Dom *dom,
                                 flo_html_Arena *perm);
 
@@ -39,11 +36,8 @@ bool flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
  * @param[in]   boolProp        The boolean property.
  * @param[in]   dom             The DOM structure.
  * @param[in]   perm            The memory arena for permanent allocations.
- *
- * @return  True if the property was successfully added, false if the operation
- * failed.
  */
-bool flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
+void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
                                        flo_html_String boolProp,
                                        flo_html_Dom *dom, flo_html_Arena *perm);
 
@@ -78,11 +72,8 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
  * @param[in]   text            The new text content.
  * @param[in]   dom             The DOM structure.
  * @param[in]   perm            The memory arena for permanent allocations.
- *
- * @return  True if the text content was successfully updated, false if the
- * operation failed.
  */
-bool flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
+void flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
                              flo_html_Dom *dom, flo_html_Arena *perm);
 
 /**
@@ -116,10 +107,8 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
  *                              not.
  * @param[in]   dom             The DOM structure.
  * @param[in]   perm            The memory arena for permanent allocations.
- *
- * @return  True if the tag was successfully set, false if the operation failed.
  */
-bool flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
+void flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
                                    bool isPaired, flo_html_Dom *dom,
                                    flo_html_Arena *perm);
 

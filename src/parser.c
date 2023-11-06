@@ -64,7 +64,6 @@ unsigned char textNodeContinue(flo_parse_Status ps, unsigned char ch) {
 }
 
 typedef struct {
-    bool isSuccess;
     bool canHaveChildren;
     flo_html_String tag;
     flo_html_node_id nodeID;
@@ -93,7 +92,6 @@ static inline bool isEndDocumentTag(flo_parse_Status ps,
 }
 
 typedef struct {
-    bool isSuccess;
     flo_html_node_id newNodeID;
     ptrdiff_t nextIndex;
 } flo_html_TextNodeParseResult;
@@ -101,9 +99,6 @@ typedef struct {
 flo_html_TextNodeParseResult
 parseTextNode(flo_parse_Status ps, flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_node_id nodeID = flo_html_createNode(NODE_TYPE_TEXT, dom, perm);
-    if (nodeID == 0) {
-        return (flo_html_TextNodeParseResult){.isSuccess = false};
-    }
 
     flo_html_RawData raw = {0};
     flo_html_String whiteSpace = FLO_HTML_S(" ");
@@ -140,8 +135,8 @@ parseTextNode(flo_parse_Status ps, flo_html_Dom *dom, flo_html_Arena *perm) {
 
     dom->nodes.buf[nodeID].text = FLO_HTML_S_LEN(raw.buf, raw.len);
 
-    return (flo_html_TextNodeParseResult){
-        .isSuccess = true, .newNodeID = nodeID, .nextIndex = ps.idx};
+    return (flo_html_TextNodeParseResult){.newNodeID = nodeID,
+                                          .nextIndex = ps.idx};
 }
 
 flo_html_String parseProp(flo_parse_Status *ps) {
@@ -177,10 +172,6 @@ flo_html_NodeParseResult parseDocumentNode(flo_parse_Status ps, bool exclamTag,
     flo_html_NodeParseResult result;
     flo_html_node_id nodeID =
         flo_html_createNode(NODE_TYPE_DOCUMENT, dom, perm);
-    if (nodeID == 0) {
-        result.isSuccess = false;
-        return result;
-    }
 
     ptrdiff_t tagStart = ps.idx;
     FLO_PARSE_NEXT_CHAR_UNTIL(ps, ch == '>' || ch == ' ' ||
@@ -223,32 +214,21 @@ flo_html_NodeParseResult parseDocumentNode(flo_parse_Status ps, bool exclamTag,
                 // will still support it.)
                 ps.idx++;
                 flo_html_String propValue = parseProp(&ps);
-                if (!flo_html_addPropertyToNode(nodeID, propKey, propValue, dom,
-                                                perm)) {
-                    result.isSuccess = false;
-                    return result;
-                }
+                flo_html_addPropertyToNode(nodeID, propKey, propValue, dom,
+                                           perm);
             } else {
-                if (!flo_html_addBooleanPropertyToNode(nodeID, propKey, dom,
-                                                       perm)) {
-                    result.isSuccess = false;
-                    return result;
-                }
+                flo_html_addBooleanPropertyToNode(nodeID, propKey, dom, perm);
             }
         }
         FLO_PARSE_SKIP_EMPTY_SPACE(ps);
     })
 
-    if (!flo_html_setTagOnDocumentNode(documentTag, nodeID, canHaveChildren,
-                                       dom, perm)) {
-        result.isSuccess = false;
-        return result;
-    }
+    flo_html_setTagOnDocumentNode(documentTag, nodeID, canHaveChildren, dom,
+                                  perm);
 
     ps.idx++; // Skip '>', we basically already parsed it by adding
               // the tag to the node ID.
 
-    result.isSuccess = true;
     result.nodeID = nodeID;
     result.canHaveChildren = canHaveChildren;
     result.tag = documentTag;
@@ -286,11 +266,6 @@ flo_html_Dom *flo_html_parse(flo_html_String html, flo_html_Dom *dom,
                     // standard opening tag or !DOCTYPE and friends
                     flo_html_NodeParseResult parseResult =
                         parseDocumentNode(ps, ch == '!', dom, perm);
-                    if (!parseResult.isSuccess) {
-                        FLO_HTML_PRINT_ERROR(
-                            "Unable to parse another document node!");
-                        return NULL;
-                    }
 
                     updateReferences(parseResult.nodeID, prevNodeID, nodeStack,
                                      dom, perm);
@@ -311,11 +286,6 @@ flo_html_Dom *flo_html_parse(flo_html_String html, flo_html_Dom *dom,
                     // Rogue open tag -> Text node.
                     flo_html_TextNodeParseResult parseResult =
                         parseTextNode(ps, dom, perm);
-                    if (!parseResult.isSuccess) {
-                        FLO_HTML_PRINT_ERROR(
-                            "Unable to parse another text node!");
-                        return NULL;
-                    }
                     updateReferences(parseResult.newNodeID, prevNodeID,
                                      nodeStack, dom, perm);
                     prevNodeID = parseResult.newNodeID;
@@ -327,10 +297,6 @@ flo_html_Dom *flo_html_parse(flo_html_String html, flo_html_Dom *dom,
         else {
             flo_html_TextNodeParseResult parseResult =
                 parseTextNode(ps, dom, perm);
-            if (!parseResult.isSuccess) {
-                FLO_HTML_PRINT_ERROR("Unable to parse another text node!");
-                return NULL;
-            }
             updateReferences(parseResult.newNodeID, prevNodeID, nodeStack, dom,
                              perm);
             prevNodeID = parseResult.newNodeID;
@@ -366,30 +332,19 @@ flo_html_parseDocumentElement(flo_html_DocumentNode *documentNode,
                               flo_html_Dom *dom, flo_html_Arena *perm) {
     flo_html_node_id newNodeID =
         flo_html_createNode(NODE_TYPE_DOCUMENT, dom, perm);
-    if (newNodeID == 0) {
-        return 0;
-    }
 
-    if (!flo_html_setTagOnDocumentNode(documentNode->tag, newNodeID,
-                                       documentNode->isPaired, dom, perm)) {
-        return 0;
-    }
+    flo_html_setTagOnDocumentNode(documentNode->tag, newNodeID,
+                                  documentNode->isPaired, dom, perm);
 
     for (ptrdiff_t i = 0; i < documentNode->boolPropsLen; i++) {
         flo_html_String boolProp = documentNode->boolProps[i];
-        if (!flo_html_addBooleanPropertyToNode(newNodeID, boolProp, dom,
-                                               perm)) {
-            return 0;
-        }
+        flo_html_addBooleanPropertyToNode(newNodeID, boolProp, dom, perm);
     }
 
     for (ptrdiff_t i = 0; i < documentNode->propsLen; i++) {
         flo_html_String keyProp = documentNode->keyProps[i];
         flo_html_String valueProp = documentNode->valueProps[i];
-        if (!flo_html_addPropertyToNode(newNodeID, keyProp, valueProp, dom,
-                                        perm)) {
-            return 0;
-        }
+        flo_html_addPropertyToNode(newNodeID, keyProp, valueProp, dom, perm);
     }
 
     return newNodeID;
@@ -399,9 +354,6 @@ flo_html_node_id flo_html_parseTextElement(flo_html_String text,
                                            flo_html_Dom *dom,
                                            flo_html_Arena *perm) {
     flo_html_node_id newNodeID = flo_html_createNode(NODE_TYPE_TEXT, dom, perm);
-    if (newNodeID == 0) {
-        return 0;
-    }
     unsigned char *malloced = FLO_HTML_NEW(perm, unsigned char, text.len);
     memcpy(malloced, text.buf, text.len);
     dom->nodes.buf[newNodeID].text = FLO_HTML_S_LEN(malloced, text.len);

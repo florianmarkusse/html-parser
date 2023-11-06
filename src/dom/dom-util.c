@@ -13,7 +13,7 @@
 flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom, flo_html_Arena *perm) {
     if (dom->nodes.len > FLO_HTML_MAX_NODE_ID - 1) {
-        return 0;
+        __builtin_longjmp(perm->jmp_buf, 1);
     }
     flo_html_Node node;
     node.nodeType = nodeType;
