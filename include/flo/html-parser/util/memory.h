@@ -22,37 +22,6 @@ typedef struct {
     void **jmp_buf;
 } flo_html_Arena;
 
-__attribute__((unused)) static inline flo_html_Arena
-flo_html_newArena(ptrdiff_t cap) {
-    flo_html_Arena a;
-    a.beg = mmap(NULL, cap, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
-                 -1, 0);
-    if (a.beg == MAP_FAILED) {
-        a.beg = NULL;
-        a.end = NULL;
-        a.cap = 0;
-    }
-    a.end = a.beg + cap;
-    a.cap = cap;
-    return a;
-}
-
-__attribute__((unused)) static inline void
-flo_html_destroyArena(flo_html_Arena *arena) {
-    if (munmap(arena->beg, arena->cap) == -1) {
-        FLO_HTML_PRINT_ERROR("Failed to unmap memory from arena!\n"
-                             "Arena Details:\n"
-                             "  beg: %p\n"
-                             "  end: %p\n"
-                             "  cap: %td\n"
-                             "Zeroing Arena regardless.",
-                             arena->beg, arena->end, arena->cap);
-    }
-    arena->cap = 0;
-    arena->beg = NULL;
-    arena->end = NULL;
-}
-
 #define FLO_HTML_ZERO_MEMORY 0x01
 #define FLO_HTML_NULL_ON_FAIL 0x02
 

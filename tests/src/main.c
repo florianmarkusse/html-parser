@@ -16,17 +16,48 @@
 #include "pretty-print.h"
 #include "test.h"
 
+#define CAP 1 << 27
+
+bool setupArena(flo_html_Arena *arena) {
+    char *start = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
+                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (start == MAP_FAILED) {
+        FLO_HTML_PRINT_ERROR("Failed to allocate memory!\n");
+        return false;
+    }
+
+    arena->beg = start;
+    arena->end = start + (ptrdiff_t)(CAP);
+    arena->cap = CAP;
+    void *jmp_buf[5];
+    if (__builtin_setjmp(jmp_buf)) {
+        if (munmap(arena->beg, arena->cap) == -1) {
+            FLO_HTML_PRINT_ERROR("Failed to unmap memory from arena!\n"
+                                 "Arena Details:\n"
+                                 "  beg: %p\n"
+                                 "  end: %p\n"
+                                 "  cap: %td\n"
+                                 "Zeroing Arena regardless.",
+                                 arena->beg, arena->end, arena->cap);
+        }
+        arena->cap = 0;
+        arena->beg = NULL;
+        arena->end = NULL;
+        FLO_HTML_PRINT_ERROR("OOM/overflow in arena!\n");
+        return false;
+    }
+    arena->jmp_buf = jmp_buf;
+
+    return true;
+}
+
 int main() {
     printf("Starting test suite...\n\n");
 
-    flo_html_Arena arena = flo_html_newArena(1U << 27U);
-    void *jmp_buf[5];
-    if (__builtin_setjmp(jmp_buf)) {
-        flo_html_destroyArena(&arena);
-        FLO_HTML_PRINT_ERROR("OOM in arena!\n");
-        return -1;
+    flo_html_Arena arena;
+    if (!setupArena(&arena)) {
+        return 1;
     }
-    arena.jmp_buf = jmp_buf;
 
     ptrdiff_t successes = 0;
     ptrdiff_t failures = 0;
@@ -63,8 +94,6 @@ int main() {
 
     testIntegrations(&successes, &failures, arena);
     printf("\n");
-
-    flo_html_destroyArena(&arena);
 
     printTestScore(successes, failures);
     if (failures > 0) {
