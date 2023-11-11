@@ -5,7 +5,7 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/text-node.h"
-#include "flo/html-parser/util/file/path.h"
+#include "file/path.h"
 
 void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
                flo_html_Dom *dom, FILE *output) {
@@ -25,19 +25,19 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
     }
 
     if (node.nodeType == NODE_TYPE_TEXT) {
-        fprintf(output, "%.*s", FLO_HTML_S_P(node.text));
+        fprintf(output, "%.*s", FLO_STRING_PRINT(node.text));
         return;
     }
 
-    flo_html_String tag = dom->tagRegistry.buf[node.tagID].tag;
-    fprintf(output, "<%.*s", FLO_HTML_S_P(tag));
+    flo_String tag = dom->tagRegistry.buf[node.tagID].tag;
+    fprintf(output, "<%.*s", FLO_STRING_PRINT(tag));
 
     for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
         flo_html_BooleanProperty boolProp = dom->boolProps.buf[i];
 
         if (boolProp.nodeID == node.nodeID) {
             fprintf(output, " %.*s",
-                    FLO_HTML_S_P(dom->boolPropRegistry.buf[boolProp.propID]));
+                    FLO_STRING_PRINT(dom->boolPropRegistry.buf[boolProp.propID]));
         }
     }
 
@@ -46,15 +46,15 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
 
         if (prop.nodeID == node.nodeID) {
             fprintf(output, " %.*s=\"%.*s\"",
-                    FLO_HTML_S_P(dom->propKeyRegistry.buf[prop.keyID]),
-                    FLO_HTML_S_P(dom->propValueRegistry.buf[prop.valueID]));
+                    FLO_STRING_PRINT(dom->propKeyRegistry.buf[prop.keyID]),
+                    FLO_STRING_PRINT(dom->propValueRegistry.buf[prop.valueID]));
         }
     }
 
     flo_html_TagRegistration *tagRegistration =
         &dom->tagRegistry.buf[node.tagID];
     if (!tagRegistration->isPaired) {
-        if (flo_html_stringEquals(tag, FLO_HTML_S("!DOCTYPE"))) {
+        if (flo_stringEquals(tag, FLO_STRING("!DOCTYPE"))) {
             fprintf(output, ">");
         } else {
             fprintf(output, "/>");
@@ -69,7 +69,7 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
         childNode = flo_html_getNext(childNode, dom);
     }
 
-    fprintf(output, "</%.*s>", FLO_HTML_S_P(tag));
+    fprintf(output, "</%.*s>", FLO_STRING_PRINT(tag));
 }
 
 void flo_html_printHTML(flo_html_Dom *dom) {
@@ -82,15 +82,15 @@ void flo_html_printHTML(flo_html_Dom *dom) {
     printf("\n\n");
 }
 
-flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
-                                             flo_html_String filePath,
-                                             flo_html_Arena scratch) {
-    flo_html_createPath(filePath, scratch);
+flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
+                                             flo_String filePath,
+                                             flo_Arena scratch) {
+    flo_createPath(filePath, scratch);
     // casting here because filePath should not contain any funny characters.
     FILE *file = fopen((char *)filePath.buf, "wbe");
     if (file == NULL) {
         printf("Failed to open file for writing: %.*s\n",
-               FLO_HTML_S_P(filePath));
+               FLO_STRING_PRINT(filePath));
         return FILE_CANT_OPEN;
     }
 
@@ -105,26 +105,26 @@ flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
     return FILE_SUCCESS;
 }
 
-void printflo_html_BasicRegistry(flo_html_String registryName,
-                                 flo_html_String_d_a *strings) {
+void printflo_html_BasicRegistry(flo_String registryName,
+                                 flo_String_d_a *strings) {
     printf("%-20.*s\nregistration nodes inside DOM...\n",
-           FLO_HTML_S_P(registryName));
+           FLO_STRING_PRINT(registryName));
     printf("total number of nodes: %zu\n", strings->len);
     for (ptrdiff_t i = 0; i < strings->len; i++) {
-        flo_html_String string = strings->buf[i];
-        printf("ID: %zu value: %-20.*s\n", i, FLO_HTML_S_P(string));
+        flo_String string = strings->buf[i];
+        printf("ID: %zu value: %-20.*s\n", i, FLO_STRING_PRINT(string));
     }
     printf("\n");
 }
 
-void printSetStatus(flo_html_StringHashSet *set) {
+void printSetStatus(flo_StringHashSet *set) {
     printf("hash set contents...\n");
-    flo_html_StringHashSetIterator iterator =
-        (flo_html_StringHashSetIterator){.set = set, .index = 0};
+    flo_StringHashSetIterator iterator =
+        (flo_StringHashSetIterator){.set = set, .index = 0};
 
-    flo_html_String string;
-    while ((string = flo_html_nextStringHashSetIterator(&iterator)).len != 0) {
-        printf("%.*s\n", FLO_HTML_S_P(string));
+    flo_String string;
+    while ((string = flo_nextStringHashSetIterator(&iterator)).len != 0) {
+        printf("%.*s\n", FLO_STRING_PRINT(string));
     }
 }
 
@@ -153,11 +153,11 @@ void flo_html_printDomStatus(flo_html_Dom *dom) {
         if (node.nodeType == NODE_TYPE_DOCUMENT) {
             printf("node ID: %-5u node type: %-10.*s with tag ID: %-5u\n",
                    node.nodeID,
-                   FLO_HTML_S_P(flo_html_nodeTypeToString(node.nodeType)),
+                   FLO_STRING_PRINT(flo_html_nodeTypeToString(node.nodeType)),
                    node.tagID);
         } else {
             printf("node ID: %-5u node type: %-10.*s\n", node.nodeID,
-                   FLO_HTML_S_P(flo_html_nodeTypeToString(node.nodeType)));
+                   FLO_STRING_PRINT(flo_html_nodeTypeToString(node.nodeType)));
         }
     }
     printf("\n");
@@ -168,14 +168,14 @@ void flo_html_printDomStatus(flo_html_Dom *dom) {
     for (ptrdiff_t i = 0; i < dom->tagRegistry.len; i++) {
         flo_html_TagRegistration tagRegistration = dom->tagRegistry.buf[i];
         printf("tag ID: %-5td tag: %-20.*s isPaired: %d\n", i,
-               FLO_HTML_S_P(tagRegistration.tag), tagRegistration.isPaired);
+               FLO_STRING_PRINT(tagRegistration.tag), tagRegistration.isPaired);
     }
     printf("\n");
 
-    printflo_html_BasicRegistry(FLO_HTML_S("bool props"),
+    printflo_html_BasicRegistry(FLO_STRING("bool props"),
                                 &dom->boolPropRegistry);
-    printflo_html_BasicRegistry(FLO_HTML_S("key props"), &dom->propKeyRegistry);
-    printflo_html_BasicRegistry(FLO_HTML_S("value props"),
+    printflo_html_BasicRegistry(FLO_STRING("key props"), &dom->propKeyRegistry);
+    printflo_html_BasicRegistry(FLO_STRING("value props"),
                                 &dom->propValueRegistry);
 
     printf("boolean property nodes inside DOM...\n");

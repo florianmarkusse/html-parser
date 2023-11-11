@@ -9,7 +9,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "flo/html-parser/definitions.h"
-#include "flo/html-parser/util/text/string.h"
+#include "text/string.h"
 
 typedef enum {
     NODE_TYPE_ROOT,
@@ -20,16 +20,16 @@ typedef enum {
     NODE_TYPE_NUM
 } flo_html_NodeType;
 
-static flo_html_String nodeTypeStrings[NODE_TYPE_NUM] = {
-    FLO_HTML_S("Root"), FLO_HTML_S("Document"), FLO_HTML_S("Text"),
-    FLO_HTML_S("Removed"), FLO_HTML_S("Error")};
+static flo_String nodeTypeStrings[NODE_TYPE_NUM] = {
+    FLO_STRING("Root"), FLO_STRING("Document"), FLO_STRING("Text"),
+    FLO_STRING("Removed"), FLO_STRING("Error")};
 
-__attribute__((unused)) static flo_html_String
+__attribute__((unused)) static flo_String
 flo_html_nodeTypeToString(flo_html_NodeType type) {
     if (type >= 0 && type < NODE_TYPE_NUM) {
         return nodeTypeStrings[type];
     }
-    return FLO_HTML_S("Unknown node type!");
+    return FLO_STRING("Unknown node type!");
 }
 
 typedef struct {
@@ -37,7 +37,7 @@ typedef struct {
     flo_html_NodeType nodeType;
     union {
         flo_html_index_id tagID;
-        flo_html_String text;
+        flo_String text;
     };
 } flo_html_Node;
 

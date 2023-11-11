@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
 
 #include "dom/appending/appending.h"
 #include "dom/comparing/comparing.h"
@@ -18,11 +19,11 @@
 
 #define CAP 1 << 27
 
-bool setupArena(flo_html_Arena *arena) {
+bool setupArena(flo_Arena *arena) {
     char *start = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (start == MAP_FAILED) {
-        FLO_HTML_PRINT_ERROR("Failed to allocate memory!\n");
+        FLO_PRINT_ERROR("Failed to allocate memory!\n");
         return false;
     }
 
@@ -32,18 +33,18 @@ bool setupArena(flo_html_Arena *arena) {
     void *jmp_buf[5];
     if (__builtin_setjmp(jmp_buf)) {
         if (munmap(arena->beg, arena->cap) == -1) {
-            FLO_HTML_PRINT_ERROR("Failed to unmap memory from arena!\n"
-                                 "Arena Details:\n"
-                                 "  beg: %p\n"
-                                 "  end: %p\n"
-                                 "  cap: %td\n"
-                                 "Zeroing Arena regardless.",
-                                 arena->beg, arena->end, arena->cap);
+            FLO_PRINT_ERROR("Failed to unmap memory from arena!\n"
+                            "Arena Details:\n"
+                            "  beg: %p\n"
+                            "  end: %p\n"
+                            "  cap: %td\n"
+                            "Zeroing Arena regardless.",
+                            arena->beg, arena->end, arena->cap);
         }
         arena->cap = 0;
         arena->beg = NULL;
         arena->end = NULL;
-        FLO_HTML_PRINT_ERROR("OOM/overflow in arena!\n");
+        FLO_PRINT_ERROR("OOM/overflow in arena!\n");
         return false;
     }
     arena->jmp_buf = jmp_buf;
@@ -54,7 +55,7 @@ bool setupArena(flo_html_Arena *arena) {
 int main() {
     printf("Starting test suite...\n\n");
 
-    flo_html_Arena arena;
+    flo_Arena arena;
     if (!setupArena(&arena)) {
         return 1;
     }

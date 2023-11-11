@@ -31,4 +31,4 @@ add_executable(${EXECUTABLE_NAME} ${TEST_SOURCE_FILES})
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${LIBRARY_NAME})
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+target_include_directories(${EXECUTABLE_NAME} PRIVATE ${FLO_HTML_INCLUDES})

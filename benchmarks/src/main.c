@@ -3,12 +3,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <time.h>
 
 #define INPUTS_DIR "benchmarks/inputs/"
 #define CAP 1 << 27
 
-bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
+bool parseFile(flo_String fileLocation, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         return false;
@@ -17,11 +18,11 @@ bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
     return true;
 }
 
-bool setupArena(flo_html_Arena *arena) {
+bool setupArena(flo_Arena *arena) {
     char *start = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (start == MAP_FAILED) {
-        FLO_HTML_PRINT_ERROR("Failed to allocate memory!\n");
+        FLO_PRINT_ERROR("Failed to allocate memory!\n");
         return false;
     }
 
@@ -31,18 +32,18 @@ bool setupArena(flo_html_Arena *arena) {
     void *jmp_buf[5];
     if (__builtin_setjmp(jmp_buf)) {
         if (munmap(arena->beg, arena->cap) == -1) {
-            FLO_HTML_PRINT_ERROR("Failed to unmap memory from arena!\n"
-                                 "Arena Details:\n"
-                                 "  beg: %p\n"
-                                 "  end: %p\n"
-                                 "  cap: %td\n"
-                                 "Zeroing Arena regardless.",
-                                 arena->beg, arena->end, arena->cap);
+            FLO_PRINT_ERROR("Failed to unmap memory from arena!\n"
+                            "Arena Details:\n"
+                            "  beg: %p\n"
+                            "  end: %p\n"
+                            "  cap: %td\n"
+                            "Zeroing Arena regardless.",
+                            arena->beg, arena->end, arena->cap);
         }
         arena->cap = 0;
         arena->beg = NULL;
         arena->end = NULL;
-        FLO_HTML_PRINT_ERROR("OOM/overflow in arena!\n");
+        FLO_PRINT_ERROR("OOM/overflow in arena!\n");
         return false;
     }
     arena->jmp_buf = jmp_buf;
@@ -50,7 +51,7 @@ bool setupArena(flo_html_Arena *arena) {
     return true;
 }
 
-void benchmark(flo_html_Arena scratch) {
+void benchmark(flo_Arena scratch) {
     // Open the inputs directory
     DIR *dir = NULL;
     struct dirent *ent = NULL;
@@ -69,7 +70,7 @@ void benchmark(flo_html_Arena scratch) {
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
                  ent->d_name);
         printf("parsing %s\n", fileLocation);
-        if (!parseFile(FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)),
+        if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
                        scratch)) {
             printf("Parsing DOM %s failed\n", fileLocation);
             break;
@@ -84,12 +85,12 @@ void benchmark(flo_html_Arena scratch) {
 int main() {
     struct timespec start;
     struct timespec end;
-    double cpu_time_used = NAN;
+    double cpu_time_used = (double)NAN;
 
     // Get the starting timestamp
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    flo_html_Arena arena;
+    flo_Arena arena;
     if (!setupArena(&arena)) {
         return -1;
     }
@@ -101,8 +102,8 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     // Calculate the elapsed time in seconds with nanosecond precision
-    cpu_time_used =
-        (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    cpu_time_used = (double)(end.tv_sec - start.tv_sec) +
+                    (double)(end.tv_nsec - start.tv_nsec) / 1e9;
 
     // Convert the elapsed time to milliseconds
     double cpu_time_used_ms = cpu_time_used * 1000;

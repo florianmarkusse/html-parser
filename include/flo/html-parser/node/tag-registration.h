@@ -8,10 +8,10 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "flo/html-parser/util/text/string.h"
+#include "text/string.h"
 
 typedef struct {
-    flo_html_String tag;
+    flo_String tag;
     bool isPaired;
 } flo_html_TagRegistration;
 

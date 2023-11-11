@@ -4,7 +4,7 @@
 #include "test.h"
 
 bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                     flo_html_Arena scratch) {
+                     flo_Arena scratch) {
     printTestTopicStart("node queries");
 
     ptrdiff_t localSuccesses = 0;

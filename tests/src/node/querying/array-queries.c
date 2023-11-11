@@ -1,5 +1,5 @@
 #include <flo/html-parser.h>
-#include <flo/html-parser/util/memory.h>
+#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -31,14 +31,14 @@ static TestFile testFiles[] = {
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(flo_html_String fileLocation,
-                            flo_html_String cssQuery,
+static TestStatus testQuery(flo_String fileLocation,
+                            flo_String cssQuery,
                             ArrayFunctionType functionType,
-                            ptrdiff_t expectedResult, flo_html_Arena scratch) {
+                            ptrdiff_t expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",
-                             FLO_HTML_S_P(fileLocation));
+        FLO_PRINT_ERROR("Failed to created DOM from file %.*s\n",
+                             FLO_STRING_PRINT(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
@@ -58,7 +58,7 @@ static TestStatus testQuery(flo_html_String fileLocation,
         ptrdiff_t actualResult = 0;
         switch (functionType) {
         case TEXT_CONTENT: {
-            flo_html_String_d_a results =
+            flo_String_d_a results =
                 flo_html_getTextContent(foundNode, dom, &scratch);
             actualResult = results.len;
             break;
@@ -93,7 +93,7 @@ static TestStatus testQuery(flo_html_String fileLocation,
 }
 
 bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                          flo_html_Arena scratch) {
+                          flo_Arena scratch) {
     printTestTopicStart("array queries");
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
@@ -104,9 +104,9 @@ bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
         printTestStart(testFile.testName);
 
         if (testQuery(
-                FLO_HTML_S_LEN(testFile.fileLocation,
+                FLO_STRING_LEN(testFile.fileLocation,
                                strlen(testFile.fileLocation)),
-                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                FLO_STRING_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
                 testFile.functionType, testFile.expectedResult,
                 scratch) != TEST_SUCCESS) {
             localFailures++;

@@ -21,9 +21,9 @@ extern "C" {
  * @param[in]   dom             The DOM structure.
  * @param[in]   perm            The memory arena for permanent allocations.
  */
-void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
-                                flo_html_String value, flo_html_Dom *dom,
-                                flo_html_Arena *perm);
+void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_String key,
+                                flo_String value, flo_html_Dom *dom,
+                                flo_Arena *perm);
 
 /**
  * @brief Add a boolean property to an HTML element.
@@ -38,8 +38,8 @@ void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_html_String key,
  * @param[in]   perm            The memory arena for permanent allocations.
  */
 void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
-                                       flo_html_String boolProp,
-                                       flo_html_Dom *dom, flo_html_Arena *perm);
+                                       flo_String boolProp,
+                                       flo_html_Dom *dom, flo_Arena *perm);
 
 /**
  * @brief Set the value of an HTML element's property.
@@ -57,9 +57,9 @@ void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
  * @return  True if the property was successfully updated, false if the
  * operation failed.
  */
-bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
-                               flo_html_String newValue, flo_html_Dom *dom,
-                               flo_html_Arena *perm);
+bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_String key,
+                               flo_String newValue, flo_html_Dom *dom,
+                               flo_Arena *perm);
 
 /**
  * @brief Set the text content of an HTML element.
@@ -73,8 +73,8 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_html_String key,
  * @param[in]   dom             The DOM structure.
  * @param[in]   perm            The memory arena for permanent allocations.
  */
-void flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
-                             flo_html_Dom *dom, flo_html_Arena *perm);
+void flo_html_setTextContent(flo_html_node_id nodeID, flo_String text,
+                             flo_html_Dom *dom, flo_Arena *perm);
 
 /**
  * @brief Add text to a text node within an HTML element.
@@ -90,9 +90,9 @@ void flo_html_setTextContent(flo_html_node_id nodeID, flo_html_String text,
  *                              text content.
  * @param[in]   perm            The memory arena for permanent allocations.
  */
-void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
+void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_String text,
                                 flo_html_Dom *dom, bool isAppend,
-                                flo_html_Arena *perm);
+                                flo_Arena *perm);
 
 /**
  * @brief Set the tag on a DocumentNode within the DOM.
@@ -108,9 +108,9 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_html_String text,
  * @param[in]   dom             The DOM structure.
  * @param[in]   perm            The memory arena for permanent allocations.
  */
-void flo_html_setTagOnDocumentNode(flo_html_String tag, flo_html_node_id nodeID,
+void flo_html_setTagOnDocumentNode(flo_String tag, flo_html_node_id nodeID,
                                    bool isPaired, flo_html_Dom *dom,
-                                   flo_html_Arena *perm);
+                                   flo_Arena *perm);
 
 #ifdef __cplusplus
 }

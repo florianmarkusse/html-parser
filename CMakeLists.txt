@@ -29,10 +29,6 @@ else()
     set(LIBRARY_TYPE "STATIC")
 endif()
 add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
-    "src/util/file/read.c"
-    "src/util/file/path.c"
-    "src/util/hash/uint16-t-hash.c"
-    "src/util/hash/string-hash.c"
     "src/dom/dom-util.c"
     "src/dom/dom.c"
     "src/dom/writing.c"
@@ -48,6 +44,11 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/dom/deletion.c"
     "src/dom/query/query.c"
     "src/dom/query/query-util.c"
+
+    "util/src/file/read.c"
+    "util/src/file/path.c"
+    "util/src/hash/uint16-t-hash.c"
+    "util/src/hash/string-hash.c"
 )
 
 
@@ -63,8 +64,12 @@ target_compile_definitions(${LIBRARY_NAME} PRIVATE
     $<$<CONFIG:Profiling>:>
 )
 
-target_include_directories(${LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-target_include_directories(${LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/util/include/)
+set(FLO_HTML_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/include/
+)
+
+target_include_directories(${LIBRARY_NAME} PRIVATE ${FLO_HTML_INCLUDES})
 
 if(${BUILD_TESTS} AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     add_subdirectory(tests)

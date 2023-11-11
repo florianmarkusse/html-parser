@@ -27,8 +27,8 @@ extern "C" {
  * @return  The ID of the replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithDocumentNodeWithQuery(
-    flo_html_String cssQuery, flo_html_DocumentNode *docNode, flo_html_Dom *dom,
-    flo_html_Arena *perm);
+    flo_String cssQuery, flo_html_DocumentNode *docNode, flo_html_Dom *dom,
+    flo_Arena *perm);
 
 /**
  * @brief Replace an HTML element with a text node using a CSS query.
@@ -44,10 +44,10 @@ flo_html_node_id flo_html_replaceWithDocumentNodeWithQuery(
  *
  * @return  The ID of the replacement node, or 0 if the operation fails.
  */
-flo_html_node_id flo_html_replaceWithTextNodeWithQuery(flo_html_String cssQuery,
-                                                       flo_html_String text,
+flo_html_node_id flo_html_replaceWithTextNodeWithQuery(flo_String cssQuery,
+                                                       flo_String text,
                                                        flo_html_Dom *dom,
-                                                       flo_html_Arena *perm);
+                                                       flo_Arena *perm);
 
 /**
  * @brief Replace an HTML element with HTML content from a string using a CSS
@@ -65,8 +65,8 @@ flo_html_node_id flo_html_replaceWithTextNodeWithQuery(flo_html_String cssQuery,
  * @return  The ID of the first replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithHTMLFromStringWithQuery(
-    flo_html_String cssQuery, flo_html_String htmlString, flo_html_Dom *dom,
-    flo_html_Arena *perm);
+    flo_String cssQuery, flo_String htmlString, flo_html_Dom *dom,
+    flo_Arena *perm);
 
 /**
  * @brief Replace an HTML element with HTML content from a file using a CSS
@@ -85,8 +85,8 @@ flo_html_node_id flo_html_replaceWithHTMLFromStringWithQuery(
  * @return  The ID of the first replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
-    flo_html_String cssQuery, flo_html_String fileLocation, flo_html_Dom *dom,
-    flo_html_Arena *perm);
+    flo_String cssQuery, flo_String fileLocation, flo_html_Dom *dom,
+    flo_Arena *perm);
 
 /**
  * @brief Replace an HTML element with a DocumentNode.
@@ -105,7 +105,7 @@ flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(
 flo_html_node_id
 flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
                                  flo_html_DocumentNode *docNode,
-                                 flo_html_Dom *dom, flo_html_Arena *perm);
+                                 flo_html_Dom *dom, flo_Arena *perm);
 
 /**
  * @brief Replace an HTML element with a text node.
@@ -122,9 +122,9 @@ flo_html_replaceWithDocumentNode(flo_html_node_id toReplaceNodeID,
  * @return  The ID of the replacement node, or 0 if the operation fails.
  */
 flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
-                                              flo_html_String text,
+                                              flo_String text,
                                               flo_html_Dom *dom,
-                                              flo_html_Arena *perm);
+                                              flo_Arena *perm);
 
 /**
  * @brief Replace an HTML element with HTML content from a string.
@@ -142,8 +142,8 @@ flo_html_node_id flo_html_replaceWithTextNode(flo_html_node_id toReplaceNodeID,
  */
 flo_html_node_id
 flo_html_replaceWithHTMLFromString(flo_html_node_id toReplaceNodeID,
-                                   flo_html_String htmlString,
-                                   flo_html_Dom *dom, flo_html_Arena *perm);
+                                   flo_String htmlString,
+                                   flo_html_Dom *dom, flo_Arena *perm);
 
 #ifdef __cplusplus
 }

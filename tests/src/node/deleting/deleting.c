@@ -40,12 +40,12 @@ static TestFile testFiles[] = {
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testDeletion(flo_html_String fileLocation1,
-                               flo_html_String fileLocation2,
-                               flo_html_String cssQuery,
-                               flo_html_String propToDelete,
+static TestStatus testDeletion(flo_String fileLocation1,
+                               flo_String fileLocation2,
+                               flo_String cssQuery,
+                               flo_String propToDelete,
                                DeletionType deletionType,
-                               flo_html_Arena scratch) {
+                               flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -69,7 +69,7 @@ static TestStatus testDeletion(flo_html_String fileLocation1,
     }
     default: {
         return failWithMessage(
-            FLO_HTML_S("No suitable DeletionType was supplied!\n"));
+            FLO_STRING("No suitable DeletionType was supplied!\n"));
     }
     }
 
@@ -77,7 +77,7 @@ static TestStatus testDeletion(flo_html_String fileLocation1,
 }
 
 bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
-                       flo_html_Arena scratch) {
+                       flo_Arena scratch) {
     printTestTopicStart("node deletions");
 
     ptrdiff_t localSuccesses = 0;
@@ -88,12 +88,12 @@ bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
         printTestStart(testFile.testName);
 
         if (testDeletion(
-                FLO_HTML_S_LEN(testFile.fileLocation1,
+                FLO_STRING_LEN(testFile.fileLocation1,
                                strlen(testFile.fileLocation1)),
-                FLO_HTML_S_LEN(testFile.fileLocation2,
+                FLO_STRING_LEN(testFile.fileLocation2,
                                strlen(testFile.fileLocation2)),
-                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                FLO_HTML_S_LEN(testFile.propToDelete,
+                FLO_STRING_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                FLO_STRING_LEN(testFile.propToDelete,
                                strlen(testFile.propToDelete)),
                 testFile.deletionType, scratch) != TEST_SUCCESS) {
             localFailures++;

@@ -10,13 +10,13 @@ extern "C" {
 #include <stddef.h>
 
 bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                     flo_html_Arena scratch);
+                     flo_Arena scratch);
 bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                         flo_html_Arena scratch);
+                         flo_Arena scratch);
 bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                         flo_html_Arena scratch);
+                         flo_Arena scratch);
 bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                          flo_html_Arena scratch);
+                          flo_Arena scratch);
 
 #ifdef __cplusplus
 }

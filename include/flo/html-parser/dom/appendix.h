@@ -27,9 +27,9 @@ extern "C" {
  * @return  The ID of the appended node, or 0 if the operation failed.
  */
 flo_html_node_id
-flo_html_appendDocumentNodeWithQuery(flo_html_String cssQuery,
+flo_html_appendDocumentNodeWithQuery(flo_String cssQuery,
                                      flo_html_DocumentNode *docNode,
-                                     flo_html_Dom *dom, flo_html_Arena *perm);
+                                     flo_html_Dom *dom, flo_Arena *perm);
 
 /**
  * @brief Append a text node to the DOM using a CSS query.
@@ -45,10 +45,10 @@ flo_html_appendDocumentNodeWithQuery(flo_html_String cssQuery,
  *
  * @return  The ID of the appended text node, or 0 if the operation failed.
  */
-flo_html_node_id flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
-                                                  flo_html_String text,
+flo_html_node_id flo_html_appendTextNodeWithQuery(flo_String cssQuery,
+                                                  flo_String text,
                                                   flo_html_Dom *dom,
-                                                  flo_html_Arena *perm);
+                                                  flo_Arena *perm);
 
 /**
  * @brief Append HTML content from a string to the DOM using a CSS query.
@@ -65,9 +65,9 @@ flo_html_node_id flo_html_appendTextNodeWithQuery(flo_html_String cssQuery,
  * @return  The ID of the first appended node, or 0 if the operation failed.
  */
 flo_html_node_id
-flo_html_appendHTMLFromStringWithQuery(flo_html_String cssQuery,
-                                       flo_html_String htmlString,
-                                       flo_html_Dom *dom, flo_html_Arena *perm);
+flo_html_appendHTMLFromStringWithQuery(flo_String cssQuery,
+                                       flo_String htmlString,
+                                       flo_html_Dom *dom, flo_Arena *perm);
 
 /**
  * @brief Append HTML content from a file to the DOM using a CSS query.
@@ -84,9 +84,9 @@ flo_html_appendHTMLFromStringWithQuery(flo_html_String cssQuery,
  * @return  The ID of the first appended node, or 0 if the operation failed.
  */
 flo_html_node_id
-flo_html_appendHTMLFromFileWithQuery(flo_html_String cssQuery,
-                                     flo_html_String fileLocation,
-                                     flo_html_Dom *dom, flo_html_Arena *perm);
+flo_html_appendHTMLFromFileWithQuery(flo_String cssQuery,
+                                     flo_String fileLocation,
+                                     flo_html_Dom *dom, flo_Arena *perm);
 
 /**
  * @brief Append a DocumentNode to the DOM.
@@ -105,7 +105,7 @@ flo_html_appendHTMLFromFileWithQuery(flo_html_String cssQuery,
 flo_html_node_id flo_html_appendDocumentNode(flo_html_node_id parentID,
                                              flo_html_DocumentNode *docNode,
                                              flo_html_Dom *dom,
-                                             flo_html_Arena *perm);
+                                             flo_Arena *perm);
 
 /**
  * @brief Append a text node to the DOM.
@@ -122,9 +122,9 @@ flo_html_node_id flo_html_appendDocumentNode(flo_html_node_id parentID,
  * @return  The ID of the appended text node, or 0 if the operation failed.
  */
 flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
-                                         flo_html_String text,
+                                         flo_String text,
                                          flo_html_Dom *dom,
-                                         flo_html_Arena *perm);
+                                         flo_Arena *perm);
 
 /**
  * @brief Append HTML content from a string to the DOM.
@@ -141,9 +141,9 @@ flo_html_node_id flo_html_appendTextNode(flo_html_node_id parentID,
  * @return  The ID of the first appended node, or 0 if the operation failed.
  */
 flo_html_node_id flo_html_appendHTMLFromString(flo_html_node_id parentID,
-                                               flo_html_String htmlString,
+                                               flo_String htmlString,
                                                flo_html_Dom *dom,
-                                               flo_html_Arena *perm);
+                                               flo_Arena *perm);
 
 #ifdef __cplusplus
 }

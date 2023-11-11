@@ -50,10 +50,10 @@ inline void printTestResultDifferenceErrorCode(ptrdiff_t expected,
 }
 
 inline void
-printTestResultDifferenceString(flo_html_String expectedString,
-                                flo_html_String actualString) {
-    printf("%-20s: %.*s\n", "Expected string", FLO_HTML_S_P(expectedString));
-    printf("%-20s: %.*s\n", "Actual string", FLO_HTML_S_P(actualString));
+printTestResultDifferenceString(flo_String expectedString,
+                                flo_String actualString) {
+    printf("%-20s: %.*s\n", "Expected string", FLO_STRING_PRINT(expectedString));
+    printf("%-20s: %.*s\n", "Actual string", FLO_STRING_PRINT(actualString));
 }
 
 inline void printTestResultDifferenceNumber(ptrdiff_t expectedNumber,

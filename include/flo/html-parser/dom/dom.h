@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "array.h"
+#include "file/file-status.h"
 #include "flo/html-parser/node/boolean-property.h"
 #include "flo/html-parser/node/next-node.h"
 #include "flo/html-parser/node/node.h"
@@ -12,23 +14,21 @@ extern "C" {
 #include "flo/html-parser/node/property.h"
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
-#include "flo/html-parser/util/array.h"
-#include "flo/html-parser/util/file/file-status.h"
-#include "flo/html-parser/util/hash/string-hash.h"
-#include "flo/html-parser/util/memory.h"
+#include "hash/string-hash.h"
+#include "memory.h"
 
 #define FLO_HTML_ERROR_NODE_ID 0U
 #define FLO_HTML_ROOT_NODE_ID 1U
 
 #define FLO_HTML_REGISTRY_START_SIZE 1U << 8U
 
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_Node) flo_html_Node_d_a;
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_ParentChild) flo_html_ParentChild_d_a;
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_NextNode) flo_html_NextNode_d_a;
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_BooleanProperty)
+typedef FLO_DYNAMIC_ARRAY(flo_html_Node) flo_html_Node_d_a;
+typedef FLO_DYNAMIC_ARRAY(flo_html_ParentChild) flo_html_ParentChild_d_a;
+typedef FLO_DYNAMIC_ARRAY(flo_html_NextNode) flo_html_NextNode_d_a;
+typedef FLO_DYNAMIC_ARRAY(flo_html_BooleanProperty)
     flo_html_BooleanProperty_d_a;
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_Property) flo_html_Property_d_a;
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_TagRegistration)
+typedef FLO_DYNAMIC_ARRAY(flo_html_Property) flo_html_Property_d_a;
+typedef FLO_DYNAMIC_ARRAY(flo_html_TagRegistration)
     flo_html_TagRegistration_d_a;
 
 typedef struct {
@@ -43,16 +43,16 @@ typedef struct {
     // Data containing the found strings.
     // Map from ID -> String
     flo_html_TagRegistration_d_a tagRegistry;
-    flo_html_String_d_a boolPropRegistry;
-    flo_html_String_d_a propKeyRegistry;
-    flo_html_String_d_a propValueRegistry;
+    flo_String_d_a boolPropRegistry;
+    flo_String_d_a propKeyRegistry;
+    flo_String_d_a propValueRegistry;
 
     // Data containg the acual string values.
     // Map from String -> ID
-    flo_html_StringHashSet tags;
-    flo_html_StringHashSet boolPropsSet;
-    flo_html_StringHashSet propKeys;
-    flo_html_StringHashSet propValues;
+    flo_StringHashSet tags;
+    flo_StringHashSet boolPropsSet;
+    flo_StringHashSet propKeys;
+    flo_StringHashSet propValues;
 } flo_html_Dom;
 
 /**
@@ -66,8 +66,7 @@ typedef struct {
  *
  * @return  The DOM of the html string, NULL if unsuccessful.
  */
-flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
-                                 flo_html_Arena *perm);
+flo_html_Dom *flo_html_createDom(flo_String htmlString, flo_Arena *perm);
 
 /**
  * @brief Create a DOM structure from an HTML file.
@@ -81,8 +80,8 @@ flo_html_Dom *flo_html_createDom(flo_html_String htmlString,
  *
  * @return  The DOM of the html string, NULL if unsuccessful.
  */
-flo_html_Dom *flo_html_createDomFromFile(flo_html_String fileLocation,
-                                         flo_html_Arena *perm);
+flo_html_Dom *flo_html_createDomFromFile(flo_String fileLocation,
+                                         flo_Arena *perm);
 
 /**
  * @brief Create a DOM structure identical to the one provided.
@@ -95,7 +94,7 @@ flo_html_Dom *flo_html_createDomFromFile(flo_html_String fileLocation,
  *
  * @return  The DOM of the html string.
  */
-flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_html_Arena *perm);
+flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_Arena *perm);
 
 #ifdef __cplusplus
 }

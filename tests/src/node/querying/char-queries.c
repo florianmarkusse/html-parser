@@ -1,5 +1,5 @@
 #include <flo/html-parser.h>
-#include <flo/html-parser/util/memory.h>
+#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -14,30 +14,30 @@ typedef enum { GET_VALUE, NUM_CHAR_FUNCTION_TYPES } CharFunctionType;
 
 typedef struct {
     char *fileLocation;
-    flo_html_String cssQuery;
-    flo_html_String input;
-    flo_html_String expectedResult;
+    flo_String cssQuery;
+    flo_String input;
+    flo_String expectedResult;
     CharFunctionType functionType;
     char *testName;
 } TestFile;
 
 static TestFile testFiles[] = {
-    {TEST_FILE_1, FLO_HTML_S("body"), FLO_HTML_S("style"), FLO_HTML_S("class"),
+    {TEST_FILE_1, FLO_STRING("body"), FLO_STRING("style"), FLO_STRING("class"),
      GET_VALUE, "flo_html_getValue when having key"},
-    {TEST_FILE_1, FLO_HTML_S("html"), FLO_HTML_S("langg"),
-     FLO_HTML_EMPTY_STRING, GET_VALUE, "flo_html_getValue when not having key"},
+    {TEST_FILE_1, FLO_STRING("html"), FLO_STRING("langg"),
+     FLO_EMPTY_STRING, GET_VALUE, "flo_html_getValue when not having key"},
 };
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus
-testQuery(flo_html_String fileLocation, flo_html_String cssQuery,
-          flo_html_String input, CharFunctionType functionType,
-          flo_html_String expectedResult, flo_html_Arena scratch) {
+testQuery(flo_String fileLocation, flo_String cssQuery,
+          flo_String input, CharFunctionType functionType,
+          flo_String expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_HTML_PRINT_ERROR("Failed to created DOM from file %.*s\n",
-                             FLO_HTML_S_P(fileLocation));
+        FLO_PRINT_ERROR("Failed to created DOM from file %.*s\n",
+                             FLO_STRING_PRINT(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 
@@ -54,7 +54,7 @@ testQuery(flo_html_String fileLocation, flo_html_String cssQuery,
             queryStatus, flo_html_queryingStatusToString(queryStatus));
         printTestDemarcation();
     } else {
-        flo_html_String actualResult = FLO_HTML_EMPTY_STRING;
+        flo_String actualResult = FLO_EMPTY_STRING;
         switch (functionType) {
         case GET_VALUE: {
             actualResult = flo_html_getValue(foundNode, input, dom);
@@ -71,7 +71,7 @@ testQuery(flo_html_String fileLocation, flo_html_String cssQuery,
 
         if ((expectedResult.len == 0 && actualResult.len == 0) ||
             (expectedResult.len > 0 &&
-             flo_html_stringEquals(actualResult, expectedResult))) {
+             flo_stringEquals(actualResult, expectedResult))) {
             printTestSuccess();
             result = TEST_SUCCESS;
         } else {
@@ -86,7 +86,7 @@ testQuery(flo_html_String fileLocation, flo_html_String cssQuery,
 }
 
 bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                         flo_html_Arena scratch) {
+                         flo_Arena scratch) {
     printTestTopicStart("char queries");
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
@@ -96,7 +96,7 @@ bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testQuery(FLO_HTML_S_LEN(testFile.fileLocation,
+        if (testQuery(FLO_STRING_LEN(testFile.fileLocation,
                                      strlen(testFile.fileLocation)),
                       testFile.cssQuery, testFile.input, testFile.functionType,
                       testFile.expectedResult, scratch) != TEST_SUCCESS) {

@@ -10,18 +10,18 @@ extern "C" {
 
 typedef struct {
     char *fileLocation;
-    flo_html_String cssQuery;
+    flo_String cssQuery;
     flo_html_QueryStatus expectedStatus;
     ptrdiff_t expectedResult;
     char *testName;
 } TestFile;
 
 unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                                      flo_html_Arena scratch);
+                                      flo_Arena scratch);
 unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures,
-                                   flo_html_Arena scratch);
+                                   flo_Arena scratch);
 unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures,
-                                flo_html_Arena scratch);
+                                flo_Arena scratch);
 
 #ifdef __cplusplus
 }

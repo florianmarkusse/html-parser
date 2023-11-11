@@ -1,6 +1,6 @@
 #include <dirent.h>
 #include <flo/html-parser.h>
-#include <flo/html-parser/util/memory.h>
+#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -12,7 +12,7 @@
 #define FUZZ_INPUTS_DIR "tests/src/dom/parsing/fuzz-inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
-bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
+bool parseFile(flo_String fileLocation, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         return false;
@@ -23,7 +23,7 @@ bool parseFile(flo_html_String fileLocation, flo_html_Arena scratch) {
 
 static inline void testAndCount(ptrdiff_t *localSuccesses,
                                 ptrdiff_t *localFailures, char *directory,
-                                flo_html_Arena scratch) {
+                                flo_Arena scratch) {
     DIR *dir = NULL;
     struct dirent *ent = NULL;
     if ((dir = opendir(directory)) == NULL) {
@@ -40,7 +40,7 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", directory,
                  ent->d_name);
         printTestStart(fileLocation);
-        if (!parseFile(FLO_HTML_S_LEN(fileLocation, strlen(fileLocation)),
+        if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
                        scratch)) {
             (*localFailures)++;
             printTestFailure();
@@ -57,7 +57,7 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
 }
 
 bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
-                              flo_html_Arena scratch) {
+                              flo_Arena scratch) {
     printTestTopicStart("DOM parsings");
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;

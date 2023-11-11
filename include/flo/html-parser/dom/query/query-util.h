@@ -9,7 +9,7 @@ extern "C" {
 
 #include "flo/html-parser/definitions.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/util/hash/uint16-t-hash.h"
+#include "hash/uint16-t-hash.h"
 #include "query-status.h"
 #include "query.h"
 
@@ -49,17 +49,17 @@ bool flo_html_filterNode(flo_html_node_id nodeID,
 
 bool flo_html_getNodesWithoutflo_html_Combinator(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, flo_html_Dom *dom, flo_html_Uint16HashSet *set,
-    flo_html_Arena *perm);
+    ptrdiff_t filtersLen, flo_html_Dom *dom, flo_Uint16HashSet *set,
+    flo_Arena *perm);
 
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t numberOfSiblings,
-    flo_html_Uint16HashSet *set, flo_html_Arena *perm);
+    flo_Uint16HashSet *set, flo_Arena *perm);
 flo_html_QueryStatus flo_html_getFilteredDescendants(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t depth,
-    flo_html_Uint16HashSet *set, flo_html_Arena *perm);
+    flo_Uint16HashSet *set, flo_Arena *perm);
 
 #ifdef __cplusplus
 }

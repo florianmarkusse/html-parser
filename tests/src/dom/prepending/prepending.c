@@ -50,7 +50,7 @@ typedef union {
 typedef struct {
     char *fileLocation1;
     char *fileLocation2;
-    flo_html_String cssQuery;
+    flo_String cssQuery;
     char *testName;
     PrependType prependType;
     PrependInput prependInput;
@@ -59,64 +59,64 @@ typedef struct {
 static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,
      TEST_FILE_1_AFTER,
-     FLO_HTML_S("body"),
+     FLO_STRING("body"),
      "document node to element with multiple children",
      PREPEND_DOCUMENT_NODE,
-     {{FLO_HTML_S("example-tag"),
+     {{FLO_STRING("example-tag"),
        true,
-       {FLO_HTML_S("prop1"), FLO_HTML_S("prop2")},
+       {FLO_STRING("prop1"), FLO_STRING("prop2")},
        2,
-       {FLO_HTML_S("key1"), FLO_HTML_S("key2")},
-       {FLO_HTML_S("value1"), FLO_HTML_S("value2")},
+       {FLO_STRING("key1"), FLO_STRING("key2")},
+       {FLO_STRING("value1"), FLO_STRING("value2")},
        2}}},
     {TEST_FILE_2_BEFORE,
      TEST_FILE_2_AFTER,
-     FLO_HTML_S("div[special-one]"),
+     FLO_STRING("div[special-one]"),
      "document node to element with 1 child",
      PREPEND_DOCUMENT_NODE,
-     {{FLO_HTML_S("example-tag"),
+     {{FLO_STRING("example-tag"),
        false,
        {},
        0,
-       {FLO_HTML_S("bla-bla")},
-       {FLO_HTML_S("bla-bla")},
+       {FLO_STRING("bla-bla")},
+       {FLO_STRING("bla-bla")},
        1}}},
     {TEST_FILE_3_BEFORE,
      TEST_FILE_3_AFTER,
-     FLO_HTML_S("x"),
+     FLO_STRING("x"),
      "document node to element with no children",
      PREPEND_DOCUMENT_NODE,
-     {{FLO_HTML_S("example-tag"),
+     {{FLO_STRING("example-tag"),
        true,
-       {FLO_HTML_S("required"), FLO_HTML_S("help-me")},
+       {FLO_STRING("required"), FLO_STRING("help-me")},
        2,
        {},
        {},
        0}}},
     {TEST_FILE_4_BEFORE,
      TEST_FILE_4_AFTER,
-     FLO_HTML_S("body"),
+     FLO_STRING("body"),
      "text node to element with multiple children",
      PREPEND_TEXT_NODE,
-     {{FLO_HTML_S("zoinks")}}},
+     {{FLO_STRING("zoinks")}}},
     {TEST_FILE_5_BEFORE,
      TEST_FILE_5_AFTER,
-     FLO_HTML_S("div[special-one]"),
+     FLO_STRING("div[special-one]"),
      "text node to element with 1 child",
      PREPEND_TEXT_NODE,
-     {{FLO_HTML_S("mama ce mama ca")}}},
+     {{FLO_STRING("mama ce mama ca")}}},
     {TEST_FILE_6_BEFORE,
      TEST_FILE_6_AFTER,
-     FLO_HTML_S("x"),
+     FLO_STRING("x"),
      "text node to element with no children",
      PREPEND_TEXT_NODE,
-     {{FLO_HTML_S("my special text plan")}}},
+     {{FLO_STRING("my special text plan")}}},
     {TEST_FILE_7_BEFORE,
      TEST_FILE_7_AFTER,
-     FLO_HTML_S("body"),
+     FLO_STRING("body"),
      "string to element with multiple children",
      PREPEND_FROM_STRING,
-     {{FLO_HTML_S("<body style=\"newstyle\">"
+     {{FLO_STRING("<body style=\"newstyle\">"
                   "  <div id=\"my-first-div\">"
                   "    <p class=\"big\">Test text</p>"
                   "  </div>"
@@ -146,49 +146,49 @@ static TestFile testFiles[] = {
                   "</body>")}}},
     {TEST_FILE_8_BEFORE,
      TEST_FILE_8_AFTER,
-     FLO_HTML_S("div[special-one]"),
+     FLO_STRING("div[special-one]"),
      "string to element with 1 child",
      PREPEND_FROM_STRING,
-     {{FLO_HTML_S("<whoop></whoop>")}}},
+     {{FLO_STRING("<whoop></whoop>")}}},
     {TEST_FILE_9_BEFORE,
      TEST_FILE_9_AFTER,
-     FLO_HTML_S("x"),
+     FLO_STRING("x"),
      "string to element with no children",
      PREPEND_FROM_STRING,
-     {{FLO_HTML_S("text only gang")}}},
+     {{FLO_STRING("text only gang")}}},
     {TEST_FILE_10_BEFORE,
      TEST_FILE_10_AFTER,
-     FLO_HTML_EMPTY_STRING,
+     FLO_EMPTY_STRING,
      "string to root",
      PREPEND_FROM_STRING,
-     {{FLO_HTML_S("<h1></h1><h2></h2>")}}},
+     {{FLO_STRING("<h1></h1><h2></h2>")}}},
     {TEST_FILE_11_BEFORE,
      TEST_FILE_11_AFTER,
-     FLO_HTML_S("body"),
+     FLO_STRING("body"),
      "string merge with first child",
      PREPEND_FROM_STRING,
-     {{FLO_HTML_S("new text here<h1></h1><p></p>I got prepended to")}}},
+     {{FLO_STRING("new text here<h1></h1><p></p>I got prepended to")}}},
     {TEST_FILE_12_BEFORE,
      TEST_FILE_12_AFTER,
-     FLO_HTML_EMPTY_STRING,
+     FLO_EMPTY_STRING,
      "string merge with first root element",
      PREPEND_FROM_STRING,
-     {{FLO_HTML_S("<html></html><wtf></wtf>bottom text")}}},
+     {{FLO_STRING("<html></html><wtf></wtf>bottom text")}}},
     {TEST_FILE_13_BEFORE,
      TEST_FILE_13_AFTER,
-     FLO_HTML_EMPTY_STRING,
+     FLO_EMPTY_STRING,
      "text node merge with first root element",
      PREPEND_TEXT_NODE,
-     {{FLO_HTML_S("even more")}}},
+     {{FLO_STRING("even more")}}},
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testPrependix(flo_html_String fileLocation1,
-                                flo_html_String fileLocation2,
-                                flo_html_String cssQuery,
+static TestStatus testPrependix(flo_String fileLocation1,
+                                flo_String fileLocation2,
+                                flo_String cssQuery,
                                 PrependType prependType,
                                 PrependInput *prependInput,
-                                flo_html_Arena scratch) {
+                                flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -199,7 +199,7 @@ static TestStatus testPrependix(flo_html_String fileLocation1,
                                           scratch);
         if (result != TEST_SUCCESS) {
             return failWithMessageAndCode(
-                FLO_HTML_S("Failed to get node from DOM!\n"), result);
+                FLO_STRING("Failed to get node from DOM!\n"), result);
         }
     }
 
@@ -214,33 +214,33 @@ static TestStatus testPrependix(flo_html_String fileLocation1,
     case PREPEND_TEXT_NODE: {
         prependedNodeID = flo_html_prependTextNode(
             foundNode,
-            FLO_HTML_S_LEN(prependInput->text, strlen(prependInput->text)),
+            FLO_STRING_LEN(prependInput->text, strlen(prependInput->text)),
             comparisonTest.actual, &scratch);
         break;
     }
     case PREPEND_FROM_STRING: {
         prependedNodeID = flo_html_prependHTMLFromString(
             foundNode,
-            FLO_HTML_S_LEN(prependInput->text, strlen(prependInput->text)),
+            FLO_STRING_LEN(prependInput->text, strlen(prependInput->text)),
             comparisonTest.actual, &scratch);
         break;
     }
     default: {
         return failWithMessage(
-            FLO_HTML_S("No suitable prependix type was supplied!\n"));
+            FLO_STRING("No suitable prependix type was supplied!\n"));
     }
     }
 
     if (prependedNodeID == FLO_HTML_ERROR_NODE_ID) {
         return failWithMessage(
-            FLO_HTML_S("Failed to prepend document to node!\n"));
+            FLO_STRING("Failed to prepend document to node!\n"));
     }
 
     return compareAndEndTest(&comparisonTest, scratch);
 }
 
 bool testflo_html_DomPrependices(ptrdiff_t *successes, ptrdiff_t *failures,
-                                 flo_html_Arena scratch) {
+                                 flo_Arena scratch) {
     printTestTopicStart("DOM prependices");
 
     ptrdiff_t localSuccesses = 0;
@@ -250,9 +250,9 @@ bool testflo_html_DomPrependices(ptrdiff_t *successes, ptrdiff_t *failures,
         TestFile testFile = testFiles[i];
         printTestStart(testFile.testName);
 
-        if (testPrependix(FLO_HTML_S_LEN(testFile.fileLocation1,
+        if (testPrependix(FLO_STRING_LEN(testFile.fileLocation1,
                                          strlen(testFile.fileLocation1)),
-                          FLO_HTML_S_LEN(testFile.fileLocation2,
+                          FLO_STRING_LEN(testFile.fileLocation2,
                                          strlen(testFile.fileLocation2)),
                           testFile.cssQuery, testFile.prependType,
                           &testFile.prependInput, scratch) != TEST_SUCCESS) {

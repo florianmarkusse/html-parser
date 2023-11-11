@@ -9,7 +9,7 @@ extern "C" {
 #include <stddef.h>
 
 bool testflo_html_DomPrependices(ptrdiff_t *successes, ptrdiff_t *failures,
-                                 flo_html_Arena scratch);
+                                 flo_Arena scratch);
 
 #ifdef __cplusplus
 }

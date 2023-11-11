@@ -8,7 +8,7 @@ extern "C" {
 #include <stddef.h>
 
 bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
-                              flo_html_Arena scratch);
+                              flo_Arena scratch);
 
 #ifdef __cplusplus
 }

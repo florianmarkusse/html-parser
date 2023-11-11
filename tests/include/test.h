@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <flo/html-parser/util/text/string.h>
+#include <text/string.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -20,8 +20,8 @@ void printTestResultDifferenceErrorCode(ptrdiff_t expected,
                                         char *expectedString,
                                         ptrdiff_t actual,
                                         char *actualString);
-void printTestResultDifferenceString(flo_html_String expectedString,
-                                     flo_html_String actualString);
+void printTestResultDifferenceString(flo_String expectedString,
+                                     flo_String actualString);
 void printTestResultDifferenceBool(bool expectedBool, bool actualBool);
 void printTestResultDifferenceNumber(ptrdiff_t expectedNumber,
                                      ptrdiff_t actualNumber);

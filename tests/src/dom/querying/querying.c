@@ -4,7 +4,7 @@
 #include "test.h"
 
 unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                                      flo_html_Arena scratch) {
+                                      flo_Arena scratch) {
     printTestTopicStart("DOM queries");
 
     ptrdiff_t localSuccesses = 0;

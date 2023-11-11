@@ -5,12 +5,13 @@
 extern "C" {
 #endif
 
-#include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "memory.h"
+
 bool testflo_html_DomAppendices(ptrdiff_t *successes, ptrdiff_t *failures,
-                                flo_html_Arena scratch);
+                                flo_Arena scratch);
 
 #ifdef __cplusplus
 }

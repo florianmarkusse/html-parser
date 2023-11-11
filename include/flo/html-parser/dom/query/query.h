@@ -9,10 +9,10 @@ extern "C" {
 
 #include "flo/html-parser/definitions.h"
 #include "flo/html-parser/dom/dom.h"
-#include "flo/html-parser/util/array.h"
+#include "array.h"
 #include "query-status.h"
 
-typedef FLO_HTML_ARRAY(uint16_t) flo_html_node_id_a;
+typedef FLO_ARRAY(uint16_t) flo_html_node_id_a;
 
 /**
  * @brief Query for elements matching a CSS selector in the DOM.
@@ -35,10 +35,10 @@ typedef FLO_HTML_ARRAY(uint16_t) flo_html_node_id_a;
  * @note    The caller is responsible for freeing the memory allocated for
  *          'results' when no longer needed.
  */
-flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String cssQuery,
+flo_html_QueryStatus flo_html_querySelectorAll(flo_String cssQuery,
                                                flo_html_Dom *dom,
                                                flo_html_node_id_a *results,
-                                               flo_html_Arena *perm);
+                                               flo_Arena *perm);
 
 /**
  * @brief Query for the first element matching a CSS selector in the DOM.
@@ -56,10 +56,10 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_html_String cssQuery,
  *          otherwise). See @ref
  *          "flo/html-parser/dom/query/query-status.h#flo_html_QueryStatus".
  */
-flo_html_QueryStatus flo_html_querySelector(flo_html_String cssQuery,
+flo_html_QueryStatus flo_html_querySelector(flo_String cssQuery,
                                             flo_html_Dom *dom,
                                             flo_html_node_id *result,
-                                            flo_html_Arena scratch);
+                                            flo_Arena scratch);
 
 #ifdef __cplusplus
 }

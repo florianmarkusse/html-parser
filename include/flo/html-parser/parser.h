@@ -13,7 +13,7 @@ extern "C" {
 
 typedef struct {
     flo_html_node_id nodeID;
-    flo_html_String tag;
+    flo_String tag;
 } flo_html_TagAndNodeID;
 
 typedef struct {
@@ -21,17 +21,17 @@ typedef struct {
     ptrdiff_t len;
 } flo_html_NodeDepth;
 
-flo_html_Dom *flo_html_parseRoot(flo_html_String html, flo_html_Dom *dom,
-                                 flo_html_Arena *perm);
-flo_html_Dom *flo_html_parseExtra(flo_html_String html, flo_html_Dom *dom,
-                                  flo_html_Arena *perm);
+flo_html_Dom *flo_html_parseRoot(flo_String html, flo_html_Dom *dom,
+                                 flo_Arena *perm);
+flo_html_Dom *flo_html_parseExtra(flo_String html, flo_html_Dom *dom,
+                                  flo_Arena *perm);
 
 flo_html_node_id
 flo_html_parseDocumentElement(flo_html_DocumentNode *documentNode,
-                              flo_html_Dom *dom, flo_html_Arena *perm);
-flo_html_node_id flo_html_parseTextElement(flo_html_String text,
+                              flo_html_Dom *dom, flo_Arena *perm);
+flo_html_node_id flo_html_parseTextElement(flo_String text,
                                            flo_html_Dom *dom,
-                                           flo_html_Arena *perm);
+                                           flo_Arena *perm);
 
 #ifdef __cplusplus
 }

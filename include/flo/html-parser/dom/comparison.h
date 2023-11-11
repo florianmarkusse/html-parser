@@ -24,7 +24,7 @@ typedef struct {
  * @param[in]   scratch            The memory arena for temporary allocations.
  */
 flo_html_ComparisonResult
-flo_html_equals(flo_html_Dom *dom1, flo_html_Dom *dom2, flo_html_Arena scratch);
+flo_html_equals(flo_html_Dom *dom1, flo_html_Dom *dom2, flo_Arena scratch);
 
 /**
  * @brief Print the first difference between two nodes.
@@ -40,7 +40,7 @@ flo_html_equals(flo_html_Dom *dom1, flo_html_Dom *dom2, flo_html_Arena scratch);
  */
 void flo_html_printFirstDifference(flo_html_node_id nodeID1, flo_html_Dom *dom1,
                                    flo_html_node_id nodeID2, flo_html_Dom *dom2,
-                                   flo_html_Arena scratch);
+                                   flo_Arena scratch);
 
 #ifdef __cplusplus
 }

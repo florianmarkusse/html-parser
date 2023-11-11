@@ -41,7 +41,7 @@ void flo_html_removeChildren(flo_html_node_id nodeID, flo_html_Dom *dom);
  * @param[in]   dom             The DOM structure.
  */
 void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
-                                    flo_html_String boolProp,
+                                    flo_String boolProp,
                                     flo_html_Dom *dom);
 
 /**
@@ -55,7 +55,7 @@ void flo_html_removeBooleanProperty(flo_html_node_id nodeID,
  * @param[in]   keyProp         The key of the property to remove.
  * @param[in]   dom             The DOM structure.
  */
-void flo_html_removeProperty(flo_html_node_id nodeID, flo_html_String keyProp,
+void flo_html_removeProperty(flo_html_node_id nodeID, flo_String keyProp,
                              flo_html_Dom *dom);
 
 #ifdef __cplusplus

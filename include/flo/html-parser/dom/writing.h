@@ -44,11 +44,11 @@ void flo_html_printHTML(flo_html_Dom *dom);
  *
  * @return  The status of the file writing operation (FILE_SUCCESS if
  *          completed, an error code otherwise). See @ref
- *          "flo/html-parser/util/file/file-status.h#flo_html_FileStatus".
+ *          "flo/html-parser/util/file/file-status.h#flo_FileStatus".
  */
-flo_html_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
-                                             flo_html_String filePath,
-                                             flo_html_Arena scratch);
+flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
+                                             flo_String filePath,
+                                             flo_Arena scratch);
 
 #ifdef __cplusplus
 }

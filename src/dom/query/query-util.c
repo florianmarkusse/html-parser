@@ -5,7 +5,7 @@
 
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "flo/html-parser/util/error.h"
+#include "error.h"
 
 bool flo_html_filterNode(flo_html_node_id nodeID, flo_html_FilterType *filters,
                          ptrdiff_t filterslen, flo_html_Dom *dom) {
@@ -63,12 +63,12 @@ bool flo_html_filterNode(flo_html_node_id nodeID, flo_html_FilterType *filters,
 
 bool flo_html_getNodesWithoutflo_html_Combinator(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
-    ptrdiff_t filtersLen, flo_html_Dom *dom, flo_html_Uint16HashSet *set,
-    flo_html_Arena *perm) {
+    ptrdiff_t filtersLen, flo_html_Dom *dom, flo_Uint16HashSet *set,
+    flo_Arena *perm) {
     for (ptrdiff_t i = 0; i < dom->nodes.len; i++) {
         if (flo_html_filterNode(dom->nodes.buf[i].nodeID, filters, filtersLen,
                                 dom)) {
-            if (!flo_html_insertUint16HashSet(set, dom->nodes.buf[i].nodeID,
+            if (!flo_insertUint16HashSet(set, dom->nodes.buf[i].nodeID,
                                               perm)) {
                 return false;
             }
@@ -82,20 +82,20 @@ bool flo_html_getNodesWithoutflo_html_Combinator(
 flo_html_QueryStatus flo_html_getFilteredAdjacents(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t numberOfSiblings,
-    flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
-    flo_html_Uint16HashSet filteredAdjacents =
-        flo_html_initUint16HashSet((flo_html_node_id)set->arrayLen, perm);
-    flo_html_Uint16HashSetIterator iterator =
-        (flo_html_Uint16HashSetIterator){.set = set, .index = 0};
+    flo_Uint16HashSet *set, flo_Arena *perm) {
+    flo_Uint16HashSet filteredAdjacents =
+        flo_initUint16HashSet((flo_html_node_id)set->arrayLen, perm);
+    flo_Uint16HashSetIterator iterator =
+        (flo_Uint16HashSetIterator){.set = set, .index = 0};
 
     flo_html_node_id inSet;
-    while ((inSet = flo_html_nextUint16HashSetIterator(&iterator)) != 0) {
+    while ((inSet = flo_nextUint16HashSetIterator(&iterator)) != 0) {
         flo_html_node_id nextNodeID = flo_html_getNext(inSet, dom);
         ptrdiff_t siblingsNumberCopy = numberOfSiblings;
 
         while (siblingsNumberCopy > 0 && nextNodeID > 0) {
             if (flo_html_filterNode(nextNodeID, filters, filtersLen, dom)) {
-                if (!flo_html_insertUint16HashSet(&filteredAdjacents,
+                if (!flo_insertUint16HashSet(&filteredAdjacents,
                                                   nextNodeID, perm)) {
                     return QUERY_MEMORY_ERROR;
                 }
@@ -117,35 +117,35 @@ flo_html_QueryStatus flo_html_getFilteredAdjacents(
 flo_html_QueryStatus flo_html_getFilteredDescendants(
     flo_html_FilterType filters[FLO_HTML_MAX_FILTERS_PER_ELEMENT],
     ptrdiff_t filtersLen, flo_html_Dom *dom, ptrdiff_t depth,
-    flo_html_Uint16HashSet *set, flo_html_Arena *perm) {
-    flo_html_Uint16HashSet firstDescendants =
-        flo_html_copyUint16HashSet(set, perm);
-    flo_html_resetUint16HashSet(set);
+    flo_Uint16HashSet *set, flo_Arena *perm) {
+    flo_Uint16HashSet firstDescendants =
+        flo_copyUint16HashSet(set, perm);
+    flo_resetUint16HashSet(set);
 
-    flo_html_Uint16HashSet secondDescendants = flo_html_initUint16HashSet(
+    flo_Uint16HashSet secondDescendants = flo_initUint16HashSet(
         (flo_html_node_id)firstDescendants.arrayLen, perm);
 
     bool isFirstFilled = true;
-    flo_html_Uint16HashSet *toBeFilledSet = &secondDescendants;
-    flo_html_Uint16HashSet *filledSet = &firstDescendants;
+    flo_Uint16HashSet *toBeFilledSet = &secondDescendants;
+    flo_Uint16HashSet *filledSet = &firstDescendants;
 
     while (depth > 0 && filledSet->entries > 0) {
         for (ptrdiff_t i = 0; i < dom->parentChilds.len; i++) {
             flo_html_ParentChild parentChildNode = dom->parentChilds.buf[i];
             if (dom->nodes.buf[parentChildNode.childID].nodeType ==
                     NODE_TYPE_DOCUMENT &&
-                flo_html_containsUint16HashSet(filledSet,
+                flo_containsUint16HashSet(filledSet,
                                                parentChildNode.parentID)) {
-                if (!flo_html_insertUint16HashSet(
+                if (!flo_insertUint16HashSet(
                         toBeFilledSet, parentChildNode.childID, perm)) {
-                    FLO_HTML_PRINT_ERROR("inserting into hash set failed!\n");
+                    FLO_PRINT_ERROR("inserting into hash set failed!\n");
                     return QUERY_MEMORY_ERROR;
                 }
                 if (flo_html_filterNode(parentChildNode.childID, filters,
                                         filtersLen, dom)) {
-                    if (!flo_html_insertUint16HashSet(
+                    if (!flo_insertUint16HashSet(
                             set, parentChildNode.childID, perm)) {
-                        FLO_HTML_PRINT_ERROR(
+                        FLO_PRINT_ERROR(
                             "inserting into results set failed!\n");
                         return QUERY_MEMORY_ERROR;
                     }
@@ -163,7 +163,7 @@ flo_html_QueryStatus flo_html_getFilteredDescendants(
             filledSet = &secondDescendants;
         }
 
-        flo_html_resetUint16HashSet(toBeFilledSet);
+        flo_resetUint16HashSet(toBeFilledSet);
 
         depth--;
     }

@@ -8,14 +8,14 @@ extern "C" {
 #include "text/string.h"
 
 typedef struct {
-    flo_html_String text;
+    flo_String text;
     ptrdiff_t idx;
 } flo_parse_Status;
 
 #define FLO_PARSE_NEXT_CHAR_WHILE_1(parseStatus, condition)                    \
     while ((parseStatus).idx < (parseStatus).text.len) {                       \
         unsigned char ch =                                                     \
-            flo_html_getChar((parseStatus).text, (parseStatus).idx);           \
+            flo_getChar((parseStatus).text, (parseStatus).idx);           \
         if (condition) {                                                       \
         } else {                                                               \
             break;                                                             \
@@ -26,7 +26,7 @@ typedef struct {
 #define FLO_PARSE_NEXT_CHAR_WHILE_2(parseStatus, condition, body)              \
     while ((parseStatus).idx < (parseStatus).text.len) {                       \
         unsigned char ch =                                                     \
-            flo_html_getChar((parseStatus).text, (parseStatus).idx);           \
+            flo_getChar((parseStatus).text, (parseStatus).idx);           \
         if (condition) {                                                       \
             { body }                                                           \
         } else {                                                               \
@@ -44,7 +44,7 @@ typedef struct {
 #define FLO_PARSE_PARSE_CHAR_WHILE(parseStatus, condition, body)               \
     while ((parseStatus).idx < (parseStatus).text.len) {                       \
         unsigned char ch =                                                     \
-            flo_html_getChar((parseStatus).text, (parseStatus).idx);           \
+            flo_getChar((parseStatus).text, (parseStatus).idx);           \
         if (condition) {                                                       \
             { body }                                                           \
         } else {                                                               \
@@ -55,7 +55,7 @@ typedef struct {
 #define FLO_PARSE_NEXT_CHAR_UNTIL_2(parseStatus, condition, body)              \
     while ((parseStatus).idx < (parseStatus).text.len) {                       \
         unsigned char ch =                                                     \
-            flo_html_getChar((parseStatus).text, (parseStatus).idx);           \
+            flo_getChar((parseStatus).text, (parseStatus).idx);           \
         if (!(condition)) {                                                    \
             { body }                                                           \
         } else {                                                               \
@@ -67,7 +67,7 @@ typedef struct {
 #define FLO_PARSE_NEXT_CHAR_UNTIL_1(parseStatus, condition)                    \
     while ((parseStatus).idx < (parseStatus).text.len) {                       \
         unsigned char ch =                                                     \
-            flo_html_getChar((parseStatus).text, (parseStatus).idx);           \
+            flo_getChar((parseStatus).text, (parseStatus).idx);           \
         if (!(condition)) {                                                    \
         } else {                                                               \
             break;                                                             \
@@ -84,7 +84,7 @@ typedef struct {
 #define FLO_PARSE_PARSE_CHAR_UNTIL(parseStatus, condition, body)               \
     while ((parseStatus).idx < (parseStatus).text.len) {                       \
         unsigned char ch =                                                     \
-            flo_html_getChar((parseStatus).text, (parseStatus).idx);           \
+            flo_getChar((parseStatus).text, (parseStatus).idx);           \
         if (!(condition)) {                                                    \
             { body }                                                           \
         } else {                                                               \
@@ -94,22 +94,22 @@ typedef struct {
 
 #define FLO_PARSE_SKIP_EMPTY_SPACE(parseStatus)                                \
     FLO_PARSE_NEXT_CHAR_WHILE(parseStatus,                                     \
-                              (ch == ' ' || flo_html_isFormattingCharacter(ch)))
+                              (ch == ' ' || flo_isFormattingCharacter(ch)))
 
 #define FLO_PARSE_SKIP_COMMENT(parseStatus)                                    \
     ps.idx += HTML_COMMENT_START_LENGTH;                                       \
     FLO_PARSE_NEXT_CHAR_UNTIL(                                                 \
         ps,                                                                    \
         (ch == '>' &&                                                          \
-         flo_html_stringEquals(                                                \
-             FLO_HTML_S("--"),                                                 \
-             FLO_HTML_S_LEN(flo_html_getCharPtr(ps.text, ps.idx - 2), 2))))    \
+         flo_stringEquals(                                                \
+             FLO_STRING("--"),                                                 \
+             FLO_STRING_LEN(flo_getCharPtr(ps.text, ps.idx - 2), 2))))    \
     ps.idx++;
 
 __attribute__((unused)) static inline unsigned char
 flo_parse_currentChar(flo_parse_Status ps) {
     if (ps.idx < ps.text.len) {
-        return flo_html_getChar(ps.text, ps.idx);
+        return flo_getChar(ps.text, ps.idx);
     }
     return '\0';
 }

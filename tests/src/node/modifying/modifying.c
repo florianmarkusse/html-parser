@@ -20,27 +20,27 @@ typedef struct {
     char *fileLocation2;
     char *cssQuery;
     char *propKey;
-    flo_html_String newPropValue;
+    flo_String newPropValue;
     char *testName;
 } TestFile;
 
 static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "body", "style",
-     FLO_HTML_S("newstyle"), "change property value"},
+     FLO_STRING("newstyle"), "change property value"},
     {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "#text-content-test", "id",
-     FLO_HTML_S("id-changed"), "change id value"},
+     FLO_STRING("id-changed"), "change id value"},
     {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "#text-content-test",
-     "I am the new text content, bow for me!", FLO_HTML_EMPTY_STRING,
+     "I am the new text content, bow for me!", FLO_EMPTY_STRING,
      "setting text content"},
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testModification(flo_html_String fileLocation1,
-                                   flo_html_String fileLocation2,
-                                   flo_html_String cssQuery,
-                                   flo_html_String propKey,
-                                   flo_html_String newPropValue,
-                                   flo_html_Arena scratch) {
+static TestStatus testModification(flo_String fileLocation1,
+                                   flo_String fileLocation2,
+                                   flo_String cssQuery,
+                                   flo_String propKey,
+                                   flo_String newPropValue,
+                                   flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -56,7 +56,7 @@ static TestStatus testModification(flo_html_String fileLocation1,
         if (!flo_html_setPropertyValue(foundNode, propKey, newPropValue,
                                        comparisonTest.actual, &scratch)) {
             return failWithMessage(
-                FLO_HTML_S("Failed to set property value!\n"));
+                FLO_STRING("Failed to set property value!\n"));
         }
     } else {
         flo_html_setTextContent(foundNode, propKey, comparisonTest.actual,
@@ -67,7 +67,7 @@ static TestStatus testModification(flo_html_String fileLocation1,
 }
 
 bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
-                           flo_html_Arena scratch) {
+                           flo_Arena scratch) {
     printTestTopicStart("node modifications");
 
     ptrdiff_t localSuccesses = 0;
@@ -79,12 +79,12 @@ bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
         printTestStart(testFile.testName);
 
         if (testModification(
-                FLO_HTML_S_LEN(testFile.fileLocation1,
+                FLO_STRING_LEN(testFile.fileLocation1,
                                strlen(testFile.fileLocation1)),
-                FLO_HTML_S_LEN(testFile.fileLocation2,
+                FLO_STRING_LEN(testFile.fileLocation2,
                                strlen(testFile.fileLocation2)),
-                FLO_HTML_S_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                FLO_HTML_S_LEN(testFile.propKey, strlen(testFile.propKey)),
+                FLO_STRING_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
+                FLO_STRING_LEN(testFile.propKey, strlen(testFile.propKey)),
                 testFile.newPropValue, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {

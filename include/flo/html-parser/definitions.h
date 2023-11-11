@@ -7,8 +7,8 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "flo/html-parser/util/array.h"
-#include "flo/html-parser/util/text/string.h"
+#include "array.h"
+#include "text/string.h"
 
 typedef uint16_t flo_html_index_id;
 #define FLO_HTML_MAX_INDEX_ID UINT16_MAX
@@ -16,7 +16,8 @@ typedef uint16_t flo_html_index_id;
 typedef uint16_t flo_html_node_id;
 #define FLO_HTML_MAX_NODE_ID UINT16_MAX
 
-typedef FLO_HTML_DYNAMIC_ARRAY(flo_html_String) flo_html_String_d_a;
+typedef FLO_DYNAMIC_ARRAY(flo_String) flo_String_d_a;
+
 #ifdef __cplusplus
 }
 #endif
