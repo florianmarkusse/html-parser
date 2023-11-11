@@ -94,7 +94,7 @@ typedef struct {
 
 #define FLO_PARSE_SKIP_EMPTY_SPACE(parseStatus)                                \
     FLO_PARSE_NEXT_CHAR_WHILE(parseStatus,                                     \
-                              (ch == ' ' || flo_html_isSpecialSpace(ch)))
+                              (ch == ' ' || flo_html_isFormattingCharacter(ch)))
 
 #define FLO_PARSE_SKIP_COMMENT(parseStatus)                                    \
     ps.idx += HTML_COMMENT_START_LENGTH;                                       \

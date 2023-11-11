@@ -57,7 +57,7 @@ static inline bool isCombinator(unsigned char ch) {
 }
 
 static inline bool endOfCurrentFilter(unsigned char ch) {
-    return isCombinator(ch) || flo_html_isSpecialSpace(ch) || ch == '[' ||
+    return isCombinator(ch) || flo_html_isFormattingCharacter(ch) || ch == '[' ||
            ch == '.' || ch == '#';
 }
 
@@ -67,7 +67,7 @@ static inline bool endOfCurrentFilter(unsigned char ch) {
 
 flo_html_String parseToken(flo_parse_Status *ps) {
     ptrdiff_t tokenStart = ps->idx;
-    FLO_PARSE_NEXT_CHAR_UNTIL(*ps, ch == ' ' || flo_html_isSpecialSpace(ch) ||
+    FLO_PARSE_NEXT_CHAR_UNTIL(*ps, ch == ' ' || flo_html_isFormattingCharacter(ch) ||
                                        ch == '=' || ch == ']');
     ptrdiff_t tokenLength = ps->idx - tokenStart;
 

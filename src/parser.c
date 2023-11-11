@@ -10,7 +10,7 @@
 #include "flo/html-parser/util/memory.h"
 #include "flo/html-parser/util/parse.h"
 #include "flo/html-parser/util/raw-data.h"
-#include "flo/html-parser/util/text/char.h"
+#include "text/char.h"
 
 #define HTML_COMMENT_START_LENGTH 4
 
@@ -58,7 +58,7 @@ static void updateReferences(flo_html_node_id newNodeID,
 }
 
 unsigned char textNodeContinue(flo_parse_Status ps, unsigned char ch) {
-    return (!flo_html_isSpecialSpace(ch) &&
+    return (!flo_html_isFormattingCharacter(ch) &&
             (ch != ' ' ||
              (ps.idx > 0 && flo_html_getChar(ps.text, ps.idx - 1) != ' ')));
 }
@@ -157,7 +157,8 @@ flo_html_String parseProp(flo_parse_Status *ps) {
     } else {
         propLen = 0;
         FLO_PARSE_NEXT_CHAR_UNTIL(*ps,
-                                  ch == ' ' || flo_html_isSpecialSpace(ch) ||
+                                  ch == ' ' ||
+                                      flo_html_isFormattingCharacter(ch) ||
                                       ch == '=' || ch == '>',
                                   { propLen++; })
     }
@@ -175,7 +176,7 @@ flo_html_NodeParseResult parseDocumentNode(flo_parse_Status ps, bool exclamTag,
 
     ptrdiff_t tagStart = ps.idx;
     FLO_PARSE_NEXT_CHAR_UNTIL(ps, ch == '>' || ch == ' ' ||
-                                      flo_html_isSpecialSpace(ch));
+                                      flo_html_isFormattingCharacter(ch));
     ptrdiff_t tagSize = ps.idx - tagStart;
 
     bool canHaveChildren = !exclamTag;
@@ -200,7 +201,7 @@ flo_html_NodeParseResult parseDocumentNode(flo_parse_Status ps, bool exclamTag,
         if (ch == '/') {
             canHaveChildren = false;
             ps.idx++;
-        } else if (ch != ' ' && !flo_html_isSpecialSpace(ch)) {
+        } else if (ch != ' ' && !flo_html_isFormattingCharacter(ch)) {
             // Found a property.
             // Not sure yet if it is a boolean or key-value property.
             // Accepted values:
