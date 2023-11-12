@@ -325,7 +325,7 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_String css,
 
         // copy to perm arena
         results->buf = (flo_html_node_id *)flo_copyToArena(
-            perm, array.buf, FLO_STRINGIZEOF(flo_html_node_id),
+            perm, array.buf, FLO_SIZEOF(flo_html_node_id),
             FLO_ALIGNOF(flo_html_node_id), array.len);
         results->len = array.len;
     }
