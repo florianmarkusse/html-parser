@@ -8,7 +8,7 @@
 #include "flo/html-parser/parser.h"
 #include "array.h"
 #include "error.h"
-#include "memory.h"
+#include "memory/arena.h"
 
 flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom, flo_Arena *perm) {

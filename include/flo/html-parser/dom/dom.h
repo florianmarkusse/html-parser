@@ -15,7 +15,7 @@ extern "C" {
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
 #include "hash/string-hash.h"
-#include "memory.h"
+#include "memory/arena.h"
 
 #define FLO_HTML_ERROR_NODE_ID 0U
 #define FLO_HTML_ROOT_NODE_ID 1U

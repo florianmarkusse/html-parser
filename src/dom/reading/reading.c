@@ -6,7 +6,7 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading.h"
 #include "flo/html-parser/dom/traversal.h"
-#include "memory.h"
+#include "memory/arena.h"
 
 bool flo_html_hasBoolProp(flo_html_node_id nodeID, flo_String boolProp,
                           flo_html_Dom *dom) {

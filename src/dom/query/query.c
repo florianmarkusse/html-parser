@@ -3,7 +3,7 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/util/parse.h"
-#include "memory.h"
+#include "memory/arena.h"
 #include "text/char.h"
 #include "text/string.h"
 #include <stdint.h>

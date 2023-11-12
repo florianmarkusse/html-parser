@@ -18,37 +18,33 @@ bool parseFile(flo_String fileLocation, flo_Arena scratch) {
     return true;
 }
 
-bool setupArena(flo_Arena *arena) {
+flo_Arena setupArena() {
     char *start = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (start == MAP_FAILED) {
         FLO_PRINT_ERROR("Failed to allocate memory!\n");
-        return false;
+        return (flo_Arena){0};
     }
 
-    arena->beg = start;
-    arena->end = start + (ptrdiff_t)(CAP);
-    arena->cap = CAP;
+    flo_Arena arena = flo_createArena(start, CAP);
+
     void *jmp_buf[5];
     if (__builtin_setjmp(jmp_buf)) {
-        if (munmap(arena->beg, arena->cap) == -1) {
+        if (munmap(arena.beg, arena.cap) == -1) {
             FLO_PRINT_ERROR("Failed to unmap memory from arena!\n"
                             "Arena Details:\n"
                             "  beg: %p\n"
                             "  end: %p\n"
                             "  cap: %td\n"
                             "Zeroing Arena regardless.",
-                            arena->beg, arena->end, arena->cap);
+                            arena.beg, arena.end, arena.cap);
         }
-        arena->cap = 0;
-        arena->beg = NULL;
-        arena->end = NULL;
         FLO_PRINT_ERROR("OOM/overflow in arena!\n");
-        return false;
+        return (flo_Arena){0};
     }
-    arena->jmp_buf = jmp_buf;
+    arena.jmp_buf = jmp_buf;
 
-    return true;
+    return arena;
 }
 
 void benchmark(flo_Arena scratch) {
@@ -90,8 +86,8 @@ int main() {
     // Get the starting timestamp
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    flo_Arena arena;
-    if (!setupArena(&arena)) {
+    flo_Arena arena = setupArena();
+    if (arena.beg == NULL) {
         return -1;
     }
 

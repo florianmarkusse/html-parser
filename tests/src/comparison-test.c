@@ -1,7 +1,7 @@
 #include <flo/html-parser.h>
 #include <flo/html-parser/dom/comparison.h>
 #include <flo/html-parser/dom/query/query-status.h>
-#include <memory.h>
+#include <memory/arena.h>
 
 #include "comparison-test.h"
 #include "test.h"

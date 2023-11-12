@@ -1,5 +1,5 @@
 #include <flo/html-parser.h>
-#include <memory.h>
+#include <memory/arena.h>
 
 #include "comparison-test.h"
 #include "integration-test.h"
