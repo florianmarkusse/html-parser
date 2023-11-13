@@ -11,7 +11,6 @@
 #include "dom/querying/querying.h"
 #include "dom/replacing/replacing.h"
 #include "integration-test.h"
-#include "memory/pool-allocator.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
 #include "node/querying/querying.h"
