@@ -16,8 +16,6 @@ typedef uint16_t flo_html_index_id;
 typedef uint16_t flo_html_node_id;
 #define FLO_HTML_MAX_NODE_ID UINT16_MAX
 
-typedef FLO_DYNAMIC_ARRAY(flo_String) flo_String_d_a;
-
 #ifdef __cplusplus
 }
 #endif

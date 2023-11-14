@@ -10,6 +10,8 @@
 #include "dom/prepending/prepending.h"
 #include "dom/querying/querying.h"
 #include "dom/replacing/replacing.h"
+#include "error.h"
+#include "hash/new-hash.h"
 #include "integration-test.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
@@ -56,49 +58,69 @@ int main() {
         return 1;
     }
 
-    ptrdiff_t successes = 0;
-    ptrdiff_t failures = 0;
+    // Might want to split these things up, so they can be reused and more
+    // stacked on top?
+    flo_String_ArrayWithHashIndex arrWithIndex = {.array = {0},
+                                                  .index = {.exp = 2}};
 
-    testflo_html_DomParsings(&successes, &failures, arena);
-    printf("\n");
+    flo_fullInsert(FLO_STRING("hahah"), &arrWithIndex, &arena);
 
-    testflo_html_DomComparisons(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomQueries(&successes, &failures, arena);
-    printf("\n");
-
-    testNodeQueries(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomDeletions(&successes, &failures, arena);
-    printf("\n");
-
-    testNodeModifications(&successes, &failures, arena);
-    printf("\n");
-
-    testNodeDeletions(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomAppendices(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomPrependices(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomReplacements(&successes, &failures, arena);
-    printf("\n");
-
-    testIntegrations(&successes, &failures, arena);
-    printf("\n");
-
-    printTestScore(successes, failures);
-    if (failures > 0) {
-        printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
-    } else {
-        printf("Test suite %ssuccessful%s.\n", ANSI_COLOR_GREEN,
-               ANSI_COLOR_RESET);
+    for (ptrdiff_t i = 0; i < arrWithIndex.index.len; i++) {
+        FLO_PRINT_ERROR("Inside index is: %.*s\n",
+                        FLO_STRING_PRINT(arrWithIndex.index.buf[i]));
     }
 
-    return failures > 0;
+    for (ptrdiff_t i = 0; i < arrWithIndex.array.len; i++) {
+        FLO_PRINT_ERROR("Inside array is: %.*s\n",
+                        FLO_STRING_PRINT(arrWithIndex.array.buf[i]));
+    }
+
+    return 0;
+
+    //    ptrdiff_t successes = 0;
+    //    ptrdiff_t failures = 0;
+    //
+    //    testflo_html_DomParsings(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomComparisons(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomQueries(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testNodeQueries(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomDeletions(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testNodeModifications(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testNodeDeletions(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomAppendices(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomPrependices(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomReplacements(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testIntegrations(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    printTestScore(successes, failures);
+    //    if (failures > 0) {
+    //        printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED,
+    //        ANSI_COLOR_RESET);
+    //    } else {
+    //        printf("Test suite %ssuccessful%s.\n", ANSI_COLOR_GREEN,
+    //               ANSI_COLOR_RESET);
+    //    }
+    //
+    //    return failures > 0;
 }

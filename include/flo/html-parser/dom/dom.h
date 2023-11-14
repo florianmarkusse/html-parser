@@ -16,6 +16,7 @@ extern "C" {
 #include "flo/html-parser/node/text-node.h"
 #include "hash/string-hash.h"
 #include "memory/arena.h"
+#include "types.h"
 
 #define FLO_HTML_ERROR_NODE_ID 0U
 #define FLO_HTML_ROOT_NODE_ID 1U
