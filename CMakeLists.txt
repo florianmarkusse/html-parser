@@ -51,7 +51,6 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "util/src/hash/string-hash.c"
 )
 
-
 target_compile_options(${LIBRARY_NAME} PRIVATE
     $<$<CONFIG:Debug>:-O0 -g3>
     $<$<CONFIG:Release>:-O3>

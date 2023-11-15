@@ -10,6 +10,18 @@ set(EXECUTABLE_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
 # Define the test executable target
 add_executable(${EXECUTABLE_NAME} ${BENCHMARK_SOURCE_FILES})
 
+target_compile_options(${EXECUTABLE_NAME} PRIVATE
+    $<$<CONFIG:Debug>:-O0 -g3>
+    $<$<CONFIG:Release>:-O3>
+    $<$<CONFIG:Profiling>:-O2 -pg>
+)
+
+target_compile_definitions(${EXECUTABLE_NAME} PRIVATE
+    $<$<CONFIG:Debug>:DEBUG>
+    $<$<CONFIG:Release>:>
+    $<$<CONFIG:Profiling>:>
+)
+
 # Link the test executable with the main project shared library
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${LIBRARY_NAME})
 

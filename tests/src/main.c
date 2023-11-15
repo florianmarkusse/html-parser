@@ -58,21 +58,30 @@ int main() {
         return 1;
     }
 
-    // Might want to split these things up, so they can be reused and more
-    // stacked on top?
-    flo_String_ArrayWithHashIndex arrWithIndex = {.array = {0},
-                                                  .index = {.exp = 2}};
+    flo_String_d_a backingBuffer = {0};
+    flo_String_HashIndex index = {.exp = 2};
+    flo_newSet(&index, FLO_SIZEOF(typeof(index.buf)),
+               FLO_ALIGNOF(typeof(index.buf)), &arena);
+    flo_fullInsert(FLO_STRING("hahah"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("aaaaaaaaaaa"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("bbbbbbbbbb"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("cccccccccc"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("ddddddddd"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("eeeeeeeee"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("fffffffffff"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("ggggggg"), &backingBuffer, &index, &arena);
+    flo_fullInsert(FLO_STRING("hhhhhhhhh"), &backingBuffer, &index, &arena);
 
-    flo_fullInsert(FLO_STRING("hahah"), &arrWithIndex, &arena);
-
-    for (ptrdiff_t i = 0; i < arrWithIndex.index.len; i++) {
-        FLO_PRINT_ERROR("Inside index is: %.*s\n",
-                        FLO_STRING_PRINT(arrWithIndex.index.buf[i]));
+    for (ptrdiff_t i = 0; i < (1 << index.exp); i++) {
+        if (index.buf[i].len > 0) {
+            FLO_PRINT_ERROR("Inside index is: %.*s\n",
+                            FLO_STRING_PRINT(index.buf[i]));
+        }
     }
 
-    for (ptrdiff_t i = 0; i < arrWithIndex.array.len; i++) {
+    for (ptrdiff_t i = 0; i < backingBuffer.len; i++) {
         FLO_PRINT_ERROR("Inside array is: %.*s\n",
-                        FLO_STRING_PRINT(arrWithIndex.array.buf[i]));
+                        FLO_STRING_PRINT(backingBuffer.buf[i]));
     }
 
     return 0;
