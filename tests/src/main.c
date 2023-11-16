@@ -59,19 +59,35 @@ int main() {
     }
 
     flo_String_d_a backingBuffer = {0};
-    flo_String_HashIndex index = {.exp = 2};
-    flo_newSet(&index, FLO_SIZEOF(typeof(index.buf)),
-               FLO_ALIGNOF(typeof(index.buf)), &arena);
-    flo_fullInsert(FLO_STRING("hahah"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("aaaaaaaaaaa"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("bbbbbbbbbb"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("cccccccccc"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("ddddddddd"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("eeeeeeeee"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("fffffffffff"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("ggggggg"), &backingBuffer, &index, &arena);
-    flo_fullInsert(FLO_STRING("hhhhhhhhh"), &backingBuffer, &index, &arena);
+    flo_String_HashIndex index = {.exp = 1};
+    flo_newSet(&index, FLO_SIZEOF(*index.buf), FLO_ALIGNOF(*index.buf), &arena);
 
+    flo_testFullInsert(FLO_STRING("a"), &backingBuffer, &index, &arena);
+    flo_testFullInsert(FLO_STRING("b"), &backingBuffer, &index, &arena);
+    flo_testFullInsert(FLO_STRING("c"), &backingBuffer, &index, &arena);
+    flo_testFullInsert(FLO_STRING("d"), &backingBuffer, &index, &arena);
+
+    //    FLO_FULL_INSERT(FLO_STRING("hahah"), &backingBuffer, &index,
+    //    flo_hashString,
+    //                    &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("aaaaaaaaaaa"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("bbbbbbbbbb"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("cccccccccc"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("ddddddddd"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("eeeeeeeee"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("fffffffffff"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("ggggggg"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+    //    FLO_FULL_INSERT(FLO_STRING("hhhhhhhhh"), &backingBuffer, &index,
+    //                    flo_hashString, &arena);
+
+    FLO_PRINT_ERROR("exp is %d\n", index.exp);
     for (ptrdiff_t i = 0; i < (1 << index.exp); i++) {
         if (index.buf[i].len > 0) {
             FLO_PRINT_ERROR("Inside index is: %.*s\n",
