@@ -11,7 +11,7 @@
 #include "dom/querying/querying.h"
 #include "dom/replacing/replacing.h"
 #include "error.h"
-#include "hash/new-hash.h"
+#include "hash/generic-msi-hash.h"
 #include "integration-test.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
@@ -59,13 +59,22 @@ int main() {
     }
 
     flo_String_d_a backingBuffer = {0};
-    flo_String_HashIndex index = {.exp = 1};
+    flo_HashStringIndex index = FLO_CREATE_STRING_INDEX(1, &arena);
     flo_newSet(&index, FLO_SIZEOF(*index.buf), FLO_ALIGNOF(*index.buf), &arena);
 
-    flo_testFullInsert(FLO_STRING("a"), &backingBuffer, &index, &arena);
-    flo_testFullInsert(FLO_STRING("b"), &backingBuffer, &index, &arena);
-    flo_testFullInsert(FLO_STRING("c"), &backingBuffer, &index, &arena);
-    flo_testFullInsert(FLO_STRING("d"), &backingBuffer, &index, &arena);
+    //    flo_testFullInsert(FLO_STRING("a"), &backingBuffer, &index, &arena);
+    //    flo_testFullInsert(FLO_STRING("b"), &backingBuffer, &index, &arena);
+    //    flo_testFullInsert(FLO_STRING("c"), &backingBuffer, &index, &arena);
+    //    flo_testFullInsert(FLO_STRING("d"), &backingBuffer, &index, &arena);
+
+    FLO_FULL_INSERT(FLO_STRING("A"), backingBuffer, index, flo_hashString,
+                    arena);
+    FLO_FULL_INSERT(FLO_STRING("B"), backingBuffer, index, flo_hashString,
+                    arena);
+    FLO_FULL_INSERT(FLO_STRING("C"), backingBuffer, index, flo_hashString,
+                    arena);
+    FLO_FULL_INSERT(FLO_STRING("A"), backingBuffer, index, flo_hashString,
+                    arena);
 
     //    FLO_FULL_INSERT(FLO_STRING("hahah"), &backingBuffer, &index,
     //    flo_hashString,
@@ -87,11 +96,11 @@ int main() {
     //    FLO_FULL_INSERT(FLO_STRING("hhhhhhhhh"), &backingBuffer, &index,
     //                    flo_hashString, &arena);
 
-    FLO_PRINT_ERROR("exp is %d\n", index.exp);
     for (ptrdiff_t i = 0; i < (1 << index.exp); i++) {
-        if (index.buf[i].len > 0) {
+        flo_String *casted = index.buf;
+        if (casted[i].len > 0) {
             FLO_PRINT_ERROR("Inside index is: %.*s\n",
-                            FLO_STRING_PRINT(index.buf[i]));
+                            FLO_STRING_PRINT(casted[i]));
         }
     }
 
