@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <time.h>
 
 #include "dom/appending/appending.h"
 #include "dom/comparing/comparing.h"
@@ -11,7 +12,9 @@
 #include "dom/querying/querying.h"
 #include "dom/replacing/replacing.h"
 #include "error.h"
-#include "hash/generic-msi-hash.h"
+#include "hash/hashes.h"
+#include "hash/msi/string-hash.h"
+#include "hash/string-hash.h"
 #include "integration-test.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
@@ -50,6 +53,49 @@ flo_Arena setupArena() {
     return arena;
 }
 
+void rehashIndex(flo_msi_String *oldIndex, flo_msi_String *newIndex) {
+    FLO_ASSERT(newIndex->len == 0);
+    for (int32_t i = 0; i < (1 << oldIndex->exp); i++) {
+        flo_String s = oldIndex->buf[i];
+        if (s.len > 0) {
+            flo_msi_insertString(s, flo_hashString(s), newIndex);
+        }
+    }
+}
+
+bool indexInsert(flo_String string, flo_msi_String *index, flo_Arena *perm) {
+    if ((uint32_t)index->len >= ((uint32_t)1 << index->exp) / 2) {
+        flo_msi_String newIndex = (flo_msi_String){.exp = index->exp + 1};
+        flo_msi_newSet(&newIndex, FLO_SIZEOF(*newIndex.buf),
+                       FLO_ALIGNOF(*newIndex.buf), perm);
+        rehashIndex(index, &newIndex);
+        *index = newIndex;
+    }
+    return flo_msi_insertString(string, flo_hashString(string), index);
+}
+
+char *generateRandomString(int length, int index) {
+    static const char charset[] =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    char *randomString = malloc((length + 1) * sizeof(char));
+
+    if (randomString == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    srand((unsigned int)time(NULL) + index); // Seed the random number generator
+
+    for (int i = 0; i < length; ++i) {
+        int index = rand() % (int)(sizeof(charset) - 1);
+        randomString[i] = charset[index];
+    }
+
+    randomString[length] = '\0'; // Null-terminate the string
+
+    return randomString;
+}
+
 int main() {
     printf("Starting test suite...\n\n");
 
@@ -58,58 +104,21 @@ int main() {
         return 1;
     }
 
-    flo_String_d_a backingBuffer = {0};
-    flo_HashStringIndex index = FLO_CREATE_STRING_INDEX(1, &arena);
-    flo_newSet(&index, FLO_SIZEOF(*index.buf), FLO_ALIGNOF(*index.buf), &arena);
+    flo_msi_String index = FLO_NEW_MSI_SET(flo_msi_String, 1, &arena);
 
-    //    flo_testFullInsert(FLO_STRING("a"), &backingBuffer, &index, &arena);
-    //    flo_testFullInsert(FLO_STRING("b"), &backingBuffer, &index, &arena);
-    //    flo_testFullInsert(FLO_STRING("c"), &backingBuffer, &index, &arena);
-    //    flo_testFullInsert(FLO_STRING("d"), &backingBuffer, &index, &arena);
-
-    FLO_FULL_INSERT(FLO_STRING("A"), backingBuffer, index, flo_hashString,
-                    arena);
-    FLO_FULL_INSERT(FLO_STRING("B"), backingBuffer, index, flo_hashString,
-                    arena);
-    FLO_FULL_INSERT(FLO_STRING("C"), backingBuffer, index, flo_hashString,
-                    arena);
-    FLO_FULL_INSERT(FLO_STRING("A"), backingBuffer, index, flo_hashString,
-                    arena);
-
-    //    FLO_FULL_INSERT(FLO_STRING("hahah"), &backingBuffer, &index,
-    //    flo_hashString,
-    //                    &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("aaaaaaaaaaa"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("bbbbbbbbbb"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("cccccccccc"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("ddddddddd"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("eeeeeeeee"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("fffffffffff"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("ggggggg"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-    //    FLO_FULL_INSERT(FLO_STRING("hhhhhhhhh"), &backingBuffer, &index,
-    //                    flo_hashString, &arena);
-
-    for (ptrdiff_t i = 0; i < (1 << index.exp); i++) {
-        flo_String *casted = index.buf;
-        if (casted[i].len > 0) {
-            FLO_PRINT_ERROR("Inside index is: %.*s\n",
-                            FLO_STRING_PRINT(casted[i]));
-        }
+    for (int i = 0; i < 20; ++i) {
+        char *randomString = generateRandomString(10, i % 5);
+        indexInsert(FLO_STRING_LEN(randomString, strlen(randomString)), &index,
+                    &arena);
     }
 
-    for (ptrdiff_t i = 0; i < backingBuffer.len; i++) {
-        FLO_PRINT_ERROR("Inside array is: %.*s\n",
-                        FLO_STRING_PRINT(backingBuffer.buf[i]));
-    }
+    FLO_PRINT_ERROR("Size of set is now %td\n", index.len);
 
-    return 0;
+    flo_String element;
+    FOR_EACH_MSI_ELEMENT(element, index) {
+        FLO_PRINT_ERROR("string with vlaue is %.*s\n",
+                        FLO_STRING_PRINT(element));
+    }
 
     //    ptrdiff_t successes = 0;
     //    ptrdiff_t failures = 0;
