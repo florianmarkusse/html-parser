@@ -13,8 +13,10 @@
 #include "dom/replacing/replacing.h"
 #include "error.h"
 #include "hash/hashes.h"
-#include "hash/msi/string-hash.h"
+#include "hash/msi/string-set.h"
 #include "hash/string-hash.h"
+#include "hash/trie/string-set.h"
+#include "hash/trie/uint16-set.h"
 #include "integration-test.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
@@ -104,6 +106,37 @@ int main() {
         return 1;
     }
 
+    flo_trie_StringSet *stringSet = NULL;
+    for (int i = 0; i < 20; ++i) {
+        char *randomString = generateRandomString(10, i % 10);
+        FLO_PRINT_ERROR("Trying to inser %s\n", randomString);
+        flo_trie_insertStringSet(
+            FLO_STRING_LEN(randomString, strlen(randomString)), &stringSet,
+            &arena);
+    }
+
+    {
+        flo_Arena scratch = arena;
+        flo_String element;
+        FLO_FOR_EACH_TRIE_STRING(element, stringSet, &scratch) {
+            FLO_PRINT_ERROR("inside string set is %.*s\n",
+                            FLO_STRING_PRINT(element));
+        }
+    }
+
+    flo_trie_Uint16Set *intSet = NULL;
+    for (uint16_t i = 0; i < 20; ++i) {
+        flo_trie_insertUint16Set(i % 10 + 2, &intSet, &arena);
+    }
+
+    {
+        flo_Arena scratch = arena;
+        uint16_t element;
+        FLO_FOR_EACH_TRIE_UINT16(element, intSet, &scratch) {
+            FLO_PRINT_ERROR("inside int set is %d\n", element);
+        }
+    }
+
     flo_msi_String index = FLO_NEW_MSI_SET(flo_msi_String, 1, &arena);
 
     for (int i = 0; i < 20; ++i) {
@@ -115,7 +148,7 @@ int main() {
     FLO_PRINT_ERROR("Size of set is now %td\n", index.len);
 
     flo_String element;
-    FOR_EACH_MSI_ELEMENT(element, index) {
+    FLO_FOR_EACH_MSI_STRING(element, index) {
         FLO_PRINT_ERROR("string with vlaue is %.*s\n",
                         FLO_STRING_PRINT(element));
     }

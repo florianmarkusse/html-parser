@@ -49,8 +49,10 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "util/src/file/path.c"
     "util/src/hash/uint16-t-hash.c"
     "util/src/hash/string-hash.c"
-    "util/src/hash/msi/string-hash.c"
-    "util/src/hash/msi/uint16-hash.c"
+    "util/src/hash/msi/string-set.c"
+    "util/src/hash/msi/uint16-set.c"
+    "util/src/hash/trie/string-set.c"
+    "util/src/hash/trie/uint16-set.c"
 )
 
 target_compile_options(${LIBRARY_NAME} PRIVATE
