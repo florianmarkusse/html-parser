@@ -31,9 +31,10 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
         }                                                                      \
     } while (0)
 
-#define GET_PROPERTY_ID_OR_RETURN(variable, set, key)                          \
+#define GET_PROPERTY_ID_OR_RETURN(variable, key, set)                          \
     do {                                                                       \
-        (variable) = (flo_html_index_id)flo_containsStringHashSet(set, key);   \
+        (variable) =                                                           \
+            (flo_html_index_id)flo_trie_containsStringAutoUint16Map(key, set); \
         if ((variable) == 0) {                                                 \
             return QUERY_NOT_SEEN_BEFORE;                                      \
         }                                                                      \
@@ -104,8 +105,8 @@ flo_html_QueryStatus getQueryResults(flo_String css, flo_html_Dom *dom,
 
             flo_html_index_id tagID;
             GET_PROPERTY_ID_OR_RETURN(
-                tagID, &dom->tags,
-                FLO_STRING_LEN(flo_getCharPtr(css, tagStart), tagLen));
+                tagID, FLO_STRING_LEN(flo_getCharPtr(css, tagStart), tagLen),
+                &dom->tagMap);
 
             filters[filtersLen].attributeSelector = TAG;
             filters[filtersLen].data.tagID = tagID;
@@ -148,10 +149,12 @@ flo_html_QueryStatus getQueryResults(flo_String css, flo_html_Dom *dom,
                                            ? FLO_STRING("class")
                                            : FLO_STRING("id");
                 flo_html_index_id propKeyID;
-                GET_PROPERTY_ID_OR_RETURN(propKeyID, &dom->propKeys, keyBuffer);
+                GET_PROPERTY_ID_OR_RETURN(propKeyID, keyBuffer,
+                                          &dom->propKeyMap);
 
                 flo_html_index_id propValueID;
-                GET_PROPERTY_ID_OR_RETURN(propValueID, &dom->propValues, token);
+                GET_PROPERTY_ID_OR_RETURN(propValueID, token,
+                                          &dom->propValueMap);
 
                 filters[filtersLen].attributeSelector = PROPERTY;
                 filters[filtersLen].data.keyValuePair.keyID = propKeyID;
@@ -159,15 +162,14 @@ flo_html_QueryStatus getQueryResults(flo_String css, flo_html_Dom *dom,
                 filtersLen++;
             } else if (ch == ']') {
                 flo_html_index_id boolPropID;
-                GET_PROPERTY_ID_OR_RETURN(boolPropID, &dom->boolPropsSet,
-                                          token);
+                GET_PROPERTY_ID_OR_RETURN(boolPropID, token, &dom->boolPropMap);
 
                 filters[filtersLen].attributeSelector = BOOLEAN_PROPERTY;
                 filters[filtersLen].data.propID = boolPropID;
                 filtersLen++;
             } else if (ch == '=') {
                 flo_html_index_id propKeyID;
-                GET_PROPERTY_ID_OR_RETURN(propKeyID, &dom->propKeys, token);
+                GET_PROPERTY_ID_OR_RETURN(propKeyID, token, &dom->propKeyMap);
 
                 // Skip the '='
                 ps.idx++;
@@ -177,8 +179,8 @@ flo_html_QueryStatus getQueryResults(flo_String css, flo_html_Dom *dom,
                 ch = flo_parse_currentChar(ps);
 
                 flo_html_index_id propValueID;
-                GET_PROPERTY_ID_OR_RETURN(propValueID, &dom->propValues,
-                                          propValue);
+                GET_PROPERTY_ID_OR_RETURN(propValueID, propValue,
+                                          &dom->propValueMap);
 
                 filters[filtersLen].attributeSelector = PROPERTY;
                 filters[filtersLen].data.keyValuePair.keyID = propKeyID;

@@ -18,35 +18,6 @@ bool parseFile(flo_String fileLocation, flo_Arena scratch) {
     return true;
 }
 
-flo_Arena setupArena() {
-    char *start = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
-                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (start == MAP_FAILED) {
-        FLO_PRINT_ERROR("Failed to allocate memory!\n");
-        return (flo_Arena){0};
-    }
-
-    flo_Arena arena = flo_createArena(start, CAP);
-
-    void *jmp_buf[5];
-    if (__builtin_setjmp(jmp_buf)) {
-        if (munmap(arena.beg, arena.cap) == -1) {
-            FLO_PRINT_ERROR("Failed to unmap memory from arena!\n"
-                            "Arena Details:\n"
-                            "  beg: %p\n"
-                            "  end: %p\n"
-                            "  cap: %td\n"
-                            "Zeroing Arena regardless.",
-                            arena.beg, arena.end, arena.cap);
-        }
-        FLO_PRINT_ERROR("OOM/overflow in arena!\n");
-        return (flo_Arena){0};
-    }
-    arena.jmp_buf = jmp_buf;
-
-    return arena;
-}
-
 void benchmark(flo_Arena scratch) {
     // Open the inputs directory
     DIR *dir = NULL;
@@ -86,10 +57,30 @@ int main() {
     // Get the starting timestamp
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    flo_Arena arena = setupArena();
-    if (arena.beg == NULL) {
+    char *begin = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
+                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (begin == MAP_FAILED) {
+        FLO_PRINT_ERROR("Failed to allocate memory!\n");
         return -1;
     }
+
+    flo_Arena arena = flo_createArena(begin, CAP);
+
+    void *jmp_buf[5];
+    if (__builtin_setjmp(jmp_buf)) {
+        if (munmap(arena.beg, arena.cap) == -1) {
+            FLO_PRINT_ERROR("Failed to unmap memory from arena!\n"
+                            "Arena Details:\n"
+                            "  beg: %p\n"
+                            "  end: %p\n"
+                            "  cap: %td\n"
+                            "Zeroing Arena regardless.",
+                            arena.beg, arena.end, arena.cap);
+        }
+        FLO_PRINT_ERROR("OOM/overflow in arena!\n");
+        return -1;
+    }
+    arena.jmp_buf = jmp_buf;
 
     // Call the function or code section to benchmark
     benchmark(arena);

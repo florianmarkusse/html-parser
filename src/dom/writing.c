@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "file/path.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/text-node.h"
-#include "file/path.h"
 
 void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
                flo_html_Dom *dom, FILE *output) {
@@ -36,8 +36,9 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
         flo_html_BooleanProperty boolProp = dom->boolProps.buf[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            fprintf(output, " %.*s",
-                    FLO_STRING_PRINT(dom->boolPropRegistry.buf[boolProp.propID]));
+            fprintf(
+                output, " %.*s",
+                FLO_STRING_PRINT(dom->boolPropRegistry.buf[boolProp.propID]));
         }
     }
 
@@ -82,9 +83,8 @@ void flo_html_printHTML(flo_html_Dom *dom) {
     printf("\n\n");
 }
 
-flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
-                                             flo_String filePath,
-                                             flo_Arena scratch) {
+flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom, flo_String filePath,
+                                        flo_Arena scratch) {
     flo_createPath(filePath, scratch);
     // casting here because filePath should not contain any funny characters.
     FILE *file = fopen((char *)filePath.buf, "wbe");
@@ -117,31 +117,35 @@ void printflo_html_BasicRegistry(flo_String registryName,
     printf("\n");
 }
 
-void printSetStatus(flo_StringHashSet *set) {
-    printf("hash set contents...\n");
-    flo_StringHashSetIterator iterator =
-        (flo_StringHashSetIterator){.set = set, .index = 0};
-
-    flo_String string;
-    while ((string = flo_nextStringHashSetIterator(&iterator)).len != 0) {
-        printf("%.*s\n", FLO_STRING_PRINT(string));
-    }
-}
-
-void flo_html_printDomStatus(flo_html_Dom *dom) {
+void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch) {
     printf("printing DOM status...\n\n");
+
+    flo_trie_StringAutoUint16Data data;
 
     printf("printing property status...\n\n");
     printf("printing keys...\n");
-    printSetStatus(&dom->propKeys);
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propKeyMap, &scratch) {
+        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
+               data.value);
+    }
+
     printf("printing values...\n");
-    printSetStatus(&dom->propValues);
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propValueMap, &scratch) {
+        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
+               data.value);
+    }
 
     printf("printing bool property status...\n\n");
-    printSetStatus(&dom->boolPropsSet);
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->boolPropMap, &scratch) {
+        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
+               data.value);
+    }
 
     printf("printing tags status...\n\n");
-    printSetStatus(&dom->tags);
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->tagMap, &scratch) {
+        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
+               data.value);
+    }
 
     printf("Printing DOM contents...\n");
 

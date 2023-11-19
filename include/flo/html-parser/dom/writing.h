@@ -16,8 +16,9 @@ extern "C" {
  * DOM.
  *
  * @param[in]   dom             The DOM structure to print status for.
+ * @param[in]   scratch            The memory arena for temporary allocations.
  */
-void flo_html_printDomStatus(flo_html_Dom *dom);
+void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch);
 
 /**
  * @brief Print the minified HTML representation of a DOM structure.
@@ -46,9 +47,8 @@ void flo_html_printHTML(flo_html_Dom *dom);
  *          completed, an error code otherwise). See @ref
  *          "flo/html-parser/util/file/file-status.h#flo_FileStatus".
  */
-flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom,
-                                             flo_String filePath,
-                                             flo_Arena scratch);
+flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom, flo_String filePath,
+                                        flo_Arena scratch);
 
 #ifdef __cplusplus
 }

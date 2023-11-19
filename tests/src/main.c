@@ -106,97 +106,97 @@ int main() {
         return 1;
     }
 
-    flo_trie_StringSet *stringSet = NULL;
-    for (int i = 0; i < 20; ++i) {
-        char *randomString = generateRandomString(10, i % 10);
-        FLO_PRINT_ERROR("Trying to inser %s\n", randomString);
-        flo_trie_insertStringSet(
-            FLO_STRING_LEN(randomString, strlen(randomString)), &stringSet,
-            &arena);
-    }
-
-    {
-        flo_Arena scratch = arena;
-        flo_String element;
-        FLO_FOR_EACH_TRIE_STRING(element, stringSet, &scratch) {
-            FLO_PRINT_ERROR("inside string set is %.*s\n",
-                            FLO_STRING_PRINT(element));
-        }
-    }
-
-    flo_trie_Uint16Set *intSet = NULL;
-    for (uint16_t i = 0; i < 20; ++i) {
-        flo_trie_insertUint16Set(i % 10 + 2, &intSet, &arena);
-    }
-
-    {
-        flo_Arena scratch = arena;
-        uint16_t element;
-        FLO_FOR_EACH_TRIE_UINT16(element, intSet, &scratch) {
-            FLO_PRINT_ERROR("inside int set is %d\n", element);
-        }
-    }
-
-    flo_msi_String index = FLO_NEW_MSI_SET(flo_msi_String, 1, &arena);
-
-    for (int i = 0; i < 20; ++i) {
-        char *randomString = generateRandomString(10, i % 5);
-        indexInsert(FLO_STRING_LEN(randomString, strlen(randomString)), &index,
-                    &arena);
-    }
-
-    FLO_PRINT_ERROR("Size of set is now %td\n", index.len);
-
-    flo_String element;
-    FLO_FOR_EACH_MSI_STRING(element, index) {
-        FLO_PRINT_ERROR("string with vlaue is %.*s\n",
-                        FLO_STRING_PRINT(element));
-    }
-
-    //    ptrdiff_t successes = 0;
-    //    ptrdiff_t failures = 0;
-    //
-    //    testflo_html_DomParsings(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomComparisons(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomQueries(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testNodeQueries(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomDeletions(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testNodeModifications(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testNodeDeletions(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomAppendices(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomPrependices(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testflo_html_DomReplacements(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    testIntegrations(&successes, &failures, arena);
-    //    printf("\n");
-    //
-    //    printTestScore(successes, failures);
-    //    if (failures > 0) {
-    //        printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED,
-    //        ANSI_COLOR_RESET);
-    //    } else {
-    //        printf("Test suite %ssuccessful%s.\n", ANSI_COLOR_GREEN,
-    //               ANSI_COLOR_RESET);
+    //    flo_trie_StringSet *stringSet = NULL;
+    //    for (int i = 0; i < 20; ++i) {
+    //        char *randomString = generateRandomString(10, i % 10);
+    //        FLO_PRINT_ERROR("Trying to inser %s\n", randomString);
+    //        flo_trie_insertStringSet(
+    //            FLO_STRING_LEN(randomString, strlen(randomString)),
+    //            &stringSet, &arena);
     //    }
     //
-    //    return failures > 0;
+    //    {
+    //        flo_Arena scratch = arena;
+    //        flo_String element;
+    //        FLO_FOR_EACH_TRIE_STRING(element, stringSet, &scratch) {
+    //            FLO_PRINT_ERROR("inside string set is %.*s\n",
+    //                            FLO_STRING_PRINT(element));
+    //        }
+    //    }
+    //
+    //    flo_trie_Uint16Set *intSet = NULL;
+    //    for (uint16_t i = 0; i < 20; ++i) {
+    //        flo_trie_insertUint16Set(i % 10 + 2, &intSet, &arena);
+    //    }
+    //
+    //    {
+    //        flo_Arena scratch = arena;
+    //        uint16_t element;
+    //        FLO_FOR_EACH_TRIE_UINT16(element, intSet, &scratch) {
+    //            FLO_PRINT_ERROR("inside int set is %d\n", element);
+    //        }
+    //    }
+    //
+    //    flo_msi_String index = FLO_NEW_MSI_SET(flo_msi_String, 1, &arena);
+    //
+    //    for (int i = 0; i < 20; ++i) {
+    //        char *randomString = generateRandomString(10, i % 5);
+    //        indexInsert(FLO_STRING_LEN(randomString, strlen(randomString)),
+    //        &index,
+    //                    &arena);
+    //    }
+    //
+    //    FLO_PRINT_ERROR("Size of set is now %td\n", index.len);
+    //
+    //    flo_String element;
+    //    FLO_FOR_EACH_MSI_STRING(element, index) {
+    //        FLO_PRINT_ERROR("string with vlaue is %.*s\n",
+    //                        FLO_STRING_PRINT(element));
+    //    }
+
+    ptrdiff_t successes = 0;
+    ptrdiff_t failures = 0;
+
+    testflo_html_DomParsings(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomComparisons(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomQueries(&successes, &failures, arena);
+    printf("\n");
+
+    testNodeQueries(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomDeletions(&successes, &failures, arena);
+    printf("\n");
+
+    testNodeModifications(&successes, &failures, arena);
+    printf("\n");
+
+    testNodeDeletions(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomAppendices(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomPrependices(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomReplacements(&successes, &failures, arena);
+    printf("\n");
+
+    testIntegrations(&successes, &failures, arena);
+    printf("\n");
+
+    printTestScore(successes, failures);
+    if (failures > 0) {
+        printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
+    } else {
+        printf("Test suite %ssuccessful%s.\n", ANSI_COLOR_GREEN,
+               ANSI_COLOR_RESET);
+    }
+
+    return failures > 0;
 }

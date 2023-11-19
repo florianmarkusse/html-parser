@@ -17,12 +17,10 @@ typedef enum {
 
 flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
                                              flo_String prop, flo_html_Dom *dom,
-                                             flo_StringHashSet *set,
+                                             flo_trie_StringAutoUint16Map **set,
                                              flo_Arena *perm) {
-    flo_StringInsert result = flo_insertStringHashSet(set, prop, perm);
-    if (result.entryIndex > FLO_HTML_MAX_NODE_ID) {
-        __builtin_longjmp(perm->jmp_buf, 1);
-    }
+    flo_NewStringInsert result =
+        flo_trie_insertStringAutoUint16Map(prop, set, perm);
     if (result.wasInserted) {
         switch (propertyType) {
         case PROPERTY_TYPE_BOOL: {
@@ -47,10 +45,10 @@ void flo_html_addPropertyToNode(flo_html_node_id nodeID, flo_String key,
                                 flo_String value, flo_html_Dom *dom,
                                 flo_Arena *perm) {
     flo_html_index_id keyID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_KEY, key, dom, &dom->propKeys, perm);
+        PROPERTY_TYPE_KEY, key, dom, &dom->propKeyMap, perm);
 
     flo_html_index_id valueID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_VALUE, value, dom, &dom->propValues, perm);
+        PROPERTY_TYPE_VALUE, value, dom, &dom->propValueMap, perm);
 
     *FLO_PUSH(&dom->props, perm) = (flo_html_Property){
         .nodeID = nodeID, .keyID = keyID, .valueID = valueID};
@@ -60,7 +58,7 @@ void flo_html_addBooleanPropertyToNode(flo_html_node_id nodeID,
                                        flo_String boolProp, flo_html_Dom *dom,
                                        flo_Arena *perm) {
     flo_html_index_id boolPropID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_BOOL, boolProp, dom, &dom->boolPropsSet, perm);
+        PROPERTY_TYPE_BOOL, boolProp, dom, &dom->boolPropMap, perm);
 
     *FLO_PUSH(&dom->boolProps, perm) =
         (flo_html_BooleanProperty){.nodeID = nodeID, .propID = boolPropID};
@@ -70,7 +68,8 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_String key,
                                flo_String newValue, flo_html_Dom *dom,
                                flo_Arena *perm) {
     flo_html_index_id keyID =
-        (flo_html_index_id)flo_containsStringHashSet(&dom->propKeys, key);
+        (flo_html_index_id)flo_trie_containsStringAutoUint16Map(
+            key, &dom->propKeyMap);
     if (keyID == 0) {
         FLO_PRINT_ERROR("Could not find key in stored prop keys\n");
         return false;
@@ -82,7 +81,7 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_String key,
     }
 
     flo_html_index_id createdValueID = getCreatedPropIDFromString(
-        PROPERTY_TYPE_VALUE, newValue, dom, &dom->propValues, perm);
+        PROPERTY_TYPE_VALUE, newValue, dom, &dom->propValueMap, perm);
     prop->valueID = createdValueID;
 
     return true;
@@ -125,10 +124,8 @@ void flo_html_addTextToTextNode(flo_html_node_id nodeID, flo_String text,
 void flo_html_setTagOnDocumentNode(flo_String tag, flo_html_node_id nodeID,
                                    bool isPaired, flo_html_Dom *dom,
                                    flo_Arena *perm) {
-    flo_StringInsert result = flo_insertStringHashSet(&dom->tags, tag, perm);
-    if (result.entryIndex > FLO_HTML_MAX_INDEX_ID) {
-        __builtin_longjmp(perm->jmp_buf, 1);
-    }
+    flo_NewStringInsert result =
+        flo_trie_insertStringAutoUint16Map(tag, &dom->tagMap, perm);
     if (result.wasInserted) {
         *FLO_PUSH(&dom->tagRegistry, perm) =
             (flo_html_TagRegistration){.tag = tag, .isPaired = isPaired};

@@ -37,20 +37,16 @@ flo_html_Dom *flo_html_createDom(flo_String htmlString, flo_Arena *perm) {
     *FLO_PUSH(&result->propKeyRegistry, perm) = FLO_EMPTY_STRING;
     *FLO_PUSH(&result->propValueRegistry, perm) = FLO_EMPTY_STRING;
 
-    result->tags =
-        flo_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
-    result->boolPropsSet =
-        flo_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
-    result->propKeys =
-        flo_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
-    result->propValues =
-        flo_initStringHashSet(FLO_HTML_REGISTRY_START_SIZE, perm);
+    result->tagMap = NULL;
+    result->boolPropMap = NULL;
+    result->propKeyMap = NULL;
+    result->propValueMap = NULL;
 
     return flo_html_parseRoot(htmlString, result, perm);
 }
 
 flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_Arena *perm) {
-    flo_html_Dom *result = FLO_NEW(perm, flo_html_Dom, 1);
+    flo_html_Dom *result = FLO_NEW(perm, flo_html_Dom);
 
     FLO_COPY_DYNAMIC_ARRAY(result->nodes, dom->nodes, flo_html_Node, perm);
     FLO_COPY_DYNAMIC_ARRAY(result->parentFirstChilds, dom->parentFirstChilds,
@@ -63,6 +59,8 @@ flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_Arena *perm) {
                            flo_html_BooleanProperty, perm);
     FLO_COPY_DYNAMIC_ARRAY(result->props, dom->props, flo_html_Property, perm);
 
+    // TODO: Duplicate dom does not work here. We are copying the same pointers.
+    // So if this changes, it changes in multiple DOMs.
     FLO_COPY_DYNAMIC_ARRAY(result->tagRegistry, dom->tagRegistry,
                            flo_html_TagRegistration, perm);
     FLO_COPY_DYNAMIC_ARRAY(result->boolPropRegistry, dom->boolPropRegistry,
@@ -72,10 +70,26 @@ flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_Arena *perm) {
     FLO_COPY_DYNAMIC_ARRAY(result->propValueRegistry, dom->propValueRegistry,
                            flo_String, perm);
 
-    result->tags = flo_copyStringHashSet(&dom->tags, perm);
-    result->boolPropsSet = flo_copyStringHashSet(&dom->boolPropsSet, perm);
-    result->propKeys = flo_copyStringHashSet(&dom->propKeys, perm);
-    result->propValues = flo_copyStringHashSet(&dom->propValues, perm);
+    // We skip 0 because that is an error value.
+    for (ptrdiff_t i = 1; i < result->tagRegistry.len; i++) {
+        flo_trie_containsStringAutoUint16Map(result->tagRegistry.buf[i].tag,
+                                             &result->tagMap);
+    }
+
+    for (ptrdiff_t i = 1; i < result->boolPropRegistry.len; i++) {
+        flo_trie_containsStringAutoUint16Map(result->boolPropRegistry.buf[i],
+                                             &result->boolPropMap);
+    }
+
+    for (ptrdiff_t i = 1; i < result->propKeyRegistry.len; i++) {
+        flo_trie_containsStringAutoUint16Map(result->propKeyRegistry.buf[i],
+                                             &result->propKeyMap);
+    }
+
+    for (ptrdiff_t i = 1; i < result->propValueRegistry.len; i++) {
+        flo_trie_containsStringAutoUint16Map(result->propValueRegistry.buf[i],
+                                             &result->propValueMap);
+    }
 
     return result;
 }

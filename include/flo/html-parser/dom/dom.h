@@ -14,6 +14,7 @@ extern "C" {
 #include "flo/html-parser/node/property.h"
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
+#include "flo/html-parser/util/string-auto-uint16-map.h"
 #include "hash/string-hash.h"
 #include "memory/arena.h"
 #include "types.h"
@@ -50,10 +51,10 @@ typedef struct {
 
     // Data containg the acual string values.
     // Map from String -> ID
-    flo_StringHashSet tags;
-    flo_StringHashSet boolPropsSet;
-    flo_StringHashSet propKeys;
-    flo_StringHashSet propValues;
+    flo_trie_StringAutoUint16Map *tagMap;
+    flo_trie_StringAutoUint16Map *boolPropMap;
+    flo_trie_StringAutoUint16Map *propKeyMap;
+    flo_trie_StringAutoUint16Map *propValueMap;
 } flo_html_Dom;
 
 /**

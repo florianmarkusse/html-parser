@@ -72,9 +72,21 @@ typedef struct {
 
 static inline bool isCommentTag(flo_parse_Status ps) {
     return ps.idx < ps.text.len - HTML_COMMENT_START_LENGTH &&
+           flo_stringEquals(FLO_STRING("!--"),
+                            FLO_STRING_LEN(flo_getCharPtr(ps.text, ps.idx + 1),
+                                           HTML_COMMENT_START_LENGTH - 1));
+}
+
+#define CDATA_LENGTH 9
+
+static inline bool isCloseTag(flo_parse_Status ps, flo_String containingTag) {
+    return ps.idx < ps.text.len - containingTag.len - 2 &&
            flo_stringEquals(
-               FLO_STRING("!--"),
-               FLO_STRING_LEN(flo_getCharPtr(ps.text, ps.idx + 1), 3));
+               FLO_STRING("/"),
+               FLO_STRING_LEN(flo_getCharPtr(ps.text, ps.idx + 1), 1)) &&
+           flo_stringEquals(containingTag,
+                            FLO_STRING_LEN(flo_getCharPtr(ps.text, ps.idx + 2),
+                                           containingTag.len));
 }
 
 static inline bool isEndDocumentTag(flo_parse_Status ps,
@@ -97,40 +109,48 @@ typedef struct {
 } flo_html_TextNodeParseResult;
 
 flo_html_TextNodeParseResult parseTextNode(flo_parse_Status ps,
-                                           flo_html_Dom *dom, flo_Arena *perm) {
+                                           flo_html_Dom *dom,
+                                           flo_String containingTag,
+                                           flo_Arena *perm) {
     flo_html_node_id nodeID = flo_html_createNode(NODE_TYPE_TEXT, dom, perm);
 
     flo_RawData raw = {0};
     flo_String whiteSpace = FLO_STRING(" ");
     bool isAppend = false;
 
-    FLO_PARSE_PARSE_CHAR_UNTIL(ps, (ch == '<' && !isCommentTag(ps)), {
-        if (ch == '<' && isCommentTag(ps)) {
-            FLO_PARSE_SKIP_COMMENT(ps);
-        } else {
-            ptrdiff_t textStart = ps.idx;
-            ptrdiff_t textLen = 0;
-            FLO_PARSE_NEXT_CHAR_WHILE(ps, textNodeContinue(ps, ch) && ch != '<',
-                                      { textLen++; })
+    FLO_PARSE_PARSE_CHAR_UNTIL(
+        ps, (ch == '<' && !isCommentTag(ps) && isCloseTag(ps, containingTag)), {
+            if (ch == '<' && isCommentTag(ps)) {
+                FLO_PARSE_SKIP_COMMENT(ps);
+            } else {
+                ptrdiff_t textStart = ps.idx;
+                ptrdiff_t textLen = 0;
+                // CDATA :(
+                if (ch == '<') {
+                    textLen++;
+                    ps.idx++;
+                }
+                FLO_PARSE_NEXT_CHAR_WHILE(
+                    ps, textNodeContinue(ps, ch) && ch != '<', { textLen++; })
 
-            // If we encountered '  ' we want to subtract 1 from the
-            // length.
-            if (ps.idx > 0 && flo_getChar(ps.text, ps.idx - 1) == ' ') {
-                textLen--;
+                // If we encountered '  ' we want to subtract 1 from the
+                // length.
+                if (ps.idx > 0 && flo_getChar(ps.text, ps.idx - 1) == ' ') {
+                    textLen--;
+                }
+
+                if (isAppend) {
+                    flo_addRawData(&raw, whiteSpace, perm);
+                }
+                isAppend = true;
+
+                flo_addRawData(
+                    &raw,
+                    FLO_STRING_LEN(flo_getCharPtr(ps.text, textStart), textLen),
+                    perm);
             }
-
-            if (isAppend) {
-                flo_addRawData(&raw, whiteSpace, perm);
-            }
-            isAppend = true;
-
-            flo_addRawData(
-                &raw,
-                FLO_STRING_LEN(flo_getCharPtr(ps.text, textStart), textLen),
-                perm);
-        }
-        FLO_PARSE_SKIP_EMPTY_SPACE(ps);
-    })
+            FLO_PARSE_SKIP_EMPTY_SPACE(ps);
+        })
 
     dom->nodes.buf[nodeID].text = FLO_STRING_LEN(raw.buf, raw.len);
 
@@ -281,8 +301,12 @@ flo_html_Dom *flo_html_parse(flo_String html, flo_html_Dom *dom,
                     ps.idx = parseResult.nextPosition;
                 } else {
                     // Rogue open tag -> Text node.
-                    flo_html_TextNodeParseResult parseResult =
-                        parseTextNode(ps, dom, perm);
+                    flo_html_TextNodeParseResult parseResult = parseTextNode(
+                        ps, dom,
+                        nodeStack->len > 0
+                            ? nodeStack->stack[nodeStack->len - 1].tag
+                            : FLO_EMPTY_STRING,
+                        perm);
                     updateReferences(parseResult.newNodeID, prevNodeID,
                                      nodeStack, dom, perm);
                     prevNodeID = parseResult.newNodeID;
@@ -292,8 +316,11 @@ flo_html_Dom *flo_html_parse(flo_String html, flo_html_Dom *dom,
         }
         // Text node.
         else {
-            flo_html_TextNodeParseResult parseResult =
-                parseTextNode(ps, dom, perm);
+            flo_html_TextNodeParseResult parseResult = parseTextNode(
+                ps, dom,
+                nodeStack->len > 0 ? nodeStack->stack[nodeStack->len - 1].tag
+                                   : FLO_EMPTY_STRING,
+                perm);
             updateReferences(parseResult.newNodeID, prevNodeID, nodeStack, dom,
                              perm);
             prevNodeID = parseResult.newNodeID;

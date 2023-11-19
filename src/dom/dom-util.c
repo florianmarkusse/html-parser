@@ -1,18 +1,19 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "array.h"
+#include "error.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/modification.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/parser.h"
-#include "array.h"
-#include "error.h"
 #include "memory/arena.h"
 
 flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom, flo_Arena *perm) {
     if (dom->nodes.len > FLO_HTML_MAX_NODE_ID - 1) {
+        FLO_ASSERT(false);
         __builtin_longjmp(perm->jmp_buf, 1);
     }
     flo_html_Node node;
@@ -38,8 +39,7 @@ bool flo_html_tryMerge(flo_html_node_id possibleMergeNodeID,
 
 void flo_html_connectOtherNodesToParent(flo_html_node_id parentID,
                                         flo_html_node_id lastAddedChild,
-                                        flo_html_Dom *dom,
-                                        flo_Arena *perm) {
+                                        flo_html_Dom *dom, flo_Arena *perm) {
     flo_html_node_id otherNewNodeID = flo_html_getNext(lastAddedChild, dom);
     while (otherNewNodeID > 0) {
         *FLO_PUSH(&dom->parentChilds, perm) = (flo_html_ParentChild){
