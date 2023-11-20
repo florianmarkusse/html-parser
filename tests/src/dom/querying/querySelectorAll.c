@@ -55,15 +55,14 @@ static TestFile testFiles[] = {
 // Calculate the number of test files
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(flo_String fileLocation,
-                            flo_String cssQuery,
+static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
                             flo_html_QueryStatus expectedStatus,
                             ptrdiff_t expectedNumberOfNodes,
                             flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         FLO_PRINT_ERROR("Failed to created DOM from file %.*s\n",
-                             FLO_STRING_PRINT(fileLocation));
+                        FLO_STRING_PRINT(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 

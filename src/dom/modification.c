@@ -17,7 +17,7 @@ typedef enum {
 
 flo_html_index_id getCreatedPropIDFromString(PropertyType propertyType,
                                              flo_String prop, flo_html_Dom *dom,
-                                             flo_trie_StringAutoUint16Map **set,
+                                             flo_trie_StringAutoUint16Map *set,
                                              flo_Arena *perm) {
     flo_NewStringInsert result =
         flo_trie_insertStringAutoUint16Map(prop, set, perm);

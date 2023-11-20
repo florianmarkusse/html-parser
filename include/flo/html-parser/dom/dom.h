@@ -51,10 +51,10 @@ typedef struct {
 
     // Data containg the acual string values.
     // Map from String -> ID
-    flo_trie_StringAutoUint16Map *tagMap;
-    flo_trie_StringAutoUint16Map *boolPropMap;
-    flo_trie_StringAutoUint16Map *propKeyMap;
-    flo_trie_StringAutoUint16Map *propValueMap;
+    flo_trie_StringAutoUint16Map tagMap;
+    flo_trie_StringAutoUint16Map boolPropMap;
+    flo_trie_StringAutoUint16Map propKeyMap;
+    flo_trie_StringAutoUint16Map propValueMap;
 } flo_html_Dom;
 
 /**

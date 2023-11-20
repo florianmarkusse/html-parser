@@ -37,10 +37,10 @@ flo_html_Dom *flo_html_createDom(flo_String htmlString, flo_Arena *perm) {
     *FLO_PUSH(&result->propKeyRegistry, perm) = FLO_EMPTY_STRING;
     *FLO_PUSH(&result->propValueRegistry, perm) = FLO_EMPTY_STRING;
 
-    result->tagMap = NULL;
-    result->boolPropMap = NULL;
-    result->propKeyMap = NULL;
-    result->propValueMap = NULL;
+    result->tagMap = (flo_trie_StringAutoUint16Map){0};
+    result->boolPropMap = (flo_trie_StringAutoUint16Map){0};
+    result->propKeyMap = (flo_trie_StringAutoUint16Map){0};
+    result->propValueMap = (flo_trie_StringAutoUint16Map){0};
 
     return flo_html_parseRoot(htmlString, result, perm);
 }

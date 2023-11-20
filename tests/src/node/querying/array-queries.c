@@ -31,14 +31,13 @@ static TestFile testFiles[] = {
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(flo_String fileLocation,
-                            flo_String cssQuery,
+static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
                             ArrayFunctionType functionType,
                             ptrdiff_t expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         FLO_PRINT_ERROR("Failed to created DOM from file %.*s\n",
-                             FLO_STRING_PRINT(fileLocation));
+                        FLO_STRING_PRINT(fileLocation));
         return TEST_ERROR_INITIALIZATION;
     }
 

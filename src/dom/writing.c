@@ -124,25 +124,27 @@ void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch) {
 
     printf("printing property status...\n\n");
     printf("printing keys...\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propKeyMap, &scratch) {
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propKeyMap.node, &scratch) {
         printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
                data.value);
     }
 
     printf("printing values...\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propValueMap, &scratch) {
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propValueMap.node,
+                                         &scratch) {
         printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
                data.value);
     }
 
     printf("printing bool property status...\n\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->boolPropMap, &scratch) {
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->boolPropMap.node,
+                                         &scratch) {
         printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
                data.value);
     }
 
     printf("printing tags status...\n\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->tagMap, &scratch) {
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->tagMap.node, &scratch) {
         printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
                data.value);
     }

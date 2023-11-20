@@ -118,18 +118,19 @@ flo_html_TextNodeParseResult parseTextNode(flo_parse_Status ps,
     flo_String whiteSpace = FLO_STRING(" ");
     bool isAppend = false;
 
+    bool isSpecialTag = flo_stringEquals(containingTag, FLO_STRING("script")) ||
+                        flo_stringEquals(containingTag, FLO_STRING("style"));
+
     FLO_PARSE_PARSE_CHAR_UNTIL(
-        ps, (ch == '<' && !isCommentTag(ps) && isCloseTag(ps, containingTag)), {
+        ps,
+        (ch == '<' && (!isCommentTag(ps) ||
+                       (isSpecialTag && isCloseTag(ps, containingTag)))),
+        {
             if (ch == '<' && isCommentTag(ps)) {
                 FLO_PARSE_SKIP_COMMENT(ps);
             } else {
                 ptrdiff_t textStart = ps.idx;
                 ptrdiff_t textLen = 0;
-                // CDATA :(
-                if (ch == '<') {
-                    textLen++;
-                    ps.idx++;
-                }
                 FLO_PARSE_NEXT_CHAR_WHILE(
                     ps, textNodeContinue(ps, ch) && ch != '<', { textLen++; })
 

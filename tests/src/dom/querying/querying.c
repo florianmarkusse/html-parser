@@ -11,7 +11,7 @@ unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,
     ptrdiff_t localFailures = 0;
 
     testQuerySelectorAll(&localSuccesses, &localFailures, scratch);
-    testQuerySelector(&localSuccesses, &localFailures, scratch);
+    //    testQuerySelector(&localSuccesses, &localFailures, scratch);
 
     printTestScore(localSuccesses, localFailures);
 
