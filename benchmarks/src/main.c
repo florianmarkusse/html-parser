@@ -7,7 +7,7 @@
 #include <time.h>
 
 #define INPUTS_DIR "benchmarks/inputs/"
-#define CAP 1 << 27
+#define CAP 1 << 21
 
 bool parseFile(flo_String fileLocation, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);

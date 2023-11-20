@@ -40,16 +40,18 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", directory,
                  ent->d_name);
         printTestStart(fileLocation);
-        if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
-                       scratch)) {
-            (*localFailures)++;
-            printTestFailure();
-            printTestDemarcation();
-            printf("Parsing DOM %s failed\n", fileLocation);
-            printTestDemarcation();
-        } else {
-            (*localSuccesses)++;
-            printTestSuccess();
+        {
+            if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
+                           scratch)) {
+                (*localFailures)++;
+                printTestFailure();
+                printTestDemarcation();
+                printf("Parsing DOM %s failed\n", fileLocation);
+                printTestDemarcation();
+            } else {
+                (*localSuccesses)++;
+                printTestSuccess();
+            }
         }
     }
 

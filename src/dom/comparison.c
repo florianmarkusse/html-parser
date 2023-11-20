@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "error.h"
 #include "flo/html-parser/comparison-status.h"
 #include "flo/html-parser/dom/comparison.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/parser.h"
-#include "error.h"
+#include "hash/msi/string-set.h"
 
 flo_html_ComparisonStatus convertHashComparisonToComparison(
     flo_HashComparisonStatus hashComparisonStatus) {
@@ -27,48 +28,59 @@ flo_html_ComparisonStatus convertHashComparisonToComparison(
     }
 }
 
-void printAttributes(flo_html_index_id tagID1, flo_StringHashSet *set1,
+void printAttributes(flo_html_index_id tagID1, flo_msi_String *set1,
                      flo_html_Dom *dom1, flo_html_index_id tagID2,
-                     flo_StringHashSet *set2, flo_html_Dom *dom2) {
-    FLO_PRINT_ERROR(
-        "Printing certain attributes of node 1 with tag %.*s:\n",
-        FLO_STRING_PRINT(dom1->tagRegistry.buf[tagID1].tag));
+                     flo_msi_String *set2, flo_html_Dom *dom2) {
+    FLO_PRINT_ERROR("Printing certain attributes of node 1 with tag %.*s:\n",
+                    FLO_STRING_PRINT(dom1->tagRegistry.buf[tagID1].tag));
 
-    flo_StringHashSetIterator iterator =
-        (flo_StringHashSetIterator){.set = set1, .index = 0};
-    flo_String attribute;
-    while ((attribute = flo_nextStringHashSetIterator(&iterator)).len !=
-           0) {
-        FLO_PRINT_ERROR("%.*s\n", FLO_STRING_PRINT(attribute));
+    flo_String element;
+    FLO_FOR_EACH_MSI_STRING(element, set1) {
+        FLO_PRINT_ERROR("%.*s\n", FLO_STRING_PRINT(element));
     }
 
-    FLO_PRINT_ERROR(
-        "Printing certain attributes of node 2 with tag %.*s:\n",
-        FLO_STRING_PRINT(dom2->tagRegistry.buf[tagID2].tag));
+    FLO_PRINT_ERROR("Printing certain attributes of node 2 with tag %.*s:\n",
+                    FLO_STRING_PRINT(dom2->tagRegistry.buf[tagID2].tag));
 
-    iterator = (flo_StringHashSetIterator){.set = set2, .index = 0};
-    while ((attribute = flo_nextStringHashSetIterator(&iterator)).len !=
-           0) {
-        FLO_PRINT_ERROR("%.*s\n", FLO_STRING_PRINT(attribute));
+    FLO_FOR_EACH_MSI_STRING(element, set2) {
+        FLO_PRINT_ERROR("%.*s\n", FLO_STRING_PRINT(element));
     }
 }
 
-void createPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
-                    flo_StringHashSet *keySet,
-                    flo_StringHashSet *valueSet, flo_Arena *perm) {
-    *keySet = flo_initStringHashSet(FLO_HTML_MAX_PROPERTIES * 2, perm);
-    *valueSet = flo_initStringHashSet(FLO_HTML_MAX_PROPERTIES * 2, perm);
+bool flo_msi_html_stringInsert(flo_String string, flo_msi_String *index,
+                               flo_Arena scratch) {
+    if ((uint32_t)index->len >= ((uint32_t)1 << index->exp) / 2) {
+        FLO_ASSERT(false);
+        FLO_PRINT_ERROR("Too many elements in MSI set, should rehash or init "
+                        "with larger exponent\n");
+        __builtin_longjmp(scratch.jmp_buf, 1);
+    }
+    return flo_msi_insertString(string, flo_hashStringDjb2(string), index);
+}
 
-    // TODO(florian): make faster. (BTREE)
+void fillPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
+                  flo_msi_String *keySet, flo_msi_String *valueSet,
+                  flo_Arena scratch) {
     for (ptrdiff_t i = 0; i < dom->props.len; i++) {
         if (dom->props.buf[i].nodeID == nodeID) {
             flo_html_index_id keyID = dom->props.buf[i].keyID;
-            flo_insertStringHashSet(keySet,
-                                         dom->propKeyRegistry.buf[keyID], perm);
+            flo_String key = dom->propKeyRegistry.buf[keyID];
+            flo_msi_html_stringInsert(key, keySet, scratch);
 
             flo_html_index_id valueID = dom->props.buf[i].valueID;
-            flo_insertStringHashSet(
-                keySet, dom->propValueRegistry.buf[valueID], perm);
+            flo_String value = dom->propValueRegistry.buf[valueID];
+            flo_msi_html_stringInsert(value, valueSet, scratch);
+        }
+    }
+}
+
+void fillBoolPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
+                      flo_msi_String *boolPropsSet, flo_Arena scratch) {
+    for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
+        if (dom->boolProps.buf[i].nodeID == nodeID) {
+            flo_html_index_id propID = dom->boolProps.buf[i].propID;
+            flo_String boolProp = dom->boolPropRegistry.buf[propID];
+            flo_msi_html_stringInsert(boolProp, boolPropsSet, scratch);
         }
     }
 }
@@ -80,33 +92,31 @@ flo_html_ComparisonStatus compareProps(flo_html_Node node1, flo_html_Dom *dom1,
                                        flo_html_Node node2, flo_html_Dom *dom2,
                                        bool printDifferences,
                                        flo_Arena scratch) {
-    flo_StringHashSet keySet1;
-    flo_StringHashSet valueSet1;
-    createPropsSet(node1.nodeID, dom1, &keySet1, &valueSet1, &scratch);
+    flo_msi_String keySet1 = FLO_NEW_MSI_SET(flo_msi_String, 7, &scratch);
+    flo_msi_String valueSet1 = FLO_NEW_MSI_SET(flo_msi_String, 7, &scratch);
+    fillPropsSet(node1.nodeID, dom1, &keySet1, &valueSet1, scratch);
 
-    flo_StringHashSet keySet2;
-    flo_StringHashSet valueSet2;
-    createPropsSet(node2.nodeID, dom2, &keySet2, &valueSet2, &scratch);
+    flo_msi_String keySet2 = FLO_NEW_MSI_SET(flo_msi_String, 7, &scratch);
+    flo_msi_String valueSet2 = FLO_NEW_MSI_SET(flo_msi_String, 7, &scratch);
+    fillPropsSet(node2.nodeID, dom2, &keySet2, &valueSet2, scratch);
 
     flo_HashComparisonStatus result =
-        flo_equalsStringHashSet(&keySet1, &keySet2);
+        flo_msi_equalsStringSet(&keySet1, &keySet2);
     if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
-            FLO_ERROR_WITH_CODE_ONLY(
-                flo_hashComparisonStatusToString(result),
-                "Nodes contain different key props\n");
+            FLO_ERROR_WITH_CODE_ONLY(flo_hashComparisonStatusToString(result),
+                                     "Nodes contain different key props\n");
             printAttributes(node1.tagID, &keySet1, dom1, node2.tagID, &keySet2,
                             dom2);
         }
         return convertHashComparisonToComparison(result);
     }
 
-    result = flo_equalsStringHashSet(&valueSet1, &valueSet2);
+    result = flo_msi_equalsStringSet(&valueSet1, &valueSet2);
     if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
-            FLO_ERROR_WITH_CODE_ONLY(
-                flo_hashComparisonStatusToString(result),
-                "Nodes contain different value props\n");
+            FLO_ERROR_WITH_CODE_ONLY(flo_hashComparisonStatusToString(result),
+                                     "Nodes contain different value props\n");
             printAttributes(node1.tagID, &valueSet1, dom1, node2.tagID,
                             &valueSet2, dom2);
         }
@@ -116,46 +126,22 @@ flo_html_ComparisonStatus compareProps(flo_html_Node node1, flo_html_Dom *dom1,
     return COMPARISON_SUCCESS;
 }
 
-bool createBoolPropsSet(flo_html_node_id nodeID, flo_html_Dom *dom,
-                        flo_StringHashSet *boolPropsSet,
-                        flo_Arena *perm) {
-    *boolPropsSet =
-        flo_initStringHashSet(FLO_HTML_MAX_PROPERTIES * 2, perm);
-
-    // TODO(florian): make faster. (BTREE)
-    for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
-        if (dom->boolProps.buf[i].nodeID == nodeID) {
-            flo_html_index_id propID = dom->boolProps.buf[i].propID;
-            flo_insertStringHashSet(
-                boolPropsSet, dom->boolPropRegistry.buf[propID], perm);
-        }
-    }
-
-    return true;
-}
-
 flo_html_ComparisonStatus
 compareBoolProps(flo_html_Node node1, flo_html_Dom *dom1, flo_html_Node node2,
-                 flo_html_Dom *dom2, bool printDifferences,
-                 flo_Arena scratch) {
-    flo_StringHashSet set1;
-    if (!(createBoolPropsSet(node1.nodeID, dom1, &set1, &scratch))) {
-        FLO_PRINT_ERROR("Failed to create hash set 1");
-        return COMPARISON_MEMORY;
-    }
+                 flo_html_Dom *dom2, bool printDifferences, flo_Arena scratch) {
+    flo_msi_String boolPropsSet1 = FLO_NEW_MSI_SET(flo_msi_String, 7, &scratch);
+    fillBoolPropsSet(node1.nodeID, dom1, &boolPropsSet1, scratch);
 
-    flo_StringHashSet set2;
-    if (!(createBoolPropsSet(node2.nodeID, dom2, &set2, &scratch))) {
-        FLO_PRINT_ERROR("Failed to create hash set 2");
-        return COMPARISON_MEMORY;
-    }
+    flo_msi_String boolPropsSet2 = FLO_NEW_MSI_SET(flo_msi_String, 7, &scratch);
+    fillBoolPropsSet(node2.nodeID, dom2, &boolPropsSet2, scratch);
 
     flo_HashComparisonStatus result =
-        flo_equalsStringHashSet(&set1, &set2);
+        flo_msi_equalsStringSet(&boolPropsSet1, &boolPropsSet2);
     if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
             FLO_PRINT_ERROR("Nodes contain different bool props\n");
-            printAttributes(node1.tagID, &set1, dom1, node2.tagID, &set2, dom2);
+            printAttributes(node1.tagID, &boolPropsSet1, dom1, node2.tagID,
+                            &boolPropsSet2, dom2);
         }
         return convertHashComparisonToComparison(result);
     }
@@ -168,15 +154,13 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
                                       bool printDifferences) {
     if (node1.nodeType != node2.nodeType) {
         if (printDifferences) {
-            flo_String nodeType1 =
-                flo_html_nodeTypeToString(node1.nodeType);
-            flo_String nodeType2 =
-                flo_html_nodeTypeToString(node2.nodeType);
+            flo_String nodeType1 = flo_html_nodeTypeToString(node1.nodeType);
+            flo_String nodeType2 = flo_html_nodeTypeToString(node2.nodeType);
             FLO_PRINT_ERROR("Uncomparable nodes:\n"
-                                 "node 1 type: %.*s\n"
-                                 "node 2 type: %.*s\n",
-                                 FLO_STRING_PRINT(nodeType1),
-                                 FLO_STRING_PRINT(nodeType2));
+                            "node 1 type: %.*s\n"
+                            "node 2 type: %.*s\n",
+                            FLO_STRING_PRINT(nodeType1),
+                            FLO_STRING_PRINT(nodeType2));
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
@@ -220,8 +204,7 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
             return COMPARISON_DIFFERENT_NODE_TYPE;
         }
 
-        if (!flo_stringEquals(tagRegistration1->tag,
-                                   tagRegistration2->tag)) {
+        if (!flo_stringEquals(tagRegistration1->tag, tagRegistration2->tag)) {
             if (printDifferences) {
                 FLO_PRINT_ERROR(
                     "Nodes have different tags.\nnode 1 tag: %.*s\nnode "
@@ -239,12 +222,10 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
     }
     default: {
         if (printDifferences) {
-            flo_String nodeType1 =
-                flo_html_nodeTypeToString(node1.nodeType);
-            FLO_PRINT_ERROR(
-                "Comparison not implemented for this node type:"
-                "node type: %.*s\n",
-                FLO_STRING_PRINT(nodeType1));
+            flo_String nodeType1 = flo_html_nodeTypeToString(node1.nodeType);
+            FLO_PRINT_ERROR("Comparison not implemented for this node type:"
+                            "node type: %.*s\n",
+                            FLO_STRING_PRINT(nodeType1));
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
@@ -254,8 +235,7 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
 flo_html_ComparisonResult compareNode(flo_html_node_id nodeID1,
                                       flo_html_Dom *dom1,
                                       flo_html_node_id nodeID2,
-                                      flo_html_Dom *dom2,
-                                      flo_Arena scratch) {
+                                      flo_html_Dom *dom2, flo_Arena scratch) {
     flo_html_ComparisonResult result;
     result.nodeID1 = nodeID1;
     result.nodeID2 = nodeID2;
@@ -304,9 +284,8 @@ flo_html_ComparisonResult compareNode(flo_html_node_id nodeID1,
     return result;
 }
 
-flo_html_ComparisonResult flo_html_equals(flo_html_Dom *dom1,
-                                          flo_html_Dom *dom2,
-                                          flo_Arena scratch) {
+flo_html_ComparisonResult
+flo_html_equals(flo_html_Dom *dom1, flo_html_Dom *dom2, flo_Arena scratch) {
     flo_html_ComparisonResult result;
 
     flo_html_node_id currNodeID1 = FLO_HTML_ROOT_NODE_ID;

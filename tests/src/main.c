@@ -24,17 +24,19 @@
 #include "pretty-print.h"
 #include "test.h"
 
-#define CAP 1 << 27
+#define CAP 1 << 21
 
-flo_Arena setupArena() {
-    char *start = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
+int main() {
+    printf("Starting test suite...\n\n");
+
+    char *begin = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (start == MAP_FAILED) {
+    if (begin == MAP_FAILED) {
         FLO_PRINT_ERROR("Failed to allocate memory!\n");
-        return (flo_Arena){0};
+        return -1;
     }
 
-    flo_Arena arena = flo_createArena(start, CAP);
+    flo_Arena arena = flo_createArena(begin, CAP);
 
     void *jmp_buf[5];
     if (__builtin_setjmp(jmp_buf)) {
@@ -48,111 +50,9 @@ flo_Arena setupArena() {
                             arena.beg, arena.end, arena.cap);
         }
         FLO_PRINT_ERROR("OOM/overflow in arena!\n");
-        return (flo_Arena){0};
+        return -1;
     }
     arena.jmp_buf = jmp_buf;
-
-    return arena;
-}
-
-void rehashIndex(flo_msi_String *oldIndex, flo_msi_String *newIndex) {
-    FLO_ASSERT(newIndex->len == 0);
-    for (int32_t i = 0; i < (1 << oldIndex->exp); i++) {
-        flo_String s = oldIndex->buf[i];
-        if (s.len > 0) {
-            flo_msi_insertString(s, flo_hashString(s), newIndex);
-        }
-    }
-}
-
-bool indexInsert(flo_String string, flo_msi_String *index, flo_Arena *perm) {
-    if ((uint32_t)index->len >= ((uint32_t)1 << index->exp) / 2) {
-        flo_msi_String newIndex = (flo_msi_String){.exp = index->exp + 1};
-        flo_msi_newSet(&newIndex, FLO_SIZEOF(*newIndex.buf),
-                       FLO_ALIGNOF(*newIndex.buf), perm);
-        rehashIndex(index, &newIndex);
-        *index = newIndex;
-    }
-    return flo_msi_insertString(string, flo_hashString(string), index);
-}
-
-char *generateRandomString(int length, int index) {
-    static const char charset[] =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    char *randomString = malloc((length + 1) * sizeof(char));
-
-    if (randomString == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    srand((unsigned int)time(NULL) + index); // Seed the random number generator
-
-    for (int i = 0; i < length; ++i) {
-        int index = rand() % (int)(sizeof(charset) - 1);
-        randomString[i] = charset[index];
-    }
-
-    randomString[length] = '\0'; // Null-terminate the string
-
-    return randomString;
-}
-
-int main() {
-    printf("Starting test suite...\n\n");
-
-    flo_Arena arena = setupArena();
-    if (arena.beg == NULL) {
-        return 1;
-    }
-
-    //    flo_trie_StringSet *stringSet = NULL;
-    //    for (int i = 0; i < 20; ++i) {
-    //        char *randomString = generateRandomString(10, i % 10);
-    //        FLO_PRINT_ERROR("Trying to inser %s\n", randomString);
-    //        flo_trie_insertStringSet(
-    //            FLO_STRING_LEN(randomString, strlen(randomString)),
-    //            &stringSet, &arena);
-    //    }
-    //
-    //    {
-    //        flo_Arena scratch = arena;
-    //        flo_String element;
-    //        FLO_FOR_EACH_TRIE_STRING(element, stringSet, &scratch) {
-    //            FLO_PRINT_ERROR("inside string set is %.*s\n",
-    //                            FLO_STRING_PRINT(element));
-    //        }
-    //    }
-    //
-    //    flo_trie_Uint16Set *intSet = NULL;
-    //    for (uint16_t i = 0; i < 20; ++i) {
-    //        flo_trie_insertUint16Set(i % 10 + 2, &intSet, &arena);
-    //    }
-    //
-    //    {
-    //        flo_Arena scratch = arena;
-    //        uint16_t element;
-    //        FLO_FOR_EACH_TRIE_UINT16(element, intSet, &scratch) {
-    //            FLO_PRINT_ERROR("inside int set is %d\n", element);
-    //        }
-    //    }
-    //
-    //    flo_msi_String index = FLO_NEW_MSI_SET(flo_msi_String, 1, &arena);
-    //
-    //    for (int i = 0; i < 20; ++i) {
-    //        char *randomString = generateRandomString(10, i % 5);
-    //        indexInsert(FLO_STRING_LEN(randomString, strlen(randomString)),
-    //        &index,
-    //                    &arena);
-    //    }
-    //
-    //    FLO_PRINT_ERROR("Size of set is now %td\n", index.len);
-    //
-    //    flo_String element;
-    //    FLO_FOR_EACH_MSI_STRING(element, index) {
-    //        FLO_PRINT_ERROR("string with vlaue is %.*s\n",
-    //                        FLO_STRING_PRINT(element));
-    //    }
 
     ptrdiff_t successes = 0;
     ptrdiff_t failures = 0;

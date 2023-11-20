@@ -44,6 +44,7 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/dom/deletion.c"
     "src/dom/query/query.c"
     "src/dom/query/query-util.c"
+    "src/dom/query/msi-uint16.c"
     "src/dom/util/string-auto-uint16-map.c"
 
     "util/src/file/read.c"

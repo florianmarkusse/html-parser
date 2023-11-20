@@ -5,7 +5,7 @@
 flo_NewStringInsert flo_trie_insertStringAutoUint16Map(
     flo_String key, flo_trie_StringAutoUint16Map *set, flo_Arena *perm) {
     flo_trie_StringAutoUint16Node **currentNode = &set->node;
-    for (uint64_t hash = flo_hashString(key); *currentNode != NULL;
+    for (uint64_t hash = flo_hashStringDjb2(key); *currentNode != NULL;
          hash <<= 2) {
         if (flo_stringEquals(key, (*currentNode)->data.key)) {
             return (flo_NewStringInsert){
@@ -29,7 +29,7 @@ uint16_t
 flo_trie_containsStringAutoUint16Map(flo_String key,
                                      flo_trie_StringAutoUint16Map *set) {
     flo_trie_StringAutoUint16Node **currentNode = &set->node;
-    for (uint64_t hash = flo_hashString(key); *currentNode != NULL;
+    for (uint64_t hash = flo_hashStringDjb2(key); *currentNode != NULL;
          hash <<= 2) {
         if (flo_stringEquals(key, (*currentNode)->data.key)) {
             return (*currentNode)->data.value;

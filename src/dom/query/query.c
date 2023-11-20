@@ -1,8 +1,10 @@
 #include "flo/html-parser/dom/dom.h"
+#include "flo/html-parser/dom/query/msi-uint16.h"
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/util/parse.h"
+#include "hash/msi/uint16-set.h"
 #include "memory/arena.h"
 #include "text/char.h"
 #include "text/string.h"
@@ -81,7 +83,7 @@ flo_String parseToken(flo_parse_Status *ps) {
 }
 
 flo_html_QueryStatus getQueryResults(flo_String css, flo_html_Dom *dom,
-                                     flo_Uint16HashSet *set, flo_Arena *perm) {
+                                     flo_msi_Uint16 *set, flo_Arena *perm) {
     flo_parse_Status ps = (flo_parse_Status){.idx = 0, .text = css};
 
     flo_html_QueryStatus result = QUERY_SUCCESS;
@@ -285,12 +287,12 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_String css,
                                                flo_Arena *perm) {
     {
         flo_Arena scratch = *perm;
-        flo_Uint16HashSet resultsSet =
-            flo_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, &scratch);
-
         flo_html_QueryStatus result = QUERY_SUCCESS;
-        flo_Uint16HashSet set =
-            flo_initUint16HashSet(FLO_HTML_INITIAL_QUERY_CAP, &scratch);
+
+        flo_msi_Uint16 resultsSet = FLO_NEW_MSI_SET(
+            flo_msi_Uint16, FLO_MSI_HTML_STARTING_EXPONENT, &scratch);
+        flo_msi_Uint16 set = FLO_NEW_MSI_SET(
+            flo_msi_Uint16, FLO_MSI_HTML_STARTING_EXPONENT, &scratch);
 
         ptrdiff_t from = 0;
         while (from < css.len) {
@@ -304,26 +306,18 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_String css,
                 return result;
             }
 
-            flo_Uint16HashSetIterator iterator =
-                (flo_Uint16HashSetIterator){.set = &set, .index = 0};
-            flo_html_node_id nodeIDResult;
-            while ((nodeIDResult = flo_nextUint16HashSetIterator(&iterator)) !=
-                   0) {
-                if (!flo_insertUint16HashSet(&resultsSet, nodeIDResult,
-                                             &scratch)) {
-                    FLO_PRINT_ERROR("Failed to save intermediate results!\n");
-
-                    return QUERY_MEMORY_ERROR;
-                }
+            uint16_t value;
+            FLO_FOR_EACH_MSI_UINT16(value, &set) {
+                flo_msi_html_uint16Insert(value, &resultsSet, &scratch);
             }
 
-            flo_resetUint16HashSet(&set);
+            flo_msi_html_resetUint16(&set);
 
             from += iter.len + 1;
         }
 
         // create on scratch arena by conversion.
-        flo_uint16_t_a array = flo_uint16HashSetToArray(&resultsSet, &scratch);
+        flo_uint16_a array = flo_msi_html_toArray(&resultsSet, &scratch);
 
         // copy to perm arena
         results->buf = (flo_html_node_id *)flo_copyToArena(
