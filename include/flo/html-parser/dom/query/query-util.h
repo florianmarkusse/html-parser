@@ -9,7 +9,6 @@ extern "C" {
 
 #include "flo/html-parser/definitions.h"
 #include "flo/html-parser/dom/dom.h"
-#include "hash/uint16-t-hash.h"
 #include "msi-uint16.h"
 #include "query-status.h"
 #include "query.h"

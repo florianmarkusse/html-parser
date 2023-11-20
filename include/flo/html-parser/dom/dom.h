@@ -15,7 +15,6 @@ extern "C" {
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
 #include "flo/html-parser/util/string-auto-uint16-map.h"
-#include "hash/string-hash.h"
 #include "memory/arena.h"
 #include "types.h"
 

@@ -14,7 +14,6 @@
 #include "error.h"
 #include "hash/hashes.h"
 #include "hash/msi/string-set.h"
-#include "hash/string-hash.h"
 #include "hash/trie/string-set.h"
 #include "hash/trie/uint16-set.h"
 #include "integration-test.h"
