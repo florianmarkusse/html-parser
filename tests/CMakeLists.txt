@@ -13,6 +13,7 @@ list(APPEND TEST_SOURCE_FILES
     "src/dom/replacing/replacing.c"
     "src/dom/querying/querying.c"
     "src/dom/deleting/deleting.c"
+    "src/dom/duplicating/duplicating.c"
     "src/dom/querying/querySelectorAll.c"
     "src/dom/querying/querySelector.c"
     "src/node/querying/querying.c"

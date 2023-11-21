@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include <flo/html-parser.h>
 #include <stdbool.h>
 #include <stddef.h>
 

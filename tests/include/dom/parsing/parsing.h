@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include "memory/arena.h"
 #include <stddef.h>
 
 bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,

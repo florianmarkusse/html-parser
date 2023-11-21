@@ -7,6 +7,7 @@
 #include "dom/appending/appending.h"
 #include "dom/comparing/comparing.h"
 #include "dom/deleting/deleting.h"
+#include "dom/duplicating/duplicating.h"
 #include "dom/parsing/parsing.h"
 #include "dom/prepending/prepending.h"
 #include "dom/querying/querying.h"
@@ -84,6 +85,9 @@ int main() {
     printf("\n");
 
     testflo_html_DomReplacements(&successes, &failures, arena);
+    printf("\n");
+
+    testflo_html_DomDuplications(&successes, &failures, arena);
     printf("\n");
 
     testIntegrations(&successes, &failures, arena);

@@ -37,16 +37,16 @@ flo_html_Dom *flo_html_createDom(flo_String htmlString, flo_Arena *perm) {
     *FLO_PUSH(&result->propKeyRegistry, perm) = FLO_EMPTY_STRING;
     *FLO_PUSH(&result->propValueRegistry, perm) = FLO_EMPTY_STRING;
 
-    result->tagMap = (flo_trie_StringAutoUint16Map){0};
-    result->boolPropMap = (flo_trie_StringAutoUint16Map){0};
-    result->propKeyMap = (flo_trie_StringAutoUint16Map){0};
-    result->propValueMap = (flo_trie_StringAutoUint16Map){0};
-
     return flo_html_parseRoot(htmlString, result, perm);
 }
 
+/**
+ * We can do a shallow copy here because we never internally change the
+ * contents that the string pointers are pointing to. If this was the case we
+ * would have to do a deep copy which is not the case now. :)
+ */
 flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_Arena *perm) {
-    flo_html_Dom *result = FLO_NEW(perm, flo_html_Dom);
+    flo_html_Dom *result = FLO_NEW(perm, flo_html_Dom, 1, FLO_ZERO_MEMORY);
 
     FLO_COPY_DYNAMIC_ARRAY(result->nodes, dom->nodes, flo_html_Node, perm);
     FLO_COPY_DYNAMIC_ARRAY(result->parentFirstChilds, dom->parentFirstChilds,
@@ -59,8 +59,6 @@ flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_Arena *perm) {
                            flo_html_BooleanProperty, perm);
     FLO_COPY_DYNAMIC_ARRAY(result->props, dom->props, flo_html_Property, perm);
 
-    // TODO: Duplicate dom does not work here. We are copying the same pointers.
-    // So if this changes, it changes in multiple DOMs.
     FLO_COPY_DYNAMIC_ARRAY(result->tagRegistry, dom->tagRegistry,
                            flo_html_TagRegistration, perm);
     FLO_COPY_DYNAMIC_ARRAY(result->boolPropRegistry, dom->boolPropRegistry,
@@ -72,23 +70,23 @@ flo_html_Dom *flo_html_duplicateDom(flo_html_Dom *dom, flo_Arena *perm) {
 
     // We skip 0 because that is an error value.
     for (ptrdiff_t i = 1; i < result->tagRegistry.len; i++) {
-        flo_trie_containsStringAutoUint16Map(result->tagRegistry.buf[i].tag,
-                                             &result->tagMap);
+        flo_trie_insertStringAutoUint16Map(result->tagRegistry.buf[i].tag,
+                                           &result->tagMap, perm);
     }
 
     for (ptrdiff_t i = 1; i < result->boolPropRegistry.len; i++) {
-        flo_trie_containsStringAutoUint16Map(result->boolPropRegistry.buf[i],
-                                             &result->boolPropMap);
+        flo_trie_insertStringAutoUint16Map(result->boolPropRegistry.buf[i],
+                                           &result->boolPropMap, perm);
     }
 
     for (ptrdiff_t i = 1; i < result->propKeyRegistry.len; i++) {
-        flo_trie_containsStringAutoUint16Map(result->propKeyRegistry.buf[i],
-                                             &result->propKeyMap);
+        flo_trie_insertStringAutoUint16Map(result->propKeyRegistry.buf[i],
+                                           &result->propKeyMap, perm);
     }
 
     for (ptrdiff_t i = 1; i < result->propValueRegistry.len; i++) {
-        flo_trie_containsStringAutoUint16Map(result->propValueRegistry.buf[i],
-                                             &result->propValueMap);
+        flo_trie_insertStringAutoUint16Map(result->propValueRegistry.buf[i],
+                                           &result->propValueMap, perm);
     }
 
     return result;
