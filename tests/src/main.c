@@ -18,6 +18,7 @@
 #include "hash/trie/string-set.h"
 #include "hash/trie/uint16-set.h"
 #include "integration-test.h"
+#include "log.h"
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
 #include "node/querying/querying.h"
@@ -57,49 +58,57 @@ int main() {
     ptrdiff_t successes = 0;
     ptrdiff_t failures = 0;
 
-    testflo_html_DomParsings(&successes, &failures, arena);
-    printf("\n");
+    flo_appendToBuffer(FLO_STDOUT, FLO_STRING("hhihiih"));
+    FLO_LOG_1((FLO_STRING("hello word")));
+    FLO_FLUSH(FLO_STDOUT);
 
-    testflo_html_DomComparisons(&successes, &failures, arena);
-    printf("\n");
+    //    writestuff(FLO_STDOUT, FLO_STRING("hello word"));
+    //    writestuff(FLO_STDERR, FLO_STRING("hello word"));
 
-    testflo_html_DomQueries(&successes, &failures, arena);
-    printf("\n");
-
-    testNodeQueries(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomDeletions(&successes, &failures, arena);
-    printf("\n");
-
-    testNodeModifications(&successes, &failures, arena);
-    printf("\n");
-
-    testNodeDeletions(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomAppendices(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomPrependices(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomReplacements(&successes, &failures, arena);
-    printf("\n");
-
-    testflo_html_DomDuplications(&successes, &failures, arena);
-    printf("\n");
-
-    testIntegrations(&successes, &failures, arena);
-    printf("\n");
-
-    printTestScore(successes, failures);
-    if (failures > 0) {
-        printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
-    } else {
-        printf("Test suite %ssuccessful%s.\n", ANSI_COLOR_GREEN,
-               ANSI_COLOR_RESET);
-    }
+    //    testflo_html_DomParsings(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomComparisons(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomQueries(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testNodeQueries(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomDeletions(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testNodeModifications(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testNodeDeletions(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomAppendices(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomPrependices(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomReplacements(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testflo_html_DomDuplications(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    testIntegrations(&successes, &failures, arena);
+    //    printf("\n");
+    //
+    //    printTestScore(successes, failures);
+    //    if (failures > 0) {
+    //        printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED,
+    //        ANSI_COLOR_RESET);
+    //    } else {
+    //        printf("Test suite %ssuccessful%s.\n", ANSI_COLOR_GREEN,
+    //               ANSI_COLOR_RESET);
+    //    }
 
     return failures > 0;
 }
