@@ -58,9 +58,19 @@ int main() {
     ptrdiff_t successes = 0;
     ptrdiff_t failures = 0;
 
-    flo_appendToBuffer(FLO_STDOUT, FLO_STRING("hhihiih"));
-    FLO_LOG_1((FLO_STRING("hello word")));
-    FLO_FLUSH(FLO_STDOUT);
+    for (ptrdiff_t i = 0; i < 1; i++) {
+        // FLO_LOG(FLO_STRING("hello word"), false, FLO_STDOUT);
+        // FLO_LOG_1(FLO_STRING("hello word"));
+        //        FLO_LOG(toPrint);
+        //        FLO_LOG((FLO_STRING("test")), 0);
+        ptrdiff_t myValue = 10043340089044;
+        FLO_LOG(myValue);
+        // FLO_LOG(FLO_STRING("hello word"), true, FLO_STDERR);
+        //        FLO_LOG(FLO_STRING("hello word"), true);
+        //        FLO_LOG(FLO_STDOUT, FLO_STRING("hello word"), true);
+    }
+
+    FLO_FLUSH_TO(FLO_STDOUT);
 
     //    writestuff(FLO_STDOUT, FLO_STRING("hello word"));
     //    writestuff(FLO_STDERR, FLO_STRING("hello word"));
