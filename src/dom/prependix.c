@@ -1,5 +1,7 @@
 #include <string.h>
 
+#include "error.h"
+#include "file/read.h"
 #include "flo/html-parser/dom/deletion.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
@@ -12,8 +14,7 @@
 #include "flo/html-parser/node/node.h"
 #include "flo/html-parser/node/parent-child.h"
 #include "flo/html-parser/parser.h"
-#include "error.h"
-#include "file/read.h"
+#include "log.h"
 
 #define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, perm,             \
                                     prependFunction)                           \
@@ -22,9 +23,10 @@
         flo_html_QueryStatus queryResult =                                     \
             flo_html_querySelector(cssQuery, dom, &parentNodeID, *(perm));     \
         if (queryResult != QUERY_SUCCESS) {                                    \
-            FLO_PRINT_ERROR(                                              \
-                "Could not find element using query selector: %s\n",           \
-                (cssQuery).buf);                                               \
+            FLO_FLUSH_AFTER(FLO_STDERR) {                                      \
+                FLO_ERROR("Could not find element using query selector: ");    \
+                FLO_ERROR((cssQuery), FLO_NEWLINE);                            \
+            }                                                                  \
             return 0;                                                          \
         }                                                                      \
         return prependFunction(parentNodeID, nodeData, dom, perm);             \
@@ -46,24 +48,26 @@ flo_html_node_id flo_html_prependTextNodeWithQuery(flo_String cssQuery,
                                 flo_html_prependTextNode);
 }
 
-flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
-    flo_String cssQuery, flo_String htmlString, flo_html_Dom *dom,
-    flo_Arena *perm) {
+flo_html_node_id flo_html_prependHTMLFromStringWithQuery(flo_String cssQuery,
+                                                         flo_String htmlString,
+                                                         flo_html_Dom *dom,
+                                                         flo_Arena *perm) {
     PREPEND_USING_QUERYSELECTOR(cssQuery, htmlString, dom, perm,
                                 flo_html_prependHTMLFromString);
 }
 
-flo_html_node_id
-flo_html_prependHTMLFromFileWithQuery(flo_String cssQuery,
-                                      flo_String fileLocation,
-                                      flo_html_Dom *dom, flo_Arena *perm) {
+flo_html_node_id flo_html_prependHTMLFromFileWithQuery(flo_String cssQuery,
+                                                       flo_String fileLocation,
+                                                       flo_html_Dom *dom,
+                                                       flo_Arena *perm) {
     flo_String content;
-    flo_FileStatus fileStatus =
-        flo_readFile(fileLocation, &content, perm);
+    flo_FileStatus fileStatus = flo_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {
-        FLO_ERROR_WITH_CODE_FORMAT(flo_fileStatusToString(fileStatus),
-                                        "Failed to read file: \"%s\"",
-                                        fileLocation.buf);
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR(flo_fileStatusToString(fileStatus), FLO_NEWLINE);
+            FLO_ERROR("Failed to read file: ");
+            FLO_ERROR(fileLocation, FLO_NEWLINE);
+        }
         return FLO_HTML_ERROR_NODE_ID;
     }
 
@@ -114,8 +118,7 @@ flo_html_node_id flo_html_prependDocumentNode(flo_html_node_id parentID,
 }
 
 flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
-                                          flo_String text,
-                                          flo_html_Dom *dom,
+                                          flo_String text, flo_html_Dom *dom,
                                           flo_Arena *perm) {
     flo_html_node_id newNodeID = flo_html_parseTextElement(text, dom, perm);
     if (newNodeID == 0) {

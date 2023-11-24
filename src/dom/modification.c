@@ -6,6 +6,7 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/parser.h"
+#include "log.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -71,12 +72,14 @@ bool flo_html_setPropertyValue(flo_html_node_id nodeID, flo_String key,
         (flo_html_index_id)flo_trie_containsStringAutoUint16Map(
             key, &dom->propKeyMap);
     if (keyID == 0) {
-        FLO_PRINT_ERROR("Could not find key in stored prop keys\n");
+        FLO_INFO((FLO_STRING("Could not find key in stored prop keys\n")),
+                 FLO_FLUSH);
         return false;
     }
     flo_html_Property *prop = flo_html_getProperty(nodeID, keyID, dom);
     if (prop == NULL) {
-        FLO_PRINT_ERROR("Could not find key for given node\n");
+        FLO_INFO((FLO_STRING("Could not find key for given node\n")),
+                 FLO_FLUSH);
         return false;
     }
 

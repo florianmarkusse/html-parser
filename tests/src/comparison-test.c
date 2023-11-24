@@ -1,3 +1,4 @@
+#include "log.h"
 #include <flo/html-parser.h>
 #include <flo/html-parser/dom/comparison.h>
 #include <flo/html-parser/dom/query/query-status.h>
@@ -12,15 +13,19 @@ ComparisonTest initComparisonTest(flo_String startFileLocation,
     ComparisonTest test = {0};
     test.actual = flo_html_createDomFromFile(startFileLocation, perm);
     if (test.actual == NULL) {
-        FLO_PRINT_ERROR("Failed to created actual DOM from file %.*s\n",
-                             FLO_STRING_PRINT(startFileLocation));
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR("Failed to created actual DOM from file ");
+            FLO_ERROR(startFileLocation, FLO_NEWLINE);
+        }
         return test;
     }
 
     test.expected = flo_html_createDomFromFile(expectedFileLocation, perm);
     if (test.expected == NULL) {
-        FLO_PRINT_ERROR("Failed to created expected DOM from file %.*s\n",
-                             FLO_STRING_PRINT(expectedFileLocation));
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR("Failed to created expected DOM from file ");
+            FLO_ERROR(expectedFileLocation, FLO_NEWLINE);
+        }
         return test;
     }
 
@@ -56,7 +61,7 @@ TestStatus failWithMessageAndCode(flo_String failureMessage,
     printTestDemarcation();
 
     if (failureStatus == TEST_SUCCESS) {
-        FLO_PRINT_ERROR("Improper use of failWithMessageAndCode!\n");
+        FLO_ERROR("Improper use of failWithMessageAndCode!\n", FLO_FLUSH);
         return TEST_FAILURE;
     }
     return failureStatus;
@@ -66,10 +71,9 @@ TestStatus failWithMessage(flo_String failureMessage) {
     return failWithMessageAndCode(failureMessage, TEST_FAILURE);
 }
 
-TestStatus
-compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
-                          flo_html_ComparisonStatus expectedStatus,
-                          flo_Arena scratch) {
+TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
+                                     flo_html_ComparisonStatus expectedStatus,
+                                     flo_Arena scratch) {
     TestStatus result = TEST_FAILURE;
 
     flo_html_ComparisonResult comp = flo_html_equals(

@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "text/string.h"
+
 typedef enum {
     QUERY_SUCCESS,
     QUERY_INVALID_ELEMENT,
@@ -14,20 +16,20 @@ typedef enum {
     QUERY_NUM_STATUS
 } flo_html_QueryStatus;
 
-static char *queryStatusStrings[QUERY_NUM_STATUS] = {
-    "Success",
-    "Invalid element",
-    "Too many filters for a single element",
-    "Detected unforeseen tag or attribute",
-    "Memory error",
+static flo_String queryStatusStrings[QUERY_NUM_STATUS] = {
+    FLO_STRING("Success"),
+    FLO_STRING("Invalid element"),
+    FLO_STRING("Too many filters for a single element"),
+    FLO_STRING("Detected unforeseen tag or attribute"),
+    FLO_STRING("Memory error"),
 };
 
-__attribute__((unused)) static char *
+__attribute__((unused)) static flo_String
 flo_html_queryingStatusToString(flo_html_QueryStatus status) {
     if (status >= 0 && status < QUERY_NUM_STATUS) {
         return queryStatusStrings[status];
     }
-    return "Unknown query status code!";
+    return FLO_STRING("Unknown query status code!");
 }
 
 #ifdef __cplusplus

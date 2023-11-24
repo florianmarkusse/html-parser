@@ -1,3 +1,4 @@
+#include "log.h"
 #include <flo/html-parser.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +17,10 @@ static TestStatus testDuplication(flo_Arena scratch) {
 
     flo_html_Dom *dom = flo_html_createDomFromFile(testFileLocation, &scratch);
     if (dom == NULL) {
-        FLO_PRINT_ERROR("Failed to created DOM from file %.*s\n",
-                        FLO_STRING_PRINT(testFileLocation));
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR("Failed to created DOM from file ");
+            FLO_ERROR(testFileLocation, FLO_NEWLINE);
+        }
         printTestFailure();
         return TEST_ERROR_INITIALIZATION;
     }
@@ -54,11 +57,14 @@ static TestStatus testDuplication(flo_Arena scratch) {
         printTestFailure();
         printTestDemarcation();
         printf("Did not recognize different content !\n");
-        printf("Returned %s\n", flo_html_comparisonStatusToString(comp.status));
+        printf(
+            "Returned %.*s\n",
+            FLO_STRING_PRINT(flo_html_comparisonStatusToString(comp.status)));
         printTestDemarcation();
         return TEST_FAILURE;
     }
-    printf("Returned %s\n", flo_html_comparisonStatusToString(comp.status));
+    printf("Returned %.*s\n",
+           FLO_STRING_PRINT(flo_html_comparisonStatusToString(comp.status)));
 
     printTestSuccess();
 

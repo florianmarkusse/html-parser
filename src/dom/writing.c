@@ -6,9 +6,10 @@
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/text-node.h"
+#include "log.h"
 
 void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
-               flo_html_Dom *dom, FILE *output) {
+               flo_html_Dom *dom, flo_WriteBuffer *buffer) {
     flo_html_Node node = dom->nodes.buf[nodeID];
 
     if (node.nodeType == NODE_TYPE_ERROR) {
@@ -18,27 +19,27 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
     if (node.nodeType == NODE_TYPE_ROOT) {
         flo_html_node_id childNode = flo_html_getFirstChild(nodeID, dom);
         while (childNode) {
-            printNode(childNode, indentation + 1, dom, output);
+            printNode(childNode, indentation + 1, dom, buffer);
             childNode = flo_html_getNext(childNode, dom);
         }
         return;
     }
 
     if (node.nodeType == NODE_TYPE_TEXT) {
-        fprintf(output, "%.*s", FLO_STRING_PRINT(node.text));
+        FLO_LOG_DATA(node.text, buffer);
         return;
     }
 
     flo_String tag = dom->tagRegistry.buf[node.tagID].tag;
-    fprintf(output, "<%.*s", FLO_STRING_PRINT(tag));
+    FLO_LOG_DATA("<", buffer);
+    FLO_LOG_DATA(tag, buffer);
 
     for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
         flo_html_BooleanProperty boolProp = dom->boolProps.buf[i];
 
         if (boolProp.nodeID == node.nodeID) {
-            fprintf(
-                output, " %.*s",
-                FLO_STRING_PRINT(dom->boolPropRegistry.buf[boolProp.propID]));
+            FLO_LOG_DATA(" ", buffer);
+            FLO_LOG_DATA(dom->boolPropRegistry.buf[boolProp.propID], buffer, 0);
         }
     }
 
@@ -46,9 +47,11 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
         flo_html_Property prop = dom->props.buf[i];
 
         if (prop.nodeID == node.nodeID) {
-            fprintf(output, " %.*s=\"%.*s\"",
-                    FLO_STRING_PRINT(dom->propKeyRegistry.buf[prop.keyID]),
-                    FLO_STRING_PRINT(dom->propValueRegistry.buf[prop.valueID]));
+            FLO_LOG_DATA(" ", buffer);
+            FLO_LOG_DATA(dom->propKeyRegistry.buf[prop.keyID], buffer, 0);
+            FLO_LOG_DATA("=\"", buffer);
+            FLO_LOG_DATA(dom->propValueRegistry.buf[prop.valueID], buffer, 0);
+            FLO_LOG_DATA("\"", buffer);
         }
     }
 
@@ -56,176 +59,244 @@ void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
         &dom->tagRegistry.buf[node.tagID];
     if (!tagRegistration->isPaired) {
         if (flo_stringEquals(tag, FLO_STRING("!DOCTYPE"))) {
-            fprintf(output, ">");
+            FLO_LOG_DATA(">", buffer);
         } else {
-            fprintf(output, "/>");
+            FLO_LOG_DATA("/>", buffer);
         }
         return;
     }
-    fprintf(output, ">");
+    FLO_LOG_DATA(">", buffer);
 
     flo_html_node_id childNode = flo_html_getFirstChild(nodeID, dom);
     while (childNode) {
-        printNode(childNode, indentation + 1, dom, output);
+        printNode(childNode, indentation + 1, dom, buffer);
         childNode = flo_html_getNext(childNode, dom);
     }
 
-    fprintf(output, "</%.*s>", FLO_STRING_PRINT(tag));
+    FLO_LOG_DATA("</", buffer);
+    FLO_LOG_DATA(tag, buffer);
+    FLO_LOG_DATA(">", buffer);
 }
 
 void flo_html_printHTML(flo_html_Dom *dom) {
-    printf("printing HTML...\n\n");
-    flo_html_node_id currentNodeID = FLO_HTML_ROOT_NODE_ID;
-    while (currentNodeID) {
-        printNode(currentNodeID, 0, dom, stdout);
-        currentNodeID = flo_html_getNext(currentNodeID, dom);
+    FLO_FLUSH_AFTER(FLO_STDOUT) {
+        FLO_INFO((FLO_STRING("printing HTML...\n\n")));
+        flo_html_node_id currentNodeID = FLO_HTML_ROOT_NODE_ID;
+        while (currentNodeID) {
+            printNode(currentNodeID, 0, dom, flo_getWriteBuffer(FLO_STDOUT));
+            currentNodeID = flo_html_getNext(currentNodeID, dom);
+        }
+        FLO_INFO((FLO_STRING("\n\n")));
     }
-    printf("\n\n");
 }
 
 flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom, flo_String filePath,
                                         flo_Arena scratch) {
     flo_createPath(filePath, scratch);
-    // casting here because filePath should not contain any funny characters.
     FILE *file = fopen((char *)filePath.buf, "wbe");
     if (file == NULL) {
-        printf("Failed to open file for writing: %.*s\n",
-               FLO_STRING_PRINT(filePath));
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR("Failed to open file for writing: ");
+            FLO_ERROR(filePath, FLO_NEWLINE);
+        }
         return FILE_CANT_OPEN;
     }
 
+    ptrdiff_t fileBufferLen = 1 << 13;
+    unsigned char *fileBuffer = FLO_NEW(&scratch, unsigned char, fileBufferLen);
+    flo_WriteBuffer writeBuffer = {.fileDescriptor = fileno(file),
+                                   .cap = fileBufferLen,
+                                   .buf = fileBuffer,
+                                   .len = fileBufferLen};
+
     flo_html_node_id currentNodeID = FLO_HTML_ROOT_NODE_ID;
     while (currentNodeID) {
-        printNode(currentNodeID, 0, dom, file);
+        printNode(currentNodeID, 0, dom, &writeBuffer);
         currentNodeID = flo_html_getNext(currentNodeID, dom);
     }
+
+    flo_flushBuffer(&writeBuffer);
 
     fclose(file);
 
     return FILE_SUCCESS;
 }
 
+// Does not automatically flush!!!!!!!
 void printflo_html_BasicRegistry(flo_String registryName,
                                  flo_String_d_a *strings) {
-    printf("%-20.*s\nregistration nodes inside DOM...\n",
-           FLO_STRING_PRINT(registryName));
-    printf("total number of nodes: %zu\n", strings->len);
+    FLO_INFO((FLO_STRING("registration nodes inside DOM for registry: ")));
+    FLO_INFO(registryName, FLO_NEWLINE);
+
+    FLO_INFO("Total number of nodes: ");
+    FLO_INFO(strings->len, FLO_NEWLINE);
     for (ptrdiff_t i = 0; i < strings->len; i++) {
         flo_String string = strings->buf[i];
-        printf("ID: %zu value: %-20.*s\n", i, FLO_STRING_PRINT(string));
+        FLO_INFO("ID: ");
+        FLO_INFO(i);
+        FLO_INFO(" value: ");
+        FLO_INFO(string, FLO_NEWLINE);
     }
-    printf("\n");
+
+    FLO_INFO("\n");
+}
+
+// Does not automatically flush!!!!!!!!
+void printStringAutoUint16Map(flo_Arena *perm,
+                              flo_trie_StringAutoUint16Node *node) {
+    flo_trie_StringAutoUint16Data data;
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, node, perm) {
+        FLO_INFO((FLO_STRING("string = ")));
+        FLO_INFO(data.key);
+        FLO_INFO((FLO_STRING(" with id = ")));
+        FLO_INFO(data.value, FLO_NEWLINE);
+    }
 }
 
 void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch) {
-    printf("printing DOM status...\n\n");
+    FLO_FLUSH_AFTER(FLO_STDOUT) {
+        FLO_INFO((FLO_STRING("printing DOM status...\n\n")));
 
-    flo_trie_StringAutoUint16Data data;
+        FLO_INFO((FLO_STRING("printing property status...\n\n")));
 
-    printf("printing property status...\n\n");
-    printf("printing keys...\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propKeyMap.node, &scratch) {
-        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
-               data.value);
-    }
+        FLO_INFO((FLO_STRING("printing keys...\n")));
+        printStringAutoUint16Map(&scratch, dom->propKeyMap.node);
 
-    printf("printing values...\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->propValueMap.node,
-                                         &scratch) {
-        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
-               data.value);
-    }
+        FLO_INFO((FLO_STRING("printing values...\n")));
+        printStringAutoUint16Map(&scratch, dom->propValueMap.node);
 
-    printf("printing bool property status...\n\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->boolPropMap.node,
-                                         &scratch) {
-        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
-               data.value);
-    }
+        FLO_INFO((FLO_STRING("printing bool property status...\n\n")));
+        printStringAutoUint16Map(&scratch, dom->boolPropMap.node);
 
-    printf("printing tags status...\n\n");
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, dom->tagMap.node, &scratch) {
-        printf("string = %.*s with id = %d\n", FLO_STRING_PRINT(data.key),
-               data.value);
-    }
+        FLO_INFO((FLO_STRING("printing tags status...\n\n")));
+        printStringAutoUint16Map(&scratch, dom->tagMap.node);
 
-    printf("Printing DOM contents...\n");
+        FLO_INFO((FLO_STRING("Printing DOM contents...\n")));
 
-    printf("nodes inside DOM...\n");
-    printf("total number of nodes: %zu\n", dom->nodes.len);
-    for (ptrdiff_t i = 0; i < dom->nodes.len; i++) {
-        flo_html_Node node = dom->nodes.buf[i];
+        FLO_INFO((FLO_STRING("Nodes inside DOM...\n")));
+        FLO_INFO((FLO_STRING("Total number of nodes: \n")));
+        FLO_INFO(dom->nodes.len, FLO_NEWLINE);
+        for (ptrdiff_t i = 0; i < dom->nodes.len; i++) {
+            flo_html_Node node = dom->nodes.buf[i];
 
-        if (node.nodeType == NODE_TYPE_DOCUMENT) {
-            printf("node ID: %-5u node type: %-10.*s with tag ID: %-5u\n",
-                   node.nodeID,
-                   FLO_STRING_PRINT(flo_html_nodeTypeToString(node.nodeType)),
-                   node.tagID);
-        } else {
-            printf("node ID: %-5u node type: %-10.*s\n", node.nodeID,
-                   FLO_STRING_PRINT(flo_html_nodeTypeToString(node.nodeType)));
+            if (node.nodeType == NODE_TYPE_DOCUMENT) {
+                FLO_INFO((FLO_STRING("Node ID: ")));
+                flo_appendUint64ToBufferMinSize(
+                    node.nodeID, 5, flo_getWriteBuffer(FLO_STDOUT), 0);
+                FLO_INFO((FLO_STRING(" Node type: ")));
+                flo_appendToBufferMinSize(
+                    flo_html_nodeTypeToString(node.nodeType), 10,
+                    flo_getWriteBuffer(FLO_STDOUT), 0);
+                FLO_INFO((FLO_STRING(" with tag ID: ")));
+                FLO_INFO(node.tagID, FLO_NEWLINE);
+            } else {
+                FLO_INFO((FLO_STRING("Node ID: ")));
+                flo_appendUint64ToBufferMinSize(
+                    node.nodeID, 5, flo_getWriteBuffer(FLO_STDOUT), 0);
+                FLO_INFO((FLO_STRING(" Node type: ")));
+                flo_appendToBufferMinSize(
+                    flo_html_nodeTypeToString(node.nodeType), 10,
+                    flo_getWriteBuffer(FLO_STDOUT), FLO_NEWLINE);
+            }
         }
-    }
-    printf("\n");
+        FLO_INFO("\n");
 
-    printf("tag registration nodes inside DOM...\n");
-    printf("total number of tag registration nodes: %zu\n",
-           dom->tagRegistry.len);
-    for (ptrdiff_t i = 0; i < dom->tagRegistry.len; i++) {
-        flo_html_TagRegistration tagRegistration = dom->tagRegistry.buf[i];
-        printf("tag ID: %-5td tag: %-20.*s isPaired: %d\n", i,
-               FLO_STRING_PRINT(tagRegistration.tag), tagRegistration.isPaired);
-    }
-    printf("\n");
+        FLO_INFO("tag registration nodes inside DOM...\n");
 
-    printflo_html_BasicRegistry(FLO_STRING("bool props"),
-                                &dom->boolPropRegistry);
-    printflo_html_BasicRegistry(FLO_STRING("key props"), &dom->propKeyRegistry);
-    printflo_html_BasicRegistry(FLO_STRING("value props"),
-                                &dom->propValueRegistry);
+        FLO_INFO("total number of tag registration nodes: ");
+        FLO_INFO(dom->tagRegistry.len, FLO_NEWLINE);
+        for (ptrdiff_t i = 0; i < dom->tagRegistry.len; i++) {
+            flo_html_TagRegistration tagRegistration = dom->tagRegistry.buf[i];
 
-    printf("boolean property nodes inside DOM...\n");
-    printf("total number of boolean properties: %zu\n", dom->boolProps.len);
-    for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
-        flo_html_BooleanProperty boolProps = dom->boolProps.buf[i];
-        printf("node ID: %-5u prop ID: %-5u\n", boolProps.nodeID,
-               boolProps.propID);
-    }
-    printf("\n");
+            FLO_INFO("tag ID: ");
+            flo_appendUint64ToBufferMinSize(i, 5,
+                                            flo_getWriteBuffer(FLO_STDOUT), 0);
+            FLO_INFO((FLO_STRING(" tag: ")));
+            flo_appendToBufferMinSize(tagRegistration.tag, 210,
+                                      flo_getWriteBuffer(FLO_STDOUT),
+                                      FLO_NEWLINE);
+            FLO_INFO(" isPaired: ");
+            FLO_INFO(tagRegistration.isPaired, FLO_NEWLINE);
+        }
+        FLO_INFO("\n");
 
-    printf("key-value property nodes inside DOM...\n");
-    printf("total number of key-value properties: %zu\n", dom->props.len);
-    for (ptrdiff_t i = 0; i < dom->props.len; i++) {
-        flo_html_Property property = dom->props.buf[i];
-        printf("node ID: %-5u key ID: %-5u value ID: %-5u\n", property.nodeID,
-               property.keyID, property.valueID);
-    }
-    printf("\n");
+        printflo_html_BasicRegistry(FLO_STRING("bool props"),
+                                    &dom->boolPropRegistry);
+        printflo_html_BasicRegistry(FLO_STRING("key props"),
+                                    &dom->propKeyRegistry);
+        printflo_html_BasicRegistry(FLO_STRING("value props"),
+                                    &dom->propValueRegistry);
 
-    printf("parent-first-child inside DOM...\n");
-    printf("total number of parent-first-child: %zu\n",
-           dom->parentFirstChilds.len);
-    for (ptrdiff_t i = 0; i < dom->parentFirstChilds.len; i++) {
-        printf("parent node ID: %-5u first child node ID: %-5u\n",
-               dom->parentFirstChilds.buf[i].parentID,
-               dom->parentFirstChilds.buf[i].childID);
-    }
-    printf("\n");
+        FLO_INFO("boolean property nodes inside DOM...\n");
+        FLO_INFO("total number of boolean properties: ");
+        FLO_INFO(dom->boolProps.len, FLO_NEWLINE);
+        for (ptrdiff_t i = 0; i < dom->boolProps.len; i++) {
+            flo_html_BooleanProperty boolProps = dom->boolProps.buf[i];
 
-    printf("parent-child inside DOM...\n");
-    printf("total number of parent-child: %zu\n", dom->parentChilds.len);
-    for (ptrdiff_t i = 0; i < dom->parentChilds.len; i++) {
-        printf("parent: %-5u child: %-5u\n", dom->parentChilds.buf[i].parentID,
-               dom->parentChilds.buf[i].childID);
-    }
-    printf("\n");
+            FLO_INFO("node ID: ");
+            FLO_INFO(boolProps.nodeID);
+            FLO_INFO(" prop ID: ");
+            FLO_INFO(boolProps.propID, FLO_NEWLINE);
+        }
+        FLO_INFO("\n");
 
-    printf("next nodes inside DOM...\n");
-    printf("total number of next nodes: %zu\n", dom->nextNodes.len);
-    for (ptrdiff_t i = 0; i < dom->nextNodes.len; i++) {
-        printf("current node: %-5u next node: %-5u\n",
-               dom->nextNodes.buf[i].currentNodeID,
-               dom->nextNodes.buf[i].nextNodeID);
+        FLO_INFO("key-value property nodes inside DOM...\n");
+        FLO_INFO("total number of key-value properties: ");
+        FLO_INFO(dom->props.len, FLO_NEWLINE);
+        for (ptrdiff_t i = 0; i < dom->props.len; i++) {
+            flo_html_Property property = dom->props.buf[i];
+            FLO_INFO("node ID: ");
+            FLO_INFO(property.nodeID);
+            FLO_INFO(" key ID: ");
+            FLO_INFO(property.valueID);
+            FLO_INFO(" value ID: ");
+            FLO_INFO(property.valueID, FLO_NEWLINE);
+        }
+        FLO_INFO("\n");
+
+        FLO_INFO("parent-first-child inside DOM...\n");
+        FLO_INFO("total number of parent-first-child: ");
+        FLO_INFO(dom->parentFirstChilds.len, FLO_NEWLINE);
+        for (ptrdiff_t i = 0; i < dom->parentFirstChilds.len; i++) {
+            FLO_INFO("parent node ID: ");
+            flo_appendUint64ToBufferMinSize(
+                dom->parentFirstChilds.buf[i].parentID, 5,
+                flo_getWriteBuffer(FLO_STDOUT), 0);
+            FLO_INFO(" first child node ID: ");
+            flo_appendUint64ToBufferMinSize(
+                dom->parentFirstChilds.buf[i].childID, 5,
+                flo_getWriteBuffer(FLO_STDOUT), FLO_NEWLINE);
+        }
+        FLO_INFO("\n");
+
+        FLO_INFO("parent-child inside DOM...\n");
+        FLO_INFO("total number of parent-child: ");
+        FLO_INFO(dom->parentChilds.len, FLO_NEWLINE);
+        for (ptrdiff_t i = 0; i < dom->parentChilds.len; i++) {
+            FLO_INFO("parent: ");
+            flo_appendUint64ToBufferMinSize(dom->parentChilds.buf[i].parentID,
+                                            5, flo_getWriteBuffer(FLO_STDOUT),
+                                            0);
+            FLO_INFO(" child: ");
+            flo_appendUint64ToBufferMinSize(dom->parentChilds.buf[i].childID, 5,
+                                            flo_getWriteBuffer(FLO_STDOUT),
+                                            FLO_NEWLINE);
+        }
+        FLO_INFO("\n");
+
+        FLO_INFO("next nodes inside DOM...\n");
+        FLO_INFO("total number of next nodes: ");
+        FLO_INFO(dom->nextNodes.len, FLO_NEWLINE);
+        for (ptrdiff_t i = 0; i < dom->nextNodes.len; i++) {
+            FLO_INFO("current node: ");
+            flo_appendUint64ToBufferMinSize(dom->nextNodes.buf[i].currentNodeID,
+                                            5, flo_getWriteBuffer(FLO_STDOUT),
+                                            0);
+            FLO_INFO(" next node: ");
+            flo_appendUint64ToBufferMinSize(dom->nextNodes.buf[i].nextNodeID, 5,
+                                            flo_getWriteBuffer(FLO_STDOUT),
+                                            FLO_NEWLINE);
+        }
+        FLO_INFO("\n\n");
     }
-    printf("\n\n");
 }

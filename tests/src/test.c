@@ -10,8 +10,7 @@ inline void printTabs() {
     }
 }
 
-inline void printTestScore(ptrdiff_t successes,
-                           ptrdiff_t failures) {
+inline void printTestScore(ptrdiff_t successes, ptrdiff_t failures) {
     tabLevel = tabLevel == 0 ? 0 : tabLevel - 1;
     printTabs();
     printf("[ %zu / %lu ]\n", successes, failures + successes);
@@ -42,17 +41,19 @@ inline void printTestDemarcation() {
 }
 
 inline void printTestResultDifferenceErrorCode(ptrdiff_t expected,
-                                               char *expectedString,
+                                               flo_String expectedString,
                                                ptrdiff_t actual,
-                                               char *actualString) {
-    printf("%-10s: %-4zu - %s\n", "Expected", expected, expectedString);
-    printf("%-10s: %-4zu - %s\n", "Actual", actual, actualString);
+                                               flo_String actualString) {
+    printf("%-10s: %-4zu - %.*s\n", "Expected", expected,
+           FLO_STRING_PRINT(expectedString));
+    printf("%-10s: %-4zu - %.*s\n", "Actual", actual,
+           FLO_STRING_PRINT(actualString));
 }
 
-inline void
-printTestResultDifferenceString(flo_String expectedString,
-                                flo_String actualString) {
-    printf("%-20s: %.*s\n", "Expected string", FLO_STRING_PRINT(expectedString));
+inline void printTestResultDifferenceString(flo_String expectedString,
+                                            flo_String actualString) {
+    printf("%-20s: %.*s\n", "Expected string",
+           FLO_STRING_PRINT(expectedString));
     printf("%-20s: %.*s\n", "Actual string", FLO_STRING_PRINT(actualString));
 }
 
@@ -62,8 +63,7 @@ inline void printTestResultDifferenceNumber(ptrdiff_t expectedNumber,
     printf("%-20s: %zu\n", "Actual number", actualNumber);
 }
 
-inline void printTestResultDifferenceBool(bool expectedBool,
-                                          bool actualBool) {
+inline void printTestResultDifferenceBool(bool expectedBool, bool actualBool) {
     printf("%-20s: %d\n", "Expected bool", expectedBool);
     printf("%-20s: %d\n", "Actual bool", actualBool);
 }

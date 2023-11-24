@@ -8,6 +8,7 @@
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/node/node.h"
 #include "flo/html-parser/util/parse.h"
+#include "log.h"
 #include "memory/arena.h"
 #include "raw-data.h"
 #include "text/char.h"
@@ -290,7 +291,7 @@ flo_html_Dom *flo_html_parse(flo_String html, flo_html_Dom *dom,
 
                     if (parseResult.canHaveChildren) {
                         if (nodeStack->len >= FLO_HTML_MAX_NODE_DEPTH) {
-                            FLO_PRINT_ERROR("Reached max node depth\n");
+                            FLO_ERROR("Reached max node depth\n");
                             return NULL;
                         }
                         nodeStack->stack[nodeStack->len].nodeID =

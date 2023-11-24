@@ -9,6 +9,7 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/parser.h"
 #include "hash/msi/string-set.h"
+#include "log.h"
 
 flo_html_ComparisonStatus convertHashComparisonToComparison(
     flo_HashComparisonStatus hashComparisonStatus) {
@@ -20,9 +21,12 @@ flo_html_ComparisonStatus convertHashComparisonToComparison(
         return COMPARISON_DIFFERENT_CONTENT;
     }
     default: {
-        FLO_ERROR_WITH_CODE_ONLY(
-            flo_hashComparisonStatusToString(hashComparisonStatus),
-            "unhandled comparison hashComparisonStatus\n");
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR(
+                "unhandled comparison hashComparisonStatus in converter: ");
+            FLO_ERROR(flo_hashComparisonStatusToString(hashComparisonStatus),
+                      FLO_NEWLINE);
+        }
         return COMPARISON_MEMORY;
     }
     }
@@ -31,19 +35,21 @@ flo_html_ComparisonStatus convertHashComparisonToComparison(
 void printAttributes(flo_html_index_id tagID1, flo_msi_String *set1,
                      flo_html_Dom *dom1, flo_html_index_id tagID2,
                      flo_msi_String *set2, flo_html_Dom *dom2) {
-    FLO_PRINT_ERROR("Printing certain attributes of node 1 with tag %.*s:\n",
-                    FLO_STRING_PRINT(dom1->tagRegistry.buf[tagID1].tag));
+    FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_ERROR("Printing certain attributes of node 1 with tag ");
+        FLO_ERROR(dom1->tagRegistry.buf[tagID1].tag, FLO_NEWLINE);
 
-    flo_String element;
-    FLO_FOR_EACH_MSI_STRING(element, set1) {
-        FLO_PRINT_ERROR("%.*s\n", FLO_STRING_PRINT(element));
-    }
+        flo_String element;
+        FLO_FOR_EACH_MSI_STRING(element, set1) {
+            FLO_ERROR(element, FLO_NEWLINE);
+        }
 
-    FLO_PRINT_ERROR("Printing certain attributes of node 2 with tag %.*s:\n",
-                    FLO_STRING_PRINT(dom2->tagRegistry.buf[tagID2].tag));
+        FLO_ERROR("Printing certain attributes of node 2 with tag ");
+        FLO_ERROR(dom2->tagRegistry.buf[tagID2].tag, FLO_NEWLINE);
 
-    FLO_FOR_EACH_MSI_STRING(element, set2) {
-        FLO_PRINT_ERROR("%.*s\n", FLO_STRING_PRINT(element));
+        FLO_FOR_EACH_MSI_STRING(element, set2) {
+            FLO_ERROR(element, FLO_NEWLINE);
+        }
     }
 }
 
@@ -51,8 +57,9 @@ bool flo_msi_html_stringInsert(flo_String string, flo_msi_String *index,
                                flo_Arena scratch) {
     if ((uint32_t)index->len >= ((uint32_t)1 << index->exp) / 2) {
         FLO_ASSERT(false);
-        FLO_PRINT_ERROR("Too many elements in MSI set, should rehash or init "
-                        "with larger exponent\n");
+        FLO_ERROR("Too many elements in MSI set, should rehash or init "
+                  "with larger exponent\n",
+                  FLO_FLUSH);
         __builtin_longjmp(scratch.jmp_buf, 1);
     }
     return flo_msi_insertString(string, flo_hashStringDjb2(string), index);
@@ -104,8 +111,11 @@ flo_html_ComparisonStatus compareProps(flo_html_Node node1, flo_html_Dom *dom1,
         flo_msi_equalsStringSet(&keySet1, &keySet2);
     if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
-            FLO_ERROR_WITH_CODE_ONLY(flo_hashComparisonStatusToString(result),
-                                     "Nodes contain different key props\n");
+            FLO_FLUSH_AFTER(FLO_STDERR) {
+                FLO_ERROR(flo_hashComparisonStatusToString(result),
+                          FLO_NEWLINE);
+                FLO_ERROR((FLO_STRING("Nodes contain different key props\n")));
+            }
             printAttributes(node1.tagID, &keySet1, dom1, node2.tagID, &keySet2,
                             dom2);
         }
@@ -115,8 +125,12 @@ flo_html_ComparisonStatus compareProps(flo_html_Node node1, flo_html_Dom *dom1,
     result = flo_msi_equalsStringSet(&valueSet1, &valueSet2);
     if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
-            FLO_ERROR_WITH_CODE_ONLY(flo_hashComparisonStatusToString(result),
-                                     "Nodes contain different value props\n");
+            FLO_FLUSH_AFTER(FLO_STDERR) {
+                FLO_ERROR(flo_hashComparisonStatusToString(result),
+                          FLO_NEWLINE);
+                FLO_ERROR(
+                    (FLO_STRING("Nodes contain different value props\n")));
+            }
             printAttributes(node1.tagID, &valueSet1, dom1, node2.tagID,
                             &valueSet2, dom2);
         }
@@ -139,7 +153,11 @@ compareBoolProps(flo_html_Node node1, flo_html_Dom *dom1, flo_html_Node node2,
         flo_msi_equalsStringSet(&boolPropsSet1, &boolPropsSet2);
     if (result != HASH_COMPARISON_SUCCESS) {
         if (printDifferences) {
-            FLO_PRINT_ERROR("Nodes contain different bool props\n");
+            FLO_FLUSH_AFTER(FLO_STDERR) {
+                FLO_ERROR(flo_hashComparisonStatusToString(result),
+                          FLO_NEWLINE);
+                FLO_ERROR((FLO_STRING("Nodes contain different bool props\n")));
+            }
             printAttributes(node1.tagID, &boolPropsSet1, dom1, node2.tagID,
                             &boolPropsSet2, dom2);
         }
@@ -156,11 +174,12 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
         if (printDifferences) {
             flo_String nodeType1 = flo_html_nodeTypeToString(node1.nodeType);
             flo_String nodeType2 = flo_html_nodeTypeToString(node2.nodeType);
-            FLO_PRINT_ERROR("Uncomparable nodes:\n"
-                            "node 1 type: %.*s\n"
-                            "node 2 type: %.*s\n",
-                            FLO_STRING_PRINT(nodeType1),
-                            FLO_STRING_PRINT(nodeType2));
+            FLO_FLUSH_AFTER(FLO_STDERR) {
+                FLO_ERROR((FLO_STRING("Uncomparable nodes:\nnode 1 type: ")));
+                FLO_ERROR(nodeType1);
+                FLO_ERROR((FLO_STRING("\nnode 2 type: ")));
+                FLO_ERROR(nodeType2, FLO_NEWLINE);
+            }
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
@@ -175,9 +194,12 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
         }
 
         if (printDifferences) {
-            FLO_PRINT_ERROR(
-                "Different text nodes\nnode 1: %.*s\nnode 2: %.*s\n",
-                FLO_STRING_PRINT(text1), FLO_STRING_PRINT(text2));
+            FLO_FLUSH_AFTER(FLO_STDERR) {
+                FLO_ERROR((FLO_STRING("Different text nodes:\nnode 1: ")));
+                FLO_ERROR(text1);
+                FLO_ERROR((FLO_STRING("\nnode 2: ")));
+                FLO_ERROR(text2, FLO_NEWLINE);
+            }
         }
         return COMPARISON_DIFFERENT_CONTENT;
     }
@@ -194,23 +216,29 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
                     singleNode++;
                 }
 
-                FLO_PRINT_ERROR(
-                    "Uncomparable nodes: single node and paired node.\nFound "
-                    "single node in node %c.\n"
-                    "node 1 tag: %.*s\nnode 2 tag: %.*s\n",
-                    singleNode, FLO_STRING_PRINT(tagRegistration1->tag),
-                    FLO_STRING_PRINT(tagRegistration2->tag));
+                FLO_FLUSH_AFTER(FLO_STDERR) {
+                    FLO_ERROR((
+                        FLO_STRING("Uncomparable nodes: single node and paired "
+                                   "node.\nFound single node in node ")));
+                    FLO_ERROR(singleNode);
+                    FLO_ERROR((FLO_STRING(".\nnode 1 tag: ")));
+                    FLO_ERROR(tagRegistration1->tag);
+                    FLO_ERROR((FLO_STRING("\nnode 2 tag: ")));
+                    FLO_ERROR(tagRegistration2->tag, FLO_NEWLINE);
+                }
             }
             return COMPARISON_DIFFERENT_NODE_TYPE;
         }
 
         if (!flo_stringEquals(tagRegistration1->tag, tagRegistration2->tag)) {
             if (printDifferences) {
-                FLO_PRINT_ERROR(
-                    "Nodes have different tags.\nnode 1 tag: %.*s\nnode "
-                    "2 tag: %.*s\n",
-                    FLO_STRING_PRINT(tagRegistration1->tag),
-                    FLO_STRING_PRINT(tagRegistration2->tag));
+                FLO_FLUSH_AFTER(FLO_STDERR) {
+                    FLO_ERROR((FLO_STRING(
+                        "Nodes have different tags.\nnode 1 tag: ")));
+                    FLO_ERROR(tagRegistration1->tag);
+                    FLO_ERROR((FLO_STRING("\nnode 2 tag: ")));
+                    FLO_ERROR(tagRegistration1->tag, FLO_NEWLINE);
+                }
             }
             return COMPARISON_DIFFERENT_CONTENT;
         }
@@ -222,10 +250,12 @@ flo_html_ComparisonStatus compareTags(flo_html_Node node1, flo_html_Dom *dom1,
     }
     default: {
         if (printDifferences) {
-            flo_String nodeType1 = flo_html_nodeTypeToString(node1.nodeType);
-            FLO_PRINT_ERROR("Comparison not implemented for this node type:"
-                            "node type: %.*s\n",
-                            FLO_STRING_PRINT(nodeType1));
+            FLO_FLUSH_AFTER(FLO_STDERR) {
+                FLO_ERROR((FLO_STRING("Comparison not implemented for this "
+                                      "node type. Node type: ")));
+                FLO_ERROR(flo_html_nodeTypeToString(node1.nodeType),
+                          FLO_NEWLINE);
+            }
         }
         return COMPARISON_DIFFERENT_NODE_TYPE;
     }
@@ -332,7 +362,8 @@ void flo_html_printFirstDifference(flo_html_node_id nodeID1, flo_html_Dom *dom1,
         }
     }
 
-    FLO_PRINT_ERROR(
+    FLO_ERROR(
         "Could not find any differences for the supplied nodes & documents "
-        "combination.\n");
+        "combination.\n",
+        FLO_FLUSH);
 }

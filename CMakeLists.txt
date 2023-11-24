@@ -49,6 +49,7 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
 
     "util/src/file/read.c"
     "util/src/file/path.c"
+    "util/src/log.c"
     "util/src/hash/msi/string-set.c"
     "util/src/hash/msi/uint16-set.c"
     "util/src/hash/trie/string-set.c"

@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "text/string.h"
+
 typedef enum {
     COMPARISON_SUCCESS,
     COMPARISON_MEMORY,
@@ -14,18 +16,20 @@ typedef enum {
     COMPARISON_NUM_STATUS
 } flo_html_ComparisonStatus;
 
-static char *comparisonStatusStrings[COMPARISON_NUM_STATUS] = {
-    "Success", "Memory error", "Different type of node",
-    "Collections have different sizes", "Collections have different content"};
+static flo_String comparisonStatusStrings[COMPARISON_NUM_STATUS] = {
+    FLO_STRING("Success"), FLO_STRING("Memory error"),
+    FLO_STRING("Different type of node"),
+    FLO_STRING("Collections have different sizes"),
+    FLO_STRING("Collections have different content")};
 
 // Not always used, but very handy for those that actually do want readable
 // error codes.
-__attribute__((unused)) static char *
+__attribute__((unused)) static flo_String
 flo_html_comparisonStatusToString(flo_html_ComparisonStatus status) {
     if (status >= 0 && status < COMPARISON_NUM_STATUS) {
         return comparisonStatusStrings[status];
     }
-    return "Unknown comparison status code!";
+    return FLO_STRING("Unknown comparison status code!");
 }
 
 #ifdef __cplusplus

@@ -1,3 +1,4 @@
+#include "log.h"
 #include <flo/html-parser.h>
 #include <memory/arena.h>
 #include <stdio.h>
@@ -24,20 +25,21 @@ typedef struct {
 static TestFile testFiles[] = {
     {TEST_FILE_1, FLO_STRING("body"), FLO_STRING("style"), FLO_STRING("class"),
      GET_VALUE, "flo_html_getValue when having key"},
-    {TEST_FILE_1, FLO_STRING("html"), FLO_STRING("langg"),
-     FLO_EMPTY_STRING, GET_VALUE, "flo_html_getValue when not having key"},
+    {TEST_FILE_1, FLO_STRING("html"), FLO_STRING("langg"), FLO_EMPTY_STRING,
+     GET_VALUE, "flo_html_getValue when not having key"},
 };
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus
-testQuery(flo_String fileLocation, flo_String cssQuery,
-          flo_String input, CharFunctionType functionType,
-          flo_String expectedResult, flo_Arena scratch) {
+static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
+                            flo_String input, CharFunctionType functionType,
+                            flo_String expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_PRINT_ERROR("Failed to created DOM from file %.*s\n",
-                             FLO_STRING_PRINT(fileLocation));
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR("Failed to created DOM from file ");
+            FLO_ERROR(fileLocation, FLO_NEWLINE);
+        }
         return TEST_ERROR_INITIALIZATION;
     }
 

@@ -2,6 +2,7 @@
 #include "array.h"
 #include "file/read.h"
 #include "flo/html-parser/parser.h"
+#include "log.h"
 #include "memory/arena.h"
 
 flo_html_Dom *flo_html_createDomFromFile(flo_String fileLocation,
@@ -9,9 +10,11 @@ flo_html_Dom *flo_html_createDomFromFile(flo_String fileLocation,
     flo_String content;
     flo_FileStatus fileStatus = flo_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {
-        FLO_ERROR_WITH_CODE_FORMAT(flo_fileStatusToString(fileStatus),
-                                   "Failed to read file: \"%s\"",
-                                   fileLocation.buf);
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR(flo_fileStatusToString(fileStatus), FLO_NEWLINE);
+            FLO_ERROR("Failed to read file: ");
+            FLO_ERROR(fileLocation, FLO_NEWLINE);
+        }
         return NULL;
     }
 

@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-#include <text/string.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <text/string.h>
 
 void printTabs();
 void printTestScore(ptrdiff_t successes, ptrdiff_t failures);
@@ -17,9 +17,9 @@ void printTestSuccess();
 void printTestFailure();
 void printTestDemarcation();
 void printTestResultDifferenceErrorCode(ptrdiff_t expected,
-                                        char *expectedString,
+                                        flo_String expectedString,
                                         ptrdiff_t actual,
-                                        char *actualString);
+                                        flo_String actualString);
 void printTestResultDifferenceString(flo_String expectedString,
                                      flo_String actualString);
 void printTestResultDifferenceBool(bool expectedBool, bool actualBool);

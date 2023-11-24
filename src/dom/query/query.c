@@ -5,6 +5,7 @@
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/util/parse.h"
 #include "hash/msi/uint16-set.h"
+#include "log.h"
 #include "memory/arena.h"
 #include "text/char.h"
 #include "text/string.h"
@@ -27,8 +28,10 @@ typedef enum { NORMAL, CLASS, ID, NUM_SELECTORS } Selector;
 #define CHECK_FILTERS_LIMIT(filtersLen)                                        \
     do {                                                                       \
         if ((filtersLen) >= FLO_HTML_MAX_FILTERS_PER_ELEMENT) {                \
-            FLO_PRINT_ERROR(                                                   \
-                "Too many filters in a single element detected!\n");           \
+            FLO_ERROR(                                                         \
+                (FLO_STRING(                                                   \
+                    "Too many filters in a single element detected!\n")),      \
+                FLO_FLUSH);                                                    \
             return QUERY_TOO_MANY_ELEMENT_FILTERS;                             \
         }                                                                      \
     } while (0)
@@ -189,8 +192,9 @@ flo_html_QueryStatus getQueryResults(flo_String css, flo_html_Dom *dom,
                 filters[filtersLen].data.keyValuePair.valueID = propValueID;
                 filtersLen++;
             } else {
-                FLO_PRINT_ERROR("Unrecognized character in filtering "
-                                "function. Dropping a token!\n");
+                FLO_ERROR("Unrecognized character in filtering "
+                          "function. Dropping a token!\n",
+                          FLO_FLUSH);
             }
 
             if (ch == ']') {
@@ -199,7 +203,8 @@ flo_html_QueryStatus getQueryResults(flo_String css, flo_html_Dom *dom,
         });
 
         if (filtersLen < 1) {
-            FLO_PRINT_ERROR("Did not receive any filters in the css query\n");
+            FLO_ERROR("Did not receive any filters in the css query\n",
+                      FLO_FLUSH);
             return QUERY_INVALID_ELEMENT;
         }
 
@@ -300,9 +305,10 @@ flo_html_QueryStatus flo_html_querySelectorAll(flo_String css,
 
             if ((result = getQueryResults(iter, dom, &set, &scratch)) !=
                 QUERY_SUCCESS) {
-                FLO_ERROR_WITH_CODE_ONLY(
-                    flo_html_queryingStatusToString(result),
-                    "Unable get query results!\n");
+                FLO_FLUSH_AFTER(FLO_STDERR) {
+                    FLO_ERROR(flo_html_queryingStatusToString(result));
+                    FLO_ERROR("Unable get query results!\n");
+                }
                 return result;
             }
 

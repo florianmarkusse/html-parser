@@ -1,3 +1,4 @@
+#include "log.h"
 #include <flo/html-parser.h>
 #include <memory/arena.h>
 #include <stdio.h>
@@ -36,8 +37,10 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
                             ptrdiff_t expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_PRINT_ERROR("Failed to created DOM from file %.*s\n",
-                        FLO_STRING_PRINT(fileLocation));
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR("Failed to created DOM from file ");
+            FLO_ERROR(fileLocation, FLO_NEWLINE);
+        }
         return TEST_ERROR_INITIALIZATION;
     }
 

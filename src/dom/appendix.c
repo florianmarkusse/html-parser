@@ -13,6 +13,7 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/parent-child.h"
 #include "flo/html-parser/parser.h"
+#include "log.h"
 
 #define APPEND_USING_QUERYSELECTOR(cssQuery, nodeData, parsed, perm,           \
                                    appendFunction)                             \
@@ -21,9 +22,10 @@
         flo_html_QueryStatus queryResult =                                     \
             flo_html_querySelector(cssQuery, parsed, &parentNodeID, *(perm));  \
         if (queryResult != QUERY_SUCCESS) {                                    \
-            FLO_PRINT_ERROR(                                                   \
-                "Could not find element using query selector: %s\n",           \
-                (cssQuery).buf);                                               \
+            FLO_FLUSH_AFTER(FLO_STDERR) {                                      \
+                FLO_ERROR("Could not find element using query selector: ");    \
+                FLO_ERROR((cssQuery), FLO_NEWLINE);                            \
+            }                                                                  \
             return 0;                                                          \
         }                                                                      \
         return appendFunction(parentNodeID, nodeData, parsed, perm);           \
@@ -60,9 +62,11 @@ flo_html_node_id flo_html_appendHTMLFromFileWithQuery(flo_String cssQuery,
     flo_String content;
     flo_FileStatus fileStatus = flo_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {
-        FLO_ERROR_WITH_CODE_FORMAT(flo_fileStatusToString(fileStatus),
-                                   "Failed to read file: \"%s\"",
-                                   fileLocation.buf);
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR(flo_fileStatusToString(fileStatus), FLO_NEWLINE);
+            FLO_ERROR("Failed to read file: ");
+            FLO_ERROR(fileLocation, FLO_NEWLINE);
+        }
         return FLO_HTML_ERROR_NODE_ID;
     }
 
