@@ -15,9 +15,8 @@ typedef struct {
     flo_html_Dom *expected;
 } ComparisonTest;
 
-ComparisonTest initComparisonTest(flo_String startFileLocation,
-                                  flo_String expectedFileLocation,
-                                  flo_Arena *perm);
+ComparisonTest initComparisonTest(char *startFileLocation,
+                                  char *expectedFileLocation, flo_Arena *perm);
 
 TestStatus compareAndEndTest(ComparisonTest *comparisonTest, flo_Arena scratch);
 TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,

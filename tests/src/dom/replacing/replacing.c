@@ -175,10 +175,11 @@ static TestFile testFiles[] = {
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus
-testReplacements(flo_String fileLocation1, flo_String fileLocation2,
-                 flo_String cssQuery, ReplacementType replacementType,
-                 ReplacementInput *replacementInput, flo_Arena scratch) {
+static TestStatus testReplacements(char *fileLocation1, char *fileLocation2,
+                                   flo_String cssQuery,
+                                   ReplacementType replacementType,
+                                   ReplacementInput *replacementInput,
+                                   flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -243,10 +244,7 @@ bool testflo_html_DomReplacements(ptrdiff_t *successes, ptrdiff_t *failures,
         TestFile testFile = testFiles[i];
         printTestStart(testFile.testName);
 
-        if (testReplacements(FLO_STRING_LEN(testFile.fileLocation1,
-                                            strlen(testFile.fileLocation1)),
-                             FLO_STRING_LEN(testFile.fileLocation2,
-                                            strlen(testFile.fileLocation2)),
+        if (testReplacements(testFile.fileLocation1, testFile.fileLocation2,
                              testFile.cssQuery, testFile.replacementType,
                              &testFile.replacementInput,
                              scratch) != TEST_SUCCESS) {

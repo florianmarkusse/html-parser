@@ -64,9 +64,10 @@ flo_html_node_id flo_html_prependTextNodeWithQuery(flo_String cssQuery,
  *
  * @return  The ID of the first prepended node, or 0 if the operation failed.
  */
-flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
-    flo_String cssQuery, flo_String htmlString, flo_html_Dom *dom,
-    flo_Arena *perm);
+flo_html_node_id flo_html_prependHTMLFromStringWithQuery(flo_String cssQuery,
+                                                         flo_String htmlString,
+                                                         flo_html_Dom *dom,
+                                                         flo_Arena *perm);
 
 /**
  * @brief Prepend HTML content from a file to the DOM using a CSS query.
@@ -83,10 +84,10 @@ flo_html_node_id flo_html_prependHTMLFromStringWithQuery(
  *
  * @return  The ID of the first prepended node, or 0 if the operation failed.
  */
-flo_html_node_id
-flo_html_prependHTMLFromFileWithQuery(flo_String cssQuery,
-                                      flo_String fileLocation,
-                                      flo_html_Dom *dom, flo_Arena *perm);
+flo_html_node_id flo_html_prependHTMLFromFileWithQuery(flo_String cssQuery,
+                                                       char *fileLocation,
+                                                       flo_html_Dom *dom,
+                                                       flo_Arena *perm);
 
 /**
  * @brief Prepend a DocumentNode to the DOM.
@@ -122,8 +123,7 @@ flo_html_node_id flo_html_prependDocumentNode(flo_html_node_id parentID,
  * @return  The ID of the prepended text node, or 0 if the operation failed.
  */
 flo_html_node_id flo_html_prependTextNode(flo_html_node_id parentID,
-                                          flo_String text,
-                                          flo_html_Dom *dom,
+                                          flo_String text, flo_html_Dom *dom,
                                           flo_Arena *perm);
 
 /**

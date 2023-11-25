@@ -36,8 +36,7 @@ static TestFile testFiles[] = {
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testModification(flo_String fileLocation1,
-                                   flo_String fileLocation2,
+static TestStatus testModification(char *fileLocation1, char *fileLocation2,
                                    flo_String cssQuery, flo_String propKey,
                                    flo_String newPropValue, flo_Arena scratch) {
     ComparisonTest comparisonTest =
@@ -79,10 +78,7 @@ bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testModification(FLO_STRING_LEN(testFile.fileLocation1,
-                                            strlen(testFile.fileLocation1)),
-                             FLO_STRING_LEN(testFile.fileLocation2,
-                                            strlen(testFile.fileLocation2)),
+        if (testModification(testFile.fileLocation1, testFile.fileLocation2,
                              testFile.cssQuery, testFile.propKey,
                              testFile.newPropValue, scratch) != TEST_SUCCESS) {
             localFailures++;

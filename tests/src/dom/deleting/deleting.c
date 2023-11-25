@@ -72,9 +72,9 @@ static TestFile testFiles[] = {
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testDeletions(flo_String fileLocation1,
-                                flo_String fileLocation2, flo_String cssQuery,
-                                DeletionType deletionType, flo_Arena scratch) {
+static TestStatus testDeletions(char *fileLocation1, char *fileLocation2,
+                                flo_String cssQuery, DeletionType deletionType,
+                                flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -118,10 +118,7 @@ bool testflo_html_DomDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testDeletions(FLO_STRING_LEN(testFile.fileLocation1,
-                                         strlen(testFile.fileLocation1)),
-                          FLO_STRING_LEN(testFile.fileLocation2,
-                                         strlen(testFile.fileLocation2)),
+        if (testDeletions(testFile.fileLocation1, testFile.fileLocation2,
                           testFile.cssQuery, testFile.deletionType,
                           scratch) != TEST_SUCCESS) {
             localFailures++;

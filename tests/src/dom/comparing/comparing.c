@@ -81,7 +81,7 @@ static TestFile testFiles[] = {
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-TestStatus compareFiles(flo_String fileLocation1, flo_String fileLocation2,
+TestStatus compareFiles(char *fileLocation1, char *fileLocation2,
                         flo_html_ComparisonStatus expectedResult,
                         flo_Arena scratch) {
     ComparisonTest comparisonTest =
@@ -101,11 +101,10 @@ bool testflo_html_DomComparisons(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (compareFiles(FLO_STRING_LEN(testFile.fileLocation1,
-                                        strlen(testFile.fileLocation1)),
-                         FLO_STRING_LEN(testFile.fileLocation2,
-                                        strlen(testFile.fileLocation2)),
-                         testFile.expectedStatus, scratch) != TEST_SUCCESS) {
+        if (compareFiles(testFile.fileLocation1,
+
+                         testFile.fileLocation2, testFile.expectedStatus,
+                         scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

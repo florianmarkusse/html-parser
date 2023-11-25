@@ -14,9 +14,8 @@
 static TestStatus parseQueryModify(flo_Arena scratch) {
     printTestStart(FLO_STRING("Parse/Query/Modify"));
 
-    ComparisonTest comparisonTest =
-        initComparisonTest(FLO_STRING(PARSE_QUERY_MODIFY_BEFORE),
-                           FLO_STRING(PARSE_QUERY_MODIFY_AFTER), &scratch);
+    ComparisonTest comparisonTest = initComparisonTest(
+        PARSE_QUERY_MODIFY_BEFORE, PARSE_QUERY_MODIFY_AFTER, &scratch);
 
     flo_html_node_id_a results;
     flo_html_QueryStatus actual = flo_html_querySelectorAll(

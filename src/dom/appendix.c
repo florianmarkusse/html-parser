@@ -56,7 +56,7 @@ flo_html_node_id flo_html_appendHTMLFromStringWithQuery(flo_String cssQuery,
 }
 
 flo_html_node_id flo_html_appendHTMLFromFileWithQuery(flo_String cssQuery,
-                                                      flo_String fileLocation,
+                                                      char *fileLocation,
                                                       flo_html_Dom *dom,
                                                       flo_Arena *perm) {
     flo_String content;

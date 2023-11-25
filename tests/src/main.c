@@ -36,7 +36,8 @@ int main() {
         return -1;
     }
 
-    flo_Arena arena = flo_createArena(begin, CAP);
+    flo_Arena arena =
+        (flo_Arena){.beg = begin, .cap = CAP, .end = begin + (ptrdiff_t)(CAP)};
 
     void *jmp_buf[5];
     if (__builtin_setjmp(jmp_buf)) {

@@ -183,9 +183,8 @@ static TestFile testFiles[] = {
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testPrependix(flo_String fileLocation1,
-                                flo_String fileLocation2, flo_String cssQuery,
-                                PrependType prependType,
+static TestStatus testPrependix(char *fileLocation1, char *fileLocation2,
+                                flo_String cssQuery, PrependType prependType,
                                 PrependInput *prependInput, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
@@ -255,10 +254,7 @@ bool testflo_html_DomPrependices(ptrdiff_t *successes, ptrdiff_t *failures,
         TestFile testFile = testFiles[i];
         printTestStart(testFile.testName);
 
-        if (testPrependix(FLO_STRING_LEN(testFile.fileLocation1,
-                                         strlen(testFile.fileLocation1)),
-                          FLO_STRING_LEN(testFile.fileLocation2,
-                                         strlen(testFile.fileLocation2)),
+        if (testPrependix(testFile.fileLocation1, testFile.fileLocation2,
                           testFile.cssQuery, testFile.prependType,
                           &testFile.prependInput, scratch) != TEST_SUCCESS) {
             localFailures++;

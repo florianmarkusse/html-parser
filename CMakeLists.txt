@@ -50,10 +50,13 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "util/src/file/read.c"
     "util/src/file/path.c"
     "util/src/log.c"
+    "util/src/hash/msi/common.c"
     "util/src/hash/msi/string-set.c"
     "util/src/hash/msi/uint16-set.c"
-    "util/src/hash/trie/string-set.c"
-    "util/src/hash/trie/uint16-set.c"
+    "util/src/hash/hash-comparison-status.c"
+    "util/src/memory/arena.c"
+    "util/src/memory/buddy-allocator.c"
+    "util/src/memory/pool-allocator.c"
 )
 
 target_compile_options(${LIBRARY_NAME} PRIVATE

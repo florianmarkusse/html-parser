@@ -12,7 +12,7 @@
 #define FUZZ_INPUTS_DIR "tests/src/dom/parsing/fuzz-inputs/"
 #define TEST_1 CURRENT_DIR "test-1.html"
 
-bool parseFile(flo_String fileLocation, flo_Arena scratch) {
+bool parseFile(char *fileLocation, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         return false;
@@ -39,13 +39,13 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
         if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
             continue;
         }
+
         char fileLocation[1024];
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", directory,
                  ent->d_name);
         printTestStart(FLO_STRING_LEN(fileLocation, strlen(fileLocation)));
         {
-            if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
-                           scratch)) {
+            if (!parseFile(fileLocation, scratch)) {
                 (*localFailures)++;
                 FLO_LOG_TEST_FAILED {
                     FLO_ERROR((FLO_STRING("Parsing DOM of file ")));

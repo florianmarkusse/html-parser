@@ -10,7 +10,7 @@
 #define INPUTS_DIR "benchmarks/inputs/"
 #define CAP 1 << 21
 
-bool parseFile(flo_String fileLocation, flo_Arena scratch) {
+bool parseFile(char *fileLocation, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
         return false;
@@ -37,15 +37,16 @@ void benchmark(flo_Arena scratch) {
         if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
             continue;
         }
+
         char fileLocation[1024];
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
                  ent->d_name);
+
         FLO_FLUSH_AFTER(FLO_STDOUT) {
             FLO_INFO((FLO_STRING("parsing ")));
             FLO_INFO(fileLocation, FLO_NEWLINE);
         }
-        if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
-                       scratch)) {
+        if (!parseFile(fileLocation, scratch)) {
             FLO_FLUSH_AFTER(FLO_STDERR) {
                 FLO_ERROR((FLO_STRING("Parsing DOM of file ")));
                 FLO_ERROR(fileLocation);
@@ -80,7 +81,8 @@ int main() {
         return -1;
     }
 
-    flo_Arena arena = flo_createArena(begin, CAP);
+    flo_Arena arena = (flo_Arena){
+        .beg = begin, .cap = CAP, .end = (begin + (ptrdiff_t)(CAP))};
 
     void *jmp_buf[5];
     if (__builtin_setjmp(jmp_buf)) {

@@ -36,7 +36,7 @@ static TestFile testFiles[] = {
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
+static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
                             ArrayFunctionType functionType,
                             ptrdiff_t expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
@@ -107,10 +107,9 @@ bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testQuery(FLO_STRING_LEN(testFile.fileLocation,
-                                     strlen(testFile.fileLocation)),
-                      testFile.cssQuery, testFile.functionType,
-                      testFile.expectedResult, scratch) != TEST_SUCCESS) {
+        if (testQuery(testFile.fileLocation, testFile.cssQuery,
+                      testFile.functionType, testFile.expectedResult,
+                      scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

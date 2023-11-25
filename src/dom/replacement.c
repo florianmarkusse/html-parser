@@ -56,10 +56,10 @@ flo_html_node_id flo_html_replaceWithHTMLFromStringWithQuery(
                                 flo_html_replaceWithHTMLFromString);
 }
 
-flo_html_node_id
-flo_html_replaceWithHTMLFromFileWithQuery(flo_String cssQuery,
-                                          flo_String fileLocation,
-                                          flo_html_Dom *dom, flo_Arena *perm) {
+flo_html_node_id flo_html_replaceWithHTMLFromFileWithQuery(flo_String cssQuery,
+                                                           char *fileLocation,
+                                                           flo_html_Dom *dom,
+                                                           flo_Arena *perm) {
     flo_String content;
     flo_FileStatus fileStatus = flo_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {

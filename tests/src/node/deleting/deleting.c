@@ -42,9 +42,8 @@ static TestFile testFiles[] = {
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testDeletion(flo_String fileLocation1,
-                               flo_String fileLocation2, flo_String cssQuery,
-                               flo_String propToDelete,
+static TestStatus testDeletion(char *fileLocation1, char *fileLocation2,
+                               flo_String cssQuery, flo_String propToDelete,
                                DeletionType deletionType, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
@@ -89,10 +88,7 @@ bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
         TestFile testFile = testFiles[i];
         printTestStart(testFile.testName);
 
-        if (testDeletion(FLO_STRING_LEN(testFile.fileLocation1,
-                                        strlen(testFile.fileLocation1)),
-                         FLO_STRING_LEN(testFile.fileLocation2,
-                                        strlen(testFile.fileLocation2)),
+        if (testDeletion(testFile.fileLocation1, testFile.fileLocation2,
                          testFile.cssQuery, testFile.propToDelete,
                          testFile.deletionType, scratch) != TEST_SUCCESS) {
             localFailures++;

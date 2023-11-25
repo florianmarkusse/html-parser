@@ -60,7 +60,7 @@ static TestFile testFiles[] = {
 // Calculate the number of test files
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
+static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
                             flo_html_QueryStatus expectedStatus,
                             ptrdiff_t expectedNumberOfNodes,
                             flo_Arena scratch) {
@@ -115,10 +115,9 @@ unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testQuery(FLO_STRING_LEN(testFile.fileLocation,
-                                     strlen(testFile.fileLocation)),
-                      testFile.cssQuery, testFile.expectedStatus,
-                      testFile.expectedResult, scratch) != TEST_SUCCESS) {
+        if (testQuery(testFile.fileLocation, testFile.cssQuery,
+                      testFile.expectedStatus, testFile.expectedResult,
+                      scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

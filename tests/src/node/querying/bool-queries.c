@@ -88,7 +88,7 @@ static TestFile testFiles[] = {
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
+static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
                             StringUnion stringUnion,
                             BoolFunctionType boolFunctionType,
                             bool expectedResult, flo_Arena scratch) {
@@ -167,11 +167,9 @@ bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testQuery(FLO_STRING_LEN(testFile.fileLocation,
-                                     strlen(testFile.fileLocation)),
-                      testFile.cssQuery, testFile.stringUnion,
-                      testFile.boolFunctionType, testFile.expectedResult,
-                      scratch) != TEST_SUCCESS) {
+        if (testQuery(testFile.fileLocation, testFile.cssQuery,
+                      testFile.stringUnion, testFile.boolFunctionType,
+                      testFile.expectedResult, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

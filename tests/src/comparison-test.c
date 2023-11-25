@@ -7,9 +7,8 @@
 #include "comparison-test.h"
 #include "test.h"
 
-ComparisonTest initComparisonTest(flo_String startFileLocation,
-                                  flo_String expectedFileLocation,
-                                  flo_Arena *perm) {
+ComparisonTest initComparisonTest(char *startFileLocation,
+                                  char *expectedFileLocation, flo_Arena *perm) {
     ComparisonTest test = {0};
     test.actual = flo_html_createDomFromFile(startFileLocation, perm);
     if (test.actual == NULL) {

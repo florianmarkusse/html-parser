@@ -5,8 +5,7 @@
 #include "log.h"
 #include "memory/arena.h"
 
-flo_html_Dom *flo_html_createDomFromFile(flo_String fileLocation,
-                                         flo_Arena *perm) {
+flo_html_Dom *flo_html_createDomFromFile(char *fileLocation, flo_Arena *perm) {
     flo_String content;
     flo_FileStatus fileStatus = flo_readFile(fileLocation, &content, perm);
     if (fileStatus != FILE_SUCCESS) {

@@ -81,8 +81,7 @@ flo_html_Dom *flo_html_createDom(flo_String htmlString, flo_Arena *perm);
  *
  * @return  The DOM of the html string, NULL if unsuccessful.
  */
-flo_html_Dom *flo_html_createDomFromFile(flo_String fileLocation,
-                                         flo_Arena *perm);
+flo_html_Dom *flo_html_createDomFromFile(char *fileLocation, flo_Arena *perm);
 
 /**
  * @brief Create a DOM structure identical to the one provided.

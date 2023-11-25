@@ -12,14 +12,11 @@
 #define TEST_FILE_1 CURRENT_DIR "test-1.html"
 
 static TestStatus testDuplication(flo_Arena scratch) {
-    flo_String testFileLocation =
-        FLO_STRING_LEN(TEST_FILE_1, strlen(TEST_FILE_1));
-
-    flo_html_Dom *dom = flo_html_createDomFromFile(testFileLocation, &scratch);
+    flo_html_Dom *dom = flo_html_createDomFromFile(TEST_FILE_1, &scratch);
     if (dom == NULL) {
         FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created DOM from file ");
-            FLO_ERROR(testFileLocation, FLO_NEWLINE);
+            FLO_ERROR(TEST_FILE_1, FLO_NEWLINE);
         }
         return TEST_ERROR_INITIALIZATION;
     }
