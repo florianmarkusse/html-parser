@@ -17,11 +17,10 @@ static TestStatus testDuplication(flo_Arena scratch) {
 
     flo_html_Dom *dom = flo_html_createDomFromFile(testFileLocation, &scratch);
     if (dom == NULL) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(testFileLocation, FLO_NEWLINE);
         }
-        printTestFailure();
         return TEST_ERROR_INITIALIZATION;
     }
 
@@ -30,10 +29,9 @@ static TestStatus testDuplication(flo_Arena scratch) {
     flo_html_ComparisonResult comp =
         flo_html_equals(dom, duplicatedDom, scratch);
     if (comp.status != COMPARISON_SUCCESS) {
-        printTestFailure();
-        printTestDemarcation();
-        printf("Duplication failed!\n");
-        printTestDemarcation();
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING("Duplication failed!\n")));
+        }
         return TEST_FAILURE;
     }
 
@@ -41,12 +39,11 @@ static TestStatus testDuplication(flo_Arena scratch) {
     flo_html_QueryStatus status = flo_html_querySelector(
         FLO_STRING("[special-one]"), dom, &nodeID, scratch);
     if (status != QUERY_SUCCESS) {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
-            status, flo_html_queryingStatusToString(status));
-        printTestDemarcation();
+        FLO_LOG_TEST_FAILED {
+            printTestResultDifferenceErrorCode(
+                QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+                status, flo_html_queryingStatusToString(status));
+        }
         return TEST_FAILURE;
     }
 
@@ -54,17 +51,14 @@ static TestStatus testDuplication(flo_Arena scratch) {
 
     comp = flo_html_equals(dom, duplicatedDom, scratch);
     if (comp.status != COMPARISON_DIFFERENT_SIZES) {
-        printTestFailure();
-        printTestDemarcation();
-        printf("Did not recognize different content !\n");
-        printf(
-            "Returned %.*s\n",
-            FLO_STRING_PRINT(flo_html_comparisonStatusToString(comp.status)));
-        printTestDemarcation();
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING(
+                "Did not recognize different content !\nReturned ")));
+            FLO_ERROR(flo_html_comparisonStatusToString(comp.status),
+                      FLO_NEWLINE);
+        }
         return TEST_FAILURE;
     }
-    printf("Returned %.*s\n",
-           FLO_STRING_PRINT(flo_html_comparisonStatusToString(comp.status)));
 
     printTestSuccess();
 
@@ -73,11 +67,11 @@ static TestStatus testDuplication(flo_Arena scratch) {
 
 bool testflo_html_DomDuplications(ptrdiff_t *successes, ptrdiff_t *failures,
                                   flo_Arena scratch) {
-    printTestTopicStart("Duplication test");
+    printTestTopicStart(FLO_STRING("Duplication test"));
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
-    printTestStart("simple duplication");
+    printTestStart(FLO_STRING("simple duplication"));
     if (testDuplication(scratch) != TEST_SUCCESS) {
         localFailures++;
     } else {

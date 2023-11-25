@@ -5,7 +5,7 @@
 
 bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
                      flo_Arena scratch) {
-    printTestTopicStart("node queries");
+    printTestTopicStart(FLO_STRING("node queries"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;

@@ -5,7 +5,7 @@
 
 unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,
                                       flo_Arena scratch) {
-    printTestTopicStart("DOM queries");
+    printTestTopicStart(FLO_STRING("DOM queries"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;

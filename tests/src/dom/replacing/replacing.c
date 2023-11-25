@@ -49,7 +49,7 @@ typedef struct {
     char *fileLocation1;
     char *fileLocation2;
     flo_String cssQuery;
-    char *testName;
+    flo_String testName;
     ReplacementType replacementType;
     ReplacementInput replacementInput;
 } TestFile;
@@ -58,7 +58,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,
      TEST_FILE_1_AFTER,
      FLO_STRING("body"),
-     "document node with element with multiple children",
+     FLO_STRING("document node with element with multiple children"),
      REPLACEMENT_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        true,
@@ -70,7 +70,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_2_BEFORE,
      TEST_FILE_2_AFTER,
      FLO_STRING("div[special-one]"),
-     "document node with element with 1 child",
+     FLO_STRING("document node with element with 1 child"),
      REPLACEMENT_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        false,
@@ -82,7 +82,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_3_BEFORE,
      TEST_FILE_3_AFTER,
      FLO_STRING("x"),
-     "document node with element with no children",
+     FLO_STRING("document node with element with no children"),
      REPLACEMENT_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        true,
@@ -94,25 +94,25 @@ static TestFile testFiles[] = {
     {TEST_FILE_4_BEFORE,
      TEST_FILE_4_AFTER,
      FLO_STRING("body"),
-     "text node with element with multiple children",
+     FLO_STRING("text node with element with multiple children"),
      REPLACEMENT_TEXT_NODE,
      {{FLO_STRING("zoinks")}}},
     {TEST_FILE_5_BEFORE,
      TEST_FILE_5_AFTER,
      FLO_STRING("div[special-one]"),
-     "text node with element with 1 child",
+     FLO_STRING("text node with element with 1 child"),
      REPLACEMENT_TEXT_NODE,
      {{FLO_STRING("mama ce mama ca")}}},
     {TEST_FILE_6_BEFORE,
      TEST_FILE_6_AFTER,
      FLO_STRING("x"),
-     "text node with element with no children",
+     FLO_STRING("text node with element with no children"),
      REPLACEMENT_TEXT_NODE,
      {{FLO_STRING("my special text plan")}}},
     {TEST_FILE_7_BEFORE,
      TEST_FILE_7_AFTER,
      FLO_STRING("body"),
-     "string with element with multiple children",
+     FLO_STRING("string with element with multiple children"),
      REPLACEMENT_FROM_STRING,
      {{FLO_STRING("<body style=\"newstyle\">"
                   "  <div id=\"my-first-div\">"
@@ -145,31 +145,31 @@ static TestFile testFiles[] = {
     {TEST_FILE_8_BEFORE,
      TEST_FILE_8_AFTER,
      FLO_STRING("div[special-one]"),
-     "string with element with 1 child",
+     FLO_STRING("string with element with 1 child"),
      REPLACEMENT_FROM_STRING,
      {{FLO_STRING("<whoop></whoop>")}}},
     {TEST_FILE_9_BEFORE,
      TEST_FILE_9_AFTER,
      FLO_STRING("x"),
-     "string with element with no children",
+     FLO_STRING("string with element with no children"),
      REPLACEMENT_FROM_STRING,
      {{FLO_STRING("text only gang")}}},
     {TEST_FILE_10_BEFORE,
      TEST_FILE_10_AFTER,
      FLO_STRING("x"),
-     "string double text merge in child element",
+     FLO_STRING("string double text merge in child element"),
      REPLACEMENT_FROM_STRING,
      {{FLO_STRING("at the start<h1></h1><h2></h2>at the end")}}},
     {TEST_FILE_11_BEFORE,
      TEST_FILE_11_AFTER,
      FLO_STRING("x"),
-     "string double text merge in root element",
+     FLO_STRING("string double text merge in root element"),
      REPLACEMENT_FROM_STRING,
      {{FLO_STRING("at the start<h1></h1><h2></h2>at the end")}}},
     {TEST_FILE_12_BEFORE,
      TEST_FILE_12_AFTER,
      FLO_STRING("x"),
-     "string single top merge in root element",
+     FLO_STRING("string single top merge in root element"),
      REPLACEMENT_FROM_STRING,
      {{FLO_STRING("at the start<h1></h1><h2></h2>at the end")}}},
 };
@@ -188,8 +188,10 @@ testReplacements(flo_String fileLocation1, flo_String fileLocation2,
         result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
                                           scratch);
         if (result != TEST_SUCCESS) {
-            return failWithMessageAndCode(
-                FLO_STRING("Failed to get node from DOM!\n"), result);
+            FLO_LOG_TEST_FAILED {
+                FLO_ERROR((FLO_STRING("Failed to get node from DOM!\n")));
+            }
+            return result;
         }
     }
 
@@ -212,13 +214,19 @@ testReplacements(flo_String fileLocation1, flo_String fileLocation2,
         break;
     }
     default: {
-        return failWithMessage(
-            FLO_STRING("No suitable replacement type was supplied!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR(
+                (FLO_STRING("No suitable replacement type was supplied!\n")));
+        }
+        return TEST_FAILURE;
     }
     }
 
     if (replacedNodeID == FLO_HTML_ERROR_NODE_ID) {
-        return failWithMessage(FLO_STRING("Failed to replace node!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING("Failed to replace node!\n")));
+        }
+        return TEST_FAILURE;
     }
 
     return compareAndEndTest(&comparisonTest, scratch);
@@ -226,7 +234,7 @@ testReplacements(flo_String fileLocation1, flo_String fileLocation2,
 
 bool testflo_html_DomReplacements(ptrdiff_t *successes, ptrdiff_t *failures,
                                   flo_Arena scratch) {
-    printTestTopicStart("DOM replacements");
+    printTestTopicStart(FLO_STRING("DOM replacements"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;

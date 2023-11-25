@@ -51,7 +51,7 @@ typedef struct {
     char *fileLocation1;
     char *fileLocation2;
     flo_String cssQuery;
-    char *testName;
+    flo_String testName;
     AppendType appendType;
     AppendInput appendInput;
 } TestFile;
@@ -60,7 +60,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,
      TEST_FILE_1_AFTER,
      FLO_STRING("body"),
-     "document node to element with multiple children",
+     FLO_STRING("document node to element with multiple children"),
      APPEND_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        true,
@@ -72,7 +72,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_2_BEFORE,
      TEST_FILE_2_AFTER,
      FLO_STRING("div[special-one]"),
-     "document node to element with 1 child",
+     FLO_STRING("document node to element with 1 child"),
      APPEND_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        false,
@@ -84,7 +84,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_3_BEFORE,
      TEST_FILE_3_AFTER,
      FLO_STRING("x"),
-     "document node to element with no children",
+     FLO_STRING("document node to element with no children"),
      APPEND_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        true,
@@ -96,25 +96,25 @@ static TestFile testFiles[] = {
     {TEST_FILE_4_BEFORE,
      TEST_FILE_4_AFTER,
      FLO_STRING("body"),
-     "text node to element with multiple children",
+     FLO_STRING("text node to element with multiple children"),
      APPEND_TEXT_NODE,
      {{FLO_STRING("zoinks")}}},
     {TEST_FILE_5_BEFORE,
      TEST_FILE_5_AFTER,
      FLO_STRING("div[special-one]"),
-     "text node to element with 1 child",
+     FLO_STRING("text node to element with 1 child"),
      APPEND_TEXT_NODE,
      {{FLO_STRING("mama ce mama ca")}}},
     {TEST_FILE_6_BEFORE,
      TEST_FILE_6_AFTER,
      FLO_STRING("x"),
-     "text node to element with no children",
+     FLO_STRING("text node to element with no children"),
      APPEND_TEXT_NODE,
      {{FLO_STRING("my special text plan")}}},
     {TEST_FILE_7_BEFORE,
      TEST_FILE_7_AFTER,
      FLO_STRING("body"),
-     "string to element with multiple children",
+     FLO_STRING("string to element with multiple children"),
      APPEND_FROM_STRING,
      {{FLO_STRING("<body style=\"newstyle\">"
                   "  <div id=\"my-first-div\">"
@@ -147,38 +147,38 @@ static TestFile testFiles[] = {
     {TEST_FILE_8_BEFORE,
      TEST_FILE_8_AFTER,
      FLO_STRING("div[special-one]"),
-     "string to element with 1 child",
+     FLO_STRING("string to element with 1 child"),
      APPEND_FROM_STRING,
      {{FLO_STRING("<whoop></whoop><ba></ba>")}}},
     {TEST_FILE_9_BEFORE,
      TEST_FILE_9_AFTER,
      FLO_STRING("x"),
-     "string to element with no children",
+     FLO_STRING("string to element with no children"),
      APPEND_FROM_STRING,
      {{FLO_STRING("text only gang")}}},
     {TEST_FILE_10_BEFORE,
      TEST_FILE_10_AFTER,
      FLO_EMPTY_STRING,
-     "string to root",
+     FLO_STRING("string to root"),
      APPEND_FROM_STRING,
      {{FLO_STRING("<h1></h1><h2></h2>")}}},
     {TEST_FILE_11_BEFORE,
      TEST_FILE_11_AFTER,
      FLO_STRING("body"),
-     "string merge with last child",
+     FLO_STRING("string merge with last child"),
      APPEND_FROM_STRING,
      {{FLO_STRING("is what I added <h1></h1>Hi there<p></p>")}}},
     {TEST_FILE_12_BEFORE,
      TEST_FILE_12_AFTER,
      FLO_EMPTY_STRING,
-     "string merge with last root element",
+     FLO_STRING("string merge with last root element"),
      APPEND_FROM_STRING,
      {{FLO_STRING(
          "at the end<h1>With an h1</h1><p></p>with more ending text")}}},
     {TEST_FILE_13_BEFORE,
      TEST_FILE_13_AFTER,
      FLO_STRING("body"),
-     "text node merge to last child",
+     FLO_STRING("text node merge to last child"),
      APPEND_TEXT_NODE,
      {{FLO_STRING("is all I do")}}},
 };
@@ -186,9 +186,8 @@ static TestFile testFiles[] = {
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testAppendix(flo_String fileLocation1,
-                               flo_String fileLocation2,
-                               flo_String cssQuery, AppendType appendType,
-                               AppendInput *appendInput,
+                               flo_String fileLocation2, flo_String cssQuery,
+                               AppendType appendType, AppendInput *appendInput,
                                flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
@@ -222,14 +221,19 @@ static TestStatus testAppendix(flo_String fileLocation1,
         break;
     }
     default: {
-        return failWithMessage(
-            FLO_STRING("No suitable appendix type was supplied!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR(
+                (FLO_STRING("No suitable appendix type was supplied!\n")));
+        }
+        return TEST_FAILURE;
     }
     }
 
     if (appendedNodeID == FLO_HTML_ERROR_NODE_ID) {
-        return failWithMessage(
-            FLO_STRING("Failed to append node(s) to DOM!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING("Failed to append node(s) to DOM!\n")));
+        }
+        return TEST_FAILURE;
     }
 
     return compareAndEndTest(&comparisonTest, scratch);
@@ -237,7 +241,7 @@ static TestStatus testAppendix(flo_String fileLocation1,
 
 bool testflo_html_DomAppendices(ptrdiff_t *successes, ptrdiff_t *failures,
                                 flo_Arena scratch) {
-    printTestTopicStart("DOM appendices");
+    printTestTopicStart(FLO_STRING("DOM appendices"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;

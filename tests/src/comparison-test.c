@@ -13,7 +13,7 @@ ComparisonTest initComparisonTest(flo_String startFileLocation,
     ComparisonTest test = {0};
     test.actual = flo_html_createDomFromFile(startFileLocation, perm);
     if (test.actual == NULL) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created actual DOM from file ");
             FLO_ERROR(startFileLocation, FLO_NEWLINE);
         }
@@ -22,7 +22,7 @@ ComparisonTest initComparisonTest(flo_String startFileLocation,
 
     test.expected = flo_html_createDomFromFile(expectedFileLocation, perm);
     if (test.expected == NULL) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created expected DOM from file ");
             FLO_ERROR(expectedFileLocation, FLO_NEWLINE);
         }
@@ -40,35 +40,16 @@ TestStatus getNodeFromQuerySelector(flo_String cssQuery,
         cssQuery, comparisonTest->actual, foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
-            queryStatus, flo_html_queryingStatusToString(queryStatus));
-        printTestDemarcation();
+        FLO_LOG_TEST_FAILED {
+            printTestResultDifferenceErrorCode(
+                QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+                queryStatus, flo_html_queryingStatusToString(queryStatus));
+        }
 
         return TEST_FAILURE;
     }
 
     return TEST_SUCCESS;
-}
-
-TestStatus failWithMessageAndCode(flo_String failureMessage,
-                                  TestStatus failureStatus) {
-    printTestFailure();
-    printTestDemarcation();
-    printf("%.*s\n", FLO_STRING_PRINT(failureMessage));
-    printTestDemarcation();
-
-    if (failureStatus == TEST_SUCCESS) {
-        FLO_ERROR("Improper use of failWithMessageAndCode!\n", FLO_FLUSH);
-        return TEST_FAILURE;
-    }
-    return failureStatus;
-}
-
-TestStatus failWithMessage(flo_String failureMessage) {
-    return failWithMessageAndCode(failureMessage, TEST_FAILURE);
 }
 
 TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
@@ -83,15 +64,15 @@ TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
         printTestSuccess();
         result = TEST_SUCCESS;
     } else {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            expectedStatus, flo_html_comparisonStatusToString(expectedStatus),
-            comp.status, flo_html_comparisonStatusToString(comp.status));
-        flo_html_printFirstDifference(comp.nodeID1, comparisonTest->actual,
-                                      comp.nodeID2, comparisonTest->expected,
-                                      scratch);
-        printTestDemarcation();
+        FLO_LOG_TEST_FAILED {
+            printTestResultDifferenceErrorCode(
+                expectedStatus,
+                flo_html_comparisonStatusToString(expectedStatus), comp.status,
+                flo_html_comparisonStatusToString(comp.status));
+            flo_html_printFirstDifference(comp.nodeID1, comparisonTest->actual,
+                                          comp.nodeID2,
+                                          comparisonTest->expected, scratch);
+        }
     }
     return result;
 }

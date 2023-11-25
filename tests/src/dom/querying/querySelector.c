@@ -13,13 +13,15 @@
 
 static TestFile testFiles[] = {
     {TEST_FILE_1, FLO_STRING("body div p h1 lalalal input"),
-     QUERY_NOT_SEEN_BEFORE, 0, "unknown tag"},
+     QUERY_NOT_SEEN_BEFORE, 0, FLO_STRING("unknown tag")},
     {TEST_FILE_1, FLO_STRING("[html-new]"), QUERY_NOT_SEEN_BEFORE, 0,
-     "unknown attribute"},
+     FLO_STRING("unknown attribute")},
     {TEST_FILE_1, FLO_STRING("[html]"), QUERY_SUCCESS, 2,
-     "with html attribute"},
-    {TEST_FILE_1, FLO_STRING("body"), QUERY_SUCCESS, 7, "single tag selector"},
-    {TEST_FILE_1, FLO_STRING("body head"), QUERY_SUCCESS, 0, "no nodes found"},
+     FLO_STRING("with html attribute")},
+    {TEST_FILE_1, FLO_STRING("body"), QUERY_SUCCESS, 7,
+     FLO_STRING("single tag selector")},
+    {TEST_FILE_1, FLO_STRING("body head"), QUERY_SUCCESS, 0,
+     FLO_STRING("no nodes found")},
 };
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -29,7 +31,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
                             flo_html_node_id expectedNode, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(fileLocation, FLO_NEWLINE);
         }
@@ -47,17 +49,16 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
         printTestSuccess();
         result = TEST_SUCCESS;
     } else {
-        printTestFailure();
-        printTestDemarcation();
-        if (actual != expectedStatus) {
-            printTestResultDifferenceErrorCode(
-                expectedStatus, flo_html_queryingStatusToString(expectedStatus),
-                actual, flo_html_queryingStatusToString(actual));
-        } else {
-            printTestResultDifferenceNumber(expectedNode, actualNode);
+        FLO_LOG_TEST_FAILED {
+            if (actual != expectedStatus) {
+                printTestResultDifferenceErrorCode(
+                    expectedStatus,
+                    flo_html_queryingStatusToString(expectedStatus), actual,
+                    flo_html_queryingStatusToString(actual));
+            } else {
+                printTestResultDifferenceNumber(expectedNode, actualNode);
+            }
         }
-
-        printTestDemarcation();
     }
 
     return result;
@@ -65,7 +66,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
 
 unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures,
                                 flo_Arena scratch) {
-    printTestTopicStart("querySelector");
+    printTestTopicStart(FLO_STRING("querySelector"));
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 

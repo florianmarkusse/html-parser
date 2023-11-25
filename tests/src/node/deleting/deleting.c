@@ -24,28 +24,28 @@ typedef enum {
 typedef struct {
     char *fileLocation1;
     char *fileLocation2;
-    char *cssQuery;
-    char *propToDelete;
+    flo_String cssQuery;
+    flo_String propToDelete;
     DeletionType deletionType;
-    char *testName;
+    flo_String testName;
 } TestFile;
 
 static TestFile testFiles[] = {
-    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "!DOCTYPE", "html",
-     DELETE_BOOLEAN_PROPERTY, "'html' on !DOCTYPE"},
-    {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "input", "required",
-     DELETE_BOOLEAN_PROPERTY, "'required' on input"},
-    {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "html", "lang", DELETE_PROPERTY,
-     "'lang' on html"},
+    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, FLO_STRING("!DOCTYPE"),
+     FLO_STRING("html"), DELETE_BOOLEAN_PROPERTY,
+     FLO_STRING("'html' on !DOCTYPE")},
+    {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, FLO_STRING("input"),
+     FLO_STRING("required"), DELETE_BOOLEAN_PROPERTY,
+     FLO_STRING("'required' on input")},
+    {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, FLO_STRING("html"),
+     FLO_STRING("lang"), DELETE_PROPERTY, FLO_STRING("'lang' on html")},
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testDeletion(flo_String fileLocation1,
-                               flo_String fileLocation2,
-                               flo_String cssQuery,
+                               flo_String fileLocation2, flo_String cssQuery,
                                flo_String propToDelete,
-                               DeletionType deletionType,
-                               flo_Arena scratch) {
+                               DeletionType deletionType, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -68,8 +68,10 @@ static TestStatus testDeletion(flo_String fileLocation1,
         break;
     }
     default: {
-        return failWithMessage(
-            FLO_STRING("No suitable DeletionType was supplied!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING("No suitable DeletionType was supplied!\n")));
+        }
+        return TEST_FAILURE;
     }
     }
 
@@ -78,7 +80,7 @@ static TestStatus testDeletion(flo_String fileLocation1,
 
 bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
                        flo_Arena scratch) {
-    printTestTopicStart("node deletions");
+    printTestTopicStart(FLO_STRING("node deletions"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
@@ -87,15 +89,12 @@ bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
         TestFile testFile = testFiles[i];
         printTestStart(testFile.testName);
 
-        if (testDeletion(
-                FLO_STRING_LEN(testFile.fileLocation1,
-                               strlen(testFile.fileLocation1)),
-                FLO_STRING_LEN(testFile.fileLocation2,
-                               strlen(testFile.fileLocation2)),
-                FLO_STRING_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                FLO_STRING_LEN(testFile.propToDelete,
-                               strlen(testFile.propToDelete)),
-                testFile.deletionType, scratch) != TEST_SUCCESS) {
+        if (testDeletion(FLO_STRING_LEN(testFile.fileLocation1,
+                                        strlen(testFile.fileLocation1)),
+                         FLO_STRING_LEN(testFile.fileLocation2,
+                                        strlen(testFile.fileLocation2)),
+                         testFile.cssQuery, testFile.propToDelete,
+                         testFile.deletionType, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

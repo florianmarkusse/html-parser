@@ -28,62 +28,62 @@ typedef union {
 
 typedef struct {
     char *fileLocation;
-    char *cssQuery;
+    flo_String cssQuery;
     StringUnion stringUnion;
     bool expectedResult;
     BoolFunctionType boolFunctionType;
-    char *testName;
+    flo_String testName;
 } TestFile;
 
 static TestFile testFiles[] = {
     {TEST_FILE_1,
-     "section",
+     FLO_STRING("section"),
      {.attribute = FLO_STRING("a")},
      true,
      HAS_BOOL_PROP,
-     "has bool prop"},
+     FLO_STRING("has bool prop")},
     {TEST_FILE_1,
-     "section",
+     FLO_STRING("section"),
      {.attribute = FLO_STRING("x")},
      false,
      HAS_BOOL_PROP,
-     "does not have bool prop"},
+     FLO_STRING("does not have bool prop")},
     {TEST_FILE_1,
-     "body",
+     FLO_STRING("body"),
      {.attribute = FLO_STRING("style")},
      true,
      HAS_PROP_KEY,
-     "has prop key"},
+     FLO_STRING("has prop key")},
     {TEST_FILE_1,
-     "body",
+     FLO_STRING("body"),
      {.attribute = FLO_STRING("lang")},
      false,
      HAS_PROP_KEY,
-     "does not have prop key"},
+     FLO_STRING("does not have prop key")},
     {TEST_FILE_1,
-     "body",
+     FLO_STRING("body"),
      {.attribute = FLO_STRING("class")},
      true,
      HAS_PROP_VALUE,
-     "has prop value"},
+     FLO_STRING("has prop value")},
     {TEST_FILE_1,
-     "body",
+     FLO_STRING("body"),
      {.attribute = FLO_STRING("big")},
      false,
      HAS_PROP_VALUE,
-     "does not have prop value"},
+     FLO_STRING("does not have prop value")},
     {TEST_FILE_1,
-     "body",
+     FLO_STRING("body"),
      {.key = FLO_STRING("style"), .value = FLO_STRING("class")},
      true,
      HAS_PROPERTY,
-     "has property"},
+     FLO_STRING("has property")},
     {TEST_FILE_1,
-     "body",
+     FLO_STRING("body"),
      {.key = FLO_STRING("style"), .value = FLO_STRING("clazz")},
      false,
      HAS_PROPERTY,
-     "does not have property"},
+     FLO_STRING("does not have property")},
 };
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -94,7 +94,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
                             bool expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(fileLocation, FLO_NEWLINE);
         }
@@ -107,12 +107,11 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
         flo_html_querySelector(cssQuery, dom, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
-            queryStatus, flo_html_queryingStatusToString(queryStatus));
-        printTestDemarcation();
+        FLO_LOG_TEST_FAILED {
+            printTestResultDifferenceErrorCode(
+                QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+                queryStatus, flo_html_queryingStatusToString(queryStatus));
+        }
     } else {
         bool actualResult = false;
         switch (boolFunctionType) {
@@ -137,10 +136,9 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
             break;
         }
         default: {
-            printTestFailure();
-            printTestDemarcation();
-            printf("No suitable enum was supplied!\n");
-            printTestDemarcation();
+            FLO_LOG_TEST_FAILED {
+                FLO_ERROR((FLO_STRING("No suitable enum was supplied!\n")));
+            }
             return result;
         }
         }
@@ -149,10 +147,9 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
             printTestSuccess();
             result = TEST_SUCCESS;
         } else {
-            printTestFailure();
-            printTestDemarcation();
-            printTestResultDifferenceBool(expectedResult, actualResult);
-            printTestDemarcation();
+            FLO_LOG_TEST_FAILED {
+                printTestResultDifferenceBool(expectedResult, actualResult);
+            }
         }
     }
 
@@ -161,7 +158,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
 
 bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
                          flo_Arena scratch) {
-    printTestTopicStart("bool queries");
+    printTestTopicStart(FLO_STRING("bool queries"));
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
@@ -170,12 +167,11 @@ bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testQuery(
-                FLO_STRING_LEN(testFile.fileLocation,
-                               strlen(testFile.fileLocation)),
-                FLO_STRING_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                testFile.stringUnion, testFile.boolFunctionType,
-                testFile.expectedResult, scratch) != TEST_SUCCESS) {
+        if (testQuery(FLO_STRING_LEN(testFile.fileLocation,
+                                     strlen(testFile.fileLocation)),
+                      testFile.cssQuery, testFile.stringUnion,
+                      testFile.boolFunctionType, testFile.expectedResult,
+                      scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

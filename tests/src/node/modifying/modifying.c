@@ -18,29 +18,28 @@
 typedef struct {
     char *fileLocation1;
     char *fileLocation2;
-    char *cssQuery;
-    char *propKey;
+    flo_String cssQuery;
+    flo_String propKey;
     flo_String newPropValue;
-    char *testName;
+    flo_String testName;
 } TestFile;
 
 static TestFile testFiles[] = {
-    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, "body", "style",
-     FLO_STRING("newstyle"), "change property value"},
-    {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, "#text-content-test", "id",
-     FLO_STRING("id-changed"), "change id value"},
-    {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, "#text-content-test",
-     "I am the new text content, bow for me!", FLO_EMPTY_STRING,
-     "setting text content"},
+    {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, FLO_STRING("body"),
+     FLO_STRING("style"), FLO_STRING("newstyle"),
+     FLO_STRING("change property value")},
+    {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, FLO_STRING("#text-content-test"),
+     FLO_STRING("id"), FLO_STRING("id-changed"), FLO_STRING("change id value")},
+    {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, FLO_STRING("#text-content-test"),
+     FLO_STRING("I am the new text content, bow for me!"), FLO_EMPTY_STRING,
+     FLO_STRING("setting text content")},
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testModification(flo_String fileLocation1,
                                    flo_String fileLocation2,
-                                   flo_String cssQuery,
-                                   flo_String propKey,
-                                   flo_String newPropValue,
-                                   flo_Arena scratch) {
+                                   flo_String cssQuery, flo_String propKey,
+                                   flo_String newPropValue, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -55,8 +54,10 @@ static TestStatus testModification(flo_String fileLocation1,
     if (newPropValue.len > 0) {
         if (!flo_html_setPropertyValue(foundNode, propKey, newPropValue,
                                        comparisonTest.actual, &scratch)) {
-            return failWithMessage(
-                FLO_STRING("Failed to set property value!\n"));
+            FLO_LOG_TEST_FAILED {
+                FLO_ERROR((FLO_STRING("Failed to set property value!\n")));
+            }
+            return TEST_FAILURE;
         }
     } else {
         flo_html_setTextContent(foundNode, propKey, comparisonTest.actual,
@@ -68,7 +69,7 @@ static TestStatus testModification(flo_String fileLocation1,
 
 bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
                            flo_Arena scratch) {
-    printTestTopicStart("node modifications");
+    printTestTopicStart(FLO_STRING("node modifications"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
@@ -78,14 +79,12 @@ bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
 
         printTestStart(testFile.testName);
 
-        if (testModification(
-                FLO_STRING_LEN(testFile.fileLocation1,
-                               strlen(testFile.fileLocation1)),
-                FLO_STRING_LEN(testFile.fileLocation2,
-                               strlen(testFile.fileLocation2)),
-                FLO_STRING_LEN(testFile.cssQuery, strlen(testFile.cssQuery)),
-                FLO_STRING_LEN(testFile.propKey, strlen(testFile.propKey)),
-                testFile.newPropValue, scratch) != TEST_SUCCESS) {
+        if (testModification(FLO_STRING_LEN(testFile.fileLocation1,
+                                            strlen(testFile.fileLocation1)),
+                             FLO_STRING_LEN(testFile.fileLocation2,
+                                            strlen(testFile.fileLocation2)),
+                             testFile.cssQuery, testFile.propKey,
+                             testFile.newPropValue, scratch) != TEST_SUCCESS) {
             localFailures++;
         } else {
             localSuccesses++;

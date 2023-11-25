@@ -28,7 +28,10 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
     struct dirent *ent = NULL;
     if ((dir = opendir(directory)) == NULL) {
         (*localFailures)++;
-        printf("Failed to open test directory: %s\n", directory);
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING("Failed to open test directory: ")));
+            FLO_ERROR(directory, FLO_NEWLINE);
+        }
         return;
     }
 
@@ -39,15 +42,16 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
         char fileLocation[1024];
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", directory,
                  ent->d_name);
-        printTestStart(fileLocation);
+        printTestStart(FLO_STRING_LEN(fileLocation, strlen(fileLocation)));
         {
             if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
                            scratch)) {
                 (*localFailures)++;
-                printTestFailure();
-                printTestDemarcation();
-                printf("Parsing DOM %s failed\n", fileLocation);
-                printTestDemarcation();
+                FLO_LOG_TEST_FAILED {
+                    FLO_ERROR((FLO_STRING("Parsing DOM of file ")));
+                    FLO_ERROR(fileLocation);
+                    FLO_ERROR((FLO_STRING(" failed\n")));
+                }
             } else {
                 (*localSuccesses)++;
                 printTestSuccess();
@@ -60,7 +64,7 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
 
 bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
                               flo_Arena scratch) {
-    printTestTopicStart("DOM parsings");
+    printTestTopicStart(FLO_STRING("DOM parsings"));
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 

@@ -13,44 +13,48 @@
 
 static TestFile testFiles[] = {
     {TEST_FILE_1, FLO_STRING("[html]"), QUERY_SUCCESS, 2,
-     "with html attribute"},
+     FLO_STRING("with html attribute")},
     {TEST_FILE_1, FLO_STRING("body div p h1 lalalal input"),
-     QUERY_NOT_SEEN_BEFORE, 0, "unknown tag"},
+     QUERY_NOT_SEEN_BEFORE, 0, FLO_STRING("unknown tag")},
     {TEST_FILE_1, FLO_STRING("[html-new]"), QUERY_NOT_SEEN_BEFORE, 0,
-     "unknown attribute"},
-    {TEST_FILE_1, FLO_STRING("body"), QUERY_SUCCESS, 1, "single tag selector"},
-    {TEST_FILE_1, FLO_STRING("body head"), QUERY_SUCCESS, 0, "no node found"},
+     FLO_STRING("unknown attribute")},
+    {TEST_FILE_1, FLO_STRING("body"), QUERY_SUCCESS, 1,
+     FLO_STRING("single tag selector")},
+    {TEST_FILE_1, FLO_STRING("body head"), QUERY_SUCCESS, 0,
+     FLO_STRING("no node found")},
     {TEST_FILE_1, FLO_STRING("html[lang=en] > body > div"), QUERY_SUCCESS, 7,
-     "multiple child tag selector"},
+     FLO_STRING("multiple child tag selector")},
     {TEST_FILE_1, FLO_STRING("body div"), QUERY_SUCCESS, 8,
-     "descendant attribute selector"},
+     FLO_STRING("descendant attribute selector")},
     {TEST_FILE_1, FLO_STRING("body [required]"), QUERY_SUCCESS, 2,
-     "descendant only attribute selector"},
+     FLO_STRING("descendant only attribute selector")},
     {TEST_FILE_1, FLO_STRING("body>[required]"), QUERY_SUCCESS, 1,
-     "child only attribute selector"},
+     FLO_STRING("child only attribute selector")},
     {TEST_FILE_1, FLO_STRING("body>[required][a][b][c][d][e][f][g]"),
-     QUERY_SUCCESS, 0, "maximum filters"},
+     QUERY_SUCCESS, 0, FLO_STRING("maximum filters")},
     {TEST_FILE_1, FLO_STRING("body>[required][a][b][c][d][e][f][g][h]"),
-     QUERY_TOO_MANY_ELEMENT_FILTERS, 0, "1 more than maximum filters"},
+     QUERY_TOO_MANY_ELEMENT_FILTERS, 0,
+     FLO_STRING("1 more than maximum filters")},
     {TEST_FILE_1, FLO_STRING("body   >\t\t  [   required]"), QUERY_SUCCESS, 1,
-     "child only attribute selector, dumb css query"},
+     FLO_STRING("child only attribute selector, dumb css query")},
     {TEST_FILE_1, FLO_STRING("[id=my-first-div] + div"), QUERY_SUCCESS, 1,
-     "single adjacent sibling"},
+     FLO_STRING("single adjacent sibling")},
     {TEST_FILE_1, FLO_STRING("div + div"), QUERY_SUCCESS, 5,
-     "multiple adjacent sibling"},
-    {TEST_FILE_1, FLO_STRING("div ~ div"), QUERY_SUCCESS, 6, "general sibling"},
+     FLO_STRING("multiple adjacent sibling")},
+    {TEST_FILE_1, FLO_STRING("div ~ div"), QUERY_SUCCESS, 6,
+     FLO_STRING("general sibling")},
     {TEST_FILE_1, FLO_STRING(".big"), QUERY_SUCCESS, 4,
-     "using '.' to select by class"},
+     FLO_STRING("using '.' to select by class")},
     {TEST_FILE_1, FLO_STRING("p.big"), QUERY_SUCCESS, 1,
-     "using '.' to select by class after tag selector"},
+     FLO_STRING("using '.' to select by class after tag selector")},
     {TEST_FILE_1, FLO_STRING("div[special-one].big"), QUERY_SUCCESS, 1,
-     "more difficult query with '.'"},
+     FLO_STRING("more difficult query with '.'")},
     {TEST_FILE_1, FLO_STRING("#test"), QUERY_SUCCESS, 1,
-     "using '#' to select by id"},
+     FLO_STRING("using '#' to select by id")},
     {TEST_FILE_1, FLO_STRING(",,,,,div > div > span, ,,,   \t   \tp, title,,,"),
-     QUERY_SUCCESS, 7, "using ',' to perform multiple queries"},
+     QUERY_SUCCESS, 7, FLO_STRING("using ',' to perform multiple queries")},
     {TEST_FILE_1, FLO_STRING("body *[special-one]"), QUERY_SUCCESS, 2,
-     "using *"},
+     FLO_STRING("using *")},
 };
 
 // Calculate the number of test files
@@ -62,7 +66,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
                             flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(fileLocation, FLO_NEWLINE);
         }
@@ -80,21 +84,21 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
         printTestSuccess();
         result = TEST_SUCCESS;
     } else {
-        printTestFailure();
-        printTestDemarcation();
-        if (actual != expectedStatus) {
-            printTestResultDifferenceErrorCode(
-                expectedStatus, flo_html_queryingStatusToString(expectedStatus),
-                actual, flo_html_queryingStatusToString(actual));
-        } else {
-            printTestResultDifferenceNumber(expectedNumberOfNodes, results.len);
-            printf("Node IDs received...\n");
-            for (ptrdiff_t i = 0; i < results.len; i++) {
-                printf("%u\n", results.buf[i]);
+        FLO_LOG_TEST_FAILED {
+            if (actual != expectedStatus) {
+                printTestResultDifferenceErrorCode(
+                    expectedStatus,
+                    flo_html_queryingStatusToString(expectedStatus), actual,
+                    flo_html_queryingStatusToString(actual));
+            } else {
+                printTestResultDifferenceNumber(expectedNumberOfNodes,
+                                                results.len);
+                FLO_ERROR((FLO_STRING("Node IDs received...\n")));
+                for (ptrdiff_t i = 0; i < results.len; i++) {
+                    FLO_ERROR(results.buf[i], FLO_NEWLINE);
+                }
             }
         }
-
-        printTestDemarcation();
     }
 
     return result;
@@ -102,7 +106,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
 
 unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures,
                                    flo_Arena scratch) {
-    printTestTopicStart("querySelectorAll");
+    printTestTopicStart(FLO_STRING("querySelectorAll"));
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 

@@ -51,7 +51,7 @@ typedef struct {
     char *fileLocation1;
     char *fileLocation2;
     flo_String cssQuery;
-    char *testName;
+    flo_String testName;
     PrependType prependType;
     PrependInput prependInput;
 } TestFile;
@@ -60,7 +60,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE,
      TEST_FILE_1_AFTER,
      FLO_STRING("body"),
-     "document node to element with multiple children",
+     FLO_STRING("document node to element with multiple children"),
      PREPEND_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        true,
@@ -72,7 +72,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_2_BEFORE,
      TEST_FILE_2_AFTER,
      FLO_STRING("div[special-one]"),
-     "document node to element with 1 child",
+     FLO_STRING("document node to element with 1 child"),
      PREPEND_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        false,
@@ -84,7 +84,7 @@ static TestFile testFiles[] = {
     {TEST_FILE_3_BEFORE,
      TEST_FILE_3_AFTER,
      FLO_STRING("x"),
-     "document node to element with no children",
+     FLO_STRING("document node to element with no children"),
      PREPEND_DOCUMENT_NODE,
      {{FLO_STRING("example-tag"),
        true,
@@ -96,25 +96,25 @@ static TestFile testFiles[] = {
     {TEST_FILE_4_BEFORE,
      TEST_FILE_4_AFTER,
      FLO_STRING("body"),
-     "text node to element with multiple children",
+     FLO_STRING("text node to element with multiple children"),
      PREPEND_TEXT_NODE,
      {{FLO_STRING("zoinks")}}},
     {TEST_FILE_5_BEFORE,
      TEST_FILE_5_AFTER,
      FLO_STRING("div[special-one]"),
-     "text node to element with 1 child",
+     FLO_STRING("text node to element with 1 child"),
      PREPEND_TEXT_NODE,
      {{FLO_STRING("mama ce mama ca")}}},
     {TEST_FILE_6_BEFORE,
      TEST_FILE_6_AFTER,
      FLO_STRING("x"),
-     "text node to element with no children",
+     FLO_STRING("text node to element with no children"),
      PREPEND_TEXT_NODE,
      {{FLO_STRING("my special text plan")}}},
     {TEST_FILE_7_BEFORE,
      TEST_FILE_7_AFTER,
      FLO_STRING("body"),
-     "string to element with multiple children",
+     FLO_STRING("string to element with multiple children"),
      PREPEND_FROM_STRING,
      {{FLO_STRING("<body style=\"newstyle\">"
                   "  <div id=\"my-first-div\">"
@@ -147,48 +147,46 @@ static TestFile testFiles[] = {
     {TEST_FILE_8_BEFORE,
      TEST_FILE_8_AFTER,
      FLO_STRING("div[special-one]"),
-     "string to element with 1 child",
+     FLO_STRING("string to element with 1 child"),
      PREPEND_FROM_STRING,
      {{FLO_STRING("<whoop></whoop>")}}},
     {TEST_FILE_9_BEFORE,
      TEST_FILE_9_AFTER,
      FLO_STRING("x"),
-     "string to element with no children",
+     FLO_STRING("string to element with no children"),
      PREPEND_FROM_STRING,
      {{FLO_STRING("text only gang")}}},
     {TEST_FILE_10_BEFORE,
      TEST_FILE_10_AFTER,
      FLO_EMPTY_STRING,
-     "string to root",
+     FLO_STRING("string to root"),
      PREPEND_FROM_STRING,
      {{FLO_STRING("<h1></h1><h2></h2>")}}},
     {TEST_FILE_11_BEFORE,
      TEST_FILE_11_AFTER,
      FLO_STRING("body"),
-     "string merge with first child",
+     FLO_STRING("string merge with first child"),
      PREPEND_FROM_STRING,
      {{FLO_STRING("new text here<h1></h1><p></p>I got prepended to")}}},
     {TEST_FILE_12_BEFORE,
      TEST_FILE_12_AFTER,
      FLO_EMPTY_STRING,
-     "string merge with first root element",
+     FLO_STRING("string merge with first root element"),
      PREPEND_FROM_STRING,
      {{FLO_STRING("<html></html><wtf></wtf>bottom text")}}},
     {TEST_FILE_13_BEFORE,
      TEST_FILE_13_AFTER,
      FLO_EMPTY_STRING,
-     "text node merge with first root element",
+     FLO_STRING("text node merge with first root element"),
      PREPEND_TEXT_NODE,
      {{FLO_STRING("even more")}}},
 };
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testPrependix(flo_String fileLocation1,
-                                flo_String fileLocation2,
-                                flo_String cssQuery,
+                                flo_String fileLocation2, flo_String cssQuery,
                                 PrependType prependType,
-                                PrependInput *prependInput,
-                                flo_Arena scratch) {
+                                PrependInput *prependInput, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -198,8 +196,10 @@ static TestStatus testPrependix(flo_String fileLocation1,
         result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
                                           scratch);
         if (result != TEST_SUCCESS) {
-            return failWithMessageAndCode(
-                FLO_STRING("Failed to get node from DOM!\n"), result);
+            FLO_LOG_TEST_FAILED {
+                FLO_ERROR((FLO_STRING("Failed to get node from DOM!\n")));
+            }
+            return result;
         }
     }
 
@@ -226,14 +226,19 @@ static TestStatus testPrependix(flo_String fileLocation1,
         break;
     }
     default: {
-        return failWithMessage(
-            FLO_STRING("No suitable prependix type was supplied!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR(
+                (FLO_STRING("No suitable prependix type was supplied!\n")));
+        }
+        return TEST_FAILURE;
     }
     }
 
     if (prependedNodeID == FLO_HTML_ERROR_NODE_ID) {
-        return failWithMessage(
-            FLO_STRING("Failed to prepend document to node!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING("Failed to prepend document to node!\n")));
+        }
+        return TEST_FAILURE;
     }
 
     return compareAndEndTest(&comparisonTest, scratch);
@@ -241,7 +246,7 @@ static TestStatus testPrependix(flo_String fileLocation1,
 
 bool testflo_html_DomPrependices(ptrdiff_t *successes, ptrdiff_t *failures,
                                  flo_Arena scratch) {
-    printTestTopicStart("DOM prependices");
+    printTestTopicStart(FLO_STRING("DOM prependices"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;

@@ -5,14 +5,19 @@
 extern "C" {
 #endif
 
+#include "log.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <text/string.h>
 
+#define FLO_LOG_TEST_FAILED                                                    \
+    for (ptrdiff_t i = (printTestFailure(), printTestDemarcation(), 0); i < 1; \
+         i = (printTestDemarcation(), FLO_FLUSH_TO(FLO_STDERR), 1))
+
 void printTabs();
 void printTestScore(ptrdiff_t successes, ptrdiff_t failures);
-void printTestTopicStart(char *testTopic);
-void printTestStart(char *testName);
+void printTestTopicStart(flo_String testTopic);
+void printTestStart(flo_String testName);
 void printTestSuccess();
 void printTestFailure();
 void printTestDemarcation();

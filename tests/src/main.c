@@ -22,13 +22,12 @@
 #include "node/deleting/deleting.h"
 #include "node/modifying/modifying.h"
 #include "node/querying/querying.h"
-#include "pretty-print.h"
 #include "test.h"
 
 #define CAP 1 << 21
 
 int main() {
-    printf("Starting test suite...\n\n");
+    FLO_INFO((FLO_STRING("Starting test suite...\n\n")));
 
     char *begin = mmap(NULL, CAP, PROT_READ | PROT_WRITE,
                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -67,47 +66,58 @@ int main() {
     ptrdiff_t failures = 0;
 
     testflo_html_DomParsings(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testflo_html_DomComparisons(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testflo_html_DomQueries(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testNodeQueries(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testflo_html_DomDeletions(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testNodeModifications(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testNodeDeletions(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testflo_html_DomAppendices(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testflo_html_DomPrependices(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testflo_html_DomReplacements(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testflo_html_DomDuplications(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     testIntegrations(&successes, &failures, arena);
-    printf("\n");
+    FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
     printTestScore(successes, failures);
     if (failures > 0) {
-        printf("Test suite %sfailed%s.\n", ANSI_COLOR_RED, ANSI_COLOR_RESET);
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR((FLO_STRING("Test suite ")));
+            flo_appendColor(FLO_COLOR_RED, FLO_STDERR);
+            FLO_ERROR((FLO_STRING("failed")));
+            flo_appendColorReset(FLO_STDERR);
+            FLO_ERROR((FLO_STRING(".\n")));
+        }
     } else {
-        printf("Test suite %ssuccessful%s.\n", ANSI_COLOR_GREEN,
-               ANSI_COLOR_RESET);
+        FLO_FLUSH_AFTER(FLO_STDOUT) {
+            FLO_INFO((FLO_STRING("Test suite ")));
+            flo_appendColor(FLO_COLOR_GREEN, FLO_STDOUT);
+            FLO_INFO((FLO_STRING("successful")));
+            flo_appendColorReset(FLO_STDOUT);
+            FLO_INFO((FLO_STRING(".\n")));
+        }
     }
 
     return failures > 0;

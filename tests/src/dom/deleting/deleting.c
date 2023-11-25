@@ -42,41 +42,39 @@ typedef struct {
     char *fileLocation2;
     flo_String cssQuery;
     DeletionType deletionType;
-    char *testName;
+    flo_String testName;
 } TestFile;
 
 static TestFile testFiles[] = {
     {TEST_FILE_1_BEFORE, TEST_FILE_1_AFTER, FLO_STRING("span[required] > p"),
-     DELETE_NODE, "node without children and only child removal"},
+     DELETE_NODE, FLO_STRING("node without children and only child removal")},
     {TEST_FILE_2_BEFORE, TEST_FILE_2_AFTER, FLO_STRING("!DOCTYPE"), DELETE_NODE,
-     "only document node removal"},
+     FLO_STRING("only document node removal")},
     {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, FLO_STRING("!DOCTYPE"), DELETE_NODE,
-     "first document node removal"},
+     FLO_STRING("first document node removal")},
     {TEST_FILE_4_BEFORE, TEST_FILE_4_AFTER, FLO_STRING("#text-content-test"),
-     DELETE_NODE, "node with children and middle child"},
+     DELETE_NODE, FLO_STRING("node with children and middle child")},
     {TEST_FILE_5_BEFORE, TEST_FILE_5_AFTER, FLO_STRING("input[text=free]"),
-     DELETE_NODE, "node without children and last child"},
+     DELETE_NODE, FLO_STRING("node without children and last child")},
     {TEST_FILE_6_BEFORE, TEST_FILE_6_AFTER, FLO_STRING("#my-first-div"),
-     DELETE_NODE, "node with children and first child"},
+     DELETE_NODE, FLO_STRING("node with children and first child")},
     {TEST_FILE_7_BEFORE, TEST_FILE_7_AFTER, FLO_STRING("html"), DELETE_NODE,
-     "last document node removal"},
+     FLO_STRING("last document node removal")},
     {TEST_FILE_8_BEFORE, TEST_FILE_8_AFTER, FLO_STRING("html"), DELETE_NODE,
-     "middle document node removal"},
+     FLO_STRING("middle document node removal")},
     {TEST_FILE_9_BEFORE, TEST_FILE_9_AFTER, FLO_STRING("head"), DELETE_CHILDREN,
-     "remove document node with text node"},
+     FLO_STRING("remove document node with text node")},
     {TEST_FILE_10_BEFORE, TEST_FILE_10_AFTER, FLO_STRING("head > title"),
-     DELETE_CHILDREN, "remove text node"},
+     DELETE_CHILDREN, FLO_STRING("remove text node")},
     {TEST_FILE_11_BEFORE, TEST_FILE_11_AFTER, FLO_STRING("body"),
-     DELETE_CHILDREN, "remove body's children"},
+     DELETE_CHILDREN, FLO_STRING("remove body's children")},
 };
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
 static TestStatus testDeletions(flo_String fileLocation1,
-                                flo_String fileLocation2,
-                                flo_String cssQuery,
-                                DeletionType deletionType,
-                                flo_Arena scratch) {
+                                flo_String fileLocation2, flo_String cssQuery,
+                                DeletionType deletionType, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
@@ -98,8 +96,10 @@ static TestStatus testDeletions(flo_String fileLocation1,
         break;
     }
     default: {
-        return failWithMessage(
-            FLO_STRING("No suitable DeletionType was supplied!\n"));
+        FLO_LOG_TEST_FAILED {
+            FLO_ERROR((FLO_STRING("No suitable DeletionType was supplied!\n")));
+        }
+        return TEST_FAILURE;
     }
     }
 
@@ -108,7 +108,7 @@ static TestStatus testDeletions(flo_String fileLocation1,
 
 bool testflo_html_DomDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
                                flo_Arena scratch) {
-    printTestTopicStart("DOM deletions");
+    printTestTopicStart(FLO_STRING("DOM deletions"));
 
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;

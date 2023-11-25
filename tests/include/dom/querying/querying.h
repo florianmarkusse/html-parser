@@ -13,7 +13,7 @@ typedef struct {
     flo_String cssQuery;
     flo_html_QueryStatus expectedStatus;
     ptrdiff_t expectedResult;
-    char *testName;
+    flo_String testName;
 } TestFile;
 
 unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,

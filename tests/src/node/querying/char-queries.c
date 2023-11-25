@@ -19,14 +19,14 @@ typedef struct {
     flo_String input;
     flo_String expectedResult;
     CharFunctionType functionType;
-    char *testName;
+    flo_String testName;
 } TestFile;
 
 static TestFile testFiles[] = {
     {TEST_FILE_1, FLO_STRING("body"), FLO_STRING("style"), FLO_STRING("class"),
-     GET_VALUE, "flo_html_getValue when having key"},
+     GET_VALUE, FLO_STRING("flo_html_getValue when having key")},
     {TEST_FILE_1, FLO_STRING("html"), FLO_STRING("langg"), FLO_EMPTY_STRING,
-     GET_VALUE, "flo_html_getValue when not having key"},
+     GET_VALUE, FLO_STRING("flo_html_getValue when not having key")},
 };
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
@@ -36,7 +36,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
                             flo_String expectedResult, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
+        FLO_LOG_TEST_FAILED {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(fileLocation, FLO_NEWLINE);
         }
@@ -49,12 +49,11 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
         flo_html_querySelector(cssQuery, dom, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
-        printTestFailure();
-        printTestDemarcation();
-        printTestResultDifferenceErrorCode(
-            QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
-            queryStatus, flo_html_queryingStatusToString(queryStatus));
-        printTestDemarcation();
+        FLO_LOG_TEST_FAILED {
+            printTestResultDifferenceErrorCode(
+                QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
+                queryStatus, flo_html_queryingStatusToString(queryStatus));
+        }
     } else {
         flo_String actualResult = FLO_EMPTY_STRING;
         switch (functionType) {
@@ -63,10 +62,9 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
             break;
         }
         default: {
-            printTestFailure();
-            printTestDemarcation();
-            printf("No suitable enum was supplied!\n");
-            printTestDemarcation();
+            FLO_LOG_TEST_FAILED {
+                FLO_ERROR((FLO_STRING("No suitable enum was supplied!\n")));
+            }
             return result;
         }
         }
@@ -77,10 +75,9 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
             printTestSuccess();
             result = TEST_SUCCESS;
         } else {
-            printTestFailure();
-            printTestDemarcation();
-            printTestResultDifferenceString(expectedResult, actualResult);
-            printTestDemarcation();
+            FLO_LOG_TEST_FAILED {
+                printTestResultDifferenceString(expectedResult, actualResult);
+            }
         }
     }
 
@@ -89,7 +86,7 @@ static TestStatus testQuery(flo_String fileLocation, flo_String cssQuery,
 
 bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
                          flo_Arena scratch) {
-    printTestTopicStart("char queries");
+    printTestTopicStart(FLO_STRING("char queries"));
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 

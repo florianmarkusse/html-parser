@@ -24,7 +24,10 @@ void benchmark(flo_Arena scratch) {
     DIR *dir = NULL;
     struct dirent *ent = NULL;
     if ((dir = opendir(INPUTS_DIR)) == NULL) {
-        printf("Failed to open directory: %s\n", INPUTS_DIR);
+        FLO_FLUSH_AFTER(FLO_STDERR) {
+            FLO_ERROR((FLO_STRING("Failed to open directory: ")));
+            FLO_ERROR((FLO_STRING(INPUTS_DIR)), FLO_NEWLINE);
+        }
         return;
     }
 
@@ -37,15 +40,27 @@ void benchmark(flo_Arena scratch) {
         char fileLocation[1024];
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", INPUTS_DIR,
                  ent->d_name);
-        printf("parsing %s\n", fileLocation);
+        FLO_FLUSH_AFTER(FLO_STDOUT) {
+            FLO_INFO((FLO_STRING("parsing ")));
+            FLO_INFO(fileLocation, FLO_NEWLINE);
+        }
         if (!parseFile(FLO_STRING_LEN(fileLocation, strlen(fileLocation)),
                        scratch)) {
-            printf("Parsing DOM %s failed\n", fileLocation);
+            FLO_FLUSH_AFTER(FLO_STDERR) {
+                FLO_ERROR((FLO_STRING("Parsing DOM of file ")));
+                FLO_ERROR(fileLocation);
+                FLO_ERROR((FLO_STRING(" failed\n")));
+            }
             break;
         }
         files++;
     }
-    printf("parsed %zu files\n", files);
+
+    FLO_FLUSH_AFTER(FLO_STDOUT) {
+        FLO_INFO((FLO_STRING("Parsed ")));
+        FLO_INFO(files);
+        FLO_INFO((FLO_STRING(" files\n")));
+    }
 
     closedir(dir);
 }
@@ -105,7 +120,11 @@ int main() {
     double cpu_time_used_ms = cpu_time_used * 1000;
 
     // Print the elapsed time in milliseconds
-    printf("Elapsed Time: %.2f milliseconds\n", cpu_time_used_ms);
+    FLO_FLUSH_AFTER(FLO_STDOUT) {
+        FLO_INFO((FLO_STRING("Elapsed Time: ")));
+        FLO_INFO(cpu_time_used_ms);
+        FLO_INFO((FLO_STRING(" milliseconds\n")));
+    }
 
     return 0;
 }

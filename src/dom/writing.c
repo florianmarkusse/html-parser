@@ -107,7 +107,7 @@ flo_FileStatus flo_html_writeHTMLToFile(flo_html_Dom *dom, flo_String filePath,
     flo_WriteBuffer writeBuffer = {.fileDescriptor = fileno(file),
                                    .cap = fileBufferLen,
                                    .buf = fileBuffer,
-                                   .len = fileBufferLen};
+                                   .len = 0};
 
     flo_html_node_id currentNodeID = FLO_HTML_ROOT_NODE_ID;
     while (currentNodeID) {

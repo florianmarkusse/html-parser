@@ -39,44 +39,49 @@ typedef struct {
     char *fileLocation1;
     char *fileLocation2;
     flo_html_ComparisonStatus expectedStatus;
-    char *testName;
+    flo_String testName;
 } TestFile;
 
 static TestFile testFiles[] = {
-    {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, "same file"},
+    {TEST_FILE_1, TEST_FILE_1, COMPARISON_SUCCESS, FLO_STRING("same file")},
     {TEST_FILE_1, TEST_FILE_2, COMPARISON_DIFFERENT_CONTENT,
-     "different key-value property"},
-    {TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES, "empty file"},
+     FLO_STRING("different key-value property")},
+    {TEST_FILE_1, TEST_FILE_3, COMPARISON_DIFFERENT_SIZES,
+     FLO_STRING("empty file")},
     {TEST_FILE_1, TEST_FILE_4, COMPARISON_DIFFERENT_SIZES,
-     "missing boolean property"},
+     FLO_STRING("missing boolean property")},
     {TEST_FILE_1, TEST_FILE_5, COMPARISON_DIFFERENT_SIZES,
-     "missing key-value property"},
+     FLO_STRING("missing key-value property")},
     {TEST_FILE_1, TEST_FILE_6, COMPARISON_DIFFERENT_NODE_TYPE,
-     "text node and document node"},
-    {TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES, "different sizes "},
-    {TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_CONTENT, "different tags "},
+     FLO_STRING("text node and document node")},
+    {TEST_FILE_1, TEST_FILE_7, COMPARISON_DIFFERENT_SIZES,
+     FLO_STRING("different sizes ")},
+    {TEST_FILE_1, TEST_FILE_8, COMPARISON_DIFFERENT_CONTENT,
+     FLO_STRING("different tags ")},
     {TEST_FILE_1, TEST_FILE_9, COMPARISON_DIFFERENT_CONTENT,
-     "different text nodes"},
-    {TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, "comments"},
-    {TEST_FILE_11, TEST_FILE_11_MIN, COMPARISON_SUCCESS, "style tag"},
-    {TEST_FILE_12, TEST_FILE_12_MIN, COMPARISON_SUCCESS, "script tag"},
+     FLO_STRING("different text nodes")},
+    {TEST_FILE_1, TEST_FILE_10, COMPARISON_SUCCESS, FLO_STRING("comments")},
+    {TEST_FILE_11, TEST_FILE_11_MIN, COMPARISON_SUCCESS,
+     FLO_STRING("style tag")},
+    {TEST_FILE_12, TEST_FILE_12_MIN, COMPARISON_SUCCESS,
+     FLO_STRING("script tag")},
     {TEST_FILE_13, TEST_FILE_13_MIN, COMPARISON_SUCCESS,
-     "difficult style tag "},
+     FLO_STRING("difficult style tag ")},
     {TEST_FILE_14, TEST_FILE_14_MIN, COMPARISON_SUCCESS,
-     "different quotes in attributes"},
+     FLO_STRING("different quotes in attributes")},
     {TEST_FILE_15, TEST_FILE_15_MIN, COMPARISON_SUCCESS,
-     "quotes as attribute key"},
+     FLO_STRING("quotes as attribute key")},
     {TEST_FILE_16, TEST_FILE_16_MIN, COMPARISON_SUCCESS,
-     "additional close tags"},
+     FLO_STRING("additional close tags")},
     {TEST_FILE_1, TEST_FILE_18, COMPARISON_SUCCESS,
-     "swapped boolean properties"},
-    {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS, "swapped properties"},
+     FLO_STRING("swapped boolean properties")},
+    {TEST_FILE_1, TEST_FILE_19, COMPARISON_SUCCESS,
+     FLO_STRING("swapped properties")},
 };
 
 static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
 
-TestStatus compareFiles(flo_String fileLocation1,
-                        flo_String fileLocation2,
+TestStatus compareFiles(flo_String fileLocation1, flo_String fileLocation2,
                         flo_html_ComparisonStatus expectedResult,
                         flo_Arena scratch) {
     ComparisonTest comparisonTest =
@@ -87,7 +92,7 @@ TestStatus compareFiles(flo_String fileLocation1,
 
 bool testflo_html_DomComparisons(ptrdiff_t *successes, ptrdiff_t *failures,
                                  flo_Arena scratch) {
-    printTestTopicStart("DOM comparisons");
+    printTestTopicStart(FLO_STRING("DOM comparisons"));
     ptrdiff_t localSuccesses = 0;
     ptrdiff_t localFailures = 0;
 
