@@ -145,9 +145,6 @@ static TestStatus parseQueryModify(flo_Arena scratch) {
 
     flo_html_printHTML(comparisonTest.actual);
 
-    flo_html_writeHTMLToFile(comparisonTest.actual, FLO_STRING("your-mom.html"),
-                             scratch);
-
     return result;
 }
 

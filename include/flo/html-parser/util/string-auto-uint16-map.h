@@ -40,11 +40,12 @@ FLO_TRIE_ITERATOR_HEADER_FILE(flo_trie_StringAutoUint16Node,
                               flo_nextStringAutoUint16Iterator);
 
 #define FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(element, stringAutoUint16Map,     \
-                                             perm)                             \
+                                             scratch)                          \
     for (flo_trie_StringAutoUint16Iterator *iter =                             \
-             flo_createStringAutoUint16Iterator(stringAutoUint16Map, perm);    \
+             flo_createStringAutoUint16Iterator(stringAutoUint16Map,           \
+                                                &(scratch));                   \
          ;)                                                                    \
-        if (((element) = flo_nextStringAutoUint16Iterator(iter, perm))         \
+        if (((element) = flo_nextStringAutoUint16Iterator(iter, &(scratch)))   \
                 .value == 0)                                                   \
             break;                                                             \
         else

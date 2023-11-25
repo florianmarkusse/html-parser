@@ -133,7 +133,8 @@ void printflo_html_BasicRegistry(flo_String registryName,
     for (ptrdiff_t i = 0; i < strings->len; i++) {
         flo_String string = strings->buf[i];
         FLO_INFO("ID: ");
-        FLO_INFO(i);
+        flo_appendPtrDiffToBufferMinSize(i, 3, flo_getWriteBuffer(FLO_STDOUT),
+                                         0);
         FLO_INFO(" value: ");
         FLO_INFO(string, FLO_NEWLINE);
     }
@@ -142,39 +143,41 @@ void printflo_html_BasicRegistry(flo_String registryName,
 }
 
 // Does not automatically flush!!!!!!!!
-void printStringAutoUint16Map(flo_Arena *perm,
+void printStringAutoUint16Map(flo_Arena scratch,
                               flo_trie_StringAutoUint16Node *node) {
     flo_trie_StringAutoUint16Data data;
-    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, node, perm) {
+    FLO_FOR_EACH_TRIE_STRING_AUTO_UINT16(data, node, scratch) {
         FLO_INFO((FLO_STRING("string = ")));
-        FLO_INFO(data.key);
+        flo_appendToBufferMinSize(data.key, 30, flo_getWriteBuffer(FLO_STDOUT),
+                                  0);
         FLO_INFO((FLO_STRING(" with id = ")));
         FLO_INFO(data.value, FLO_NEWLINE);
     }
+    FLO_INFO((FLO_STRING("\n")));
 }
 
 void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch) {
     FLO_FLUSH_AFTER(FLO_STDOUT) {
         FLO_INFO((FLO_STRING("printing DOM status...\n\n")));
 
-        FLO_INFO((FLO_STRING("printing property status...\n\n")));
+        FLO_INFO((FLO_STRING("printing property status...\n")));
 
         FLO_INFO((FLO_STRING("printing keys...\n")));
-        printStringAutoUint16Map(&scratch, dom->propKeyMap.node);
+        printStringAutoUint16Map(scratch, dom->propKeyMap.node);
 
         FLO_INFO((FLO_STRING("printing values...\n")));
-        printStringAutoUint16Map(&scratch, dom->propValueMap.node);
+        printStringAutoUint16Map(scratch, dom->propValueMap.node);
 
-        FLO_INFO((FLO_STRING("printing bool property status...\n\n")));
-        printStringAutoUint16Map(&scratch, dom->boolPropMap.node);
+        FLO_INFO((FLO_STRING("printing bool property status...\n")));
+        printStringAutoUint16Map(scratch, dom->boolPropMap.node);
 
-        FLO_INFO((FLO_STRING("printing tags status...\n\n")));
-        printStringAutoUint16Map(&scratch, dom->tagMap.node);
+        FLO_INFO((FLO_STRING("printing tags status...\n")));
+        printStringAutoUint16Map(scratch, dom->tagMap.node);
 
         FLO_INFO((FLO_STRING("Printing DOM contents...\n")));
 
         FLO_INFO((FLO_STRING("Nodes inside DOM...\n")));
-        FLO_INFO((FLO_STRING("Total number of nodes: \n")));
+        FLO_INFO((FLO_STRING("Total number of nodes: ")));
         FLO_INFO(dom->nodes.len, FLO_NEWLINE);
         for (ptrdiff_t i = 0; i < dom->nodes.len; i++) {
             flo_html_Node node = dom->nodes.buf[i];
@@ -212,9 +215,8 @@ void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch) {
             flo_appendUint64ToBufferMinSize(i, 5,
                                             flo_getWriteBuffer(FLO_STDOUT), 0);
             FLO_INFO((FLO_STRING(" tag: ")));
-            flo_appendToBufferMinSize(tagRegistration.tag, 210,
-                                      flo_getWriteBuffer(FLO_STDOUT),
-                                      FLO_NEWLINE);
+            flo_appendToBufferMinSize(tagRegistration.tag, 20,
+                                      flo_getWriteBuffer(FLO_STDOUT), 0);
             FLO_INFO(" isPaired: ");
             FLO_INFO(tagRegistration.isPaired, FLO_NEWLINE);
         }
@@ -234,7 +236,8 @@ void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch) {
             flo_html_BooleanProperty boolProps = dom->boolProps.buf[i];
 
             FLO_INFO("node ID: ");
-            FLO_INFO(boolProps.nodeID);
+            flo_appendPtrDiffToBufferMinSize(boolProps.nodeID, 3,
+                                             flo_getWriteBuffer(FLO_STDOUT), 0);
             FLO_INFO(" prop ID: ");
             FLO_INFO(boolProps.propID, FLO_NEWLINE);
         }
@@ -246,9 +249,11 @@ void flo_html_printDomStatus(flo_html_Dom *dom, flo_Arena scratch) {
         for (ptrdiff_t i = 0; i < dom->props.len; i++) {
             flo_html_Property property = dom->props.buf[i];
             FLO_INFO("node ID: ");
-            FLO_INFO(property.nodeID);
+            flo_appendPtrDiffToBufferMinSize(property.nodeID, 3,
+                                             flo_getWriteBuffer(FLO_STDOUT), 0);
             FLO_INFO(" key ID: ");
-            FLO_INFO(property.valueID);
+            flo_appendPtrDiffToBufferMinSize(property.keyID, 3,
+                                             flo_getWriteBuffer(FLO_STDOUT), 0);
             FLO_INFO(" value ID: ");
             FLO_INFO(property.valueID, FLO_NEWLINE);
         }
