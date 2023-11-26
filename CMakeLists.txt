@@ -59,7 +59,6 @@ target_include_directories(${FLO_HTML_PARSER_LIBRARY} PRIVATE ${LIBRARY_DIR}/uti
 
 target_link_libraries(${FLO_HTML_PARSER_LIBRARY} PRIVATE ${LIBRARY_DIR}/util/build/libutil-Release.a)
 
-
 # Compilation options
 target_compile_options(${FLO_HTML_PARSER_LIBRARY} PRIVATE
     $<$<CONFIG:Debug>:-O0 -g3>
@@ -73,11 +72,10 @@ target_compile_definitions(${FLO_HTML_PARSER_LIBRARY} PRIVATE
     $<$<CONFIG:Profiling>:>
 )
 
-
-if(${BUILD_TESTS} AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
+if("${BUILD_TESTS}" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     add_subdirectory(tests)
 endif()
 
-if(${BUILD_BENCHMARKS} AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/CMakeLists.txt")
+if("${BUILD_BENCHMARKS}" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/CMakeLists.txt")
     add_subdirectory(benchmarks)
 endif()
