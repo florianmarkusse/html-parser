@@ -21,14 +21,14 @@ if (CMAKE_BUILD_TYPE STREQUAL "Profiling")
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 endif()
 
-set(LIBRARY_NAME "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
+set(FLO_HTML_PARSER_LIBRARY "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
 
 if(BUILD_SHARED_LIBS)
     set(LIBRARY_TYPE "SHARED")
 else()
     set(LIBRARY_TYPE "STATIC")
 endif()
-add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
+add_library(${FLO_HTML_PARSER_LIBRARY} ${LIBRARY_TYPE}
     "src/dom/dom-util.c"
     "src/dom/dom.c"
     "src/dom/writing.c"
@@ -46,37 +46,33 @@ add_library(${LIBRARY_NAME} ${LIBRARY_TYPE}
     "src/dom/query/query-util.c"
     "src/dom/query/msi-uint16.c"
     "src/dom/util/string-auto-uint16-map.c"
-
-    "util/src/file/read.c"
-    "util/src/file/path.c"
-    "util/src/log.c"
-    "util/src/hash/msi/common.c"
-    "util/src/hash/msi/string-set.c"
-    "util/src/hash/msi/uint16-set.c"
-    "util/src/hash/hash-comparison-status.c"
-    "util/src/memory/arena.c"
-    "util/src/memory/buddy-allocator.c"
-    "util/src/memory/pool-allocator.c"
 )
 
-target_compile_options(${LIBRARY_NAME} PRIVATE
+set(FLO_HTML_PARSER_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+)
+target_include_directories(${FLO_HTML_PARSER_LIBRARY} PRIVATE ${FLO_HTML_PARSER_INCLUDES})
+
+# Libraries
+set(LIBRARY_DIR ${CMAKE_SOURCE_DIR}/libs)
+target_include_directories(${FLO_HTML_PARSER_LIBRARY} PRIVATE ${LIBRARY_DIR}/util/include)
+
+target_link_libraries(${FLO_HTML_PARSER_LIBRARY} PRIVATE ${LIBRARY_DIR}/util/build/libutil-Release.a)
+
+
+# Compilation options
+target_compile_options(${FLO_HTML_PARSER_LIBRARY} PRIVATE
     $<$<CONFIG:Debug>:-O0 -g3>
     $<$<CONFIG:Release>:-O3>
     $<$<CONFIG:Profiling>:-O2 -pg>
 )
 
-target_compile_definitions(${LIBRARY_NAME} PRIVATE
+target_compile_definitions(${FLO_HTML_PARSER_LIBRARY} PRIVATE
     $<$<CONFIG:Debug>:DEBUG>
     $<$<CONFIG:Release>:>
     $<$<CONFIG:Profiling>:>
 )
 
-set(FLO_HTML_INCLUDES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/include/
-)
-
-target_include_directories(${LIBRARY_NAME} PRIVATE ${FLO_HTML_INCLUDES})
 
 if(${BUILD_TESTS} AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     add_subdirectory(tests)
