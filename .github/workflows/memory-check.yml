@@ -14,8 +14,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install possible submodules
-      run: git submodule update --init --recursive
+    - name: Create libs dir
+      run: mkdir libs
+
+    - name: Install util library
+      run: |
+        cd libs
+        git clone https://github.com/florianmarkusse/util.git
+        cd util
+        ./build.sh
+        cd ../../
 
     - name: Install Valgrind
       run: |
