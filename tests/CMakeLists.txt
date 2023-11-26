@@ -3,7 +3,6 @@ project(html-parser-tests)
 
 list(APPEND TEST_SOURCE_FILES
     "src/main.c"
-    "src/test.c"
     "src/comparison-test.c"
     "src/integration-test.c"
     "src/dom/parsing/parsing.c"
@@ -33,8 +32,10 @@ target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR
 # set(LIBRARY_DIR ${CMAKE_SOURCE_DIR}/../libs) <-- Unnecessary since it is set by parent CMakeLists.txt
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${FLO_HTML_PARSER_INCLUDES})
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${LIBRARY_DIR}/util/include)
+target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/libs/test/include)
 
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${LIBRARY_DIR}/util/build/libutil-Release.a)
+target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/libs/test/build/libtest-Release.a)
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${FLO_HTML_PARSER_LIBRARY})
 
 # Compilation options

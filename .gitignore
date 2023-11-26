@@ -26,6 +26,7 @@ Makefile
 
 # Dependency directories
 /libs/
+/tests/libs/
 /vendor/
 
 # Miscellaneous
