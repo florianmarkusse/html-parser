@@ -8,8 +8,7 @@ extern "C" {
 #include "memory/arena.h"
 #include <stddef.h>
 
-bool testflo_html_DomDuplications(ptrdiff_t *successes, ptrdiff_t *failures,
-                                  flo_Arena scratch);
+void testflo_html_DomDuplications(flo_Arena scratch);
 
 #ifdef __cplusplus
 }

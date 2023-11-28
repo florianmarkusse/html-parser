@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "dom/querying/querying.h"
-#include "test-status.h"
+#include "expectations.h"
 #include "test.h"
 
 #define CURRENT_DIR "tests/src/dom/querying/inputs/"
@@ -58,41 +58,36 @@ static TestFile testFiles[] = {
 };
 
 // Calculate the number of test files
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
-                            flo_html_QueryStatus expectedStatus,
-                            ptrdiff_t expectedNumberOfNodes,
-                            flo_Arena scratch) {
+static void testQuery(char *fileLocation, flo_String cssQuery,
+                      flo_html_QueryStatus expectedStatus,
+                      ptrdiff_t expectedNumberOfNodes, flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(fileLocation, FLO_NEWLINE);
         }
-        return TEST_ERROR_INITIALIZATION;
+        return;
     }
 
     flo_html_node_id_a results;
     flo_html_QueryStatus actual =
         flo_html_querySelectorAll(cssQuery, dom, &results, &scratch);
 
-    TestStatus result = TEST_FAILURE;
-
     if (actual == expectedStatus && (expectedStatus != QUERY_SUCCESS ||
                                      results.len == expectedNumberOfNodes)) {
-        printTestSuccess();
-        result = TEST_SUCCESS;
+        flo_testSuccess();
     } else {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             if (actual != expectedStatus) {
-                printTestResultDifferenceErrorCode(
+                flo_appendExpectCodeWithString(
                     expectedStatus,
                     flo_html_queryingStatusToString(expectedStatus), actual,
                     flo_html_queryingStatusToString(actual));
             } else {
-                printTestResultDifferenceNumber(expectedNumberOfNodes,
-                                                results.len);
+                flo_appendExpectUint(expectedNumberOfNodes, results.len);
                 FLO_ERROR((FLO_STRING("Node IDs received...\n")));
                 for (ptrdiff_t i = 0; i < results.len; i++) {
                     FLO_ERROR(results.buf[i], FLO_NEWLINE);
@@ -100,33 +95,19 @@ static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
             }
         }
     }
-
-    return result;
 }
 
-unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures,
-                                   flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("querySelectorAll"));
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
+void testQuerySelectorAll(flo_Arena scratch){
+    FLO_TEST_TOPIC(FLO_STRING("querySelectorAll")){
 
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
+        for (ptrdiff_t i = 0; i < numTestFiles;
+             i++){TestFile testFile = testFiles[i];
 
-        printTestStart(testFile.testName);
-
-        if (testQuery(testFile.fileLocation, testFile.cssQuery,
-                      testFile.expectedStatus, testFile.expectedResult,
-                      scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
-        }
-    }
-
-    printTestScore(localSuccesses, localFailures);
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
-};
+FLO_TEST(testFile.testName) {
+    testQuery(testFile.fileLocation, testFile.cssQuery, testFile.expectedStatus,
+              testFile.expectedResult, scratch);
+}
+}
+}
+}
+;

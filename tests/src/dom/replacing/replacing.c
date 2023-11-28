@@ -4,7 +4,6 @@
 
 #include "comparison-test.h"
 #include "dom/replacing/replacing.h"
-#include "test-status.h"
 #include "test.h"
 
 #define CURRENT_DIR "tests/src/dom/replacing/inputs/"
@@ -173,26 +172,24 @@ static TestFile testFiles[] = {
      REPLACEMENT_FROM_STRING,
      {{FLO_STRING("at the start<h1></h1><h2></h2>at the end")}}},
 };
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-static TestStatus testReplacements(char *fileLocation1, char *fileLocation2,
-                                   flo_String cssQuery,
-                                   ReplacementType replacementType,
-                                   ReplacementInput *replacementInput,
-                                   flo_Arena scratch) {
+static void testReplacements(char *fileLocation1, char *fileLocation2,
+                             flo_String cssQuery,
+                             ReplacementType replacementType,
+                             ReplacementInput *replacementInput,
+                             flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
+    if (comparisonTest.actual == NULL) {
+        return;
+    }
 
-    TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = FLO_HTML_ROOT_NODE_ID;
     if (cssQuery.len > 0) {
-        result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
-                                          scratch);
-        if (result != TEST_SUCCESS) {
-            FLO_LOG_TEST_FAILED {
-                FLO_ERROR((FLO_STRING("Failed to get node from DOM!\n")));
-            }
-            return result;
+        if (!getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                      scratch)) {
+            return;
         }
     }
 
@@ -215,49 +212,33 @@ static TestStatus testReplacements(char *fileLocation1, char *fileLocation2,
         break;
     }
     default: {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR(
                 (FLO_STRING("No suitable replacement type was supplied!\n")));
         }
-        return TEST_FAILURE;
+        return;
     }
     }
 
     if (replacedNodeID == FLO_HTML_ERROR_NODE_ID) {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR((FLO_STRING("Failed to replace node!\n")));
         }
-        return TEST_FAILURE;
+        return;
     }
 
-    return compareAndEndTest(&comparisonTest, scratch);
+    compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testflo_html_DomReplacements(ptrdiff_t *successes, ptrdiff_t *failures,
-                                  flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("DOM replacements"));
-
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
-
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
-        printTestStart(testFile.testName);
-
-        if (testReplacements(testFile.fileLocation1, testFile.fileLocation2,
-                             testFile.cssQuery, testFile.replacementType,
-                             &testFile.replacementInput,
-                             scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
+void testflo_html_DomReplacements(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("DOM replacements")) {
+        for (ptrdiff_t i = 0; i < numTestFiles; i++) {
+            TestFile testFile = testFiles[i];
+            FLO_TEST(testFile.testName) {
+                testReplacements(testFile.fileLocation1, testFile.fileLocation2,
+                                 testFile.cssQuery, testFile.replacementType,
+                                 &testFile.replacementInput, scratch);
+            }
         }
     }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
 }

@@ -10,8 +10,7 @@ extern "C" {
 
 #include "memory/arena.h"
 
-bool testflo_html_DomAppendices(ptrdiff_t *successes, ptrdiff_t *failures,
-                                flo_Arena scratch);
+void testflo_html_DomAppendices(flo_Arena scratch);
 
 #ifdef __cplusplus
 }

@@ -16,12 +16,9 @@ typedef struct {
     flo_String testName;
 } TestFile;
 
-unsigned char testflo_html_DomQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                                      flo_Arena scratch);
-unsigned char testQuerySelectorAll(ptrdiff_t *successes, ptrdiff_t *failures,
-                                   flo_Arena scratch);
-unsigned char testQuerySelector(ptrdiff_t *successes, ptrdiff_t *failures,
-                                flo_Arena scratch);
+void testflo_html_DomQueries(flo_Arena scratch);
+void testQuerySelectorAll(flo_Arena scratch);
+void testQuerySelector(flo_Arena scratch);
 
 #ifdef __cplusplus
 }

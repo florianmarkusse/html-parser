@@ -3,8 +3,8 @@
 #include <memory/arena.h>
 #include <stdio.h>
 
+#include "expectations.h"
 #include "node/querying/querying.h"
-#include "test-status.h"
 #include "test.h"
 
 typedef enum {
@@ -86,32 +86,32 @@ static TestFile testFiles[] = {
      FLO_STRING("does not have property")},
 };
 
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
-                            StringUnion stringUnion,
-                            BoolFunctionType boolFunctionType,
-                            bool expectedResult, flo_Arena scratch) {
+static void testQuery(char *fileLocation, flo_String cssQuery,
+                      StringUnion stringUnion,
+                      BoolFunctionType boolFunctionType, bool expectedResult,
+                      flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(fileLocation, FLO_NEWLINE);
         }
-        return TEST_ERROR_INITIALIZATION;
+        return;
     }
 
-    TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
     flo_html_QueryStatus queryStatus =
         flo_html_querySelector(cssQuery, dom, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
-        FLO_LOG_TEST_FAILED {
-            printTestResultDifferenceErrorCode(
+        FLO_TEST_FAILURE {
+            flo_appendExpectCodeWithString(
                 QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
                 queryStatus, flo_html_queryingStatusToString(queryStatus));
         }
+        return;
     } else {
         bool actualResult = false;
         switch (boolFunctionType) {
@@ -136,50 +136,34 @@ static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
             break;
         }
         default: {
-            FLO_LOG_TEST_FAILED {
+            FLO_TEST_FAILURE {
                 FLO_ERROR((FLO_STRING("No suitable enum was supplied!\n")));
             }
-            return result;
+            return;
         }
         }
 
         if (actualResult == expectedResult) {
-            printTestSuccess();
-            result = TEST_SUCCESS;
+            flo_testSuccess();
+            return;
         } else {
-            FLO_LOG_TEST_FAILED {
-                printTestResultDifferenceBool(expectedResult, actualResult);
+            FLO_TEST_FAILURE {
+                flo_appendExpectBool(expectedResult, actualResult);
             }
         }
     }
-
-    return result;
 }
 
-bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                         flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("bool queries"));
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
+void testBoolNodeQueries(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("bool queries")) {
+        for (ptrdiff_t i = 0; i < numTestFiles; i++) {
+            TestFile testFile = testFiles[i];
 
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
-
-        printTestStart(testFile.testName);
-
-        if (testQuery(testFile.fileLocation, testFile.cssQuery,
-                      testFile.stringUnion, testFile.boolFunctionType,
-                      testFile.expectedResult, scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
+            FLO_TEST(testFile.testName) {
+                testQuery(testFile.fileLocation, testFile.cssQuery,
+                          testFile.stringUnion, testFile.boolFunctionType,
+                          testFile.expectedResult, scratch);
+            }
         }
     }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
 }

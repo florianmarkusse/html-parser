@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "expectations.h"
 #include "node/querying/querying.h"
-#include "test-status.h"
 #include "test.h"
 
 typedef enum { TEXT_CONTENT, NUM_CHAR_FUNCTION_TYPES } ArrayFunctionType;
@@ -34,28 +34,27 @@ static TestFile testFiles[] = {
      FLO_STRING("multiple text nodes 2")},
 };
 
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
-                            ArrayFunctionType functionType,
-                            ptrdiff_t expectedResult, flo_Arena scratch) {
+static void testQuery(char *fileLocation, flo_String cssQuery,
+                      ArrayFunctionType functionType, ptrdiff_t expectedResult,
+                      flo_Arena scratch) {
     flo_html_Dom *dom = flo_html_createDomFromFile(fileLocation, &scratch);
     if (dom == NULL) {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR("Failed to created DOM from file ");
             FLO_ERROR(fileLocation, FLO_NEWLINE);
         }
-        return TEST_ERROR_INITIALIZATION;
+        return;
     }
 
-    TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
     flo_html_QueryStatus queryStatus =
         flo_html_querySelector(cssQuery, dom, &foundNode, scratch);
 
     if (queryStatus != QUERY_SUCCESS) {
-        FLO_LOG_TEST_FAILED {
-            printTestResultDifferenceErrorCode(
+        FLO_TEST_FAILURE {
+            flo_appendExpectCodeWithString(
                 QUERY_SUCCESS, flo_html_queryingStatusToString(QUERY_SUCCESS),
                 queryStatus, flo_html_queryingStatusToString(queryStatus));
         }
@@ -69,57 +68,41 @@ static TestStatus testQuery(char *fileLocation, flo_String cssQuery,
             break;
         }
         default: {
-            FLO_LOG_TEST_FAILED {
+            FLO_TEST_FAILURE {
                 FLO_ERROR((FLO_STRING("No suitable enum was supplied!\n")));
             }
-            return result;
+            return;
         }
         }
 
         if (queryStatus == QUERY_SUCCESS && expectedResult == actualResult) {
-            printTestSuccess();
-            result = TEST_SUCCESS;
+            flo_testSuccess();
+            return;
         } else {
-            FLO_LOG_TEST_FAILED {
+            FLO_TEST_FAILURE {
                 if (queryStatus != QUERY_SUCCESS) {
-                    printTestResultDifferenceErrorCode(
+                    flo_appendExpectCodeWithString(
                         QUERY_SUCCESS,
                         flo_html_queryingStatusToString(QUERY_SUCCESS),
                         queryStatus,
                         flo_html_queryingStatusToString(queryStatus));
                 }
-                printTestResultDifferenceNumber(expectedResult, actualResult);
+                flo_appendExpectUint(expectedResult, actualResult);
             }
         }
     }
-
-    return result;
 }
 
-bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                          flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("array queries"));
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
+void testArrayNodeQueries(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("array queries")) {
+        for (ptrdiff_t i = 0; i < numTestFiles; i++) {
+            TestFile testFile = testFiles[i];
 
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
-
-        printTestStart(testFile.testName);
-
-        if (testQuery(testFile.fileLocation, testFile.cssQuery,
-                      testFile.functionType, testFile.expectedResult,
-                      scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
+            FLO_TEST(testFile.testName) {
+                testQuery(testFile.fileLocation, testFile.cssQuery,
+                          testFile.functionType, testFile.expectedResult,
+                          scratch);
+            }
         }
     }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
 }

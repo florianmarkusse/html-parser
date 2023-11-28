@@ -4,7 +4,6 @@
 
 #include "comparison-test.h"
 #include "dom/prepending/prepending.h"
-#include "test-status.h"
 #include "test.h"
 
 #define CURRENT_DIR "tests/src/dom/prepending/inputs/"
@@ -181,24 +180,22 @@ static TestFile testFiles[] = {
      PREPEND_TEXT_NODE,
      {{FLO_STRING("even more")}}},
 };
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-static TestStatus testPrependix(char *fileLocation1, char *fileLocation2,
-                                flo_String cssQuery, PrependType prependType,
-                                PrependInput *prependInput, flo_Arena scratch) {
+static void testPrependix(char *fileLocation1, char *fileLocation2,
+                          flo_String cssQuery, PrependType prependType,
+                          PrependInput *prependInput, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
+    if (comparisonTest.actual == NULL) {
+        return;
+    }
 
-    TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = FLO_HTML_ROOT_NODE_ID;
     if (cssQuery.len > 0) {
-        result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
-                                          scratch);
-        if (result != TEST_SUCCESS) {
-            FLO_LOG_TEST_FAILED {
-                FLO_ERROR((FLO_STRING("Failed to get node from DOM!\n")));
-            }
-            return result;
+        if (!getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                      scratch)) {
+            return;
         }
     }
 
@@ -225,48 +222,33 @@ static TestStatus testPrependix(char *fileLocation1, char *fileLocation2,
         break;
     }
     default: {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR(
                 (FLO_STRING("No suitable prependix type was supplied!\n")));
         }
-        return TEST_FAILURE;
+        return;
     }
     }
 
     if (prependedNodeID == FLO_HTML_ERROR_NODE_ID) {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR((FLO_STRING("Failed to prepend document to node!\n")));
         }
-        return TEST_FAILURE;
+        return;
     }
 
-    return compareAndEndTest(&comparisonTest, scratch);
+    compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testflo_html_DomPrependices(ptrdiff_t *successes, ptrdiff_t *failures,
-                                 flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("DOM prependices"));
-
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
-
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
-        printTestStart(testFile.testName);
-
-        if (testPrependix(testFile.fileLocation1, testFile.fileLocation2,
-                          testFile.cssQuery, testFile.prependType,
-                          &testFile.prependInput, scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
+void testflo_html_DomPrependices(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("DOM prependices")) {
+        for (ptrdiff_t i = 0; i < numTestFiles; i++) {
+            TestFile testFile = testFiles[i];
+            FLO_TEST(testFile.testName) {
+                testPrependix(testFile.fileLocation1, testFile.fileLocation2,
+                              testFile.cssQuery, testFile.prependType,
+                              &testFile.prependInput, scratch);
+            }
         }
     }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
 }

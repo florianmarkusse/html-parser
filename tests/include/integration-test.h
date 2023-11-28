@@ -5,11 +5,9 @@
 extern "C" {
 #endif
 
-#include <stdbool.h>
-#include <stddef.h>
+#include "memory/arena.h"
 
-bool testIntegrations(ptrdiff_t *successes, ptrdiff_t *failures,
-                      flo_Arena scratch);
+void testIntegrations(flo_Arena scratch);
 
 #ifdef __cplusplus
 }

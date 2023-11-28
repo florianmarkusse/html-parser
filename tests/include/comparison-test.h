@@ -8,7 +8,6 @@ extern "C" {
 #include <flo/html-parser/dom/dom.h>
 
 #include "flo/html-parser/comparison-status.h"
-#include "test-status.h"
 
 typedef struct {
     flo_html_Dom *actual;
@@ -18,15 +17,14 @@ typedef struct {
 ComparisonTest initComparisonTest(char *startFileLocation,
                                   char *expectedFileLocation, flo_Arena *perm);
 
-TestStatus compareAndEndTest(ComparisonTest *comparisonTest, flo_Arena scratch);
-TestStatus compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
-                                     flo_html_ComparisonStatus expectedStatus,
-                                     flo_Arena scratch);
+void compareAndEndTest(ComparisonTest *comparisonTest, flo_Arena scratch);
+void compareWithCodeAndEndTest(ComparisonTest *comparisonTest,
+                               flo_html_ComparisonStatus expectedStatus,
+                               flo_Arena scratch);
 
-TestStatus getNodeFromQuerySelector(flo_String cssQuery,
-                                    ComparisonTest *comparisonTest,
-                                    flo_html_node_id *foundNode,
-                                    flo_Arena scratch);
+bool getNodeFromQuerySelector(flo_String cssQuery,
+                              ComparisonTest *comparisonTest,
+                              flo_html_node_id *foundNode, flo_Arena scratch);
 
 #ifdef __cplusplus
 }

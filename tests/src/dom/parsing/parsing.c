@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "dom/parsing/parsing.h"
-#include "test-status.h"
 #include "test.h"
 
 #define INPUTS_DIR "tests/src/dom/parsing/inputs/"
@@ -21,14 +20,11 @@ bool parseFile(char *fileLocation, flo_Arena scratch) {
     return true;
 }
 
-static inline void testAndCount(ptrdiff_t *localSuccesses,
-                                ptrdiff_t *localFailures, char *directory,
-                                flo_Arena scratch) {
+static inline void testAndCount(char *directory, flo_Arena scratch) {
     DIR *dir = NULL;
     struct dirent *ent = NULL;
     if ((dir = opendir(directory)) == NULL) {
-        (*localFailures)++;
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR((FLO_STRING("Failed to open test directory: ")));
             FLO_ERROR(directory, FLO_NEWLINE);
         }
@@ -43,18 +39,15 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
         char fileLocation[1024];
         snprintf(fileLocation, sizeof(fileLocation), "%s%s", directory,
                  ent->d_name);
-        printTestStart(FLO_STRING_LEN(fileLocation, strlen(fileLocation)));
-        {
+        FLO_TEST(FLO_STRING_LEN(fileLocation, strlen(fileLocation))) {
             if (!parseFile(fileLocation, scratch)) {
-                (*localFailures)++;
-                FLO_LOG_TEST_FAILED {
+                FLO_TEST_FAILURE {
                     FLO_ERROR((FLO_STRING("Parsing DOM of file ")));
                     FLO_ERROR(fileLocation);
                     FLO_ERROR((FLO_STRING(" failed\n")));
                 }
             } else {
-                (*localSuccesses)++;
-                printTestSuccess();
+                flo_testSuccess();
             }
         }
     }
@@ -62,19 +55,9 @@ static inline void testAndCount(ptrdiff_t *localSuccesses,
     closedir(dir);
 }
 
-bool testflo_html_DomParsings(ptrdiff_t *successes, ptrdiff_t *failures,
-                              flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("DOM parsings"));
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
-
-    // testAndCount(&localSuccesses, &localFailures, FUZZ_INPUTS_DIR, scratch);
-    testAndCount(&localSuccesses, &localFailures, INPUTS_DIR, scratch);
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
+void testflo_html_DomParsings(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("DOM parsings")) {
+        // testAndCount(FUZZ_INPUTS_DIR, scratch);
+        testAndCount(INPUTS_DIR, scratch);
+    }
 }

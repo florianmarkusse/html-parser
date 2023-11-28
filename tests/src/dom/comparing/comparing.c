@@ -4,7 +4,6 @@
 
 #include "comparison-test.h"
 #include "dom/comparing/comparing.h"
-#include "test-status.h"
 #include "test.h"
 
 #define CURRENT_DIR "tests/src/dom/comparing/inputs/"
@@ -79,42 +78,27 @@ static TestFile testFiles[] = {
      FLO_STRING("swapped properties")},
 };
 
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-TestStatus compareFiles(char *fileLocation1, char *fileLocation2,
-                        flo_html_ComparisonStatus expectedResult,
-                        flo_Arena scratch) {
+void compareFiles(char *fileLocation1, char *fileLocation2,
+                  flo_html_ComparisonStatus expectedResult, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
 
-    return compareWithCodeAndEndTest(&comparisonTest, expectedResult, scratch);
+    compareWithCodeAndEndTest(&comparisonTest, expectedResult, scratch);
 }
 
-bool testflo_html_DomComparisons(ptrdiff_t *successes, ptrdiff_t *failures,
-                                 flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("DOM comparisons"));
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
+void testflo_html_DomComparisons(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("DOM comparisons")) {
+        for (ptrdiff_t i = 0; i < numTestFiles; i++) {
+            TestFile testFile = testFiles[i];
 
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
+            FLO_TEST(testFile.testName) {
+                compareFiles(testFile.fileLocation1,
 
-        printTestStart(testFile.testName);
-
-        if (compareFiles(testFile.fileLocation1,
-
-                         testFile.fileLocation2, testFile.expectedStatus,
-                         scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
+                             testFile.fileLocation2, testFile.expectedStatus,
+                             scratch);
+            }
         }
     }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
-};
+}

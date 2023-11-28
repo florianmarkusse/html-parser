@@ -9,8 +9,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
-bool testflo_html_DomDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
-                               flo_Arena scratch);
+void testflo_html_DomDeletions(flo_Arena scratch);
 
 #ifdef __cplusplus
 }

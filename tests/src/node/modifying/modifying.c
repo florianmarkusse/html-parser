@@ -4,7 +4,6 @@
 
 #include "comparison-test.h"
 #include "node/modifying/modifying.h"
-#include "test-status.h"
 #include "test.h"
 
 #define CURRENT_DIR "tests/src/node/modifying/inputs/"
@@ -34,63 +33,49 @@ static TestFile testFiles[] = {
      FLO_STRING("I am the new text content, bow for me!"), FLO_EMPTY_STRING,
      FLO_STRING("setting text content")},
 };
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-static TestStatus testModification(char *fileLocation1, char *fileLocation2,
-                                   flo_String cssQuery, flo_String propKey,
-                                   flo_String newPropValue, flo_Arena scratch) {
+static void testModification(char *fileLocation1, char *fileLocation2,
+                             flo_String cssQuery, flo_String propKey,
+                             flo_String newPropValue, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
+    if (comparisonTest.actual == NULL) {
+        return;
+    }
 
-    TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
-    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
-                                      scratch);
-    if (result != TEST_SUCCESS) {
-        return result;
+    if (!getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                  scratch)) {
+        return;
     }
 
     if (newPropValue.len > 0) {
         if (!flo_html_setPropertyValue(foundNode, propKey, newPropValue,
                                        comparisonTest.actual, &scratch)) {
-            FLO_LOG_TEST_FAILED {
+            FLO_TEST_FAILURE {
                 FLO_ERROR((FLO_STRING("Failed to set property value!\n")));
             }
-            return TEST_FAILURE;
+            return;
         }
     } else {
         flo_html_setTextContent(foundNode, propKey, comparisonTest.actual,
                                 &scratch);
     }
 
-    return compareAndEndTest(&comparisonTest, scratch);
+    compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testNodeModifications(ptrdiff_t *successes, ptrdiff_t *failures,
-                           flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("node modifications"));
+void testNodeModifications(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("node modifications")) {
+        for (ptrdiff_t i = 0; i < numTestFiles; i++) {
+            TestFile testFile = testFiles[i];
 
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
-
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
-
-        printTestStart(testFile.testName);
-
-        if (testModification(testFile.fileLocation1, testFile.fileLocation2,
-                             testFile.cssQuery, testFile.propKey,
-                             testFile.newPropValue, scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
+            FLO_TEST(testFile.testName) {
+                testModification(testFile.fileLocation1, testFile.fileLocation2,
+                                 testFile.cssQuery, testFile.propKey,
+                                 testFile.newPropValue, scratch);
+            }
         }
     }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
 }

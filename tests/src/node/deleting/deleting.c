@@ -4,7 +4,6 @@
 
 #include "comparison-test.h"
 #include "node/deleting/deleting.h"
-#include "test-status.h"
 #include "test.h"
 
 typedef enum {
@@ -40,20 +39,21 @@ static TestFile testFiles[] = {
     {TEST_FILE_3_BEFORE, TEST_FILE_3_AFTER, FLO_STRING("html"),
      FLO_STRING("lang"), DELETE_PROPERTY, FLO_STRING("'lang' on html")},
 };
-static ptrdiff_t numTestFiles = sizeof(testFiles) / sizeof(testFiles[0]);
+static ptrdiff_t numTestFiles = FLO_COUNTOF(testFiles);
 
-static TestStatus testDeletion(char *fileLocation1, char *fileLocation2,
-                               flo_String cssQuery, flo_String propToDelete,
-                               DeletionType deletionType, flo_Arena scratch) {
+static void testDeletion(char *fileLocation1, char *fileLocation2,
+                         flo_String cssQuery, flo_String propToDelete,
+                         DeletionType deletionType, flo_Arena scratch) {
     ComparisonTest comparisonTest =
         initComparisonTest(fileLocation1, fileLocation2, &scratch);
+    if (comparisonTest.actual == NULL) {
+        return;
+    }
 
-    TestStatus result = TEST_FAILURE;
     flo_html_node_id foundNode = 0;
-    result = getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
-                                      scratch);
-    if (result != TEST_SUCCESS) {
-        return result;
+    if (!getNodeFromQuerySelector(cssQuery, &comparisonTest, &foundNode,
+                                  scratch)) {
+        return;
     }
 
     switch (deletionType) {
@@ -67,40 +67,25 @@ static TestStatus testDeletion(char *fileLocation1, char *fileLocation2,
         break;
     }
     default: {
-        FLO_LOG_TEST_FAILED {
+        FLO_TEST_FAILURE {
             FLO_ERROR((FLO_STRING("No suitable DeletionType was supplied!\n")));
         }
-        return TEST_FAILURE;
+        return;
     }
     }
 
-    return compareAndEndTest(&comparisonTest, scratch);
+    compareAndEndTest(&comparisonTest, scratch);
 }
 
-bool testNodeDeletions(ptrdiff_t *successes, ptrdiff_t *failures,
-                       flo_Arena scratch) {
-    printTestTopicStart(FLO_STRING("node deletions"));
-
-    ptrdiff_t localSuccesses = 0;
-    ptrdiff_t localFailures = 0;
-
-    for (ptrdiff_t i = 0; i < numTestFiles; i++) {
-        TestFile testFile = testFiles[i];
-        printTestStart(testFile.testName);
-
-        if (testDeletion(testFile.fileLocation1, testFile.fileLocation2,
-                         testFile.cssQuery, testFile.propToDelete,
-                         testFile.deletionType, scratch) != TEST_SUCCESS) {
-            localFailures++;
-        } else {
-            localSuccesses++;
+void testNodeDeletions(flo_Arena scratch) {
+    FLO_TEST_TOPIC(FLO_STRING("node deletions")) {
+        for (ptrdiff_t i = 0; i < numTestFiles; i++) {
+            TestFile testFile = testFiles[i];
+            FLO_TEST(testFile.testName) {
+                testDeletion(testFile.fileLocation1, testFile.fileLocation2,
+                             testFile.cssQuery, testFile.propToDelete,
+                             testFile.deletionType, scratch);
+            }
         }
     }
-
-    printTestScore(localSuccesses, localFailures);
-
-    *successes += localSuccesses;
-    *failures += localFailures;
-
-    return localFailures > 0;
 }

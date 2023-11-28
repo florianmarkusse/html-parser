@@ -63,63 +63,43 @@ int main() {
     }
     arena.jmp_buf = jmp_buf;
 
-    ptrdiff_t successes = 0;
-    ptrdiff_t failures = 0;
+    flo_testSuiteStart();
 
-    testflo_html_DomParsings(&successes, &failures, arena);
+    testflo_html_DomParsings(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testflo_html_DomComparisons(&successes, &failures, arena);
+    testflo_html_DomComparisons(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testflo_html_DomQueries(&successes, &failures, arena);
+    testflo_html_DomQueries(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testNodeQueries(&successes, &failures, arena);
+    testNodeQueries(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testflo_html_DomDeletions(&successes, &failures, arena);
+    testflo_html_DomDeletions(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testNodeModifications(&successes, &failures, arena);
+    testNodeModifications(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testNodeDeletions(&successes, &failures, arena);
+    testNodeDeletions(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testflo_html_DomAppendices(&successes, &failures, arena);
+    testflo_html_DomAppendices(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testflo_html_DomPrependices(&successes, &failures, arena);
+    testflo_html_DomPrependices(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testflo_html_DomReplacements(&successes, &failures, arena);
+    testflo_html_DomReplacements(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testflo_html_DomDuplications(&successes, &failures, arena);
+    testflo_html_DomDuplications(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    testIntegrations(&successes, &failures, arena);
+    testIntegrations(arena);
     FLO_INFO((FLO_STRING("\n")), FLO_FLUSH);
 
-    printTestScore(successes, failures);
-    if (failures > 0) {
-        FLO_FLUSH_AFTER(FLO_STDERR) {
-            FLO_ERROR((FLO_STRING("Test suite ")));
-            flo_appendColor(FLO_COLOR_RED, FLO_STDERR);
-            FLO_ERROR((FLO_STRING("failed")));
-            flo_appendColorReset(FLO_STDERR);
-            FLO_ERROR((FLO_STRING(".\n")));
-        }
-    } else {
-        FLO_FLUSH_AFTER(FLO_STDOUT) {
-            FLO_INFO((FLO_STRING("Test suite ")));
-            flo_appendColor(FLO_COLOR_GREEN, FLO_STDOUT);
-            FLO_INFO((FLO_STRING("successful")));
-            flo_appendColorReset(FLO_STDOUT);
-            FLO_INFO((FLO_STRING(".\n")));
-        }
-    }
-
-    return failures > 0;
+    return flo_testSuiteFinish();
 }

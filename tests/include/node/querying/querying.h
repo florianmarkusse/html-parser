@@ -6,17 +6,11 @@ extern "C" {
 #endif
 
 #include <flo/html-parser.h>
-#include <stdbool.h>
-#include <stddef.h>
 
-bool testNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                     flo_Arena scratch);
-bool testBoolNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                         flo_Arena scratch);
-bool testCharNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                         flo_Arena scratch);
-bool testArrayNodeQueries(ptrdiff_t *successes, ptrdiff_t *failures,
-                          flo_Arena scratch);
+void testNodeQueries(flo_Arena scratch);
+void testBoolNodeQueries(flo_Arena scratch);
+void testCharNodeQueries(flo_Arena scratch);
+void testArrayNodeQueries(flo_Arena scratch);
 
 #ifdef __cplusplus
 }
