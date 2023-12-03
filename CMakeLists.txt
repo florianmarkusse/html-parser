@@ -21,6 +21,10 @@ if (CMAKE_BUILD_TYPE STREQUAL "Profiling")
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 endif()
 
+message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+message(STATUS "EXE LINKER: ${CMAKE_EXE_LINKER_FLAGS}")
+message(STATUS "SHARED LINKER FLAGS: ${CMAKE_SHARED_LINKER_FLAGS}")
+
 set(FLO_HTML_PARSER_LIBRARY "${PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
 
 if(BUILD_SHARED_LIBS)
@@ -37,6 +41,7 @@ add_library(${FLO_HTML_PARSER_LIBRARY} ${LIBRARY_TYPE}
     "src/dom/reading/reading-util.c"
     "src/dom/modification.c"
     "src/parser.c" 
+    "src/comparison-status.c" 
     "src/dom/comparison.c"
     "src/dom/appendix.c"
     "src/dom/prependix.c"
