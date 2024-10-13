@@ -1,9 +1,9 @@
 #include "flo/html-parser/dom/dom.h"
-#include "array.h"
-#include "file/read.h"
+#include "flo/util/array.h"
+#include "flo/util/file/read.h"
 #include "flo/html-parser/parser.h"
-#include "log.h"
-#include "memory/arena.h"
+#include "flo/util/log.h"
+#include "flo/util/memory/arena.h"
 
 flo_html_Dom *flo_html_createDomFromFile(char *fileLocation, flo_Arena *perm) {
     flo_String content;

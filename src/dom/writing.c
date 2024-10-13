@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "file/path.h"
+#include "flo/util/file/path.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/text-node.h"
-#include "log.h"
+#include "flo/util/log.h"
 
 void printNode(flo_html_node_id nodeID, ptrdiff_t indentation,
                flo_html_Dom *dom, flo_WriteBuffer *buffer) {

@@ -8,10 +8,10 @@
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/node/node.h"
 #include "flo/html-parser/util/parse.h"
-#include "log.h"
-#include "memory/arena.h"
-#include "raw-data.h"
-#include "text/char.h"
+#include "flo/util/log.h"
+#include "flo/util/memory/arena.h"
+#include "flo/util/raw-data.h"
+#include "flo/util/text/char.h"
 
 #define HTML_COMMENT_START_LENGTH 4
 

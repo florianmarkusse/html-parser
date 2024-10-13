@@ -7,8 +7,8 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "array.h"
-#include "text/string.h"
+#include "flo/util/array.h"
+#include "flo/util/text/string.h"
 
 typedef uint16_t flo_html_index_id;
 

@@ -9,7 +9,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "flo/html-parser/definitions.h"
-#include "text/string.h"
+#include "flo/util/text/string.h"
 
 typedef enum {
     NODE_TYPE_ROOT,

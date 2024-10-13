@@ -8,7 +8,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "memory/arena.h"
+#include "flo/util/memory/arena.h"
 
 void testflo_html_DomAppendices(flo_Arena scratch);
 

@@ -4,7 +4,7 @@
 #include "comparison-test.h"
 #include "expectations.h"
 #include "integration-test.h"
-#include "log.h"
+#include "flo/util/log.h"
 #include "test.h"
 
 #define CURRENT_DIR "tests/src/inputs/"

@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "memory/arena.h"
+#include "flo/util/memory/arena.h"
 
 void testNodeDeletions(flo_Arena scratch);
 

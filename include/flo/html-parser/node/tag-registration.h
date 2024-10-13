@@ -8,7 +8,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "text/string.h"
+#include "flo/util/text/string.h"
 
 typedef struct {
     flo_String tag;

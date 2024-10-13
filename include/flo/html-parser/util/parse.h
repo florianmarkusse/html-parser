@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "text/string.h"
+#include "flo/util/text/string.h"
 
 typedef struct {
     flo_String text;

@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "error.h"
-#include "file/read.h"
+#include "flo/util/file/read.h"
 #include "flo/html-parser/dom/deletion.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/dom.h"
@@ -14,7 +14,7 @@
 #include "flo/html-parser/node/node.h"
 #include "flo/html-parser/node/parent-child.h"
 #include "flo/html-parser/parser.h"
-#include "log.h"
+#include "flo/util/log.h"
 
 #define PREPEND_USING_QUERYSELECTOR(cssQuery, nodeData, dom, perm,             \
                                     prependFunction)                           \

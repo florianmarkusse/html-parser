@@ -9,7 +9,7 @@ extern "C" {
 
 #include "flo/html-parser/definitions.h"
 #include "flo/html-parser/dom/dom.h"
-#include "array.h"
+#include "flo/util/array.h"
 #include "query-status.h"
 
 typedef FLO_ARRAY(uint16_t) flo_html_node_id_a;

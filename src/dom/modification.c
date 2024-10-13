@@ -6,7 +6,7 @@
 #include "flo/html-parser/dom/query/query-util.h"
 #include "flo/html-parser/dom/reading/reading-util.h"
 #include "flo/html-parser/parser.h"
-#include "log.h"
+#include "flo/util/log.h"
 #include <stdbool.h>
 #include <string.h>
 

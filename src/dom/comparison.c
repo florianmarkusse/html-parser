@@ -8,8 +8,8 @@
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/parser.h"
-#include "hash/msi/string-set.h"
-#include "log.h"
+#include "flo/util/hash/msi/string-set.h"
+#include "flo/util/log.h"
 
 flo_html_ComparisonStatus convertHashComparisonToComparison(
     flo_HashComparisonStatus hashComparisonStatus) {

@@ -8,7 +8,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "text/string.h"
+#include "flo/util/text/string.h"
 
 #define FLO_HTML_MAX_PROPS_LEN_APPENDIX (1U << 4U)
 

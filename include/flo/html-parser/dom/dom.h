@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-#include "array.h"
-#include "file/file-status.h"
+#include "flo/util/array.h"
+#include "flo/util/file/file-status.h"
 #include "flo/html-parser/node/boolean-property.h"
 #include "flo/html-parser/node/next-node.h"
 #include "flo/html-parser/node/node.h"
@@ -15,8 +15,8 @@ extern "C" {
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/node/text-node.h"
 #include "flo/html-parser/util/string-auto-uint16-map.h"
-#include "memory/arena.h"
-#include "types.h"
+#include "flo/util/memory/arena.h"
+#include "flo/util/types.h"
 
 #define FLO_HTML_ERROR_NODE_ID 0U
 #define FLO_HTML_ROOT_NODE_ID 1U

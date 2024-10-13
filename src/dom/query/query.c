@@ -4,11 +4,11 @@
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/dom/writing.h"
 #include "flo/html-parser/util/parse.h"
-#include "hash/msi/uint16-set.h"
-#include "log.h"
-#include "memory/arena.h"
-#include "text/char.h"
-#include "text/string.h"
+#include "flo/util/hash/msi/uint16-set.h"
+#include "flo/util/log.h"
+#include "flo/util/memory/arena.h"
+#include "flo/util/text/char.h"
+#include "flo/util/text/string.h"
 #include <stdint.h>
 
 /**

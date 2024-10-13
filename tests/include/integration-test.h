@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "memory/arena.h"
+#include "flo/util/memory/arena.h"
 
 void testIntegrations(flo_Arena scratch);
 

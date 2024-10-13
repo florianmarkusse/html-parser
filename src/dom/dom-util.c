@@ -1,14 +1,14 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "array.h"
+#include "flo/util/array.h"
 #include "error.h"
 #include "flo/html-parser/dom/dom-util.h"
 #include "flo/html-parser/dom/modification.h"
 #include "flo/html-parser/dom/traversal.h"
 #include "flo/html-parser/node/tag-registration.h"
 #include "flo/html-parser/parser.h"
-#include "memory/arena.h"
+#include "flo/util/memory/arena.h"
 
 flo_html_node_id flo_html_createNode(flo_html_NodeType nodeType,
                                      flo_html_Dom *dom, flo_Arena *perm) {

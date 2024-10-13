@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "text/string.h"
+#include "flo/util/text/string.h"
 
 typedef enum {
     QUERY_SUCCESS,

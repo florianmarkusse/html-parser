@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "memory/arena.h"
+#include "flo/util/memory/arena.h"
 #include <stddef.h>
 
 void testflo_html_DomParsings(flo_Arena scratch);

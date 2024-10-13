@@ -1,6 +1,6 @@
 #include "flo/html-parser/util/string-auto-uint16-map.h"
 
-#include "hash/hashes.h"
+#include "flo/util/hash/hashes.h"
 
 flo_NewStringInsert flo_trie_insertStringAutoUint16Map(
     flo_String key, flo_trie_StringAutoUint16Map *set, flo_Arena *perm) {

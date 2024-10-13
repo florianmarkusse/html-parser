@@ -1,5 +1,5 @@
 #include "flo/html-parser/dom/query/msi-uint16.h"
-#include "hash/hashes.h"
+#include "flo/util/hash/hashes.h"
 #include <string.h>
 
 void rehashIndex(flo_msi_Uint16 *oldIndex, flo_msi_Uint16 *newIndex) {

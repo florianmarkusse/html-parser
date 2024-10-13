@@ -1,8 +1,8 @@
 #ifndef FLO_HTML_PARSER_UTIL_STRING_AUTO_UINT16_MAP_H
 #define FLO_HTML_PARSER_UTIL_STRING_AUTO_UINT16_MAP_H
 
-#include "hash/trie/common-iterator.h"
-#include "text/string.h"
+#include "flo/util/hash/trie/common-iterator.h"
+#include "flo/util/text/string.h"
 
 typedef struct {
     flo_String key;

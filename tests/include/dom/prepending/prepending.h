@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "memory/arena.h"
+#include "flo/util/memory/arena.h"
 
 void testflo_html_DomPrependices(flo_Arena scratch);
 

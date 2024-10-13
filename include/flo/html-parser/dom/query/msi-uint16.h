@@ -8,7 +8,7 @@ extern "C" {
 #define FLO_MSI_HTML_STARTING_EXPONENT 7
 
 #include "flo/html-parser/definitions.h"
-#include "hash/msi/uint16-set.h"
+#include "flo/util/hash/msi/uint16-set.h"
 
 bool flo_msi_html_uint16Insert(uint16_t value, flo_msi_Uint16 *index,
                                flo_Arena *perm);
